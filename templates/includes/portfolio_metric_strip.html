@@ -1,0 +1,29 @@
+{% load core_filters ton_display %}
+<section class="metric-strip metric-strip--portfolio" aria-label="خلاصه پورتفولیو">
+  <div class="metric-strip__metrics metric-strip__metrics--tight" role="list">
+    <div class="metric-strip__item" role="listitem">
+      <span class="metric-strip__value tabnums">{{ kpis.active_count|format_count }}</span>
+      <span class="metric-strip__label">فعال</span>
+    </div>
+    <span class="metric-strip__sep" aria-hidden="true"></span>
+    <div class="metric-strip__item metric-strip__item--hero" role="listitem">
+      <span class="metric-strip__value tabnums">{{ kpis.total_impressions|format_count }}</span>
+      <span class="metric-strip__label">نمایش</span>
+    </div>
+    <span class="metric-strip__sep" aria-hidden="true"></span>
+    <div class="metric-strip__item" role="listitem">
+      <span class="metric-strip__value tabnums">{{ kpis.total_clicks|format_count }}</span>
+      <span class="metric-strip__label">کلیک</span>
+    </div>
+    <span class="metric-strip__sep" aria-hidden="true"></span>
+    <div class="metric-strip__item metric-strip__item--accent" role="listitem">
+      <span class="metric-strip__value tabnums">{{ kpis.weighted_ctr|persian_digits }}٪</span>
+      <span class="metric-strip__label">CTR وزنی</span>
+    </div>
+    <span class="metric-strip__sep metric-strip__sep--hide-md" aria-hidden="true"></span>
+    <div class="metric-strip__item metric-strip__item--finance" role="listitem">
+      <span class="metric-strip__value">{% ton_amount kpis.total_spent_ton %}</span>
+      <span class="metric-strip__label">هزینه</span>
+    </div>
+  </div>
+</section>

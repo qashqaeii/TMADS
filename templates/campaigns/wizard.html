@@ -4,7 +4,7 @@
 {% block container_class %}container-wide{% endblock %}
 {% block content %}
 <div class="wizard-shell page-frame studio-shell">
-  {% include "includes/dash_header.html" with eyebrow="کمپین" title="استودیو ساخت تبلیغ" hint=campaign.name %}
+  {% include "includes/dash_header.html" with title="استودیو ساخت تبلیغ" subtitle=campaign.name|default:"پیش‌نویس جدید" with_sub=1 %}
   <nav class="wizard-progress wizard-progress--exec" aria-label="مراحل">
     {% for key, label in steps %}
       <span class="wizard-step {% if forloop.counter == step %}is-active{% elif forloop.counter < step %}is-complete{% endif %}">{{ forloop.counter }}. {{ label }}</span>

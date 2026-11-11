@@ -1,0 +1,10 @@
+{% comment %}
+Unified performance metric strip — pass items as repeated blocks via includes,
+or use dedicated wrappers: dashboard_performance_strip, campaign_metrics_strip.
+{% endcomment %}
+<section class="metric-strip{% if variant %} metric-strip--{{ variant }}{% endif %}{% if class %} {{ class }}{% endif %}" aria-label="{{ aria_label|default:'خلاصه عملکرد' }}">
+  {% if title %}<header class="metric-strip__head"><h2 class="metric-strip__title">{{ title }}</h2>{% if footnote %}<p class="metric-strip__footnote muted">{{ footnote }}</p>{% endif %}</header>{% endif %}
+  <div class="metric-strip__body">
+    {{ strip_body|default:"" }}
+  </div>
+</section>

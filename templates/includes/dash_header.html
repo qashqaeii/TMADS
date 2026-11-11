@@ -1,9 +1,9 @@
-<header class="dash-header dash-header--luxe{% if with_sub %} dash-header--with-sub{% endif %}{% if rich %} dash-header--rich{% endif %} {% if class %}{{ class }}{% endif %}">
+<header class="dash-header dash-header--luxe dash-header--editorial{% if with_sub %} dash-header--with-sub{% endif %}{% if rich %} dash-header--rich{% endif %} {% if class %}{{ class }}{% endif %}">
   <div class="dash-header__main">
     <div class="dash-header__title-row">
       {% if eyebrow %}<span class="dash-header__kicker">{{ eyebrow }}</span>{% endif %}
       <h1>{{ title }}</h1>
-      {% if hint %}<span class="dash-header__hint">{{ hint }}</span>{% endif %}
+      {% if hint and not with_sub %}<span class="dash-header__hint">{{ hint }}</span>{% endif %}
     </div>
     {% if subtitle %}<p class="page-sub">{{ subtitle }}</p>{% endif %}
     {% if meta %}<div class="dash-header__meta">{{ meta|safe }}</div>{% endif %}

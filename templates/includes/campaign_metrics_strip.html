@@ -1,0 +1,29 @@
+{% load core_filters ton_display %}
+<section class="metric-strip metric-strip--campaign" aria-label="آمار کمپین">
+  <div class="metric-strip__metrics metric-strip__metrics--campaign" role="list">
+    <div class="metric-strip__item metric-strip__item--hero" role="listitem">
+      <span class="metric-strip__value tabnums">{{ metrics.impressions|format_count }}</span>
+      <span class="metric-strip__label">نمایش</span>
+    </div>
+    <span class="metric-strip__sep" aria-hidden="true"></span>
+    <div class="metric-strip__item" role="listitem">
+      <span class="metric-strip__value tabnums">{{ metrics.clicks|format_count }}</span>
+      <span class="metric-strip__label">کلیک</span>
+    </div>
+    <span class="metric-strip__sep" aria-hidden="true"></span>
+    <div class="metric-strip__item metric-strip__item--accent" role="listitem">
+      <span class="metric-strip__value tabnums">{{ metrics.ctr|persian_digits }}٪</span>
+      <span class="metric-strip__label">CTR</span>
+    </div>
+    <span class="metric-strip__sep metric-strip__sep--hide-sm" aria-hidden="true"></span>
+    <div class="metric-strip__item metric-strip__item--secondary" role="listitem">
+      <span class="metric-strip__value tabnums">{{ metrics.actions|format_count }}</span>
+      <span class="metric-strip__label">ورود</span>
+    </div>
+    <span class="metric-strip__sep metric-strip__sep--hide-sm" aria-hidden="true"></span>
+    <div class="metric-strip__item metric-strip__item--finance" role="listitem">
+      <span class="metric-strip__value">{% ton_amount metrics.spent_ton exchange_rate_id=order_exchange_rate_id %}</span>
+      <span class="metric-strip__label">هزینه</span>
+    </div>
+  </div>
+</section>

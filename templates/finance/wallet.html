@@ -5,11 +5,20 @@
 {% block content %}
 <div class="app-stack">
 {% url 'finance:topup' as topup_url %}
-{% include "includes/dash_header.html" with eyebrow="مالی" title="کیف پول" action_url=topup_url action_label="شارژ" action_primary=1 %}
-<div class="kpi-exec-grid kpi-exec-grid--duo">
-  <article class="kpi-exec"><span class="kpi-exec__icon">{% include "includes/kpi_icon.html" with name="wallet" %}</span><div class="kpi-exec__body"><span class="kpi-exec__label">موجودی</span><span class="kpi-exec__value">{{ wallet.available_irr|irr_to_toman|format_irr }} تومان</span></div></article>
-  <article class="kpi-exec"><span class="kpi-exec__icon">{% include "includes/kpi_icon.html" with name="wallet" %}</span><div class="kpi-exec__body"><span class="kpi-exec__label">رزرو</span><span class="kpi-exec__value">{{ wallet.reserved_irr|irr_to_toman|format_irr }} تومان</span></div></article>
-</div>
+{% include "includes/dash_header.html" with title="کیف پول" subtitle="موجودی قابل استفاده و رزرو کمپین" with_sub=1 action_url=topup_url action_label="شارژ" action_primary=1 %}
+<section class="metric-strip metric-strip--wallet" aria-label="خلاصه کیف پول">
+  <div class="metric-strip__metrics" role="list">
+    <div class="metric-strip__item metric-strip__item--hero" role="listitem">
+      <span class="metric-strip__value tabnums">{{ wallet.available_irr|irr_to_toman|format_irr }}</span>
+      <span class="metric-strip__label">موجودی (تومان)</span>
+    </div>
+    <span class="metric-strip__sep" aria-hidden="true"></span>
+    <div class="metric-strip__item" role="listitem">
+      <span class="metric-strip__value tabnums">{{ wallet.reserved_irr|irr_to_toman|format_irr }}</span>
+      <span class="metric-strip__label">رزرو (تومان)</span>
+    </div>
+  </div>
+</section>
 <article class="card table-card card--lift">
   <header class="dash-panel__head" style="border-bottom:1px solid var(--border-default)">
     <div class="dash-panel__title"><h2 class="section-title">تراکنش‌های اخیر</h2></div>

@@ -9,13 +9,7 @@
 <div class="app-stack">
 {% include "campaigns/includes/list_page_header.html" %}
 
-<div class="kpi-exec-grid kpi-exec-grid--5">
-  <article class="kpi-exec"><span class="kpi-exec__icon">{% include "includes/kpi_icon.html" with name="bolt" %}</span><div class="kpi-exec__body"><span class="kpi-exec__label">فعال</span><span class="kpi-exec__value">{{ kpis.active_count|format_count }}</span></div></article>
-  <article class="kpi-exec"><span class="kpi-exec__icon">{% include "includes/kpi_icon.html" with name="eye" %}</span><div class="kpi-exec__body"><span class="kpi-exec__label">کل نمایش</span><span class="kpi-exec__value">{{ kpis.total_impressions|format_count }}</span></div></article>
-  <article class="kpi-exec"><span class="kpi-exec__icon">{% include "includes/kpi_icon.html" with name="click" %}</span><div class="kpi-exec__body"><span class="kpi-exec__label">کل کلیک</span><span class="kpi-exec__value">{{ kpis.total_clicks|format_count }}</span></div></article>
-  <article class="kpi-exec"><span class="kpi-exec__icon">{% include "includes/kpi_icon.html" with name="percent" %}</span><div class="kpi-exec__body"><span class="kpi-exec__label">نرخ کلیک وزنی</span><span class="kpi-exec__value">{{ kpis.weighted_ctr|persian_digits }}٪</span></div></article>
-  <article class="kpi-exec"><span class="kpi-exec__icon">{% include "includes/kpi_icon.html" with name="wallet" %}</span><div class="kpi-exec__body"><span class="kpi-exec__label">هزینه گرام</span><span class="kpi-exec__value">{% ton_amount kpis.total_spent_ton %}</span></div></article>
-</div>
+{% include "includes/portfolio_metric_strip.html" %}
 
 {% if has_any_campaigns and not has_portfolio_chart %}
 <p class="portfolio-stats-note muted" role="status">نمودار روند در دسترس نیست — پس از اتصال تبلیغ به API و همگام‌سازی آمار، اینجا نمایش داده می‌شود.</p>

@@ -1,0 +1,38 @@
+{% load core_filters %}
+<aside class="wallet-module wallet-module--compact" aria-label="کیف پول">
+  <header class="wallet-module__head">
+    <h2 class="wallet-module__title">کیف پول</h2>
+    {% with total=wallet.available_irr|add:wallet.reserved_irr %}
+    {% if not total %}
+    <span class="wallet-module__badge">خالی</span>
+    {% endif %}
+    {% endwith %}
+  </header>
+  {% with total=wallet.available_irr|add:wallet.reserved_irr %}
+  {% if total %}
+  <div class="wallet-module__bar" aria-hidden="true">
+    <span class="wallet-module__bar-seg wallet-module__bar-seg--avail" style="flex: {% widthratio wallet.available_irr total 100 %}"></span>
+    <span class="wallet-module__bar-seg wallet-module__bar-seg--reserved" style="flex: {% widthratio wallet.reserved_irr total 100 %}"></span>
+  </div>
+  {% endif %}
+  {% endwith %}
+  <dl class="wallet-module__rows">
+    <div class="wallet-module__row">
+      <dt>موجودی قابل استفاده</dt>
+      <dd class="tabnums">{{ wallet.available_irr|irr_to_toman|format_irr }} <span class="wallet-module__unit">تومان</span></dd>
+    </div>
+    <div class="wallet-module__row">
+      <dt>رزرو کمپین</dt>
+      <dd class="tabnums">{{ wallet.reserved_irr|irr_to_toman|format_irr }} <span class="wallet-module__unit">تومان</span></dd>
+    </div>
+  </dl>
+  {% with total=wallet.available_irr|add:wallet.reserved_irr %}
+  {% if not total %}
+  <p class="wallet-module__zero muted">برای شروع تبلیغ، کیف پول را شارژ کنید.</p>
+  {% endif %}
+  {% endwith %}
+  <div class="wallet-module__actions">
+    <a class="btn btn-primary btn-sm" href="{% url 'finance:topup' %}">شارژ</a>
+    <a class="btn btn-ghost btn-sm" href="{% url 'finance:wallet' %}">جزئیات</a>
+  </div>
+</aside>

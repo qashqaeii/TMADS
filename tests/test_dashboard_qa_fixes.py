@@ -34,6 +34,7 @@ def test_dashboard_header_does_not_render_stray_action_count(client, customer_us
             html,
         )
     assert "کیف پول" in html
+    assert "ساخت تبلیغ" in html
     assert "کمپین جدید" in html
 
 

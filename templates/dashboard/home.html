@@ -6,93 +6,64 @@
 {% if has_chart %}{% include "includes/charts_exec_scripts.html" %}{% endif %}
 {% endblock %}
 {% block content %}
-<div class="app-stack">
-{% with name=user.customer_profile.display_name|default:user.get_username %}
-{% url 'finance:wallet' as wallet_url %}
+<div class="app-stack app-stack--dashboard">
 {% url 'campaigns:wizard_new' as wizard_url %}
-{% include "includes/dash_header.html" with title="داشبورد" hint=name secondary_action_url=wallet_url secondary_action_label="کیف پول" action_url=wizard_url action_label="کمپین جدید" action_primary=1 only %}
-{% endwith %}
+{% include "includes/dash_header.html" with title="داشبورد تبلیغات" subtitle="نمای کلی عملکرد کمپین‌های شما" with_sub=1 action_url=wizard_url action_label="ساخت تبلیغ" action_primary=1 only %}
 
 {% include "includes/rate_strip.html" %}
 
-<div class="kpi-exec-grid">
-  {% include "includes/kpi_exec_card.html" with icon="bolt" label="کمپین فعال" value=active_count|format_count %}
-  {% include "includes/kpi_exec_card.html" with icon="grid" label="کل کمپین‌ها" value=total_campaigns|format_count %}
-  {% include "includes/kpi_exec_card.html" with icon="eye" label="نمایش تبلیغات" value=impressions|format_count %}
-  {% include "includes/kpi_exec_card.html" with icon="percent" label="نرخ کلیک" value=ctr|persian_digits suffix="٪" %}
-</div>
+{% include "includes/dashboard_performance_strip.html" with active_count=active_count total_campaigns=total_campaigns impressions=impressions clicks=clicks ctr=ctr %}
 
-<div class="panel-grid panel-2 panel-2--performance">
-  <section class="card card--lift dash-chart-card">
-    <header class="dash-chart-card__head">
-      <h2 class="section-title">روند نمایش و کلیک</h2>
-      {% if has_chart %}<span class="muted dash-chart-card__meta">۳۰ روز اخیر — جمع همه کمپین‌ها</span>{% endif %}
+<section class="dash-performance-layout" aria-label="تحلیل و مالی">
+  <article class="insight-panel insight-panel--chart">
+    <header class="insight-panel__head chart-head chart-head--compact">
+      <div class="chart-head__titles">
+        <h2 class="insight-panel__title">روند نمایش و کلیک</h2>
+        {% if has_chart %}<span class="insight-panel__meta muted">۳۰ روز اخیر — جمع همه کمپین‌ها</span>{% endif %}
+      </div>
     </header>
     {% if has_chart %}
-    <div id="dash-chart" class="chart-box chart-box--medium" role="img" aria-label="نمودار روند پورتفولیو"></div>
+    <div id="dash-chart" class="chart-box chart-box--medium chart-box--dominant" role="img" aria-label="نمودار روند پورتفولیو"></div>
     {% else %}
     {% include "includes/chart_empty_dash.html" with has_linked_ads=has_linked_ads show_steps=1 %}
     {% endif %}
-  </section>
-  <section class="card card--lift wallet-panel wallet-panel--compact">
-    <h2 class="section-title">کیف پول</h2>
-    <div class="wallet-panel__viz">
-      {% with total=wallet.available_irr|add:wallet.reserved_irr %}
-      <div class="wallet-bar" aria-hidden="true">
-        {% if total %}
-        <span style="width:{% widthratio wallet.available_irr total 100 %}%"></span>
-        <span style="width:{% widthratio wallet.reserved_irr total 100 %}%"></span>
-        {% endif %}
-      </div>
-      {% endwith %}
-      <div class="wallet-stats">
-        <div><small>موجودی قابل استفاده</small><strong class="tabnums">{{ wallet.available_irr|irr_to_toman|format_irr }} تومان</strong></div>
-        <div><small>رزرو کمپین</small><strong class="tabnums">{{ wallet.reserved_irr|irr_to_toman|format_irr }} تومان</strong></div>
-      </div>
-    </div>
-    <div class="wallet-panel__actions">
-      <a class="btn btn-primary btn-sm" href="{% url 'finance:topup' %}">شارژ</a>
-      <a class="btn btn-ghost btn-sm" href="{% url 'finance:wallet' %}">جزئیات</a>
-      <a class="btn btn-ghost btn-sm" href="{% url 'finance:transactions' %}">تراکنش‌ها</a>
-    </div>
-  </section>
-</div>
+  </article>
+  {% include "includes/wallet_module_compact.html" with wallet=wallet %}
+</section>
 
 <div class="dash-panels dash-panels--split">
-  <section class="dash-panel card card--lift">
-    <header class="dash-panel__head">
+  <section class="dash-panel insight-panel">
+    <header class="dash-panel__head insight-panel__head">
       <div class="dash-panel__title">
-        <h2 class="section-title">کمپین‌های اخیر</h2>
-        {% if recent_rows %}<span class="dash-panel__meta tabnums">{{ recent_rows|length }} مورد</span>{% endif %}
+        <h2 class="insight-panel__title">کمپین‌های اخیر</h2>
+        {% if recent_rows %}<span class="dash-panel__meta tabnums muted">{{ recent_rows|length }} مورد</span>{% endif %}
       </div>
       <a class="btn btn-ghost btn-sm" href="{% url 'campaigns:list' %}">مشاهده همه</a>
     </header>
     {% if recent_rows %}
-    <ul class="dash-recent-list">
+    <ul class="dash-recent-list dash-recent-list--refined">
       {% for row in recent_rows %}
       {% with c=row.campaign m=row.metrics %}
       <li>
-        <a class="dash-recent-item" href="{% url 'campaigns:detail' c.id %}">
-          <div class="dash-recent-item__main">
+        <a class="dash-recent-item dash-recent-item--refined" href="{% url 'campaigns:detail' c.id %}">
+          <div class="dash-recent-item__identity">
             <span class="dash-recent-item__name">{{ c.name|default:"بدون نام" }}</span>
-            <span class="dash-recent-item__sub" dir="ltr">{% if c.destination %}{{ c.destination|shorten_url:40 }}{% else %}<span class="muted">مقصد تنظیم نشده</span>{% endif %}</span>
-          </div>
-          <div class="dash-recent-item__metrics tabnums" aria-label="آمار خلاصه">
-            <span><em>نمایش</em> {{ m.impressions|format_count }}</span>
-            <span><em>کلیک</em> {{ m.clicks|format_count }}</span>
-            <span><em>CTR</em> {{ row.ctr|persian_digits }}٪</span>
-          </div>
-          <div class="dash-recent-item__end">
             <span class="status status--compact {{ c.status|campaign_status_class }}">{{ c.get_status_display }}</span>
-            <span class="dash-recent-item__time muted">{% if c.updated_at %}{{ c.updated_at|jalali_datetime }}{% endif %}</span>
           </div>
+          <span class="dash-recent-item__dest muted" dir="ltr">{% if c.destination %}{{ c.destination|shorten_url:36 }}{% else %}—{% endif %}</span>
+          <dl class="dash-recent-item__grid tabnums">
+            <div><dt class="sr-only">نمایش</dt><dd><span class="dash-recent-item__k">نمایش</span> {{ m.impressions|format_count }}</dd></div>
+            <div><dt class="sr-only">کلیک</dt><dd><span class="dash-recent-item__k">کلیک</span> {{ m.clicks|format_count }}</dd></div>
+            <div><dt class="sr-only">CTR</dt><dd><span class="dash-recent-item__k">CTR</span> {{ row.ctr|persian_digits }}٪</dd></div>
+          </dl>
+          <time class="dash-recent-item__time muted">{% if c.updated_at %}{{ c.updated_at|jalali_datetime }}{% endif %}</time>
         </a>
       </li>
       {% endwith %}
       {% endfor %}
     </ul>
     {% else %}
-    <div class="dash-panel__empty empty-state">
+    <div class="dash-panel__empty empty-state empty-state--compact">
       <strong>اولین کمپین خود را بسازید</strong>
       <p class="muted">استودیو ساخت تبلیغ — ۵ مرحله با پیش‌نویس خودکار</p>
       <a class="btn btn-primary btn-sm" href="{% url 'campaigns:wizard_new' %}">شروع</a>
@@ -100,16 +71,16 @@
     {% endif %}
   </section>
 
-  <section class="dash-panel card card--lift dash-panel--activity">
-    <header class="dash-panel__head">
+  <section class="dash-panel insight-panel dash-panel--activity">
+    <header class="dash-panel__head insight-panel__head">
       <div class="dash-panel__title">
-        <h2 class="section-title">فعالیت اخیر</h2>
-        {% if activity %}<span class="dash-panel__meta tabnums">{{ activity|length }}</span>{% endif %}
+        <h2 class="insight-panel__title">فعالیت اخیر</h2>
+        {% if activity %}<span class="dash-panel__meta tabnums muted">{{ activity|length }}</span>{% endif %}
       </div>
       <a class="btn btn-ghost btn-sm" href="{% url 'dashboard:notifications' %}">اعلان‌ها</a>
     </header>
     {% if activity %}
-    <ul class="activity-feed">
+    <ul class="activity-feed activity-feed--compact">
       {% for a in activity %}
       <li class="activity-feed__item">
         <span class="activity-feed__dot" aria-hidden="true"></span>
@@ -125,7 +96,7 @@
       {% endfor %}
     </ul>
     {% else %}
-    <div class="dash-panel__empty dash-panel__empty--compact activity-feed__empty">
+    <div class="dash-panel__empty dash-panel__empty--compact activity-feed__empty empty-state--inline">
       <p class="muted">هنوز رویدادی ثبت نشده است.</p>
     </div>
     {% endif %}

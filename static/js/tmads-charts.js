@@ -3,14 +3,14 @@
  */
 (function (global) {
   const COLORS = {
-    impressions: "#2AABEE",
-    clicks: "#177DC7",
+    impressions: "#249FE5",
+    clicks: "#147FC5",
     actions: "#16866A",
-    spent: "#7D8FA5",
-    ctr: "#B7791F",
-    grid: "#E3EAF1",
-    muted: "#718198",
-    heading: "#243449",
+    spent: "#8794A7",
+    ctr: "#BA8229",
+    grid: "#E6EBF1",
+    muted: "#8794A7",
+    heading: "#14243A",
   };
 
   const FA_FONT = "Vazirmatn, Tahoma, sans-serif";
