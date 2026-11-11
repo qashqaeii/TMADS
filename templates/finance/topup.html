@@ -1,0 +1,14 @@
+﻿{% extends "app_shell.html" %}
+{% block page_title %}شارژ کیف پول{% endblock %}
+{% block container_class %}container-wide{% endblock %}
+{% block content %}
+<div class="app-stack">
+{% include "includes/dash_header.html" with eyebrow="مالی" title="شارژ کیف پول" %}
+<form method="post" class="card card--lift card-pad form-stack" style="max-width:28rem">
+  {% csrf_token %}
+  <div class="field"><label>مبلغ (تومان)</label><input name="amount_toman" type="number" min="1000" dir="ltr" required></div>
+  {% if payment_gateway == 'fake' %}<p class="muted" style="font-size:.85rem;margin:0">در محیط آزمایشی، پرداخت شبیه‌سازی می‌شود.</p>{% endif %}
+  <button class="btn btn-primary" type="submit">ادامه پرداخت</button>
+</form>
+</div>
+{% endblock %}

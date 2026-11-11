@@ -1,0 +1,8 @@
+{% load core_filters %}
+{% if ton_rate_display %}
+<div class="rate-strip">
+  <span class="rate-strip__label">نرخ هر گرام</span>
+  <span class="rate-strip__value tabnums">{{ ton_rate_display.irr_per_ton|irr_to_toman|format_count }} تومان</span>
+  {% if not ton_rate_display.is_fresh %}<span class="rate-strip__meta sync-hint">نرخ لحظه‌ای نیست — مقدار آخر ثبت‌شده</span>{% endif %}
+</div>
+{% endif %}

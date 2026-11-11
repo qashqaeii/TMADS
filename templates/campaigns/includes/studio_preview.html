@@ -1,0 +1,52 @@
+{% load core_filters %}
+<aside class="studio-aside" id="studio-preview-panel">
+  <p class="studio-aside__eyebrow">پیش‌نمایش</p>
+  <p class="muted studio-disclaimer">پیش‌نمایش تقریبی است و ممکن است نمایش نهایی در تلگرام متفاوت باشد.</p>
+
+  {% if campaign.target_type == 'search' %}
+  <div class="tg-search-preview" dir="ltr">
+    <div class="tg-search-preview__bar">🔍 <span>{% firstof campaign.targeting.config.search_queries.0 'جستجو' %}</span></div>
+    <div class="tg-search-preview__ad">
+      <div class="tg-search-preview__avatar"></div>
+      <div>
+        <strong dir="auto">{{ campaign.name|default:'عنوان تبلیغ' }}</strong>
+        <span class="tg-search-preview__badge">Ad</span>
+        <p class="muted" style="margin:.25rem 0 0;font-size:.8rem" dir="auto">{{ campaign.destination|default:'t.me/...' }}</p>
+      </div>
+    </div>
+  </div>
+  {% elif campaign.target_type == 'bots' %}
+  <div class="tg-preview">
+    <div class="bubble">
+      <p style="margin:0">{% if creative %}{{ creative.ad_text|default:'متن تبلیغ در ربات' }}{% else %}متن تبلیغ در ربات{% endif %}</p>
+      <span class="cta">{% if creative %}{{ creative.cta_label|default:'ادامه' }}{% else %}ادامه{% endif %}</span>
+    </div>
+  </div>
+  {% else %}
+  <div class="tg-preview">
+    <div class="bubble">
+      <p style="margin:0">{% if creative %}{{ creative.ad_text|default:'پیام اسپانسری' }}{% else %}پیام اسپانسری{% endif %}</p>
+      <span class="cta">{% if creative %}{{ creative.cta_label|default:'مشاهده' }}{% else %}مشاهده{% endif %}</span>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="studio-feedback">
+    {% if studio_feedback.errors %}
+    <p class="text-danger" style="margin:0 0 .5rem">{% for e in studio_feedback.errors %}• {{ e }}<br>{% endfor %}</p>
+    {% endif %}
+    {% if studio_feedback.warnings %}
+    <p class="text-warning" style="margin:0 0 .5rem">{% for w in studio_feedback.warnings %}• {{ w }}<br>{% endfor %}</p>
+    {% endif %}
+    {% if studio_feedback.ok and studio_feedback.infos %}
+    <p class="muted" style="margin:0">{% for i in studio_feedback.infos %}• {{ i }}<br>{% endfor %}</p>
+    {% endif %}
+  </div>
+
+  {% if quote_totals and campaign.budget_irr %}
+  <div class="studio-finance card-muted card-pad" style="margin-top:1rem">
+    <div class="finance-line"><span>جمع پرداختی</span><strong>{{ quote_totals.total_irr|irr_to_toman|format_irr }} تومان</strong></div>
+    {% if quote_totals.ton_allocation %}<div class="finance-line"><span>گرام</span><strong dir="ltr">◎ {{ quote_totals.ton_allocation }}</strong></div>{% endif %}
+  </div>
+  {% endif %}
+</aside>

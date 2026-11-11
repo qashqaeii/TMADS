@@ -1,0 +1,15 @@
+{% extends "app_shell.html" %}
+{% block page_title %}تیکت جدید{% endblock %}
+{% block container_class %}container-wide{% endblock %}
+{% block content %}
+<div class="app-stack">
+{% include "includes/dash_header.html" with eyebrow="پشتیبانی" title="تیکت جدید" %}
+<form method="post" class="card card--lift card-pad form-stack" style="max-width:36rem">
+  {% csrf_token %}
+  {% if campaign_id %}<input type="hidden" name="campaign_id" value="{{ campaign_id }}"><p class="muted ops-pill">مرتبط با کمپین <code dir="ltr">{{ campaign_id }}</code></p>{% endif %}
+  <div class="field"><label>موضوع</label><input name="subject" placeholder="مشکل پرداخت یا کمپین" required></div>
+  <div class="field"><label>شرح</label><textarea name="body" rows="5" required placeholder="جزئیات را بنویسید…"></textarea></div>
+  <button class="btn btn-primary" type="submit">ثبت تیکت</button>
+</form>
+</div>
+{% endblock %}

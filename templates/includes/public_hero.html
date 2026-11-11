@@ -1,0 +1,13 @@
+<section class="public-hero {% if compact %}public-hero--compact{% endif %}">
+  <div class="container public-hero__inner">
+    {% if eyebrow %}<p class="public-hero__eyebrow">{{ eyebrow }}</p>{% endif %}
+    <h1 class="public-hero__title">{{ title }}</h1>
+    {% if subtitle and show_subtitle %}<p class="public-hero__subtitle">{{ subtitle }}</p>{% endif %}
+    {% if cta_url %}
+    <div class="hero-actions public-hero__actions">
+      <a class="btn btn-primary" href="{{ cta_url }}">{{ cta_label|default:"شروع" }}</a>
+      {% if cta_secondary_url %}<a class="btn btn-ghost" href="{{ cta_secondary_url }}">{{ cta_secondary_label }}</a>{% endif %}
+    </div>
+    {% endif %}
+  </div>
+</section>

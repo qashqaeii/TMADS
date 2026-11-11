@@ -1,0 +1,147 @@
+﻿{% extends "app_shell.html" %}
+{% load core_filters humanize static %}
+{% block container_class %}container-wide{% endblock %}
+{% block page_title %}داشبورد{% endblock %}
+{% block charts_head %}
+{% if has_chart %}{% include "includes/charts_exec_scripts.html" %}{% endif %}
+{% endblock %}
+{% block content %}
+<div class="app-stack">
+{% with name=user.customer_profile.display_name|default:user.get_username %}
+{% url 'finance:wallet' as wallet_url %}
+{% url 'campaigns:wizard_new' as wizard_url %}
+{% include "includes/dash_header.html" with title="داشبورد" hint=name secondary_action_url=wallet_url secondary_action_label="کیف پول" action_url=wizard_url action_label="کمپین جدید" action_primary=1 %}
+{% endwith %}
+
+{% include "includes/rate_strip.html" %}
+
+<div class="kpi-exec-grid">
+  {% include "includes/kpi_exec_card.html" with icon="bolt" label="کمپین فعال" value=active_count|format_count %}
+  {% include "includes/kpi_exec_card.html" with icon="grid" label="کل کمپین‌ها" value=total_campaigns|format_count %}
+  {% include "includes/kpi_exec_card.html" with icon="eye" label="نمایش تبلیغات" value=impressions|format_count %}
+  {% include "includes/kpi_exec_card.html" with icon="percent" label="نرخ کلیک" value=ctr|persian_digits suffix="٪" %}
+</div>
+
+<div class="panel-grid panel-2">
+  <section class="card card--lift dash-chart-card">
+    <header class="dash-chart-card__head">
+      <h2 class="section-title">روند نمایش و کلیک</h2>
+      {% if has_chart %}<span class="muted dash-chart-card__meta">۳۰ روز اخیر — جمع همه کمپین‌ها</span>{% endif %}
+    </header>
+    {% if has_chart %}
+    <div id="dash-chart" class="chart-box chart-box--medium" role="img" aria-label="نمودار روند پورتفولیو"></div>
+    {% else %}
+    {% include "includes/chart_empty_dash.html" with has_linked_ads=has_linked_ads show_steps=1 %}
+    {% endif %}
+  </section>
+  <section class="card card--lift wallet-panel">
+    <h2 class="section-title">کیف پول</h2>
+    {% with total=wallet.available_irr|add:wallet.reserved_irr %}
+    <div class="wallet-bar" aria-hidden="true">
+      {% if total %}
+      <span style="width:{% widthratio wallet.available_irr total 100 %}%"></span>
+      <span style="width:{% widthratio wallet.reserved_irr total 100 %}%"></span>
+      {% endif %}
+    </div>
+    {% endwith %}
+    <div class="wallet-stats">
+      <div><small>موجودی</small><strong>{{ wallet.available_irr|irr_to_toman|format_irr }} تومان</strong></div>
+      <div><small>رزرو</small><strong>{{ wallet.reserved_irr|irr_to_toman|format_irr }} تومان</strong></div>
+    </div>
+    <div class="dash-header__actions" style="margin-top:1rem">
+      <a class="btn btn-primary btn-sm" href="{% url 'finance:topup' %}">شارژ</a>
+      <a class="btn btn-ghost btn-sm" href="{% url 'finance:transactions' %}">تراکنش‌ها</a>
+    </div>
+  </section>
+</div>
+
+<div class="dash-panels dash-panels--split">
+  <section class="dash-panel card card--lift">
+    <header class="dash-panel__head">
+      <div class="dash-panel__title">
+        <h2 class="section-title">کمپین‌های اخیر</h2>
+        {% if recent_rows %}<span class="dash-panel__meta tabnums">{{ recent_rows|length }} مورد</span>{% endif %}
+      </div>
+      <a class="btn btn-ghost btn-sm" href="{% url 'campaigns:list' %}">مشاهده همه</a>
+    </header>
+    {% if recent_rows %}
+    <ul class="dash-recent-list">
+      {% for row in recent_rows %}
+      {% with c=row.campaign m=row.metrics %}
+      <li>
+        <a class="dash-recent-item" href="{% url 'campaigns:detail' c.id %}">
+          <div class="dash-recent-item__main">
+            <span class="dash-recent-item__name">{{ c.name|default:"بدون نام" }}</span>
+            <span class="dash-recent-item__sub" dir="ltr">{% if c.destination %}{{ c.destination|shorten_url:40 }}{% else %}<span class="muted">مقصد تنظیم نشده</span>{% endif %}</span>
+          </div>
+          <div class="dash-recent-item__metrics tabnums" aria-label="آمار خلاصه">
+            <span><em>نمایش</em> {{ m.impressions|format_count }}</span>
+            <span><em>کلیک</em> {{ m.clicks|format_count }}</span>
+            <span><em>CTR</em> {{ row.ctr|persian_digits }}٪</span>
+          </div>
+          <div class="dash-recent-item__end">
+            <span class="status status--compact {{ c.status|campaign_status_class }}">{{ c.get_status_display }}</span>
+            <span class="dash-recent-item__time muted">{% if c.updated_at %}{{ c.updated_at|jalali_datetime }}{% endif %}</span>
+          </div>
+        </a>
+      </li>
+      {% endwith %}
+      {% endfor %}
+    </ul>
+    {% else %}
+    <div class="dash-panel__empty empty-state">
+      <strong>اولین کمپین خود را بسازید</strong>
+      <p class="muted">ویزارد ۸ مرحله‌ای با پیش‌نویس خودکار</p>
+      <a class="btn btn-primary btn-sm" href="{% url 'campaigns:wizard_new' %}">شروع</a>
+    </div>
+    {% endif %}
+  </section>
+
+  <section class="dash-panel card card--lift dash-panel--activity">
+    <header class="dash-panel__head">
+      <div class="dash-panel__title">
+        <h2 class="section-title">فعالیت اخیر</h2>
+        {% if activity %}<span class="dash-panel__meta tabnums">{{ activity|length }}</span>{% endif %}
+      </div>
+      <a class="btn btn-ghost btn-sm" href="{% url 'dashboard:notifications' %}">اعلان‌ها</a>
+    </header>
+    {% if activity %}
+    <ul class="activity-feed">
+      {% for a in activity %}
+      <li class="activity-feed__item">
+        <span class="activity-feed__dot" aria-hidden="true"></span>
+        <div class="activity-feed__body">
+          <p class="activity-feed__line">
+            <a href="{% url 'campaigns:detail' a.campaign_id %}">{{ a.campaign.name|default:"کمپین" }}</a>
+            <span class="activity-feed__sep">·</span>
+            <span>{% if a.note %}{{ a.note }}{% else %}به‌روزرسانی وضعیت{% endif %}</span>
+          </p>
+          <time class="activity-feed__time muted">{{ a.created_at|jalali_datetime }}</time>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <div class="dash-panel__empty activity-feed__empty">
+      <p class="muted">هنوز رویدادی ثبت نشده است.</p>
+      <p class="muted" style="font-size:.82rem;margin:.35rem 0 0">پس از ذخیره پیش‌نویس یا تغییر وضعیت، اینجا نمایش داده می‌شود.</p>
+    </div>
+    {% endif %}
+  </section>
+</div>
+
+{% if has_chart %}
+<script>
+(function () {
+  const data = {{ chart_json|safe }};
+  const el = document.getElementById('dash-chart');
+  if (!el || !data.dates || !data.dates.length) return;
+  (window.tmadsRunWhenReady || function (cb) { cb(); })(function () {
+    const chart = TMADSCharts.portfolioChart(el, data);
+    if (!chart) console.warn('TMADS: portfolio chart did not mount — check data or container size');
+  });
+})();
+</script>
+{% endif %}
+</div>
+{% endblock %}

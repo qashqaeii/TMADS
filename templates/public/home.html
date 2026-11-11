@@ -1,0 +1,92 @@
+{% extends "public_base.html" %}
+{% block title %}{{ PRODUCT_NAME }} — تبلیغات تلگرام{% endblock %}
+{% block content %}
+<section class="hero hero--telegram hero--exec container hero--public-mobile">
+  <div class="hero-grid hero-grid--public">
+    <div class="hero-copy">
+      <p class="badge-tg badge-tg--exec">تبلیغات تلگرام — بدون حساب شخصی</p>
+      <h1>{{ PRODUCT_TAGLINE }}</h1>
+      <p class="lead">کمپین بسازید، ریالی پرداخت کنید، گزارش بگیرید — بدون نیاز به حساب شخصی Telegram Ads.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary btn-lg" href="{% url 'accounts:register' %}">شروع تبلیغات</a>
+        <a class="btn btn-ghost btn-lg" href="{% url 'public:how_it_works' %}">نحوه کار</a>
+      </div>
+      <ul class="check-list muted">
+        <li>ویزارد ۸ مرحله‌ای با پیش‌نویس خودکار</li>
+        <li>کیف پول ریالی + پیش‌فاکتور شفاف</li>
+        <li>گزارش همگام‌شده از API</li>
+      </ul>
+      <div class="trust-strip">
+        <span>✓ جداسازی داده مشتری</span>
+        <span>✓ رزرو بودجه امن</span>
+        <span>✓ پنل عملیات داخلی</span>
+      </div>
+    </div>
+    <div class="hero-panel hero-panel--exec card--lift" aria-hidden="true">
+      <p class="hero-panel__title">پیش‌نمایش داشبورد</p>
+      <div class="kpi-exec-grid kpi-exec-grid--compact">
+        <article class="kpi-exec kpi-exec--compact">
+          <span class="kpi-exec__icon">{% include "includes/kpi_icon.html" with name="bolt" %}</span>
+          <div class="kpi-exec__body">
+            <span class="kpi-exec__label">کمپین فعال</span>
+            <span class="kpi-exec__value">۳</span>
+          </div>
+        </article>
+        <article class="kpi-exec kpi-exec--compact">
+          <span class="kpi-exec__icon">{% include "includes/kpi_icon.html" with name="eye" %}</span>
+          <div class="kpi-exec__body">
+            <span class="kpi-exec__label">نمایش</span>
+            <span class="kpi-exec__value">۱۶۸٬۴۱۶</span>
+          </div>
+        </article>
+        <article class="kpi-exec kpi-exec--compact">
+          <span class="kpi-exec__icon">{% include "includes/kpi_icon.html" with name="click" %}</span>
+          <div class="kpi-exec__body">
+            <span class="kpi-exec__label">کلیک</span>
+            <span class="kpi-exec__value">۵٬۱۰۹</span>
+          </div>
+        </article>
+        <article class="kpi-exec kpi-exec--compact">
+          <span class="kpi-exec__icon">{% include "includes/kpi_icon.html" with name="percent" %}</span>
+          <div class="kpi-exec__body">
+            <span class="kpi-exec__label">نرخ کلیک</span>
+            <span class="kpi-exec__value">۳٫۰۳٪</span>
+          </div>
+        </article>
+      </div>
+      <div class="tg-preview" style="margin-top:1rem">
+        <div class="bubble">
+          <strong>نمونه تبلیغ</strong>
+          <p style="margin:.35rem 0 .2rem">مخاطبان هدف خود را در تلگرام پیدا کنید.</p>
+          <span class="cta">شروع</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="section public-section container">
+  <div class="section-head section-head--exec">
+    <h2>مسیر شما تا انتشار</h2>
+    <p>از ایده تا گزارش — در یک تجربه یکپارچه و فارسی</p>
+  </div>
+  <div class="steps-row steps-row--exec" style="margin-top:1rem">
+    <article class="card card--lift step-card">
+      <h3>طراحی کمپین</h3>
+      <p class="muted">هدف، مقصد، جایگاه، متن و بودجه — با پیش‌نمایش شبیه تلگرام.</p>
+    </article>
+    <article class="card card--lift step-card">
+      <h3>پرداخت امن</h3>
+      <p class="muted">رزرو از کیف پول پس از پیش‌فاکتور. درگاه تولید پس از تأیید شما.</p>
+    </article>
+    <article class="card card--lift step-card">
+      <h3>گزارش حرفه‌ای</h3>
+      <p class="muted">نمایش، کلیک و ورود در نمودار روزانه با تاریخ شمسی.</p>
+    </article>
+  </div>
+  <div class="cta-band">
+    <h2>آماده اولین کمپین هستید؟</h2>
+    <p>ثبت‌نام رایگان است. محیط آزمایشی برای تست کیف پول و ویزارد فعال است.</p>
+    <a class="btn btn-primary btn-lg" href="{% url 'accounts:register' %}">ایجاد حساب</a>
+  </div>
+</section>
+{% endblock %}

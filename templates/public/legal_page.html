@@ -1,0 +1,14 @@
+{% extends "public_base.html" %}
+{% block title %}{{ title }} — {{ PRODUCT_NAME }}{% endblock %}
+{% block content %}
+{% include "includes/public_hero.html" with title=title compact=1 %}
+<section class="section public-section container">
+  <article class="card card--lift card-pad legal-prose legal-md">
+    {% if body_text %}
+      {{ body_text|linebreaksbr }}
+    {% else %}
+      <p>متن در <code>docs/legal/{{ slug }}.md</code> قابل ویرایش است.</p>
+    {% endif %}
+  </article>
+</section>
+{% endblock %}

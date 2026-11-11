@@ -1,0 +1,52 @@
+# ممیزی UI — Telegram Executive Blue
+
+**وضعیت کلی:** یکسان‌سازی Executive در اپ، Ops، عمومی و Auth — **کامل** (بدون تغییر منطق مالی/API).
+
+## اپ (پنل مشتری)
+
+| صفحه | الگو | وضعیت |
+|------|------|--------|
+| داشبورد | `app-stack` + `dash_header` + KPI + `dash-panels--split` | ✅ |
+| کمپین‌ها (لیست) | `dash_header` + kicker + فیلتر/جدول | ✅ |
+| کمپین (جزئیات) | lifecycle + budget meter + تحلیل ECharts (عملکرد/قیف/مصرف) + `activity-feed` | ✅ |
+| کمپین (لیست) | KPI پورتفolio + نمودار ۳۰ روز + sparkline هفت‌روزه | ✅ |
+| ویزارد | stepper exec + فرم کارت | ✅ |
+| کیف پول، تراکنش، فاکتور، شارژ، بازپرداخت | `dash_header` + `table-card` / ledger | ✅ |
+| پشتیبانی | `record-list` / `chat-thread` | ✅ |
+| اعلان‌ها | `activity-feed` | ✅ |
+| پروفایل | فرم در کارت | ✅ |
+
+## عملیات (Ops)
+
+| صفحه | وضعیت |
+|------|--------|
+| نمای کلی، نرخ ارز، API، ممیزی، لیست کمپین، بررسی کمپین، بازپرداخت | ✅ `dash_header` + جداول/فرم |
+
+## سایت عمومی
+
+| صفحه | وضعیت |
+|------|--------|
+| خانه | `hero--exec` + KPI compact + `steps-row--exec` | ✅ |
+| امکانات، تعرفه، FAQ، نحوه کار، درباره، تماس، حقوقی | `public-hero` + grid/card exec | ✅ |
+| `public_base` | شیت تمام‌قد موبایل + backdrop + CTA پایین؛ دسکتاپ بدون تغییر | ✅ |
+
+## حساب کاربری
+
+ورود، ثبت‌نام، بازیابی رمز — `auth-card--exec` ✅
+
+## الگوی مشترک
+
+- **Shell:** `app_shell` → `page-frame` بیرونی؛ محتوا → `app-stack` (بدون `page-frame` تودرتو)
+- **هدر صفحه:** `includes/dash_header.html` (پشتیبانی `hint`, دو اکشن, `actions` سفارشی)
+- **Legacy:** `includes/app_page_header.html` → alias به `dash_header`
+- **کامپوننت‌ها:** `kpi-exec-*`, `table-card`, `record-list`, `activity-feed`
+- **استایل:** `static/css/design-executive.css` + `motion.js`
+
+## خارج از دامنه این فاز
+
+- `kpi_luxe.html` — بدون استفاده در قالب‌ها (نگه‌داری اختیاری)
+- تست بصری مرورگر — فقط با درخواست صریح کاربر
+
+## تست خودکار
+
+پس از تغییرات UI: `pytest` (smoke/template) — آخرین اجرا در commit محلی.

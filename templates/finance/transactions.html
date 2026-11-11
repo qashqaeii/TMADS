@@ -1,0 +1,29 @@
+﻿{% extends "app_shell.html" %}
+{% load core_filters %}
+{% block page_title %}تراکنش‌ها{% endblock %}
+{% block container_class %}container-wide{% endblock %}
+{% block content %}
+<div class="app-stack">
+{% url 'finance:wallet' as wallet_url %}
+{% include "includes/dash_header.html" with eyebrow="مالی" title="تراکنش‌ها" action_url=wallet_url action_label="کیف پول" %}
+<article class="card table-card card--lift">
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead><tr><th>نوع</th><th>مبلغ (تومان)</th><th>موجودی پس از</th><th>تاریخ</th></tr></thead>
+      <tbody>
+      {% for e in entries %}
+      <tr>
+        <td>{{ e.get_entry_type_display }}</td>
+        <td class="tabnums" dir="ltr">{{ e.amount_irr|irr_to_toman|format_irr }}</td>
+        <td class="tabnums" dir="ltr">{{ e.balance_after_available|irr_to_toman|format_irr }}</td>
+        <td>{{ e.created_at|jalali_datetime }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="4"><div class="empty-state"><strong>تراکنشی نیست</strong></div></td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</article>
+</div>
+{% endblock %}

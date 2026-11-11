@@ -1,0 +1,28 @@
+{% extends "app_shell.html" %}
+{% load core_filters %}
+{% block container_class %}container-wide{% endblock %}
+{% block page_title %}ممیزی{% endblock %}
+{% block content %}
+<div class="app-stack">
+{% include "includes/dash_header.html" with eyebrow="امنیت" title="ممیزی" %}
+<article class="card table-card card--lift">
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead><tr><th>اقدام</th><th>کاربر</th><th>موجودیت</th><th>زمان</th></tr></thead>
+      <tbody>
+        {% for log in logs %}
+          <tr>
+            <td><code>{{ log.action }}</code></td>
+            <td>{{ log.actor|default:"—" }}</td>
+            <td dir="ltr">{{ log.entity_type }} {{ log.entity_id|default:"" }}</td>
+            <td>{{ log.created_at|jalali_datetime }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="4"><div class="empty-state"><strong>رکوردی نیست</strong></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</article>
+</div>
+{% endblock %}

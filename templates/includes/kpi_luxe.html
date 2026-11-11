@@ -1,0 +1,9 @@
+<div class="kpi-luxe {% if class %}{{ class }}{% endif %}" role="list">
+  {% for item in items %}
+  <article class="kpi-luxe__item" role="listitem">
+    <span class="kpi-luxe__label">{{ item.label }}</span>
+    <span class="kpi-luxe__value tabnums">{{ item.value }}</span>
+    {% if item.hint %}<span class="kpi-luxe__hint">{{ item.hint }}</span>{% endif %}
+  </article>
+  {% endfor %}
+</div>

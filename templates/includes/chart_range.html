@@ -1,0 +1,8 @@
+<div class="chart-range{% if range_variant %} chart-range--{{ range_variant }}{% endif %}" data-chart-range{% if range_group %} data-range-group="{{ range_group }}"{% endif %} role="group" aria-label="بازهٔ زمانی نمودار">
+  {% if range_variant != "minimal" %}<span class="chart-range__label muted">بازه</span>{% endif %}
+  <button type="button" class="chart-range__btn" data-chart-days="7">۷ روز</button>
+  <button type="button" class="chart-range__btn" data-chart-days="14">۱۴ روز</button>
+  <button type="button" class="chart-range__btn is-active" data-chart-days="30">۳۰ روز</button>
+  <button type="button" class="chart-range__btn" data-chart-days="90">۹۰ روز</button>
+  <button type="button" class="chart-range__btn" data-chart-days="0">کل دوره</button>
+</div>

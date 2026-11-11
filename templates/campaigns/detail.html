@@ -1,0 +1,418 @@
+﻿{% extends "app_shell.html" %}
+{% load core_filters humanize static ton_display %}
+{% block container_class %}container-wide{% endblock %}
+{% block page_title %}{{ campaign.name|default:"جزئیات کمپین" }}{% endblock %}
+{% block charts_head %}
+{% include "includes/charts_exec_scripts.html" %}
+{% endblock %}
+{% block content %}
+<div class="app-stack campaign-detail">
+  <article class="campaign-detail__brief campaign-detail__hero campaign-detail__hero--exec card card--lift" aria-label="خلاصه کمپین">
+    <nav class="campaign-detail__crumb" aria-label="مسیر">
+      <a class="campaign-detail__back" href="{% url 'campaigns:list' %}">کمپین‌ها</a>
+    </nav>
+
+    <div class="campaign-detail__masthead">
+      <header class="campaign-detail__identity">
+        <div class="campaign-detail__title-row">
+          <h1 class="campaign-detail__title">{{ campaign.name|default:"بدون نام" }}</h1>
+          <span class="status status--compact status--pill {{ campaign.status|campaign_status_class }}">{{ campaign.get_status_display }}</span>
+        </div>
+        {% if campaign.placement or campaign.destination %}
+        <p class="campaign-detail__meta">
+          {% if campaign.placement %}<span class="campaign-detail__meta-item">{{ campaign.get_placement_display }}</span>{% endif %}
+          {% if campaign.destination %}
+          <a class="campaign-detail__meta-link" href="{{ campaign.destination }}" target="_blank" rel="noopener noreferrer" dir="ltr">{{ campaign.destination|shorten_url:42 }}</a>
+          {% endif %}
+        </p>
+        {% endif %}
+        {% if budget.is_paused or metrics.stats_stale %}
+        <p class="campaign-detail__alerts" role="status">
+          {% if budget.is_paused %}<span class="campaign-detail__alert">متوقف در تلگرام</span>{% endif %}
+          {% if metrics.stats_stale %}<span class="campaign-detail__alert campaign-detail__alert--muted">آمار نیاز به بروزرسانی</span>{% endif %}
+        </p>
+        {% endif %}
+      </header>
+
+      <div class="campaign-detail__toolbar" aria-label="عملیات کمپین">
+        <form method="post" action="{% url 'campaigns:refresh_stats' %}" class="campaign-detail__actions-form">{% csrf_token %}
+          <input type="hidden" name="campaign_id" value="{{ campaign.id }}">
+          <button type="submit" class="btn btn-ghost btn-sm btn-quiet">بروزرسانی</button>
+        </form>
+        <a class="btn btn-ghost btn-sm" href="{% url 'support:create' %}?campaign={{ campaign.id }}">پشتیبانی</a>
+        {% include "includes/campaign_actions_menu.html" %}
+      </div>
+    </div>
+
+    {% if budget.has_remote and budget.spent_percent is not None %}
+    {% include "includes/campaign_budget_band.html" %}
+    {% endif %}
+
+    <footer class="campaign-detail__foot">
+      {% if last_sync %}
+      <p class="campaign-detail__sync-row">
+        <span class="campaign-detail__sync-label">همگام‌سازی</span>
+        <time class="campaign-detail__sync" datetime="{{ last_sync|date:'c' }}">{{ last_sync|jalali_datetime }}</time>
+      </p>
+      {% endif %}
+      {% include "includes/campaign_lifecycle.html" with lifecycle_steps=lifecycle_steps variant="rail" %}
+    </footer>
+  </article>
+
+  <div class="kpi-exec-grid kpi-exec-grid--5 campaign-detail__kpi">
+    {% include "includes/kpi_exec_card.html" with icon="eye" label="نمایش" value=metrics.impressions|format_count %}
+    {% include "includes/kpi_exec_card.html" with icon="click" label="کلیک" value=metrics.clicks|format_count %}
+    {% include "includes/kpi_exec_card.html" with icon="percent" label="نرخ کلیک" value=metrics.ctr|persian_digits suffix="٪" %}
+    {% include "includes/kpi_exec_card.html" with icon="grid" label="ورود" value=metrics.actions|format_count %}
+    <article class="kpi-exec"><span class="kpi-exec__icon">{% include "includes/kpi_icon.html" with name="wallet" %}</span><div class="kpi-exec__body"><span class="kpi-exec__label">هزینه گرام</span><span class="kpi-exec__value">{% ton_amount metrics.spent_ton exchange_rate_id=order_exchange_rate_id %}</span></div></article>
+  </div>
+
+  <div class="detail-tabs campaign-detail__tabs" x-data="{ tab: 'overview' }">
+    <div class="tab-bar tab-bar--exec" role="tablist" aria-label="بخش‌های کمپین">
+      <button type="button" role="tab" :class="{ 'is-active': tab === 'overview' }" @click="tab = 'overview'; $nextTick(() => window.dispatchEvent(new Event('tmads-charts-resize')))">نمای کلی</button>
+      <button type="button" role="tab" :class="{ 'is-active': tab === 'analytics' }" @click="tab = 'analytics'; $nextTick(() => window.dispatchEvent(new Event('tmads-charts-resize')))">تحلیل</button>
+      <button type="button" role="tab" :class="{ 'is-active': tab === 'creative' }" @click="tab = 'creative'">محتوا</button>
+      <button type="button" role="tab" :class="{ 'is-active': tab === 'targeting' }" @click="tab = 'targeting'">هدف‌گیری</button>
+      <button type="button" role="tab" :class="{ 'is-active': tab === 'finance' }" @click="tab = 'finance'">بودجه</button>
+      <button type="button" role="tab" :class="{ 'is-active': tab === 'history' }" @click="tab = 'history'">تاریخچه</button>
+    </div>
+
+    <div class="tab-panel" role="tabpanel" x-show="tab === 'overview'" x-cloak>
+      <div class="panel-grid panel-2 campaign-detail__split">
+        <section class="card card--lift card-pad detail-panel">
+          <h2 class="section-title">عملکرد تبدیل</h2>
+          <dl class="stat-rows">
+            <div class="stat-rows__row"><dt>نرخ تبدیل</dt><dd class="tabnums">{% if metrics.clicks %}{{ metrics.conversion_rate|persian_digits }}٪{% else %}—{% endif %}</dd></div>
+            <div class="stat-rows__row"><dt>هزینه هر ورود</dt><dd>{% ton_amount metrics.cost_per_action exchange_rate_id=order_exchange_rate_id %}</dd></div>
+            <div class="stat-rows__row"><dt>CPM</dt><dd>{% ton_amount metrics.cpm exchange_rate_id=order_exchange_rate_id %}</dd></div>
+            <div class="stat-rows__row"><dt>بودجه باقی‌مانده</dt><dd>{% ton_amount metrics.remaining_ton exchange_rate_id=order_exchange_rate_id %}</dd></div>
+          </dl>
+        </section>
+        <section class="card card--lift card-pad detail-panel">
+          <h2 class="section-title">اتصال تبلیغ</h2>
+          {% for ad in remote_ads %}
+          <dl class="stat-rows">
+            <div class="stat-rows__row"><dt>شناسه</dt><dd><code class="code-inline" dir="ltr">{{ ad.remote_ad_id|default:"—" }}</code></dd></div>
+            <div class="stat-rows__row"><dt>وضعیت تلگرام</dt><dd>{{ ad.remote_status|default:"—" }}</dd></div>
+            {% if ad.promotion_url %}<div class="stat-rows__row"><dt>لینک</dt><dd dir="ltr" class="muted">{{ ad.promotion_url|shorten_url:36 }}</dd></div>{% endif %}
+          </dl>
+          {% empty %}
+          <p class="detail-panel__hint muted">پس از تأیید و اتصال به تلگرام، آمار اینجا همگام می‌شود.</p>
+          {% endfor %}
+          <dl class="stat-rows stat-rows--tail">
+            <div class="stat-rows__row"><dt>ایجاد در پنل</dt><dd>{{ campaign.created_at|jalali_datetime }}</dd></div>
+          </dl>
+        </section>
+      </div>
+      {% if has_chart %}
+      <section class="card card--lift card-pad detail-panel detail-panel--chart campaign-detail__trend">
+        <header class="chart-head chart-head--range chart-head--compact">
+          <div class="chart-head__titles chart-head__titles--inline">
+            <h2 class="section-title">روند عملکرد</h2>
+            <span class="muted chart-head__sub" data-chart-range-caption>۳۰ روز اخیر</span>
+          </div>
+          {% include "includes/chart_range.html" with range_group="campaign-detail" range_variant="minimal" %}
+        </header>
+        {% if chart_has_signal %}
+        <div id="campaign-chart-mini" class="chart-box chart-box--short" role="img" aria-label="نمودار خلاصه"></div>
+        {% else %}
+        <div class="empty-state chart-empty detail-chart-empty">
+          <strong>روند روزانه در snapshot ذخیره نشده</strong>
+          <p class="muted">آمار کلی از تلگرام آمده است؛ برای پر شدن نمودار، «بروزرسانی» را بزنید (کل دوره از ایجاد آگهی).</p>
+          <form method="post" action="{% url 'campaigns:refresh_stats' %}" class="detail-chart-empty__form">{% csrf_token %}
+            <input type="hidden" name="campaign_id" value="{{ campaign.id }}">
+            <button type="submit" class="btn btn-primary btn-sm">بروزرسانی آمار</button>
+          </form>
+        </div>
+        {% endif %}
+      </section>
+      {% endif %}
+    </div>
+
+    <div class="tab-panel" role="tabpanel" x-show="tab === 'analytics'" x-cloak>
+      <div class="campaign-analytics-suite">
+        <section class="card card--lift analytics-module analytics-module--trend">
+          <header class="analytics-module__head analytics-head analytics-head--trend">
+            <div class="analytics-head__lead">
+              <h2 class="analytics-head__title">روند روزانه</h2>
+              <span class="analytics-head__meta muted" data-chart-range-caption>۳۰ روز اخیر</span>
+            </div>
+            {% include "includes/chart_range.html" with range_group="campaign-detail" range_variant="minimal" %}
+          </header>
+          {% if has_chart and chart_has_signal %}
+          <dl class="analytics-period-kpis" aria-label="خلاصه بازهٔ انتخاب‌شده">
+            <div class="analytics-period-kpis__item analytics-period-kpis__item--imp">
+              <dt>نمایش</dt>
+              <dd class="tabnums" data-period-kpi="impressions">—</dd>
+            </div>
+            <div class="analytics-period-kpis__item analytics-period-kpis__item--clk">
+              <dt>کلیک</dt>
+              <dd class="tabnums" data-period-kpi="clicks">—</dd>
+            </div>
+            <div class="analytics-period-kpis__item analytics-period-kpis__item--act">
+              <dt>ورود</dt>
+              <dd class="tabnums" data-period-kpi="actions">—</dd>
+            </div>
+            <div class="analytics-period-kpis__item analytics-period-kpis__item--ctr">
+              <dt>نرخ کلیک</dt>
+              <dd class="tabnums" data-period-kpi="ctr">—</dd>
+            </div>
+          </dl>
+          {% endif %}
+          <div class="analytics-chart-canvas analytics-chart-canvas--trend">
+            <div id="campaign-chart" class="chart-box chart-box--analytics" role="img" aria-label="نمودار عملکرد"></div>
+          </div>
+          {% if not has_chart %}
+          <div class="empty-state chart-empty analytics-empty">
+            <strong>دادهٔ نمودار کافی نیست</strong>
+            <p class="muted">پس از اتصال تبلیغ، «بروزرسانی آمار» را بزنید.</p>
+          </div>
+          {% elif not chart_has_signal %}
+          <div class="empty-state chart-empty analytics-empty">
+            <strong>روند روزانه ذخیره نشده</strong>
+            <p class="muted">آمار کلی موجود است؛ از «بروزرسانی» برای پر شدن نمودار استفاده کنید.</p>
+          </div>
+          {% endif %}
+        </section>
+
+        <div class="campaign-analytics-suite__col">
+          <section class="card card--lift analytics-module analytics-module--funnel">
+            <header class="analytics-module__head analytics-head">
+              <h2 class="analytics-head__title">قیف تبدیل</h2>
+            </header>
+            <div id="campaign-funnel" class="funnel-viz-host" role="img" aria-label="قیف تبدیل"></div>
+            <footer class="analytics-funnel-foot" aria-label="نرخ‌های تبدیل">
+              <span class="analytics-funnel-pill">
+                <span class="analytics-funnel-pill__label">نمایش → کلیک</span>
+                <strong class="tabnums">{% if metrics.impressions %}{{ metrics.ctr|persian_digits }}٪{% else %}—{% endif %}</strong>
+              </span>
+              <span class="analytics-funnel-pill">
+                <span class="analytics-funnel-pill__label">کلیک → ورود</span>
+                <strong class="tabnums">{% if metrics.clicks %}{{ metrics.conversion_rate|persian_digits }}٪{% else %}—{% endif %}</strong>
+              </span>
+            </footer>
+          </section>
+
+          <section class="card card--lift analytics-module analytics-module--spend">
+            <header class="analytics-module__head analytics-head analytics-head--spend">
+              <h2 class="analytics-head__title">مصرف روزانه</h2>
+              <span class="analytics-head__meta muted" aria-live="polite">
+                جمع <strong class="tabnums" data-period-kpi="spent">—</strong> گرام
+              </span>
+            </header>
+            <div class="analytics-chart-canvas analytics-chart-canvas--spend">
+              <div id="campaign-spend-chart" class="chart-box chart-box--spend-v" role="img" aria-label="مصرف روزانه"></div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-panel" role="tabpanel" x-show="tab === 'creative'" x-cloak>
+      <section class="card card--lift card-pad detail-panel">
+        <h2 class="section-title">پیش‌نمایش تبلیغ</h2>
+        {% if creative %}
+        <div class="tg-preview tg-preview--detail tg-preview--premium">
+          <div class="bubble">
+            {% if creative.title %}<strong class="tg-preview__title">{{ creative.title }}</strong>{% endif %}
+            <p class="tg-preview__text">{{ creative.ad_text|default:"متن تبلیغ" }}</p>
+            {% if creative.cta_label %}<span class="cta">{{ creative.cta_label }}</span>{% elif campaign.destination %}<span class="cta">باز کردن</span>{% endif %}
+          </div>
+        </div>
+        {% else %}
+        <p class="detail-panel__hint muted">متن تبلیغ ثبت نشده است.</p>
+        <a class="btn btn-primary btn-sm" href="{% url 'campaigns:wizard' campaign.id %}">تکمیل در ویزارد</a>
+        {% endif %}
+      </section>
+    </div>
+
+    <div class="tab-panel" role="tabpanel" x-show="tab === 'targeting'" x-cloak>
+      <section class="card card--lift card-pad detail-panel targeting-board-wrap">
+        <header class="targeting-board__hero">
+          <div>
+            <h2 class="targeting-board__hero-title">هدف‌گیری</h2>
+            {% if targeting_rows %}
+            <p class="targeting-board__hero-hint">روی کارت کلیک کنید تا کپی شود؛ برای خروجی یکجا از «کپی همه» استفاده کنید.</p>
+            {% endif %}
+          </div>
+        </header>
+        {% if targeting_rows %}
+        {% include "campaigns/includes/targeting_board.html" %}
+        {% else %}
+        <p class="detail-panel__hint muted">هدف‌گیری در ویزارد یا پس از import از تلگرام پر می‌شود.</p>
+        {% endif %}
+      </section>
+    </div>
+
+    <div class="tab-panel" role="tabpanel" x-show="tab === 'finance'" x-cloak>
+      <section class="card card--lift card-pad detail-panel">
+        <h2 class="section-title">بودجه و سفارش</h2>
+        {% if order %}
+        <dl class="stat-rows">
+          <div class="stat-rows__row"><dt>بودجه تبلیغ</dt><dd dir="ltr">{{ order.advertising_budget_irr|irr_to_toman|format_irr }} تومان</dd></div>
+          <div class="stat-rows__row"><dt>کارمزد</dt><dd dir="ltr">{{ order.service_fee_irr|irr_to_toman|format_irr }} تومان</dd></div>
+          <div class="stat-rows__row"><dt>تخصیص گرام</dt><dd>{% ton_amount order.ton_allocation exchange_rate_id=order_exchange_rate_id %}</dd></div>
+          <div class="stat-rows__row"><dt>وضعیت سفارش</dt><dd>{{ order.get_status_display }}</dd></div>
+          {% if campaign.daily_cap_irr %}<div class="stat-rows__row"><dt>سقف روزانه</dt><dd>{{ campaign.daily_cap_irr|irr_to_toman|format_irr }} تومان</dd></div>{% endif %}
+        </dl>
+        {% else %}
+        <dl class="stat-rows">
+          <div class="stat-rows__row"><dt>هزینه ثبت‌شده</dt><dd>{% ton_amount metrics.spent_ton %}</dd></div>
+        </dl>
+        <p class="detail-panel__hint muted">سفارش ریالی برای کمپین‌های importشده ممکن است ثبت نشده باشد.</p>
+        {% endif %}
+      </section>
+    </div>
+
+    <div class="tab-panel" role="tabpanel" x-show="tab === 'history'" x-cloak>
+      <section class="card card--lift card-pad detail-panel detail-panel--history">
+        <h2 class="section-title">تاریخچه وضعیت</h2>
+        <ul class="activity-feed">
+          {% for h in history %}
+          <li class="activity-feed__item">
+            <span class="activity-feed__dot" aria-hidden="true"></span>
+            <div class="activity-feed__body">
+              <p class="activity-feed__line"><strong>{{ h.to_status|campaign_status_label }}</strong>{% if h.note %}<span class="activity-feed__sep">·</span><span>{{ h.note }}</span>{% endif %}</p>
+              <time class="activity-feed__time muted">{{ h.created_at|jalali_datetime }}</time>
+            </div>
+          </li>
+          {% empty %}<li class="activity-feed__empty"><p class="muted">رویدادی ثبت نشده است.</p></li>{% endfor %}
+        </ul>
+      </section>
+    </div>
+  </div>
+
+  <script>
+  (function () {
+    const funnel = {{ funnel_json|safe }};
+    const boot = window.tmadsRunWhenReady || function (cb) { cb(); };
+
+    function faNum(n) {
+      try { return Number(n).toLocaleString('fa-IR'); } catch (_e) { return String(n); }
+    }
+
+    function rangeCaption(days, total) {
+      if (!days || days <= 0 || days >= total) {
+        return 'کل دوره — ' + faNum(total) + ' روز از ایجاد آگهی';
+      }
+      return faNum(days) + ' روز اخیر';
+    }
+
+    function setRangeUi(days) {
+      document.querySelectorAll('[data-chart-range]').forEach(function (bar) {
+        bar.querySelectorAll('.chart-range__btn').forEach(function (btn) {
+          var d = parseInt(btn.getAttribute('data-chart-days'), 10);
+          btn.classList.toggle('is-active', d === days);
+          btn.disabled = d > 0 && d > window.__tmadsChartTotalDays;
+        });
+      });
+      document.querySelectorAll('[data-chart-range-caption]').forEach(function (el) {
+        el.textContent = rangeCaption(days, window.__tmadsChartTotalDays);
+      });
+    }
+
+    function bindRangeControls(onPick) {
+      document.querySelectorAll('[data-chart-range] .chart-range__btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var days = parseInt(btn.getAttribute('data-chart-days'), 10);
+          onPick(days);
+        });
+      });
+    }
+
+    function resizeCampaignCharts() {
+      if (!window.echarts) return;
+      ['campaign-chart-mini', 'campaign-chart', 'campaign-funnel', 'campaign-spend-chart'].forEach(function (id) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        var inst = echarts.getInstanceByDom(el);
+        if (inst) {
+          requestAnimationFrame(function () { inst.resize(); });
+        }
+      });
+    }
+    window.addEventListener('tmads-charts-resize', resizeCampaignCharts);
+
+    function updatePeriodKpis(slice) {
+      if (!slice) return;
+      var sum = function (arr) {
+        if (!arr || !arr.length) return 0;
+        return arr.reduce(function (a, b) { return a + (Number(b) || 0); }, 0);
+      };
+      var imp = sum(slice.impressions);
+      var clk = sum(slice.clicks);
+      var act = sum(slice.actions);
+      var spent = sum(slice.spent);
+      var ctr = imp > 0 ? Math.round((clk / imp) * 1000) / 10 : 0;
+      var map = {
+        impressions: faNum(imp),
+        clicks: faNum(clk),
+        actions: faNum(act),
+        ctr: (ctr ? ctr.toString().replace('.', '٫') : '۰') + '٪',
+        spent: spent ? faNum(Math.round(spent * 10000) / 10000) : '۰',
+      };
+      document.querySelectorAll('[data-period-kpi]').forEach(function (el) {
+        var key = el.getAttribute('data-period-kpi');
+        if (key && map[key] !== undefined) el.textContent = map[key];
+      });
+    }
+
+    {% if has_chart %}
+    const fullData = {{ chart_json|safe }};
+    const chartHasSignal = {{ chart_has_signal|yesno:"true,false" }};
+    boot(function () {
+      var funnelEl = document.getElementById('campaign-funnel');
+      if (!fullData.dates || !fullData.dates.length) {
+        TMADSCharts.conversionFunnelChart(funnelEl, funnel, { premium: true });
+        return;
+      }
+      if (!chartHasSignal) {
+        TMADSCharts.conversionFunnelChart(funnelEl, funnel, { premium: true });
+        return;
+      }
+      var totalDays = fullData.dates.length;
+      window.__tmadsChartTotalDays = totalDays;
+      var defaultRange = TMADSCharts.suggestChartRangeDays(fullData, 30);
+
+      function renderRange(days) {
+        var slice = TMADSCharts.slicePeriodData(fullData, days);
+        var mini = document.getElementById('campaign-chart-mini');
+        var main = document.getElementById('campaign-chart');
+        var spend = document.getElementById('campaign-spend-chart');
+        if (mini) {
+          TMADSCharts.performanceChart(mini, slice, {
+            compact: true,
+            portfolio: true,
+            overviewMini: true,
+            grid: { top: 22, bottom: 26, left: 2, right: 2 },
+          });
+        }
+        if (main) {
+          TMADSCharts.performanceChart(main, slice, {
+            showCtr: true,
+            analyticsMode: true,
+            grid: { bottom: 76, right: 10, top: 36, left: 6 },
+          });
+        }
+        if (spend) {
+          TMADSCharts.spendChart(spend, slice, { compact: true, premium: true });
+        }
+        updatePeriodKpis(slice);
+        setRangeUi(days);
+      }
+
+      bindRangeControls(renderRange);
+      renderRange(defaultRange);
+      TMADSCharts.conversionFunnelChart(funnelEl, funnel, { premium: true });
+      setTimeout(resizeCampaignCharts, 80);
+    });
+    {% else %}
+    boot(function () {
+      TMADSCharts.conversionFunnelChart(document.getElementById('campaign-funnel'), funnel, { premium: true });
+    });
+    {% endif %}
+  })();
+  </script>
+  <script src="{% static 'js/targeting-board.js' %}"></script>
+</div>
+{% endblock %}

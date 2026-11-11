@@ -1,0 +1,30 @@
+{% load ton_display core_filters %}
+<section class="campaign-detail__budget-band budget-meter budget-meter--exec budget-meter--inline{% if budget.spent_percent >= 92 %} budget-meter--critical{% elif budget.spent_percent >= 75 %} budget-meter--high{% endif %}" aria-label="مصرف بودجه تبلیغ">
+  <div class="budget-meter__top budget-meter__top--inline">
+    <div class="budget-meter__lead">
+      <span class="budget-meter__title">مصرف بودجه</span>
+      {% if budget.spent_percent >= 90 %}<span class="budget-meter__chip">نزدیک اتمام</span>{% endif %}
+    </div>
+    <span class="budget-meter__pct tabnums" dir="ltr">{{ budget.spent_percent|floatformat:1|persian_digits }}٪</span>
+  </div>
+  <div class="budget-meter__track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ budget.spent_percent|floatformat:0 }}">
+    <span class="budget-meter__fill" style="width: {{ budget.spent_percent }}%"></span>
+  </div>
+  <dl class="budget-meter__stats budget-meter__stats--inline">
+    <div class="budget-meter__stat">
+      <dt>مصرف‌شده</dt>
+      <dd>{% ton_amount budget.spent_ton exchange_rate_id=order_exchange_rate_id %}</dd>
+    </div>
+    <div class="budget-meter__stat budget-meter__stat--remain">
+      <dt>باقی‌مانده</dt>
+      <dd>{% ton_amount budget.remaining_ton exchange_rate_id=order_exchange_rate_id %}</dd>
+    </div>
+    <div class="budget-meter__stat budget-meter__stat--total">
+      <dt>کل</dt>
+      <dd>{% ton_amount budget.total_ton exchange_rate_id=order_exchange_rate_id %}</dd>
+    </div>
+  </dl>
+  {% if budget.daily_spent_budget is not None %}
+  <p class="budget-meter__daily muted">امروز {% ton_amount budget.daily_spent_budget exchange_rate_id=order_exchange_rate_id %}</p>
+  {% endif %}
+</section>

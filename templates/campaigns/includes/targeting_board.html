@@ -1,0 +1,57 @@
+{% comment %}Premium targeting display — chips with copy (single + all).{% endcomment %}
+<div class="targeting-board">
+  {% for row in targeting_rows %}
+  <article class="targeting-board__section">
+    <header class="targeting-board__head">
+      <div class="targeting-board__head-main">
+        <h3 class="targeting-board__label">{{ row.label }}</h3>
+        {% if row.kind == "chips" and row.count %}
+        <span class="targeting-board__count">{{ row.count }} مورد</span>
+        {% endif %}
+      </div>
+      {% if row.kind == "chips" %}
+      <div class="targeting-board__actions">
+        <span class="targeting-board__copy-feedback" data-targeting-copy-status aria-live="polite"></span>
+        <button type="button" class="targeting-board__copy-all" data-targeting-copy-all-btn>
+          <svg class="targeting-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+            <rect x="7" y="7" width="9" height="9" rx="1.5" stroke="currentColor" stroke-width="1.4"/>
+            <path d="M5 13V5a1 1 0 0 1 1-1h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+          </svg>
+          <span>کپی همه</span>
+        </button>
+      </div>
+      {% endif %}
+    </header>
+    {% if row.kind == "chips" %}
+    <textarea class="targeting-board__clipboard-src" hidden readonly aria-hidden="true">{{ row.copy_all }}</textarea>
+    <ul class="targeting-grid" role="list">
+      {% for item in row.items %}
+      <li class="targeting-grid__cell">
+        <button type="button" class="targeting-card" data-targeting-copy-one="{{ item.copy|escape }}" title="کپی {{ item.copy }}">
+          <span class="targeting-card__avatar" aria-hidden="true">{{ item.initial }}</span>
+          <span class="targeting-card__content">
+            <span class="targeting-card__title">{{ item.title }}</span>
+            {% if item.subtitle %}
+            <span class="targeting-card__handle tabnums" dir="ltr">{{ item.subtitle }}</span>
+            {% else %}
+            <span class="targeting-card__handle tabnums" dir="ltr">{{ item.copy }}</span>
+            {% endif %}
+          </span>
+          <span class="targeting-card__action" aria-hidden="true">
+            <svg class="targeting-icon" viewBox="0 0 20 20" fill="none">
+              <rect x="7" y="7" width="9" height="9" rx="1.5" stroke="currentColor" stroke-width="1.4"/>
+              <path d="M5 13V5a1 1 0 0 1 1-1h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+            </svg>
+            <span class="targeting-card__action-label">کپی</span>
+          </span>
+          <span class="targeting-card__status" data-targeting-chip-status aria-live="polite"></span>
+        </button>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="targeting-board__text" dir="auto">{{ row.value }}</p>
+    {% endif %}
+  </article>
+  {% endfor %}
+</div>

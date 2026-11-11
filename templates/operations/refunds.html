@@ -1,0 +1,56 @@
+{% extends "app_shell.html" %}
+{% load core_filters %}
+{% block page_title %}بازپرداخت‌ها{% endblock %}
+{% block container_class %}container-wide{% endblock %}
+{% block content %}
+<div class="app-stack">
+{% include "includes/dash_header.html" with eyebrow="عملیات" title="بازپرداخت" %}
+<section class="filter-exec-shell" aria-label="فیلتر بازپرداخت">
+  <form method="get" class="filter-exec">
+    <div class="filter-exec__grid filter-exec__grid--inline">
+      <div class="filter-exec__field">
+        <label class="filter-exec__label" for="ops-refund-status">وضعیت</label>
+        <select id="ops-refund-status" class="filter-exec__control" name="status" onchange="this.form.submit()">
+          <option value="">همه وضعیت‌ها</option>
+          <option value="open" {% if filter_status == 'open' %}selected{% endif %}>باز</option>
+          <option value="review" {% if filter_status == 'review' %}selected{% endif %}>بررسی</option>
+          <option value="paid" {% if filter_status == 'paid' %}selected{% endif %}>پرداخت‌شده</option>
+          <option value="rejected" {% if filter_status == 'rejected' %}selected{% endif %}>رد شده</option>
+        </select>
+      </div>
+    </div>
+  </form>
+</section>
+{% if refunds %}
+<article class="card table-card card--lift">
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead><tr><th>مشتری</th><th>مبلغ</th><th>وضعیت</th><th>دلیل</th><th>اقدام</th></tr></thead>
+      <tbody>
+      {% for r in refunds %}
+        <tr>
+          <td>{{ r.customer }}</td>
+          <td>{{ r.amount_irr|irr_to_toman|format_irr }} ت</td>
+          <td><span class="status status-info">{{ r.get_status_display }}</span></td>
+          <td style="max-width:220px">{{ r.reason|truncatechars:100 }}</td>
+          <td>
+            {% if r.status == 'open' or r.status == 'review' %}
+            <form method="post" class="filter-row" style="margin:0">{% csrf_token %}
+              <input type="hidden" name="refund_id" value="{{ r.id }}">
+              <button class="btn btn-primary btn-sm" name="action" value="approve" type="submit">تأیید</button>
+              <button class="btn btn-danger btn-sm" name="action" value="reject" type="submit">رد</button>
+              <input name="note" placeholder="دلیل رد" style="max-width:100px;font-size:.8rem">
+            </form>
+            {% else %}—{% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</article>
+{% else %}
+<div class="empty-state card--lift"><strong>درخواست باز نیست</strong></div>
+{% endif %}
+</div>
+{% endblock %}

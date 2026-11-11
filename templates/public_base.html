@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% block body_class %}is-public{% endblock %}
+{% block body %}
+<header class="site-header site-header--exec">
+  <div
+    class="container public-nav-shell"
+    x-data="{ open: false }"
+    @keydown.escape.window="open = false"
+    x-effect="document.documentElement.classList.toggle('public-nav-open', open)"
+  >
+    <nav class="nav-bar nav-bar--exec public-nav-bar" aria-label="ناوبری اصلی">
+      <a href="{% url 'public:home' %}" class="brand brand-lockup">
+        {% include "includes/brand_mark.html" %}
+        <span>{{ PRODUCT_NAME }}</span>
+      </a>
+      <div class="nav-links nav-links--desktop">
+        <a href="{% url 'public:features' %}">امکانات</a>
+        <a href="{% url 'public:how_it_works' %}">نحوه کار</a>
+        <a href="{% url 'public:pricing' %}">تعرفه</a>
+        <a href="{% url 'public:faq' %}">سوالات</a>
+        <a href="{% url 'public:about' %}">درباره</a>
+      </div>
+      <div class="nav-actions nav-actions--desktop">
+        {% if user.is_authenticated %}
+          <a class="btn btn-primary" href="{% url 'dashboard:home' %}">داشبورد</a>
+        {% else %}
+          <a class="btn btn-ghost" href="{% url 'accounts:login' %}">ورود</a>
+          <a class="btn btn-primary" href="{% url 'accounts:register' %}">شروع تبلیغات</a>
+        {% endif %}
+      </div>
+      <div class="public-nav-bar__tools mobile-only">
+        {% if user.is_authenticated %}
+          <a class="btn btn-ghost btn-sm public-nav-bar__dash" href="{% url 'dashboard:home' %}">پنل</a>
+        {% endif %}
+        <button
+          type="button"
+          class="topbar-menu public-menu-trigger"
+          @click="open = !open"
+          :aria-expanded="open"
+          aria-controls="public-nav-sheet"
+          aria-label="باز و بسته کردن منو"
+        >
+          <span class="topbar-menu__bars" :class="{ 'is-open': open }" aria-hidden="true"></span>
+        </button>
+      </div>
+    </nav>
+
+    <div
+      class="public-nav-backdrop mobile-only"
+      x-show="open"
+      x-transition.opacity
+      @click="open = false"
+      x-cloak
+      aria-hidden="true"
+    ></div>
+
+    <aside
+      id="public-nav-sheet"
+      class="public-nav-sheet mobile-only"
+      :class="{ 'is-open': open }"
+      role="dialog"
+      aria-modal="true"
+      aria-label="منوی سایت"
+      x-cloak
+    >
+      <header class="public-nav-sheet__head">
+        <div class="public-nav-sheet__brand">
+          {% include "includes/brand_mark.html" %}
+          <div>
+            <strong>{{ PRODUCT_NAME }}</strong>
+            <span class="muted">تبلیغات تلگرام</span>
+          </div>
+        </div>
+        <button type="button" class="public-nav-sheet__close" @click="open = false" aria-label="بستن منو">
+          <span aria-hidden="true"></span>
+        </button>
+      </header>
+
+      <nav class="public-nav-sheet__links" aria-label="صفحات">
+        <a href="{% url 'public:home' %}" class="public-nav-sheet__link" @click="open = false">
+          <span class="public-nav-sheet__label">صفحه اصلی</span>
+        </a>
+        <a href="{% url 'public:features' %}" class="public-nav-sheet__link" @click="open = false">
+          <span class="public-nav-sheet__label">امکانات</span>
+          <span class="public-nav-sheet__hint">ویزارد، کیف پول، گزارش</span>
+        </a>
+        <a href="{% url 'public:how_it_works' %}" class="public-nav-sheet__link" @click="open = false">
+          <span class="public-nav-sheet__label">نحوه کار</span>
+          <span class="public-nav-sheet__hint">از ایده تا انتشار</span>
+        </a>
+        <a href="{% url 'public:pricing' %}" class="public-nav-sheet__link" @click="open = false">
+          <span class="public-nav-sheet__label">تعرفه</span>
+          <span class="public-nav-sheet__hint">کارمزد شفاف</span>
+        </a>
+        <a href="{% url 'public:faq' %}" class="public-nav-sheet__link" @click="open = false">
+          <span class="public-nav-sheet__label">سوالات</span>
+        </a>
+        <a href="{% url 'public:about' %}" class="public-nav-sheet__link" @click="open = false">
+          <span class="public-nav-sheet__label">درباره</span>
+        </a>
+        <a href="{% url 'public:contact' %}" class="public-nav-sheet__link" @click="open = false">
+          <span class="public-nav-sheet__label">تماس</span>
+        </a>
+      </nav>
+
+      <footer class="public-nav-sheet__foot">
+        {% if user.is_authenticated %}
+          <a class="btn btn-primary" href="{% url 'dashboard:home' %}" @click="open = false">ورود به داشبورد</a>
+        {% else %}
+          <a class="btn btn-primary" href="{% url 'accounts:register' %}" @click="open = false">شروع تبلیغات</a>
+          <a class="btn btn-ghost" href="{% url 'accounts:login' %}" @click="open = false">ورود</a>
+        {% endif %}
+      </footer>
+    </aside>
+  </div>
+</header>
+<main class="site-main site-main--public">{% block content %}{% endblock %}</main>
+<footer class="site-footer site-footer--exec section-muted">
+  <div class="container footer-grid footer-grid--rich footer-grid--public">
+    <div class="footer-col">
+      <a href="{% url 'public:home' %}" class="brand brand-lockup">{% include "includes/brand_mark.html" %}<span>{{ PRODUCT_NAME }}</span></a>
+      <p class="footer-tagline muted">تبلیغات تلگرام با کیف پول ریالی، ویزارد حرفه‌ای و گزارش یکپارچه.</p>
+    </div>
+    <div class="footer-col">
+      <h3>محصول</h3>
+      <a href="{% url 'public:features' %}">امکانات</a>
+      <a href="{% url 'public:how_it_works' %}">نحوه کار</a>
+      <a href="{% url 'public:pricing' %}">تعرفه</a>
+      <a href="{% url 'public:faq' %}">سوالات</a>
+    </div>
+    <div class="footer-col">
+      <h3>حقوقی و تماس</h3>
+      <a href="{% url 'public:terms' %}">شرایط</a>
+      <a href="{% url 'public:privacy' %}">حریم خصوصی</a>
+      <a href="{% url 'public:refund' %}">بازپرداخت</a>
+      <a href="{% url 'public:contact' %}">تماس</a>
+    </div>
+  </div>
+  <p class="container footer-legal muted">© {{ PRODUCT_NAME }} — محیط: {{ APP_ENV }}</p>
+</footer>
+{% endblock %}

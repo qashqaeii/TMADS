@@ -1,0 +1,29 @@
+﻿{% extends "app_shell.html" %}
+{% load core_filters %}
+{% block page_title %}کیف پول{% endblock %}
+{% block container_class %}container-wide{% endblock %}
+{% block content %}
+<div class="app-stack">
+{% url 'finance:topup' as topup_url %}
+{% include "includes/dash_header.html" with eyebrow="مالی" title="کیف پول" action_url=topup_url action_label="شارژ" action_primary=1 %}
+<div class="kpi-exec-grid kpi-exec-grid--duo">
+  <article class="kpi-exec"><span class="kpi-exec__icon">{% include "includes/kpi_icon.html" with name="wallet" %}</span><div class="kpi-exec__body"><span class="kpi-exec__label">موجودی</span><span class="kpi-exec__value">{{ wallet.available_irr|irr_to_toman|format_irr }} تومان</span></div></article>
+  <article class="kpi-exec"><span class="kpi-exec__icon">{% include "includes/kpi_icon.html" with name="wallet" %}</span><div class="kpi-exec__body"><span class="kpi-exec__label">رزرو</span><span class="kpi-exec__value">{{ wallet.reserved_irr|irr_to_toman|format_irr }} تومان</span></div></article>
+</div>
+<article class="card table-card card--lift">
+  <header class="dash-panel__head" style="border-bottom:1px solid var(--border-default)">
+    <div class="dash-panel__title"><h2 class="section-title">تراکنش‌های اخیر</h2></div>
+    <a class="btn btn-ghost btn-sm" href="{% url 'finance:transactions' %}">همه</a>
+  </header>
+  <ul class="wallet-ledger">
+    {% for e in recent_entries %}
+    <li class="finance-line"><span>{{ e.get_entry_type_display }}</span><strong class="tabnums" dir="ltr">{{ e.amount_irr|irr_to_toman|format_irr }} ت</strong></li>
+    {% empty %}<li class="muted" style="padding:.75rem 0">تراکنشی نیست.</li>{% endfor %}
+  </ul>
+  <div class="wallet-ledger__actions">
+    <a href="{% url 'finance:invoices' %}">فاکتورها</a>
+    <a href="{% url 'finance:refunds' %}">بازپرداخت</a>
+  </div>
+</article>
+</div>
+{% endblock %}

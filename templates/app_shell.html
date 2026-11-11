@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% load core_filters %}
+{% block body_class %}is-app{% endblock %}
+{% block body %}
+<div class="app-layout" x-data="{ open: false }" @keydown.escape.window="open = false">
+  <div class="sidebar-backdrop mobile-only" x-show="open" x-transition.opacity @click="open = false" aria-hidden="true"></div>
+  <aside class="sidebar sidebar--premium" :class="{ 'is-open': open }" id="app-sidebar">
+    <header class="sidebar-head">
+      <a class="sidebar-brand brand-lockup" href="{% url 'dashboard:home' %}">
+        {% include "includes/brand_mark.html" %}
+        <span class="sidebar-brand-text">
+          <strong>{{ PRODUCT_NAME }}</strong>
+          <small>تبلیغات تلگرام</small>
+        </span>
+      </a>
+    </header>
+
+    <div class="sidebar-scroll">
+      <nav class="sidebar-nav" aria-label="منوی اصلی">
+        <p class="sidebar-group-label">اصلی</p>
+        <a href="{% url 'dashboard:home' %}" class="sidebar-link {% if request.path == '/app/' or request.path == '/app' %}active{% endif %}">
+          <span class="nav-icon">{% include "includes/nav_icon.html" with icon="dashboard" %}</span>
+          <span class="nav-label">داشبورد</span>
+        </a>
+        <a href="{% url 'campaigns:list' %}" class="sidebar-link {% if '/campaigns' in request.path and '/ops/' not in request.path %}active{% endif %}">
+          <span class="nav-icon">{% include "includes/nav_icon.html" with icon="campaigns" %}</span>
+          <span class="nav-label">کمپین‌ها</span>
+        </a>
+
+        <p class="sidebar-group-label">مالی و حساب</p>
+        <a href="{% url 'finance:wallet' %}" class="sidebar-link {% if '/finance/wallet' in request.path or '/finance/topup' in request.path or '/finance/transactions' in request.path %}active{% endif %}">
+          <span class="nav-icon">{% include "includes/nav_icon.html" with icon="wallet" %}</span>
+          <span class="nav-label">کیف پول</span>
+        </a>
+        <a href="{% url 'finance:invoices' %}" class="sidebar-link {% if '/finance/invoices' in request.path %}active{% endif %}">
+          <span class="nav-icon">{% include "includes/nav_icon.html" with icon="invoice" %}</span>
+          <span class="nav-label">فاکتورها</span>
+        </a>
+        <a href="{% url 'finance:refunds' %}" class="sidebar-link {% if '/finance/refunds' in request.path %}active{% endif %}">
+          <span class="nav-icon">{% include "includes/nav_icon.html" with icon="refund" %}</span>
+          <span class="nav-label">بازپرداخت</span>
+        </a>
+
+        <p class="sidebar-group-label">راهنما</p>
+        <a href="{% url 'policies:ad_policies' %}" class="sidebar-link {% if '/app/ad-policies' in request.path %}active{% endif %}">
+          <span class="nav-icon">{% include "includes/nav_icon.html" with icon="check" %}</span>
+          <span class="nav-label">قوانین تبلیغ</span>
+        </a>
+        <a href="{% url 'support:list' %}" class="sidebar-link {% if '/support' in request.path %}active{% endif %}">
+          <span class="nav-icon">{% include "includes/nav_icon.html" with icon="support" %}</span>
+          <span class="nav-label">پشتیبانی</span>
+        </a>
+        <a href="{% url 'accounts:profile' %}" class="sidebar-link {% if '/accounts/profile' in request.path %}active{% endif %}">
+          <span class="nav-icon">{% include "includes/nav_icon.html" with icon="profile" %}</span>
+          <span class="nav-label">پروفایل</span>
+        </a>
+
+        {% if user.is_platform_manager %}
+        <p class="sidebar-group-label sidebar-group-label--admin">مدیریت پلتفرم</p>
+        <div class="sidebar-admin-block">
+          <a href="{% url 'operations:overview' %}" class="sidebar-link {% if request.path == '/ops/' or request.path == '/ops' %}active{% endif %}">
+            <span class="nav-icon">{% include "includes/nav_icon.html" with icon="ops" %}</span>
+            <span class="nav-label">نمای کلی</span>
+          </a>
+          <a href="{% url 'operations:campaigns' %}" class="sidebar-link {% if '/ops/campaigns' in request.path %}active{% endif %}">
+            <span class="nav-icon">{% include "includes/nav_icon.html" with icon="check" %}</span>
+            <span class="nav-label">بررسی کمپین</span>
+          </a>
+          <a href="{% url 'operations:refunds' %}" class="sidebar-link {% if '/ops/refunds' in request.path %}active{% endif %}">
+            <span class="nav-icon">{% include "includes/nav_icon.html" with icon="refund" %}</span>
+            <span class="nav-label">بازپرداخت‌ها</span>
+          </a>
+          <a href="{% url 'operations:exchange_rates' %}" class="sidebar-link {% if '/ops/exchange-rates' in request.path %}active{% endif %}">
+            <span class="nav-icon">{% include "includes/nav_icon.html" with icon="rate" %}</span>
+            <span class="nav-label">نرخ گرام</span>
+          </a>
+          <a href="{% url 'operations:api_status' %}" class="sidebar-link {% if '/ops/api-status' in request.path %}active{% endif %}">
+            <span class="nav-icon">{% include "includes/nav_icon.html" with icon="api" %}</span>
+            <span class="nav-label">وضعیت API</span>
+          </a>
+          <a href="{% url 'operations:audit' %}" class="sidebar-link {% if '/ops/audit' in request.path %}active{% endif %}">
+            <span class="nav-icon">{% include "includes/nav_icon.html" with icon="audit" %}</span>
+            <span class="nav-label">ممیزی</span>
+          </a>
+        </div>
+        {% endif %}
+      </nav>
+    </div>
+
+    <footer class="sidebar-foot sidebar-foot--compact">
+      {% if wallet_hint %}
+      <div class="sidebar-foot__row">
+        <a class="sidebar-foot__balance" href="{% url 'finance:wallet' %}">
+          <span class="sidebar-foot__balance-label">کیف پول</span>
+          <span class="sidebar-foot__balance-value tabnums">{{ wallet_hint.available_toman|format_count }} ت</span>
+        </a>
+        <a class="sidebar-foot__topup" href="{% url 'finance:topup' %}" title="شارژ کیف پول" aria-label="شارژ کیف پول">+</a>
+      </div>
+      {% endif %}
+      <a class="sidebar-foot__user" href="{% url 'accounts:profile' %}">
+        <span class="sidebar-foot__avatar" aria-hidden="true">{{ user.get_username|slice:":1" }}</span>
+        <span class="sidebar-foot__user-meta">
+          <span class="sidebar-foot__name">{{ user.get_full_name|default:user.get_username }}</span>
+          <span class="sidebar-foot__role">{% if user.is_superuser %}مدیر{% else %}{{ user.get_role_display }}{% endif %}</span>
+        </span>
+      </a>
+    </footer>
+  </aside>
+
+  <div class="app-main">
+    <header class="topbar">
+      <button type="button" class="topbar-menu mobile-only" @click="open = !open" :aria-expanded="open" aria-controls="app-sidebar" aria-label="باز و بسته کردن منو">
+        <span class="topbar-menu__bars" aria-hidden="true"></span>
+      </button>
+      <div class="topbar-title">{% block page_title %}داشبورد{% endblock %}</div>
+      <div class="topbar-actions">
+        <a class="btn btn-ghost btn-sm" href="{% url 'dashboard:notifications' %}">اعلان‌ها{% if unread_notifications %}<span class="badge-count">{{ unread_notifications|format_count }}</span>{% endif %}</a>
+        <a class="btn btn-primary btn-sm topbar-cta" href="{% url 'campaigns:wizard_new' %}">کمپین جدید</a>
+        <a class="btn btn-ghost btn-sm" href="{% url 'accounts:logout' %}">خروج</a>
+      </div>
+    </header>
+    <main class="app-content {% block container_class %}container-wide{% endblock %}">
+      <div class="page-frame">
+        {% block content %}{% endblock %}
+      </div>
+    </main>
+  </div>
+</div>
+{% endblock %}

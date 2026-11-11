@@ -1,0 +1,78 @@
+{% extends "app_shell.html" %}
+{% load static %}
+{% block page_title %}{{ intro.title }}{% endblock %}
+{% block container_class %}container-wide{% endblock %}
+{% block content %}
+<div class="policy-center page-frame">
+  <header class="dash-header dash-header--luxe">
+    <div class="dash-header__main">
+      <span class="dash-header__kicker">راهنما</span>
+      <h1>{{ intro.title }}</h1>
+      <p class="muted" style="margin:.5rem 0 0;max-width:40rem">{{ intro.subtitle }}</p>
+    </div>
+  </header>
+
+  <section class="card card--lift card-pad policy-intro">
+    <ul class="policy-intro-list">
+      {% for point in intro.points %}
+      <li>{{ point }}</li>
+      {% endfor %}
+    </ul>
+    <p class="muted" style="font-size:.82rem;margin:.75rem 0 0">
+      خلاصه‌های فارسی در TMADS راهنمای عملی هستند؛
+      <a href="https://ads.telegram.org/guidelines" target="_blank" rel="noopener">دستورالعمل رسمی تلگرام</a>
+      و
+      <a href="https://ads.telegram.org/tos" target="_blank" rel="noopener">شرایط پلتفرم تبلیغات</a>
+      مرجع حقوقی‌اند.
+    </p>
+  </section>
+
+  <section class="policy-accordion" aria-label="قوانین به تفکیک موضوع">
+    {% for cat in categories %}
+    <details class="policy-accordion__item" {% if forloop.first %}open{% endif %}>
+      <summary class="policy-accordion__head">
+        <span>{{ cat.title }}</span>
+        <span class="muted" style="font-size:.8rem">{{ cat.summary }}</span>
+      </summary>
+      <div class="policy-accordion__body">
+        <div class="policy-example-grid">
+          <article>
+            <h3 class="section-title" style="font-size:.88rem;color:var(--success)">نمونهٔ مناسب</h3>
+            <p dir="auto" style="margin:0;font-size:.9rem">{{ cat.good }}</p>
+          </article>
+          <article>
+            <h3 class="section-title" style="font-size:.88rem;color:var(--danger)">نمونهٔ مشکل‌دار</h3>
+            <p dir="auto" style="margin:0;font-size:.9rem">{{ cat.bad }}</p>
+          </article>
+        </div>
+        <p class="muted" style="margin:.75rem 0 0;font-size:.85rem">{{ cat.why }}</p>
+      </div>
+    </details>
+    {% endfor %}
+  </section>
+
+  <section class="card card--lift card-pad" style="margin-top:1.25rem">
+    <h2 class="section-title">سوالات متداول</h2>
+    <dl class="policy-faq">
+      {% for item in faq %}
+      <div class="policy-faq__row">
+        <dt>{{ item.q }}</dt>
+        <dd class="muted">{{ item.a }}</dd>
+      </div>
+      {% endfor %}
+    </dl>
+  </section>
+
+  <section class="policy-sources card-muted card-pad" style="margin-top:1.25rem">
+    <h2 class="section-title" style="font-size:1rem">منابع رسمی</h2>
+    <div class="policy-sources__links">
+      <a href="https://ads.telegram.org/tos" target="_blank" rel="noopener">شرایط پلتفرم تبلیغات تلگرام</a>
+      <a href="https://ads.telegram.org/guidelines" target="_blank" rel="noopener">دستورالعمل تبلیغات</a>
+      <a href="https://ads.telegram.org/getting-started" target="_blank" rel="noopener">راهنمای شروع</a>
+      <a href="{% url 'public:terms' %}">شرایط TMADS</a>
+      <a href="{% url 'public:refund' %}">بازپرداخت TMADS</a>
+      <a href="{% url 'public:privacy' %}">حریم خصوصی TMADS</a>
+    </div>
+  </section>
+</div>
+{% endblock %}

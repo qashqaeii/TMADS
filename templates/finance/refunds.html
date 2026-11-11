@@ -1,0 +1,48 @@
+﻿{% extends "app_shell.html" %}
+{% load core_filters %}
+{% block page_title %}بازپرداخت{% endblock %}
+{% block container_class %}container-wide{% endblock %}
+{% block content %}
+<div class="app-stack">
+{% include "includes/dash_header.html" with eyebrow="مالی" title="بازپرداخت" %}
+<section class="card card--lift card-pad form-stack">
+  <h2 class="section-title">ثبت درخواست</h2>
+  <form method="post">{% csrf_token %}
+    <div class="field">
+      <label>سفارش</label>
+      <select name="order_id" required>
+        <option value="">انتخاب کنید</option>
+        {% for oid, label in order_choices %}
+        <option value="{{ oid }}">{{ label }}</option>
+        {% empty %}
+        <option value="" disabled>سفارش واجد شرایطی نیست</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="field"><label>دلیل</label><textarea name="reason" rows="3" required></textarea></div>
+    <button class="btn btn-primary" type="submit" {% if not order_choices %}disabled{% endif %}>ثبت درخواست</button>
+  </form>
+</section>
+<section class="card card--lift table-card">
+  <h2 class="section-title card-pad" style="padding-bottom:0">درخواست‌های من</h2>
+  {% if refunds %}
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead><tr><th>مبلغ</th><th>وضعیت</th><th>تاریخ</th></tr></thead>
+      <tbody>
+      {% for r in refunds %}
+      <tr>
+        <td class="tabnums">{{ r.amount_irr|irr_to_toman|format_irr }} تومان</td>
+        <td><span class="status status--compact status-info">{{ r.get_status_display }}</span></td>
+        <td>{{ r.created_at|jalali_datetime }}</td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="muted card-pad">درخواستی ثبت نشده است.</p>
+  {% endif %}
+</section>
+</div>
+{% endblock %}

@@ -1,0 +1,36 @@
+﻿{% extends "app_shell.html" %}
+{% load core_filters %}
+{% block page_title %}فاکتورها{% endblock %}
+{% block container_class %}container-wide{% endblock %}
+{% block content %}
+<div class="app-stack">
+{% url 'finance:wallet' as wallet_url %}
+{% include "includes/dash_header.html" with eyebrow="مالی" title="فاکتورها" action_url=wallet_url action_label="کیف پول" %}
+{% if invoices %}
+<article class="card table-card card--lift">
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead><tr><th>شماره</th><th>شرح</th><th>مبلغ</th><th>تاریخ</th></tr></thead>
+      <tbody>
+      {% for inv in invoices %}
+      <tr>
+        <td dir="ltr"><a href="{% url 'finance:invoice_detail' inv.id %}">{{ inv.invoice_number }}</a></td>
+        <td>{{ inv.description|default:"—" }}</td>
+        <td class="tabnums">{{ inv.amount_irr|irr_to_toman|format_irr }} تومان</td>
+        <td>{{ inv.created_at|jalali_datetime }}</td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</article>
+{% else %}
+<article class="card card--lift">
+  <div class="empty-state dash-panel__empty">
+    <strong>فاکتوری ثبت نشده</strong>
+    <p class="muted">پس از شارژ یا پرداخت کمپین، فاکتور اینجا نمایش داده می‌شود.</p>
+  </div>
+</article>
+{% endif %}
+</div>
+{% endblock %}

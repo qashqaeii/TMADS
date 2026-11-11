@@ -1,0 +1,19 @@
+<header class="dash-header dash-header--luxe{% if with_sub %} dash-header--with-sub{% endif %}{% if rich %} dash-header--rich{% endif %} {% if class %}{{ class }}{% endif %}">
+  <div class="dash-header__main">
+    <div class="dash-header__title-row">
+      {% if eyebrow %}<span class="dash-header__kicker">{{ eyebrow }}</span>{% endif %}
+      <h1>{{ title }}</h1>
+      {% if hint %}<span class="dash-header__hint">{{ hint }}</span>{% endif %}
+    </div>
+    {% if subtitle %}<p class="page-sub">{{ subtitle }}</p>{% endif %}
+    {% if meta %}<div class="dash-header__meta">{{ meta|safe }}</div>{% endif %}
+  </div>
+  {% if actions %}
+  <div class="dash-header__actions">{{ actions|safe }}</div>
+  {% elif secondary_action_url or action_url %}
+  <div class="dash-header__actions">
+    {% if secondary_action_url %}<a class="btn btn-ghost btn-sm" href="{{ secondary_action_url }}">{{ secondary_action_label|default:"بیشتر" }}</a>{% endif %}
+    {% if action_url %}<a class="btn {% if action_primary %}btn-primary{% else %}btn-ghost{% endif %} btn-sm" href="{{ action_url }}">{{ action_label|default:"ادامه" }}</a>{% endif %}
+  </div>
+  {% endif %}
+</header>

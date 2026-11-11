@@ -1,0 +1,16 @@
+<div class="exec-menu" x-data="{ open: false }" @keydown.escape.window="open = false">
+  <button type="button" class="btn btn-ghost btn-sm exec-menu__trigger" @click="open = !open" :aria-expanded="open" aria-haspopup="menu">
+    بیشتر
+  </button>
+  <div class="exec-menu__panel" x-show="open" x-transition.opacity @click.outside="open = false" x-cloak role="menu">
+    <a role="menuitem" class="exec-menu__item" href="{% url 'campaigns:wizard' campaign.id %}">ویرایش ویزارد</a>
+    <a role="menuitem" class="exec-menu__item" href="{% url 'campaigns:duplicate' campaign.id %}">تکثیر کمپین</a>
+    <a role="menuitem" class="exec-menu__item" href="{% url 'campaigns:export_csv' campaign.id %}">خروجی CSV</a>
+    {% if can_delete_draft %}
+    <form method="post" action="{% url 'campaigns:delete' campaign.id %}" class="exec-menu__item exec-menu__item--danger" onsubmit="return confirm('این پیش‌نویس برای همیشه حذف شود؟');">
+      {% csrf_token %}
+      <button type="submit">حذف پیش‌نویس</button>
+    </form>
+    {% endif %}
+  </div>
+</div>

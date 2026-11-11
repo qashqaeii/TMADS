@@ -1,0 +1,30 @@
+﻿{% extends "app_shell.html" %}
+{% load core_filters %}
+{% block page_title %}اعلان‌ها{% endblock %}
+{% block container_class %}container-wide{% endblock %}
+{% block content %}
+<div class="app-stack">
+{% include "includes/dash_header.html" with eyebrow="پیام" title="اعلان‌ها" %}
+<div class="dash-toolbar">
+  <form method="post">{% csrf_token %}<button class="btn btn-ghost btn-sm" type="submit">علامت همه خوانده</button></form>
+</div>
+<article class="card card--lift notification-panel">
+  <ul class="activity-feed">
+    {% for n in notifications %}
+    <li class="activity-feed__item notification-item {% if not n.is_read %}is-unread{% endif %}">
+      <span class="activity-feed__dot" aria-hidden="true"></span>
+      <div class="activity-feed__body">
+        <p class="activity-feed__line"><strong>{{ n.title }}</strong>{% if n.body %}<span class="activity-feed__sep">·</span><span>{{ n.body }}</span>{% endif %}</p>
+        <time class="activity-feed__time muted">{{ n.created_at|jalali_datetime }}</time>
+      </div>
+    </li>
+    {% empty %}
+    <li class="activity-feed__empty">
+      <strong>اعلانی نیست</strong>
+      <p class="muted" style="margin:.35rem 0 0;font-size:.85rem">وقتی کمپین یا پرداختی ثبت شود، اینجا نمایش داده می‌شود.</p>
+    </li>
+    {% endfor %}
+  </ul>
+</article>
+</div>
+{% endblock %}

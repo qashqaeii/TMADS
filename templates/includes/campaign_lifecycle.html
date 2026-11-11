@@ -1,0 +1,19 @@
+{% if variant == "rail" %}
+<ol class="lifecycle-rail" aria-label="مراحل کمپین">
+  {% for step in lifecycle_steps %}
+  <li class="lifecycle-rail__step lifecycle-rail__step--{{ step.state }}{% if step.is_terminal and step.state == 'current' %} is-terminal{% endif %}">
+    <span class="lifecycle-rail__node" aria-hidden="true"></span>
+    <span class="lifecycle-rail__label">{{ step.label }}</span>
+  </li>
+  {% endfor %}
+</ol>
+{% else %}
+<ol class="campaign-lifecycle{% if variant == 'track' %} campaign-lifecycle--track{% endif %}" aria-label="مراحل کمپین">
+  {% for step in lifecycle_steps %}
+  <li class="campaign-lifecycle__step campaign-lifecycle__step--{{ step.state }}{% if step.is_terminal and step.state == 'current' %} is-terminal{% endif %}">
+    <span class="campaign-lifecycle__dot" aria-hidden="true"></span>
+    <span class="campaign-lifecycle__label">{{ step.label }}</span>
+  </li>
+  {% endfor %}
+</ol>
+{% endif %}

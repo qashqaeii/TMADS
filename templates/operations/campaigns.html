@@ -1,0 +1,43 @@
+{% extends "app_shell.html" %}
+{% load core_filters %}
+{% block container_class %}container-wide{% endblock %}
+{% block page_title %}بررسی کمپین{% endblock %}
+{% block content %}
+<div class="app-stack">
+{% include "includes/dash_header.html" with eyebrow="عملیات" title="بررسی کمپین" %}
+<section class="filter-exec-shell" aria-label="فیلتر کمپین‌ها">
+  <form method="get" class="filter-exec">
+    <div class="filter-exec__grid filter-exec__grid--inline">
+      <div class="filter-exec__field">
+        <label class="filter-exec__label" for="ops-campaign-status">وضعیت صف</label>
+        <select id="ops-campaign-status" class="filter-exec__control" name="status" onchange="this.form.submit()">
+          <option value="all">همه</option>
+          <option value="pending_review" {% if filter_status == 'pending_review' %}selected{% endif %}>در انتظار بررسی</option>
+          <option value="ready_for_submission" {% if filter_status == 'ready_for_submission' %}selected{% endif %}>آماده ارسال</option>
+          <option value="rejected" {% if filter_status == 'rejected' %}selected{% endif %}>رد شده</option>
+        </select>
+      </div>
+    </div>
+  </form>
+</section>
+<article class="card table-card card--lift">
+  <div class="table-wrap">
+    <table class="data-table">
+      <thead><tr><th>کمپین</th><th>مشتری</th><th>وضعیت</th><th></th></tr></thead>
+      <tbody>
+      {% for c in campaigns %}
+        <tr>
+          <td><strong>{{ c.name|default:"—" }}</strong></td>
+          <td>{{ c.customer }}</td>
+          <td><span class="status {{ c.status|campaign_status_class }}">{{ c.get_status_display }}</span></td>
+          <td><a class="btn btn-ghost btn-sm" href="{% url 'operations:campaign_review' c.id %}">بررسی</a></td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="4"><div class="empty-state"><strong>موردی در صف نیست</strong></div></td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</article>
+</div>
+{% endblock %}

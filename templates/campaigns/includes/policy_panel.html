@@ -1,0 +1,31 @@
+{% load core_filters %}
+{% if policy_run %}
+<section class="policy-panel card card-pad card-muted" aria-live="polite">
+  <h3 class="section-title" style="font-size:.92rem;margin:0 0 .65rem">بررسی قوانین تبلیغ</h3>
+  {% with counts=policy_run.counts %}
+  <p class="muted" style="font-size:.8rem;margin:0 0 .65rem">
+    نسخهٔ قوانین: <span dir="ltr">{{ policy_run.policy_version_code }}</span>
+    · مسدود: {{ counts.blocked|default:0 }}
+    · بررسی: {{ counts.review_required|default:0 }}
+    · هشدار: {{ counts.warning|default:0 }}
+  </p>
+  {% endwith %}
+  <ul class="policy-findings">
+    {% for f in policy_run.findings %}
+    <li class="policy-findings__item policy-findings__item--{{ f.severity }}">
+      <span class="policy-findings__badge">{{ f.severity }}</span>
+      <span>{{ f.message_fa }}</span>
+      {% if f.suggestion_fa %}<small class="muted">{{ f.suggestion_fa }}</small>{% endif %}
+      {% if f.field_key and step %}<a href="#field-{{ f.field_key }}" class="policy-findings__jump">رفتن به فیلد</a>{% endif %}
+    </li>
+    {% empty %}
+    <li class="muted" style="font-size:.85rem">مورد مهمی یافت نشد.</li>
+    {% endfor %}
+  </ul>
+  <p style="margin:.65rem 0 0;font-size:.78rem;display:flex;flex-wrap:wrap;gap:.75rem;align-items:center">
+    <a href="{% url 'policies:ad_policies' %}">راهنمای کامل قوانین</a>
+    <button type="button" class="btn btn-ghost btn-sm" data-policy-refresh>بررسی مجدد قوانین</button>
+    <span class="muted" data-policy-refresh-status aria-live="polite"></span>
+  </p>
+</section>
+{% endif %}

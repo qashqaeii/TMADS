@@ -1,0 +1,37 @@
+﻿{% extends "app_shell.html" %}
+{% load core_filters %}
+{% block page_title %}{{ ticket.subject }}{% endblock %}
+{% block container_class %}container-wide{% endblock %}
+{% block content %}
+<div class="app-stack">
+{% url 'support:list' as list_url %}
+<header class="dash-header dash-header--luxe dash-header--rich">
+  <div class="dash-header__main">
+    <div class="dash-header__title-row">
+      <span class="dash-header__kicker">تیکت</span>
+      <h1>{{ ticket.subject }}</h1>
+    </div>
+    <div class="dash-header__meta">
+      <span class="status status--compact status-info">{{ ticket.get_status_display }}</span>
+    </div>
+  </div>
+  <a class="btn btn-ghost btn-sm" href="{{ list_url }}">بازگشت</a>
+</header>
+<section class="card card--lift card-pad">
+  <div class="chat-thread">
+    {% for m in ticket.messages.all %}
+    <article class="msg-bubble {% if m.author.is_staff_ops %}is-staff{% endif %}">
+      <p style="margin:0 0 .35rem">{{ m.body }}</p>
+      <small class="muted">{{ m.author.get_username }} — {{ m.created_at|jalali_datetime }}</small>
+    </article>
+    {% empty %}
+    <p class="muted">پیامی نیست.</p>
+    {% endfor %}
+  </div>
+  <form method="post" class="chat-compose">{% csrf_token %}
+    <div class="field" style="margin:0"><textarea name="body" rows="4" required placeholder="پیام شما…"></textarea></div>
+    <button class="btn btn-primary btn-sm" type="submit">ارسال</button>
+  </form>
+</section>
+</div>
+{% endblock %}

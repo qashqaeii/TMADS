@@ -1,0 +1,15 @@
+{% load core_filters %}
+<span class="ton-amount{% if not has_value %} ton-amount--empty{% endif %}{% if show_hint %} ton-amount--convertible{% endif %}"{% if show_hint %} tabindex="0"{% endif %}>
+  {% if has_value %}
+  {% if symbol %}<span class="ton-amount__sym" aria-hidden="true">{{ symbol }}</span>{% endif %}
+  <span class="ton-amount__val tabnums">{{ amount|format_ton }}</span>
+  {% if show_hint %}
+  <span class="ton-amount__tip" role="tooltip">
+    <span class="ton-amount__tip-toman tabnums">≈ {{ irr_total|irr_to_toman|format_irr }} تومان</span>
+    {% if rate_hint %}<span class="ton-amount__tip-meta muted">{{ rate_hint }}</span>{% endif %}
+  </span>
+  {% endif %}
+  {% else %}
+  <span class="ton-amount__val">—</span>
+  {% endif %}
+</span>

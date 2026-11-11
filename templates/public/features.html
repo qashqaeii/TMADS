@@ -1,0 +1,20 @@
+{% extends "public_base.html" %}
+{% block title %}امکانات — {{ PRODUCT_NAME }}{% endblock %}
+{% block content %}
+{% include "includes/public_hero.html" with title="امکانات" compact=1 %}
+<section class="section public-section container">
+  <div class="feature-grid">
+    <article class="feature-card"><span class="feature-card__icon">۱</span><h3>ویزارد کمپین</h3><p class="muted">هدف، مقصد، جایگاه، خلاقه، بودجه و پرداخت.</p></article>
+    <article class="feature-card"><span class="feature-card__icon">۲</span><h3>کیف پول ریالی</h3><p class="muted">شارژ، رزرو بودجه و پیش‌فاکتور شفاف.</p></article>
+    <article class="feature-card"><span class="feature-card__icon">۳</span><h3>گزارش زنده</h3><p class="muted">نمودار روزانه و KPI با همگام‌سازی API.</p></article>
+    <article class="feature-card"><span class="feature-card__icon">۴</span><h3>عملیات داخلی</h3><p class="muted">تأیید کمپین، نرخ ارز و ممیزی.</p></article>
+    <article class="feature-card"><span class="feature-card__icon">۵</span><h3>اعلان‌ها</h3><p class="muted">رویدادهای پرداخت و وضعیت کمپین.</p></article>
+    <article class="feature-card"><span class="feature-card__icon">۶</span><h3>پشتیبانی</h3><p class="muted">تیکت با پیگیری وضعیت.</p></article>
+  </div>
+  <div class="cta-band" style="margin-top:2rem">
+    <h2>آماده شروع هستید؟</h2>
+    <p>ثبت‌نام و ساخت اولین پیش‌نویس کمپین.</p>
+    <a class="btn btn-primary btn-lg" href="{% url 'accounts:register' %}">شروع رایگان</a>
+  </div>
+</section>
+{% endblock %}

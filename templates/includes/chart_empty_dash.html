@@ -1,0 +1,39 @@
+{% comment %}Empty state for dashboard trend chart{% endcomment %}
+<div class="dash-chart-empty" role="status">
+  <div class="dash-chart-empty__viz" aria-hidden="true">
+    <div class="dash-chart-empty__bars">
+      <span style="--h: 42%"></span>
+      <span style="--h: 68%"></span>
+      <span style="--h: 55%"></span>
+      <span style="--h: 82%"></span>
+      <span style="--h: 48%"></span>
+      <span style="--h: 70%"></span>
+      <span style="--h: 58%"></span>
+    </div>
+    <svg class="dash-chart-empty__line" viewBox="0 0 240 48" preserveAspectRatio="none">
+      <path d="M0 38 C40 28, 80 32, 120 22 S200 18, 240 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+  </div>
+  <div class="dash-chart-empty__content">
+    <strong>{{ title|default:"نمودار روند هنوز آماده نیست" }}</strong>
+    <p class="muted">{{ message|default:"برای نمایش نمودار روزانه، تبلیغ باید به تلگرام متصل شود و آمار همگام شود." }}</p>
+    <ul class="dash-chart-empty__steps muted">
+      {% if show_steps %}
+      <li>کمپین را منتشر یا از تلگرام وارد کنید</li>
+      <li>در صفحه کمپین‌ها، «بروزرسانی آمار» را بزنید</li>
+      <li>پس از چند روز فعالیت، نقاط روزانه اینجا ظاهر می‌شوند</li>
+      {% endif %}
+    </ul>
+    <div class="dash-chart-empty__actions">
+      {% if has_linked_ads %}
+      <form method="post" action="{% url 'campaigns:refresh_stats' %}">{% csrf_token %}
+        <button type="submit" class="btn btn-primary btn-sm">بروزرسانی آمار</button>
+      </form>
+      {% endif %}
+      <a class="btn btn-ghost btn-sm" href="{% url 'campaigns:list' %}">کمپین‌ها</a>
+      {% if not has_linked_ads %}
+      <a class="btn btn-primary btn-sm" href="{% url 'campaigns:wizard_new' %}">کمپین جدید</a>
+      {% endif %}
+    </div>
+  </div>
+</div>
