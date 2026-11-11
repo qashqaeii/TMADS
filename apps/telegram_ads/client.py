@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import dataclasses
 import logging
+from collections.abc import Callable
 from typing import Any
 
 from django.conf import settings
@@ -9,6 +10,34 @@ from django.conf import settings
 from .exceptions import TelegramAdsError, TelegramAdsNotConfigured, TelegramAdsWriteDisabled
 
 logger = logging.getLogger(__name__)
+
+
+def _humanize_api_error(exc: Exception) -> str:
+    try:
+        from telead.errors import TransportError
+
+        if isinstance(exc, TransportError):
+            return (
+                "اتصال به سرور تبلیغات تلگرام برقرار نشد. "
+                "اینترنت، پروکسی یا فیلترشکن را بررسی کنید و دوباره تلاش کنید."
+            )
+    except ImportError:
+        pass
+    text = str(exc)
+    connection_hints = (
+        "ConnectionRefusedError",
+        "ConnectionError",
+        "NewConnectionError",
+        "Max retries exceeded",
+        "Failed to establish",
+        "promoteapi.telegram.org",
+    )
+    if type(exc).__name__ in ("ConnectionError", "ConnectionRefusedError") or any(h in text for h in connection_hints):
+        return (
+            "اتصال به سرور تبلیغات تلگرام برقرار نشد. "
+            "اینترنت، پروکسی یا فیلترشکن را بررسی کنید و دوباره تلاش کنید."
+        )
+    return f"خطای API تبلیغات تلگرام: {exc}"
 
 
 def _model_to_dict(obj: Any) -> dict[str, Any]:
@@ -56,30 +85,44 @@ class TelegramAdsClient:
             raise TelegramAdsNotConfigured("telead package not installed") from exc
         return Client(self.token)
 
-    def get_account(self) -> dict[str, Any]:
+    def _run(self, operation: str, fn: Callable[..., Any]) -> Any:
         with self._client() as client:
-            account = client.get_current_account()
-            return _model_to_dict(account)
+            try:
+                return fn(client)
+            except (TelegramAdsNotConfigured, TelegramAdsWriteDisabled, TelegramAdsError):
+                raise
+            except Exception as exc:
+                logger.warning("Telegram Ads API %s failed: %s", operation, exc, exc_info=True)
+                raise TelegramAdsError(_humanize_api_error(exc)) from exc
+
+    def get_account(self) -> dict[str, Any]:
+        return self._run("get_account", lambda client: _model_to_dict(client.get_current_account()))
 
     def list_advertisements(self) -> list[dict[str, Any]]:
-        with self._client() as client:
+        def _list(client):
             ads_list = client.get_ads_list()
             items = getattr(ads_list, "ads", None) or getattr(ads_list, "items", None) or []
             return [_model_to_dict(ad) for ad in items]
 
+        return self._run("list_advertisements", _list)
+
     def get_account_info(self, *, account_id: str | None = None) -> dict[str, Any]:
-        with self._client() as client:
-            return _model_to_dict(client.get_account_info(account_id=account_id))
+        return self._run(
+            "get_account_info",
+            lambda client: _model_to_dict(client.get_account_info(account_id=account_id)),
+        )
 
     def get_ad(self, ad_id: str, *, return_target: bool = False) -> dict[str, Any]:
-        with self._client() as client:
-            ad = client.get_ad(int(ad_id), return_target=return_target)
-            return _model_to_dict(ad)
+        return self._run(
+            "get_ad",
+            lambda client: _model_to_dict(client.get_ad(int(ad_id), return_target=return_target)),
+        )
 
     def get_ads_by_ids(self, ad_ids: list[int], *, return_target: bool = False) -> list[dict[str, Any]]:
-        with self._client() as client:
-            ads = client.get_ads_by_id(ad_ids, return_target=return_target)
-            return [_model_to_dict(ad) for ad in ads]
+        return self._run(
+            "get_ads_by_ids",
+            lambda client: [_model_to_dict(ad) for ad in client.get_ads_by_id(ad_ids, return_target=return_target)],
+        )
 
     def get_ad_statistics(
         self,
@@ -89,7 +132,7 @@ class TelegramAdsClient:
         to_time,
         interval: int = 86400,
     ) -> dict[str, Any]:
-        with self._client() as client:
+        def _stats(client):
             stats = client.get_ad_stats(
                 ad_id=int(ad_id),
                 from_time=from_time,
@@ -100,54 +143,56 @@ class TelegramAdsClient:
                 return {"items": [_model_to_dict(s) for s in stats]}
             return _model_to_dict(stats)
 
+        return self._run("get_ad_statistics", _stats)
+
     def get_ad_transactions(self, ad_id: str, *, limit: int = 20) -> dict[str, Any]:
-        with self._client() as client:
-            tx = client.get_ad_transactions_list(int(ad_id), limit=limit)
-            return _model_to_dict(tx)
+        return self._run(
+            "get_ad_transactions",
+            lambda client: _model_to_dict(client.get_ad_transactions_list(int(ad_id), limit=limit)),
+        )
 
     def get_target_languages(self) -> list[dict[str, Any]]:
-        with self._client() as client:
-            return [_model_to_dict(x) for x in client.get_target_languages_list()]
+        return self._run("get_target_languages", lambda client: [_model_to_dict(x) for x in client.get_target_languages_list()])
 
     def get_target_topics(self) -> list[dict[str, Any]]:
-        with self._client() as client:
-            return [_model_to_dict(x) for x in client.get_target_topics_list()]
+        return self._run("get_target_topics", lambda client: [_model_to_dict(x) for x in client.get_target_topics_list()])
 
     def get_target_countries(self) -> list[dict[str, Any]]:
-        with self._client() as client:
-            return [_model_to_dict(x) for x in client.get_target_countries_list()]
+        return self._run("get_target_countries", lambda client: [_model_to_dict(x) for x in client.get_target_countries_list()])
 
     def resolve_target_bot(self, bot: str) -> dict[str, Any]:
-        with self._client() as client:
-            return _model_to_dict(client.get_target_bot(bot))
+        return self._run("resolve_target_bot", lambda client: _model_to_dict(client.get_target_bot(bot)))
 
     def create_advertisement(self, payload: dict[str, Any]) -> dict[str, Any]:
         if not settings.TELEGRAM_ADS_WRITE_ENABLED:
             raise TelegramAdsWriteDisabled("Write operations are disabled")
         if not settings.TELEGRAM_ADS_PAID_SUBMISSION_ENABLED:
             raise TelegramAdsWriteDisabled("Paid submission is disabled")
-        with self._client() as client:
-            ad = client.create_ad(**payload)
-            return _model_to_dict(ad)
+        return self._run("create_advertisement", lambda client: _model_to_dict(client.create_ad(**payload)))
 
     def edit_advertisement(self, ad_id: str, payload: dict[str, Any]) -> dict[str, Any]:
         if not settings.TELEGRAM_ADS_WRITE_ENABLED:
             raise TelegramAdsWriteDisabled("Write operations are disabled")
-        with self._client() as client:
-            ad = client.edit_ad(ad_id=int(ad_id), **payload)
-            return _model_to_dict(ad)
+        return self._run(
+            "edit_advertisement",
+            lambda client: _model_to_dict(client.edit_ad(ad_id=int(ad_id), **payload)),
+        )
 
     def submit_ad_for_review(self, ad_id: str) -> dict[str, Any]:
         if not settings.TELEGRAM_ADS_WRITE_ENABLED:
             raise TelegramAdsWriteDisabled("Write operations are disabled")
-        with self._client() as client:
-            ad = client.submit_ad_for_review(ad_id=int(ad_id))
-            return _model_to_dict(ad)
+        return self._run(
+            "submit_ad_for_review",
+            lambda client: _model_to_dict(client.submit_ad_for_review(ad_id=int(ad_id))),
+        )
 
     def resolve_target_channel(self, channel: str) -> dict[str, Any]:
-        with self._client() as client:
-            return _model_to_dict(client.get_target_channel(channel))
+        return self._run("resolve_target_channel", lambda client: _model_to_dict(client.get_target_channel(channel)))
 
     def get_target_locations(self, country_code: str, query: str, *, limit: int = 20) -> dict[str, Any]:
-        with self._client() as client:
-            return _model_to_dict(client.get_target_locations_list(country_code=country_code, query=query, limit=limit))
+        return self._run(
+            "get_target_locations",
+            lambda client: _model_to_dict(
+                client.get_target_locations_list(country_code=country_code, query=query, limit=limit)
+            ),
+        )

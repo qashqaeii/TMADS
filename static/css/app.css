@@ -1058,7 +1058,9 @@ h1, h2, h3 { letter-spacing: -.02em; }
   }
 }
 
-.nav-svg { width: 1.05rem; height: 1.05rem; display: block; }
+.nav-svg,
+.lucide-svg--nav,
+svg.df-lucide-svg.lucide-svg--nav { width: 1.05rem; height: 1.05rem; display: block; }
 .sidebar-link .nav-icon {
   width: 2rem;
   height: 2rem;

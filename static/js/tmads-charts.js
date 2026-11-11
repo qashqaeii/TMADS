@@ -15,6 +15,11 @@
 
   const FA_FONT = "Vazirmatn, Tahoma, sans-serif";
 
+  const TOOLTIP_PREMIUM_CSS =
+    "backdrop-filter:blur(14px) saturate(1.15);-webkit-backdrop-filter:blur(14px) saturate(1.15);" +
+    "box-shadow:0 18px 48px rgba(16,29,48,0.11),0 1px 0 rgba(255,255,255,0.72) inset;" +
+    "border-radius:12px;border:1px solid rgba(16,29,48,0.08);padding:10px 14px;";
+
   function baseGrid(extra) {
     return Object.assign(
       { left: 52, right: 28, top: 36, bottom: 48, containLabel: true },
@@ -148,10 +153,10 @@
       {
         trigger: "axis",
         padding: [10, 14],
-        backgroundColor: "rgba(255,255,255,0.97)",
+        backgroundColor: "rgba(255,255,255,0.94)",
         borderColor: COLORS.grid,
         borderWidth: 1,
-        extraCssText: "box-shadow: 0 12px 32px rgba(16,31,51,0.12); border-radius: 12px;",
+        extraCssText: TOOLTIP_PREMIUM_CSS,
         textStyle: { color: COLORS.heading, fontFamily: FA_FONT, fontSize: 12 },
         axisPointer: {
           type: "shadow",
@@ -248,6 +253,7 @@
     const opts = options || {};
     const lbl = labels(data);
     const portfolio = Boolean(opts.portfolio);
+    const dashboardHome = Boolean(opts.dashboardHome);
     const analyticsMode = Boolean(opts.analyticsMode);
     const overviewMini = Boolean(opts.overviewMini);
     const compact = Boolean(opts.compact);
@@ -382,6 +388,11 @@
     if (overviewMini) {
       gridDefaults.top = 26;
       gridDefaults.bottom = 30;
+    } else if (dashboardHome) {
+      gridDefaults.top = 20;
+      gridDefaults.bottom = 22;
+      gridDefaults.left = 2;
+      gridDefaults.right = 2;
     } else if (analyticsMode) {
       gridDefaults.top = 40;
     }
@@ -409,18 +420,30 @@
           return html;
         },
       }),
-      legend: {
-        type: overviewMini || analyticsMode ? "plain" : "scroll",
-        data: legendItems,
-        top: analyticsMode ? 0 : overviewMini ? 0 : undefined,
-        bottom: analyticsMode || overviewMini ? undefined : 2,
-        left: analyticsMode || overviewMini ? "center" : undefined,
-        itemGap: overviewMini ? 12 : analyticsMode ? 14 : 18,
-        itemWidth: 18,
-        itemHeight: 10,
-        textStyle: { color: COLORS.muted, fontFamily: FA_FONT, fontSize: overviewMini ? 10 : 11 },
-        icon: "roundRect",
-      },
+      legend: dashboardHome
+        ? {
+            type: "plain",
+            data: legendItems,
+            top: 2,
+            left: "center",
+            itemGap: 18,
+            itemWidth: 16,
+            itemHeight: 8,
+            textStyle: { color: COLORS.muted, fontFamily: FA_FONT, fontSize: 11 },
+            icon: "roundRect",
+          }
+        : {
+            type: overviewMini || analyticsMode ? "plain" : "scroll",
+            data: legendItems,
+            top: analyticsMode ? 0 : overviewMini ? 0 : undefined,
+            bottom: analyticsMode || overviewMini ? undefined : 2,
+            left: analyticsMode || overviewMini ? "center" : undefined,
+            itemGap: overviewMini ? 12 : analyticsMode ? 14 : 18,
+            itemWidth: 18,
+            itemHeight: 10,
+            textStyle: { color: COLORS.muted, fontFamily: FA_FONT, fontSize: overviewMini ? 10 : 11 },
+            icon: "roundRect",
+          },
       xAxis: axisCategory(lbl, opts),
       yAxis,
       series,
@@ -466,11 +489,14 @@
     const opts = options || {};
     const compact = Boolean(opts.compact);
     const premium = Boolean(opts.premium);
+    const luxeSpend =
+      (el && el.classList && el.classList.contains("chart-box--spend-luxe")) ||
+      (el && el.closest && el.closest(".campaign-analytics-spend"));
     const many = data.dates.length > 20;
     const spentSeries = (data.spent || []).map((v) => Number(v) || 0);
     const peakSpent = Math.max(...spentSeries, 0.0001);
     chart.setOption({
-      color: [COLORS.spent],
+      color: [luxeSpend ? "#B8944A" : COLORS.spent],
       grid: baseGrid({
         bottom: compact ? (premium ? 26 : 28) : 40,
         left: premium ? 4 : compact ? 6 : 10,
@@ -502,13 +528,23 @@
           name: "مصرف روزانه",
           type: "bar",
           data: data.spent || [],
-          barMaxWidth: compact ? (premium ? 12 : 14) : 22,
+          barMaxWidth: compact ? (luxeSpend ? 14 : premium ? 12 : 14) : 22,
           itemStyle: {
-            borderRadius: premium ? [5, 5, 0, 0] : [4, 4, 1, 1],
-            color: premium ? barFill("#B8C5CF", "#94A5B3") : barFill("#A8B8C6", "#8A9DAB"),
+            borderRadius: luxeSpend ? [6, 6, 0, 0] : premium ? [5, 5, 0, 0] : [4, 4, 1, 1],
+            color: luxeSpend
+              ? barFill("#D4B978", "#A8863E")
+              : premium
+                ? barFill("#B8C5CF", "#94A5B3")
+                : barFill("#A8B8C6", "#8A9DAB"),
           },
           emphasis: {
-            itemStyle: { color: premium ? barFill("#CDD6DE", "#7A8C9B") : barFill("#BCC9D4", "#6D7F8E") },
+            itemStyle: {
+              color: luxeSpend
+                ? barFill("#E2C992", "#92702F")
+                : premium
+                  ? barFill("#CDD6DE", "#7A8C9B")
+                  : barFill("#BCC9D4", "#6D7F8E"),
+            },
           },
         },
       ],
@@ -534,7 +570,8 @@
     return maxHalf * Math.max(minRatio, Math.min(1, ratio));
   }
 
-  function renderDomFunnel(el, funnel) {
+  function renderDomFunnel(el, funnel, options) {
+    const opts = options || {};
     const existing = el && global.echarts ? echarts.getInstanceByDom(el) : null;
     if (existing) {
       existing.dispose();
@@ -543,8 +580,13 @@
     const imp = Number(funnel.impressions) || 0;
     const clk = Number(funnel.clicks) || 0;
     const act = Number(funnel.actions) || 0;
+    const textless =
+      Boolean(opts.textless) ||
+      (el && el.classList && el.classList.contains("campaign-analytics-funnel__host--textless"));
     if (!imp && !clk && !act) {
-      el.innerHTML = '<p class="muted chart-empty analytics-chart-empty">هنوز داده‌ای برای قیف تبدیل نیست.</p>';
+      el.innerHTML = textless
+        ? ""
+        : '<p class="muted chart-empty analytics-chart-empty">هنوز داده‌ای برای قیف تبدیل نیست.</p>';
       return null;
     }
     const cx = 140;
@@ -583,11 +625,13 @@
       `<path d="${pClk}" fill="url(#tmads-fg-clk)"/>` +
       `<path d="${pAct}" fill="url(#tmads-fg-act)"/>` +
       `</g>` +
-      `<g class="funnel-svg__texts">` +
-      txt("نمایش", imp, 26, 46) +
-      txt("کلیک", clk, 82, 102) +
-      txt("ورود", act, 138, 158) +
-      `</g>` +
+      (textless
+        ? ""
+        : `<g class="funnel-svg__texts">` +
+          txt("نمایش", imp, 26, 46) +
+          txt("کلیک", clk, 82, 102) +
+          txt("ورود", act, 138, 158) +
+          `</g>`) +
       `</svg></div>`;
     el.classList.add("funnel-viz-host--ready");
     return { el };
@@ -598,12 +642,17 @@
     const imp = Number(funnel.impressions) || 0;
     const clk = Number(funnel.clicks) || 0;
     const act = Number(funnel.actions) || 0;
+    const textless =
+      Boolean(opts.textless) ||
+      (el && el.classList && el.classList.contains("campaign-analytics-funnel__host--textless"));
     if (!imp && !clk && !act) {
-      el.innerHTML = '<p class="muted chart-empty analytics-chart-empty">هنوز داده‌ای برای قیف تبدیل نیست.</p>';
+      el.innerHTML = textless
+        ? ""
+        : '<p class="muted chart-empty analytics-chart-empty">هنوز داده‌ای برای قیف تبدیل نیست.</p>';
       return null;
     }
     if (opts.premium !== false) {
-      return renderDomFunnel(el, funnel);
+      return renderDomFunnel(el, funnel, opts);
     }
 
     const chart = init(el);
@@ -620,7 +669,11 @@
       animationEasing: "cubicOut",
       tooltip: {
         trigger: "item",
-        textStyle: { fontFamily: FA_FONT },
+        textStyle: { fontFamily: FA_FONT, color: COLORS.heading, fontSize: 12 },
+        backgroundColor: "rgba(255,255,255,0.94)",
+        borderColor: COLORS.grid,
+        borderWidth: 1,
+        extraCssText: TOOLTIP_PREMIUM_CSS,
         formatter(p) {
           return `${p.name}<br/><strong>${formatCountFull(p.value)}</strong><br/><span style="color:${COLORS.muted}">${shareOfImpressions(p.value)} از نمایش</span>`;
         },
@@ -683,7 +736,11 @@
       animationDuration: 600,
       tooltip: {
         trigger: "item",
-        textStyle: { fontFamily: FA_FONT },
+        textStyle: { fontFamily: FA_FONT, color: COLORS.heading, fontSize: 12 },
+        backgroundColor: "rgba(255,255,255,0.94)",
+        borderColor: COLORS.grid,
+        borderWidth: 1,
+        extraCssText: TOOLTIP_PREMIUM_CSS,
         formatter(p) {
           return `${p.name}<br/><strong>${formatCountFull(p.value)}</strong>`;
         },
@@ -721,11 +778,16 @@
     return chart;
   }
 
-  function portfolioChart(el, data) {
+  function portfolioChart(el, data, options) {
+    const extra = options || {};
+    const dashboardHome = Boolean(extra.dashboardHome);
     return performanceChart(el, data, {
       compact: true,
       portfolio: true,
-      grid: { bottom: 48, top: 32, left: 8, right: 8 },
+      dashboardHome,
+      grid: dashboardHome
+        ? { bottom: 26, top: 24, left: 0, right: 0 }
+        : { bottom: 48, top: 32, left: 8, right: 8 },
     });
   }
 

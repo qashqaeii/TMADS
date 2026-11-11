@@ -13,10 +13,7 @@
       <div class="targeting-board__actions">
         <span class="targeting-board__copy-feedback" data-targeting-copy-status aria-live="polite"></span>
         <button type="button" class="targeting-board__copy-all" data-targeting-copy-all-btn>
-          <svg class="targeting-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-            <rect x="7" y="7" width="9" height="9" rx="1.5" stroke="currentColor" stroke-width="1.4"/>
-            <path d="M5 13V5a1 1 0 0 1 1-1h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
-          </svg>
+          {% include "includes/lucide_icon.html" with name="copy" size="sm" %}
           <span>کپی همه</span>
         </button>
       </div>
@@ -38,10 +35,7 @@
             {% endif %}
           </span>
           <span class="targeting-card__action" aria-hidden="true">
-            <svg class="targeting-icon" viewBox="0 0 20 20" fill="none">
-              <rect x="7" y="7" width="9" height="9" rx="1.5" stroke="currentColor" stroke-width="1.4"/>
-              <path d="M5 13V5a1 1 0 0 1 1-1h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
-            </svg>
+            {% include "includes/lucide_icon.html" with name="copy" size="sm" %}
             <span class="targeting-card__action-label">کپی</span>
           </span>
           <span class="targeting-card__status" data-targeting-chip-status aria-live="polite"></span>

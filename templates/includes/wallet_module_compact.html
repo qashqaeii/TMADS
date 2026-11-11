@@ -1,11 +1,12 @@
 {% load core_filters %}
-<aside class="wallet-module wallet-module--compact" aria-label="کیف پول">
+<aside class="wallet-module wallet-module--dash-rail" aria-label="کیف پول">
   <header class="wallet-module__head">
-    <h2 class="wallet-module__title">کیف پول</h2>
+    <h2 class="wallet-module__title">
+      {% include "includes/lucide_icon.html" with name="wallet" size="sm" %}
+      <span>کیف پول</span>
+    </h2>
     {% with total=wallet.available_irr|add:wallet.reserved_irr %}
-    {% if not total %}
-    <span class="wallet-module__badge">خالی</span>
-    {% endif %}
+    {% if not total %}<span class="wallet-module__badge">خالی</span>{% endif %}
     {% endwith %}
   </header>
   {% with total=wallet.available_irr|add:wallet.reserved_irr %}
@@ -18,21 +19,25 @@
   {% endwith %}
   <dl class="wallet-module__rows">
     <div class="wallet-module__row">
-      <dt>موجودی قابل استفاده</dt>
+      <dt>موجودی</dt>
       <dd class="tabnums">{{ wallet.available_irr|irr_to_toman|format_irr }} <span class="wallet-module__unit">تومان</span></dd>
     </div>
     <div class="wallet-module__row">
-      <dt>رزرو کمپین</dt>
+      <dt>رزرو</dt>
       <dd class="tabnums">{{ wallet.reserved_irr|irr_to_toman|format_irr }} <span class="wallet-module__unit">تومان</span></dd>
     </div>
   </dl>
   {% with total=wallet.available_irr|add:wallet.reserved_irr %}
   {% if not total %}
-  <p class="wallet-module__zero muted">برای شروع تبلیغ، کیف پول را شارژ کنید.</p>
+  <p class="wallet-module__zero">برای شروع تبلیغ، کیف پول را شارژ کنید.</p>
   {% endif %}
   {% endwith %}
   <div class="wallet-module__actions">
     <a class="btn btn-primary btn-sm" href="{% url 'finance:topup' %}">شارژ</a>
     <a class="btn btn-ghost btn-sm" href="{% url 'finance:wallet' %}">جزئیات</a>
   </div>
+  <nav class="wallet-module__links" aria-label="پیوندهای مالی">
+    <a href="{% url 'finance:transactions' %}">تراکنش‌ها</a>
+    <a href="{% url 'finance:invoices' %}">فاکتورها</a>
+  </nav>
 </aside>

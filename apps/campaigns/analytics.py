@@ -368,8 +368,8 @@ def targeting_display_rows(targeting) -> list[dict[str, Any]]:
     return rows
 
 
-_LIFECYCLE: list[tuple[str, str, set[str]]] = [
-    ("پیش‌نویس", "draft", {Campaign.Status.DRAFT}),
+_LIFECYCLE: list[tuple[str, str, set[str], str]] = [
+    ("پیش‌نویس", "draft", {Campaign.Status.DRAFT}, "file-pen-line"),
     (
         "پرداخت",
         "pay",
@@ -378,6 +378,7 @@ _LIFECYCLE: list[tuple[str, str, set[str]]] = [
             Campaign.Status.PAYMENT_PENDING,
             Campaign.Status.PAID,
         },
+        "wallet",
     ),
     (
         "بررسی",
@@ -388,11 +389,13 @@ _LIFECYCLE: list[tuple[str, str, set[str]]] = [
             Campaign.Status.SUBMITTING,
             Campaign.Status.AWAITING_TELEGRAM,
         },
+        "clipboard-check",
     ),
     (
         "انتشار",
         "live",
         {Campaign.Status.ACTIVE, Campaign.Status.PAUSED},
+        "radio",
     ),
     (
         "پایان",
@@ -404,6 +407,7 @@ _LIFECYCLE: list[tuple[str, str, set[str]]] = [
             Campaign.Status.FAILED,
             Campaign.Status.RECONCILIATION,
         },
+        "flag",
     ),
 ]
 
@@ -411,16 +415,25 @@ _LIFECYCLE: list[tuple[str, str, set[str]]] = [
 def campaign_lifecycle(campaign: Campaign) -> list[dict[str, Any]]:
     status = campaign.status
     matched_idx = 0
-    for idx, (_label, _key, statuses) in enumerate(_LIFECYCLE):
+    for idx, (_label, _key, statuses, _icon) in enumerate(_LIFECYCLE):
         if status in statuses:
             matched_idx = idx
             break
     steps = []
-    for idx, (label, key, statuses) in enumerate(_LIFECYCLE):
+    for idx, (label, key, statuses, icon) in enumerate(_LIFECYCLE):
         state = "upcoming"
         if idx < matched_idx:
             state = "done"
         elif idx == matched_idx:
             state = "current"
-        steps.append({"label": label, "key": key, "state": state, "is_terminal": key == "done"})
+        steps.append(
+            {
+                "label": label,
+                "key": key,
+                "icon": icon,
+                "index": idx,
+                "state": state,
+                "is_terminal": key == "done",
+            }
+        )
     return steps

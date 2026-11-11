@@ -1,29 +1,43 @@
 {% load core_filters ton_display %}
-<section class="metric-strip metric-strip--portfolio" aria-label="خلاصه پورتفولیو">
-  <div class="metric-strip__metrics metric-strip__metrics--tight" role="list">
-    <div class="metric-strip__item" role="listitem">
-      <span class="metric-strip__value tabnums">{{ kpis.active_count|format_count }}</span>
-      <span class="metric-strip__label">فعال</span>
-    </div>
-    <span class="metric-strip__sep" aria-hidden="true"></span>
-    <div class="metric-strip__item metric-strip__item--hero" role="listitem">
-      <span class="metric-strip__value tabnums">{{ kpis.total_impressions|format_count }}</span>
-      <span class="metric-strip__label">نمایش</span>
-    </div>
-    <span class="metric-strip__sep" aria-hidden="true"></span>
-    <div class="metric-strip__item" role="listitem">
-      <span class="metric-strip__value tabnums">{{ kpis.total_clicks|format_count }}</span>
-      <span class="metric-strip__label">کلیک</span>
-    </div>
-    <span class="metric-strip__sep" aria-hidden="true"></span>
-    <div class="metric-strip__item metric-strip__item--accent" role="listitem">
-      <span class="metric-strip__value tabnums">{{ kpis.weighted_ctr|persian_digits }}٪</span>
-      <span class="metric-strip__label">CTR وزنی</span>
-    </div>
-    <span class="metric-strip__sep metric-strip__sep--hide-md" aria-hidden="true"></span>
-    <div class="metric-strip__item metric-strip__item--finance" role="listitem">
-      <span class="metric-strip__value">{% ton_amount kpis.total_spent_ton %}</span>
-      <span class="metric-strip__label">هزینه</span>
-    </div>
+<section class="campaign-kpi-board campaign-kpi-board--luxe campaign-kpi-ribbon metric-strip metric-strip--portfolio motion-reveal" aria-label="خلاصه پورتفولیو">
+  <header class="campaign-kpi-ribbon__head">
+    <h2 class="campaign-kpi-ribbon__title">خلاصه پورتفولیو</h2>
+  </header>
+  <div class="campaign-kpi-ribbon__track" role="list">
+    <article class="campaign-kpi-ribbon__cell" role="listitem" style="--kpi-accent: #1f9b78;">
+      <p class="campaign-kpi-ribbon__meta">
+        <span class="campaign-kpi-ribbon__glyph" aria-hidden="true">{% include "includes/lucide_icon.html" with name="radio" size="kpi" %}</span>
+        <span class="campaign-kpi-ribbon__name">فعال</span>
+      </p>
+      <p class="campaign-kpi-ribbon__value tabnums">{{ kpis.active_count|format_count }}</p>
+    </article>
+    <article class="campaign-kpi-ribbon__cell campaign-kpi-ribbon__cell--lead" role="listitem" style="--kpi-accent: #249fe5;">
+      <p class="campaign-kpi-ribbon__meta">
+        <span class="campaign-kpi-ribbon__glyph" aria-hidden="true">{% include "includes/lucide_icon.html" with name="eye" size="kpi" %}</span>
+        <span class="campaign-kpi-ribbon__name">نمایش</span>
+      </p>
+      <p class="campaign-kpi-ribbon__value tabnums">{{ kpis.total_impressions|format_count }}</p>
+    </article>
+    <article class="campaign-kpi-ribbon__cell" role="listitem" style="--kpi-accent: #147fc5;">
+      <p class="campaign-kpi-ribbon__meta">
+        <span class="campaign-kpi-ribbon__glyph" aria-hidden="true">{% include "includes/lucide_icon.html" with name="mouse-pointer-click" size="kpi" %}</span>
+        <span class="campaign-kpi-ribbon__name">کلیک</span>
+      </p>
+      <p class="campaign-kpi-ribbon__value tabnums">{{ kpis.total_clicks|format_count }}</p>
+    </article>
+    <article class="campaign-kpi-ribbon__cell campaign-kpi-ribbon__cell--ctr" role="listitem" style="--kpi-accent: #ba8229;">
+      <p class="campaign-kpi-ribbon__meta">
+        <span class="campaign-kpi-ribbon__glyph" aria-hidden="true">{% include "includes/lucide_icon.html" with name="percent" size="kpi" %}</span>
+        <span class="campaign-kpi-ribbon__name">نرخ کلیک کل</span>
+      </p>
+      <p class="campaign-kpi-ribbon__value tabnums">{{ kpis.weighted_ctr|persian_digits }}<span class="campaign-kpi-ribbon__suffix">٪</span></p>
+    </article>
+    <article class="campaign-kpi-ribbon__cell campaign-kpi-ribbon__cell--finance" role="listitem" style="--kpi-accent: #8794a7;">
+      <p class="campaign-kpi-ribbon__meta">
+        <span class="campaign-kpi-ribbon__glyph" aria-hidden="true">{% include "includes/lucide_icon.html" with name="coins" size="kpi" %}</span>
+        <span class="campaign-kpi-ribbon__name">هزینه</span>
+      </p>
+      <p class="campaign-kpi-ribbon__value campaign-kpi-ribbon__value--ton">{% ton_amount kpis.total_spent_ton hint=0 %}</p>
+    </article>
   </div>
 </section>

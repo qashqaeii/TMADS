@@ -20,6 +20,7 @@ from apps.core.models import AuditLog
 from apps.finance.models import AdvertisingOrder, PriceQuote
 from apps.finance.invoice import issue_invoice_for_order
 from apps.finance.services import calculate_quote_totals, ensure_wallet, reserve_for_order, ton_allocation_for_budget
+from apps.finance.services.ton_equiv import resolve_ton_display_rate
 from apps.notifications.services import notify_customer
 
 from .analytics import (
@@ -141,7 +142,7 @@ def campaign_refresh_stats(request):
     try:
         sync_remote_advertisements_readonly()
     except TelegramAdsError as exc:
-        messages.error(request, f"همگام‌سازی متادیتا ممکن نشد: {exc}")
+        messages.error(request, str(exc))
         if campaign:
             return redirect("campaigns:detail", campaign_id=campaign.id)
         return redirect("campaigns:list")
@@ -186,6 +187,8 @@ def campaign_detail(request, campaign_id):
     )
 
     has_chart = bool(chart.get("dates"))
+    order_exchange_rate_id = order.exchange_rate_id if order else None
+    ton_irr_per_ton, _ = resolve_ton_display_rate(exchange_rate_id=order_exchange_rate_id)
     return render(
         request,
         "campaigns/detail.html",
@@ -206,7 +209,8 @@ def campaign_detail(request, campaign_id):
             "remote_ads": remote_ads,
             "last_sync": last_sync,
             "can_delete_draft": can_delete_draft_campaign(campaign)[0],
-            "order_exchange_rate_id": order.exchange_rate_id if order else None,
+            "order_exchange_rate_id": order_exchange_rate_id,
+            "ton_irr_per_ton": int(ton_irr_per_ton) if ton_irr_per_ton else 0,
         },
     )
 

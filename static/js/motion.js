@@ -10,6 +10,13 @@
     }
   }
 
+  function revealInRoot(root) {
+    if (!root) return;
+    markRevealed(root.querySelectorAll(".motion-reveal:not(.is-revealed)"));
+  }
+
+  window.tmadsRevealIn = revealInRoot;
+
   function assignStaggerIndices(root) {
     var scope = root || document;
     scope.querySelectorAll(".page-frame").forEach(function (frame) {
@@ -18,8 +25,8 @@
         kids[i].style.setProperty("--motion-section", String(i));
       }
     });
-    scope.querySelectorAll(".kpi-exec-grid, .kpi-luxe").forEach(function (grid) {
-      var items = grid.querySelectorAll(".kpi-exec, .kpi-luxe__item");
+    scope.querySelectorAll(".kpi-exec-grid, .kpi-luxe, .dash-kpi-board__grid, .dash-campaign-list").forEach(function (grid) {
+      var items = grid.querySelectorAll(".kpi-exec, .kpi-luxe__item, .dash-kpi-tile, .dash-campaign-list__item");
       for (var j = 0; j < items.length; j++) {
         items[j].style.setProperty("--motion-kpi", String(j));
       }
@@ -41,6 +48,15 @@
     ".ops-links a",
     ".state-banner",
     ".hero-panel--exec",
+    ".dash-kpi-board",
+    ".dash-hero",
+    ".campaign-kpi-board",
+    ".campaigns-filter--luxe",
+    ".campaigns-table-board--luxe",
+    ".campaign-trend-card",
+    ".campaign-analytics-trend",
+    ".campaign-analytics-funnel",
+    ".campaign-analytics-spend",
   ].join(",");
 
   function initReveal(root) {
@@ -80,15 +96,28 @@
     initReveal(root);
   }
 
+  function revealVisibleCampaignTabs() {
+    document.querySelectorAll(".campaign-detail .tab-panel").forEach(function (panel) {
+      if (panel.offsetParent !== null) {
+        revealInRoot(panel);
+      }
+    });
+  }
+
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", function () {
       boot();
+      revealVisibleCampaignTabs();
     });
   } else {
     boot();
+    revealVisibleCampaignTabs();
   }
+
+  document.addEventListener("alpine:initialized", revealVisibleCampaignTabs);
 
   document.body.addEventListener("htmx:afterSettle", function () {
     boot(document.querySelector(".page-frame") || document);
+    revealVisibleCampaignTabs();
   });
 })();

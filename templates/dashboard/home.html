@@ -1,105 +1,126 @@
-﻿{% extends "app_shell.html" %}
+{% extends "app_shell.html" %}
 {% load core_filters humanize static %}
 {% block container_class %}container-wide{% endblock %}
-{% block page_title %}داشبورد{% endblock %}
+{% block page_title %}<span class="sr-only">داشبورد</span>{% endblock %}
 {% block charts_head %}
 {% if has_chart %}{% include "includes/charts_exec_scripts.html" %}{% endif %}
 {% endblock %}
 {% block content %}
-<div class="app-stack app-stack--dashboard">
-{% url 'campaigns:wizard_new' as wizard_url %}
-{% include "includes/dash_header.html" with title="داشبورد تبلیغات" subtitle="نمای کلی عملکرد کمپین‌های شما" with_sub=1 action_url=wizard_url action_label="ساخت تبلیغ" action_primary=1 only %}
+<div class="dash-home dash-home--premium">
+  {% include "includes/dash_home_hero.html" %}
 
-{% include "includes/rate_strip.html" %}
+  {% include "includes/dash_home_kpi.html" with active_count=active_count total_campaigns=total_campaigns impressions=impressions clicks=clicks ctr=ctr %}
 
-{% include "includes/dashboard_performance_strip.html" with active_count=active_count total_campaigns=total_campaigns impressions=impressions clicks=clicks ctr=ctr %}
-
-<section class="dash-performance-layout" aria-label="تحلیل و مالی">
-  <article class="insight-panel insight-panel--chart">
-    <header class="insight-panel__head chart-head chart-head--compact">
-      <div class="chart-head__titles">
-        <h2 class="insight-panel__title">روند نمایش و کلیک</h2>
-        {% if has_chart %}<span class="insight-panel__meta muted">۳۰ روز اخیر — جمع همه کمپین‌ها</span>{% endif %}
+  <section class="dash-workspace" aria-label="تحلیل و کیف پول">
+    <article class="dash-chart-card dash-chart-card--lux">
+      <header class="dash-chart-card__head">
+        <h2 class="dash-chart-card__title">روند نمایش و کلیک</h2>
+        {% if has_chart %}<p class="dash-chart-card__meta">۳۰ روز اخیر · جمع همه کمپین‌ها</p>{% endif %}
+      </header>
+      <div class="dash-chart-card__body">
+        {% if has_chart %}
+        <div id="dash-chart" class="chart-box chart-box--dash-home" role="img" aria-label="نمودار روند پورتفولیو"></div>
+        {% else %}
+        <div class="dash-chart-card__empty">
+          {% include "includes/chart_empty_dash.html" with has_linked_ads=has_linked_ads show_steps=1 %}
+        </div>
+        {% endif %}
       </div>
-    </header>
-    {% if has_chart %}
-    <div id="dash-chart" class="chart-box chart-box--medium chart-box--dominant" role="img" aria-label="نمودار روند پورتفولیو"></div>
-    {% else %}
-    {% include "includes/chart_empty_dash.html" with has_linked_ads=has_linked_ads show_steps=1 %}
-    {% endif %}
-  </article>
-  {% include "includes/wallet_module_compact.html" with wallet=wallet %}
-</section>
-
-<div class="dash-panels dash-panels--split">
-  <section class="dash-panel insight-panel">
-    <header class="dash-panel__head insight-panel__head">
-      <div class="dash-panel__title">
-        <h2 class="insight-panel__title">کمپین‌های اخیر</h2>
-        {% if recent_rows %}<span class="dash-panel__meta tabnums muted">{{ recent_rows|length }} مورد</span>{% endif %}
-      </div>
-      <a class="btn btn-ghost btn-sm" href="{% url 'campaigns:list' %}">مشاهده همه</a>
-    </header>
-    {% if recent_rows %}
-    <ul class="dash-recent-list dash-recent-list--refined">
-      {% for row in recent_rows %}
-      {% with c=row.campaign m=row.metrics %}
-      <li>
-        <a class="dash-recent-item dash-recent-item--refined" href="{% url 'campaigns:detail' c.id %}">
-          <div class="dash-recent-item__identity">
-            <span class="dash-recent-item__name">{{ c.name|default:"بدون نام" }}</span>
-            <span class="status status--compact {{ c.status|campaign_status_class }}">{{ c.get_status_display }}</span>
-          </div>
-          <span class="dash-recent-item__dest muted" dir="ltr">{% if c.destination %}{{ c.destination|shorten_url:36 }}{% else %}—{% endif %}</span>
-          <dl class="dash-recent-item__grid tabnums">
-            <div><dt class="sr-only">نمایش</dt><dd><span class="dash-recent-item__k">نمایش</span> {{ m.impressions|format_count }}</dd></div>
-            <div><dt class="sr-only">کلیک</dt><dd><span class="dash-recent-item__k">کلیک</span> {{ m.clicks|format_count }}</dd></div>
-            <div><dt class="sr-only">CTR</dt><dd><span class="dash-recent-item__k">CTR</span> {{ row.ctr|persian_digits }}٪</dd></div>
-          </dl>
-          <time class="dash-recent-item__time muted">{% if c.updated_at %}{{ c.updated_at|jalali_datetime }}{% endif %}</time>
-        </a>
-      </li>
-      {% endwith %}
-      {% endfor %}
-    </ul>
-    {% else %}
-    <div class="dash-panel__empty empty-state empty-state--compact">
-      <strong>اولین کمپین خود را بسازید</strong>
-      <p class="muted">استودیو ساخت تبلیغ — ۵ مرحله با پیش‌نویس خودکار</p>
-      <a class="btn btn-primary btn-sm" href="{% url 'campaigns:wizard_new' %}">شروع</a>
-    </div>
-    {% endif %}
+    </article>
+    {% include "includes/wallet_module_compact.html" with wallet=wallet %}
   </section>
 
-  <section class="dash-panel insight-panel dash-panel--activity">
-    <header class="dash-panel__head insight-panel__head">
-      <div class="dash-panel__title">
-        <h2 class="insight-panel__title">فعالیت اخیر</h2>
-        {% if activity %}<span class="dash-panel__meta tabnums muted">{{ activity|length }}</span>{% endif %}
-      </div>
-      <a class="btn btn-ghost btn-sm" href="{% url 'dashboard:notifications' %}">اعلان‌ها</a>
-    </header>
-    {% if activity %}
-    <ul class="activity-feed activity-feed--compact">
-      {% for a in activity %}
-      <li class="activity-feed__item">
-        <span class="activity-feed__dot" aria-hidden="true"></span>
-        <div class="activity-feed__body">
-          <p class="activity-feed__line">
-            <a href="{% url 'campaigns:detail' a.campaign_id %}">{{ a.campaign.name|default:"کمپین" }}</a>
-            <span class="activity-feed__sep">·</span>
-            <span>{% if a.note %}{{ a.note }}{% else %}به‌روزرسانی وضعیت{% endif %}</span>
-          </p>
-          <time class="activity-feed__time muted">{{ a.created_at|jalali_datetime }}</time>
+  <section class="dash-bottom{% if not activity %} dash-bottom--solo{% endif %}" aria-label="کمپین و فعالیت">
+    <article class="dash-board dash-board--campaigns">
+      <header class="dash-board__head">
+        <div class="dash-board__title">
+          <div class="dash-board__title-row">
+            <h2 class="dash-board__heading">کمپین‌های اخیر</h2>
+            {% if recent_rows %}<span class="dash-board__count tabnums">{{ recent_rows|length }}</span>{% endif %}
+          </div>
+          <p class="dash-board__sub">مرتب‌شده بر اساس آخرین به‌روزرسانی</p>
         </div>
-      </li>
-      {% endfor %}
-    </ul>
-    {% else %}
-    <div class="dash-panel__empty dash-panel__empty--compact activity-feed__empty empty-state--inline">
-      <p class="muted">هنوز رویدادی ثبت نشده است.</p>
-    </div>
-    {% endif %}
+        <a class="dash-board__all" href="{% url 'campaigns:list' %}">
+          <span>همه کمپین‌ها</span>
+          {% include "includes/lucide_icon.html" with name="arrow-left" size="sm" %}
+        </a>
+      </header>
+      {% if recent_rows %}
+      <ul class="dash-campaign-rows dash-campaign-list">
+        {% for row in recent_rows %}
+        {% with c=row.campaign m=row.metrics %}
+        <li class="dash-campaign-list__item">
+          <a class="dash-campaign-row dash-campaign-card dash-campaign-card--{{ c.status }}" href="{% url 'campaigns:detail' c.id %}">
+            <span class="dash-campaign-card__rail" aria-hidden="true"></span>
+            <div class="dash-campaign-card__body">
+              <div class="dash-campaign-row__lead dash-campaign-card__head">
+                <span class="dash-campaign-row__name dash-campaign-card__name">{{ c.name|default:"بدون نام" }}</span>
+                <span class="status status--pill status--compact {{ c.status|campaign_status_class }}">{{ c.get_status_display }}</span>
+              </div>
+              <p class="dash-campaign-row__dest dash-campaign-card__dest" dir="ltr" title="{{ c.destination }}">
+                {% include "includes/lucide_icon.html" with name="link-2" size="sm" %}
+                <span>{% if c.destination %}{{ c.destination|shorten_url:36 }}{% else %}—{% endif %}</span>
+              </p>
+            </div>
+            <div class="dash-campaign-row__nums dash-campaign-card__stats tabnums" aria-label="آمار کمپین">
+              <div class="dash-campaign-stat">
+                <span class="dash-campaign-stat__value">{{ m.impressions|format_count }}</span>
+                <span class="dash-campaign-stat__label">نمایش</span>
+              </div>
+              <div class="dash-campaign-stat">
+                <span class="dash-campaign-stat__value">{{ m.clicks|format_count }}</span>
+                <span class="dash-campaign-stat__label">کلیک</span>
+              </div>
+              <div class="dash-campaign-stat dash-campaign-stat--accent">
+                <span class="dash-campaign-stat__value">{{ row.ctr|persian_digits }}<span class="dash-campaign-stat__suffix">٪</span></span>
+                <span class="dash-campaign-stat__label">نرخ کلیک</span>
+              </div>
+            </div>
+            <div class="dash-campaign-card__meta">
+              <time class="dash-campaign-row__when dash-campaign-card__when">{{ c.updated_at|jalali_datetime }}</time>
+              <span class="dash-campaign-card__go" aria-hidden="true">{% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}</span>
+            </div>
+          </a>
+        </li>
+        {% endwith %}
+        {% endfor %}
+      </ul>
+      {% else %}
+      <div class="dash-board__empty dash-board__empty--lux">
+        <p class="dash-board__empty-title">اولین کمپین را بسازید</p>
+        <p class="muted">۵ مرحله · پیش‌نویس خودکار</p>
+        <a class="btn btn-primary btn-sm" href="{% url 'campaigns:wizard_new' %}">
+          {% include "includes/lucide_icon.html" with name="plus" size="btn" %}
+          <span>شروع</span>
+        </a>
+      </div>
+      {% endif %}
+    </article>
+
+    <aside class="dash-board dash-board--activity{% if not activity %} is-empty{% endif %}">
+      <header class="dash-board__head">
+        <h2 class="dash-board__heading">فعالیت</h2>
+        <a class="dash-board__link" href="{% url 'dashboard:notifications' %}">اعلان‌ها</a>
+      </header>
+      {% if activity %}
+      <ul class="dash-activity-list">
+        {% for a in activity %}
+        <li class="dash-activity-list__item">
+          <span class="dash-activity-list__dot" aria-hidden="true"></span>
+          <div class="dash-activity-list__body">
+            <p class="dash-activity-list__line">
+              <a href="{% url 'campaigns:detail' a.campaign_id %}">{{ a.campaign.name|default:"کمپین" }}</a>
+              — {% if a.note %}{{ a.note }}{% else %}به‌روزرسانی وضعیت{% endif %}
+            </p>
+            <time class="dash-activity-list__time">{{ a.created_at|jalali_datetime }}</time>
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="dash-board__hint">رویدادی ثبت نشده است.</p>
+      {% endif %}
+    </aside>
   </section>
 </div>
 
@@ -110,11 +131,17 @@
   const el = document.getElementById('dash-chart');
   if (!el || !data.dates || !data.dates.length) return;
   (window.tmadsRunWhenReady || function (cb) { cb(); })(function () {
-    const chart = TMADSCharts.portfolioChart(el, data);
-    if (!chart) console.warn('TMADS: portfolio chart did not mount — check data or container size');
+    const chart = TMADSCharts.portfolioChart(el, data, { dashboardHome: true });
+    if (!chart) return;
+    const resize = function () { chart.resize(); };
+    requestAnimationFrame(resize);
+    if (typeof ResizeObserver !== "undefined") {
+      new ResizeObserver(function () { resize(); }).observe(el);
+    } else {
+      window.addEventListener("resize", resize);
+    }
   });
 })();
 </script>
 {% endif %}
-</div>
 {% endblock %}

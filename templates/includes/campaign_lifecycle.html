@@ -1,9 +1,26 @@
+{% load core_filters %}
 {% if variant == "rail" %}
-<ol class="lifecycle-rail" aria-label="مراحل کمپین">
+<ol
+  class="lifecycle-rail lifecycle-rail--rich"
+  dir="rtl"
+  aria-label="مراحل کمپین"
+  style="--life-steps: {{ lifecycle_steps|length }};{% for step in lifecycle_steps %}{% if step.state == 'current' %} --life-current: {{ forloop.counter0 }};{% endif %}{% endfor %}"
+>
   {% for step in lifecycle_steps %}
-  <li class="lifecycle-rail__step lifecycle-rail__step--{{ step.state }}{% if step.is_terminal and step.state == 'current' %} is-terminal{% endif %}">
-    <span class="lifecycle-rail__node" aria-hidden="true"></span>
-    <span class="lifecycle-rail__label">{{ step.label }}</span>
+  <li
+    class="lifecycle-rail__step lifecycle-rail__step--{{ step.state }}{% if step.is_terminal and step.state == 'current' %} is-terminal{% endif %}"
+    {% if step.state == 'current' %}aria-current="step"{% endif %}
+  >
+    <span class="lifecycle-rail__node lifecycle-rail__node--icon" aria-hidden="true">
+      {% include "includes/lucide_icon.html" with name=step.icon size="sm" %}
+    </span>
+    <div class="lifecycle-rail__copy">
+      <span class="lifecycle-rail__index tabnums" aria-hidden="true">{{ forloop.counter|persian_digits }}</span>
+      <span class="lifecycle-rail__label">{{ step.label }}</span>
+      {% if step.state == 'current' and campaign %}
+      <span class="lifecycle-rail__detail status status--compact status--pill {{ campaign.status|campaign_status_class }}">{{ campaign.get_status_display }}</span>
+      {% endif %}
+    </div>
   </li>
   {% endfor %}
 </ol>

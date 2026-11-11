@@ -6,7 +6,7 @@
 {% if has_portfolio_chart %}{% include "includes/charts_exec_scripts.html" %}{% endif %}
 {% endblock %}
 {% block content %}
-<div class="app-stack">
+<div class="app-stack campaigns-page campaigns-page--luxe">
 {% include "campaigns/includes/list_page_header.html" %}
 
 {% include "includes/portfolio_metric_strip.html" %}
@@ -15,89 +15,108 @@
 <p class="portfolio-stats-note muted" role="status">نمودار روند در دسترس نیست — پس از اتصال تبلیغ به API و همگام‌سازی آمار، اینجا نمایش داده می‌شود.</p>
 {% endif %}
 
-<section class="filter-exec-shell" aria-label="فیلتر کمپین‌ها">
-  <form method="get" class="filter-exec">
-    <div class="filter-exec__grid filter-exec__grid--campaigns">
-      <div class="filter-exec__field filter-exec__field--grow">
-        <label class="filter-exec__label" for="campaign-filter-q">جستجو</label>
-        <input id="campaign-filter-q" class="filter-exec__control" type="search" name="q" value="{{ request.GET.q }}" placeholder="نام کمپین یا لینک مقصد" autocomplete="off">
-      </div>
-      <div class="filter-exec__field">
-        <label class="filter-exec__label" for="campaign-filter-status">وضعیت</label>
-        <select id="campaign-filter-status" class="filter-exec__control" name="status">
-          <option value="">همه وضعیت‌ها</option>
-          {% for val,label in status_choices %}<option value="{{ val }}" {% if request.GET.status == val %}selected{% endif %}>{{ label }}</option>{% endfor %}
-        </select>
-      </div>
-      <div class="filter-exec__field">
-        <label class="filter-exec__label" for="campaign-filter-placement">جایگاه</label>
-        <select id="campaign-filter-placement" class="filter-exec__control" name="placement">
-          <option value="">همه جایگاه‌ها</option>
-          {% for val,label in placement_choices %}<option value="{{ val }}" {% if request.GET.placement == val %}selected{% endif %}>{{ label }}</option>{% endfor %}
-        </select>
-      </div>
-      <input type="hidden" name="sort" value="{{ sort }}">
-      <div class="filter-exec__actions">
-        <button class="btn btn-primary btn-sm" type="submit">اعمال فیلتر</button>
-        {% if request.GET.q or request.GET.status or request.GET.placement %}
-        <a class="btn btn-ghost btn-sm" href="{% url 'campaigns:list' %}">پاک کردن</a>
-        {% endif %}
+<section class="filter-exec-shell campaigns-filter campaigns-filter--luxe motion-reveal" aria-label="فیلتر کمپین‌ها">
+  <form method="get" class="filter-exec campaigns-filter__form">
+  <div class="campaigns-filter__bar">
+    <div class="campaigns-filter__field campaigns-filter__field--search">
+      <label class="campaigns-filter__label" for="campaign-filter-q">جستجو</label>
+      <div class="campaigns-filter__input-wrap">
+        <span class="campaigns-filter__input-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="search" size="sm" %}</span>
+        <input id="campaign-filter-q" class="filter-exec__control campaigns-filter__control campaigns-filter__control--search" type="search" name="q" value="{{ request.GET.q }}" placeholder="نام یا لینک مقصد" autocomplete="off">
       </div>
     </div>
+    <div class="campaigns-filter__field campaigns-filter__field--select">
+      <label class="campaigns-filter__label" for="campaign-filter-status">وضعیت</label>
+      <select id="campaign-filter-status" class="filter-exec__control campaigns-filter__control campaigns-filter__control--select" name="status">
+        <option value="">همه</option>
+        {% for val,label in status_choices %}<option value="{{ val }}" {% if request.GET.status == val %}selected{% endif %}>{{ label }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="campaigns-filter__field campaigns-filter__field--select">
+      <label class="campaigns-filter__label" for="campaign-filter-placement">جایگاه</label>
+      <select id="campaign-filter-placement" class="filter-exec__control campaigns-filter__control campaigns-filter__control--select" name="placement">
+        <option value="">همه</option>
+        {% for val,label in placement_choices %}<option value="{{ val }}" {% if request.GET.placement == val %}selected{% endif %}>{{ label }}</option>{% endfor %}
+      </select>
+    </div>
+    <input type="hidden" name="sort" value="{{ sort }}">
+    <div class="campaigns-filter__actions">
+      <button class="campaigns-filter__btn campaigns-filter__btn--apply" type="submit">اعمال</button>
+      {% if request.GET.q or request.GET.status or request.GET.placement %}
+      <a class="campaigns-filter__btn campaigns-filter__btn--clear" href="{% url 'campaigns:list' %}">پاک‌سازی</a>
+      {% endif %}
+    </div>
+  </div>
   </form>
 </section>
 
-<article class="card table-card card--lift campaign-table-card">
-  <div class="table-toolbar table-toolbar--split">
-    <span class="muted table-toolbar__lead">{{ kpis.campaign_count }} کمپین{% if kpis.any_stale %} · <span class="sync-hint">آمار قدیمی</span>{% endif %}</span>
-    <div class="table-toolbar__cluster">
-      <label class="table-density-toggle">
-        <input type="checkbox" id="campaign-advanced-cols" class="table-density-toggle__input">
-        <span>ستون‌های پیشرفته</span>
+<article class="campaigns-table-board campaigns-table-board--luxe campaign-table-card motion-reveal">
+  <header class="campaigns-table__head campaigns-table__head--luxe table-toolbar table-toolbar--split">
+    <div class="campaigns-table__head-lead">
+      <h2 class="campaigns-table__title">فهرست کمپین‌ها</h2>
+      <p class="campaigns-table__count">
+        <span class="campaigns-table__count-badge tabnums" aria-label="تعداد">{{ kpis.campaign_count }}</span>
+        <span class="campaigns-table__count-text muted">کمپین</span>
+        {% if kpis.any_stale %}<span class="campaigns-table__stale sync-hint" title="برخی ردیف‌ها آمار قدیمی دارند">آمار ناهمگام</span>{% endif %}
+      </p>
+    </div>
+    <div class="table-toolbar__cluster campaigns-table__tools">
+      <label class="campaigns-table__density campaigns-table__density--desktop table-density-toggle" title="نمایش ستون‌های تکمیلی در جدول">
+        <input type="checkbox" id="campaign-advanced-cols" class="table-density-toggle__input campaigns-table__density-input">
+        <span class="campaigns-table__density-ui" aria-hidden="true"></span>
+        <span class="campaigns-table__density-label">ستون‌های پیشرفته</span>
       </label>
-      <span class="muted table-toolbar__label">مرتب‌سازی</span>
-      <div class="sort-pills">
-      <a class="sort-pill {% if sort == '-views' %}is-active{% endif %}" href="{% querystring sort='-views' %}">بازدید</a>
-      <a class="sort-pill {% if sort == '-ctr' %}is-active{% endif %}" href="{% querystring sort='-ctr' %}">CTR</a>
-      <a class="sort-pill {% if sort == '-spent' %}is-active{% endif %}" href="{% querystring sort='-spent' %}">هزینه</a>
-      <a class="sort-pill {% if sort == '-created_at' or sort == '' %}is-active{% endif %}" href="{% querystring sort='-created_at' %}">جدیدترین</a>
+      <div class="campaigns-table__sort" role="group" aria-label="مرتب‌سازی">
+        <span class="campaigns-table__sort-label">مرتب‌سازی</span>
+        <div class="campaigns-table__sort-track sort-pills">
+          <a class="sort-pill campaigns-table__sort-pill {% if sort == '-views' %}is-active{% endif %}" href="{% querystring sort='-views' %}">بازدید</a>
+          <a class="sort-pill campaigns-table__sort-pill {% if sort == '-ctr' %}is-active{% endif %}" href="{% querystring sort='-ctr' %}">نرخ کلیک</a>
+          <a class="sort-pill campaigns-table__sort-pill {% if sort == '-spent' %}is-active{% endif %}" href="{% querystring sort='-spent' %}">هزینه</a>
+          <a class="sort-pill campaigns-table__sort-pill {% if sort == '-created_at' or sort == '' %}is-active{% endif %}" href="{% querystring sort='-created_at' %}">جدیدترین</a>
+        </div>
       </div>
     </div>
-  </div>
+  </header>
 
   {% if campaign_rows %}
   <div class="table-wrap table-wrap--scroll campaign-table-desktop">
     <table class="data-table data-table--campaigns" id="campaign-data-table">
       <thead>
         <tr>
-          <th>کمپین</th>
-          <th>مقصد</th>
-          <th>جایگاه</th>
-          <th>وضعیت</th>
-          <th class="num">نمایش</th>
-          <th class="spark col-advanced">روند</th>
-          <th class="num">کلیک</th>
-          <th class="num">نرخ کلیک</th>
-          <th class="num col-advanced">ورود</th>
-          <th class="num col-advanced">هزینه هزارنمایش</th>
-          <th class="num">مصرف</th>
-          <th class="num col-advanced">باقی‌مانده</th>
-          <th class="col-advanced">بروزرسانی</th>
-          <th></th>
+          <th class="campaigns-table__col campaigns-table__col--name">کمپین</th>
+          <th class="campaigns-table__col campaigns-table__col--status">وضعیت</th>
+          <th class="num campaigns-table__col campaigns-table__col--metric">نمایش</th>
+          <th class="num campaigns-table__col campaigns-table__col--metric">کلیک</th>
+          <th class="num campaigns-table__col campaigns-table__col--metric">نرخ کلیک</th>
+          <th class="num campaigns-table__col campaigns-table__col--metric">مصرف</th>
+          <th class="col-advanced campaigns-table__col">مقصد</th>
+          <th class="col-advanced campaigns-table__col">جایگاه</th>
+          <th class="spark col-advanced campaigns-table__col">روند</th>
+          <th class="num col-advanced campaigns-table__col">ورود</th>
+          <th class="num col-advanced campaigns-table__col">هزینهٔ هزار نمایش</th>
+          <th class="num col-advanced campaigns-table__col">باقی‌مانده</th>
+          <th class="col-advanced campaigns-table__col">بروزرسانی</th>
+          <th class="campaigns-table__col campaigns-table__col--actions"><span class="sr-only">عملیات</span></th>
         </tr>
       </thead>
       <tbody>
       {% for row in campaign_rows %}
       {% with c=row.campaign m=row.metrics %}
-      <tr class="{% if m.stats_stale %}row-stale{% endif %}">
-        <td>
+      <tr class="campaigns-table__row {% if m.stats_stale %}row-stale{% endif %}">
+        <td class="campaigns-table__identity">
           <a class="campaign-title" href="{% url 'campaigns:detail' c.id %}">{{ c.name|default:"بدون نام" }}</a>
-          {% if row.remote_ad_id %}<small class="muted" dir="ltr">#{{ row.remote_ad_id }}</small>{% endif %}
+          <div class="campaigns-table__identity-meta">
+            {% if row.placement_label %}<span class="campaigns-table__chip">{{ row.placement_label }}</span>{% endif %}
+            {% if row.remote_ad_id %}<span class="campaigns-table__ad-id muted tabnums" dir="ltr" title="شناسه تبلیغ">#{{ row.remote_ad_id }}</span>{% endif %}
+          </div>
         </td>
-        <td dir="ltr" class="cell-destination"><span title="{{ c.destination }}">{{ c.destination|shorten_url:32 }}</span></td>
-        <td>{{ row.placement_label }}</td>
-        <td><span class="status {{ c.status|campaign_status_class }}">{{ c.get_status_display }}</span></td>
-        <td class="num tabnums">{% if m.has_stats %}{{ m.impressions|format_count }}{% else %}<span class="muted">—</span>{% endif %}</td>
+        <td class="campaigns-table__status"><span class="status status--pill {{ c.status|campaign_status_class }}">{{ c.get_status_display }}</span></td>
+        <td class="num tabnums campaigns-table__metric">{% if m.has_stats %}{{ m.impressions|format_count }}{% else %}<span class="muted">—</span>{% endif %}</td>
+        <td class="num tabnums campaigns-table__metric">{% if m.has_stats %}{{ m.clicks|format_count }}{% else %}—{% endif %}</td>
+        <td class="num tabnums campaigns-table__metric campaigns-table__metric--ctr">{% if m.has_stats %}{{ row.ctr|persian_digits }}٪{% else %}—{% endif %}</td>
+        <td class="num tabnums campaigns-table__metric campaigns-table__metric--spent">{% ton_amount m.spent_ton hint=0 %}</td>
+        <td dir="ltr" class="cell-destination col-advanced"><span title="{{ c.destination }}">{{ c.destination|shorten_url:32 }}</span></td>
+        <td class="col-advanced">{{ row.placement_label }}</td>
         <td class="sparkline-cell col-advanced">
           {% if row.sparkline_max %}
           <div class="sparkline" role="img" aria-label="روند هفت‌روزه نمایش">
@@ -107,14 +126,11 @@
           </div>
           {% else %}<span class="muted">—</span>{% endif %}
         </td>
-        <td class="num tabnums">{% if m.has_stats %}{{ m.clicks|format_count }}{% else %}—{% endif %}</td>
-        <td class="num tabnums">{% if m.has_stats %}{{ row.ctr|persian_digits }}٪{% else %}—{% endif %}</td>
         <td class="num tabnums col-advanced">{% if m.has_stats %}{{ m.actions|format_count }}{% else %}—{% endif %}</td>
-        <td class="num tabnums col-advanced">{% ton_amount m.cpm %}</td>
-        <td class="num tabnums">{% ton_amount m.spent_ton %}</td>
-        <td class="num tabnums col-advanced">{% ton_amount m.remaining_ton %}</td>
-        <td class="col-advanced"><small class="muted">{% if m.last_updated %}{{ m.last_updated|jalali_datetime }}{% else %}—{% endif %}{% if m.stats_stale %}<span class="sync-hint" title="قدیمی">●</span>{% endif %}</small></td>
-        <td class="row-actions">{% include "campaigns/includes/list_row_actions.html" with campaign=c %}</td>
+        <td class="num tabnums col-advanced">{% ton_amount m.cpm hint=0 %}</td>
+        <td class="num tabnums col-advanced">{% ton_amount m.remaining_ton hint=0 %}</td>
+        <td class="col-advanced"><small class="muted tabnums">{% if m.last_updated %}{{ m.last_updated|jalali_datetime }}{% else %}—{% endif %}{% if m.stats_stale %}<span class="sync-hint" title="قدیمی">●</span>{% endif %}</small></td>
+        <td class="row-actions campaigns-table__actions">{% include "campaigns/includes/list_row_actions.html" with campaign=c %}</td>
       </tr>
       {% endwith %}
       {% endfor %}
@@ -122,35 +138,57 @@
     </table>
   </div>
 
-  <div class="campaign-cards-mobile">
+  <div class="campaign-cards-mobile campaigns-mobile-list">
     {% for row in campaign_rows %}
     {% with c=row.campaign m=row.metrics %}
-    <article class="campaign-mobile-card card card--lift">
-      <a class="campaign-mobile-card__link" href="{% url 'campaigns:detail' c.id %}">
-        <div class="campaign-mobile-card__head">
-          <strong>{{ c.name|default:"بدون نام" }}</strong>
-          <span class="status {{ c.status|campaign_status_class }}">{{ c.get_status_display }}</span>
+    <article class="campaigns-mobile-card campaigns-mobile-card--luxe campaigns-mobile-card--{{ c.status }} {% if m.stats_stale %}campaigns-mobile-card--stale{% endif %}">
+      <a class="campaigns-mobile-card__main" href="{% url 'campaigns:detail' c.id %}">
+        <span class="campaigns-mobile-card__rail" aria-hidden="true"></span>
+        <div class="campaigns-mobile-card__content">
+          <div class="campaigns-mobile-card__head">
+            <h3 class="campaigns-mobile-card__title">{{ c.name|default:"بدون نام" }}</h3>
+            <span class="status status--pill status--compact {{ c.status|campaign_status_class }}">{{ c.get_status_display }}</span>
+          </div>
+          {% if row.placement_label or c.get_target_type_display or m.stats_stale %}
+          <div class="campaigns-mobile-card__tags">
+            {% if row.placement_label %}<span class="campaigns-mobile-card__tag">{{ row.placement_label }}</span>{% endif %}
+            {% if c.get_target_type_display %}<span class="campaigns-mobile-card__tag campaigns-mobile-card__tag--soft">{{ c.get_target_type_display }}</span>{% endif %}
+            {% if m.stats_stale %}<span class="campaigns-mobile-card__tag campaigns-mobile-card__tag--warn sync-hint">آمار قدیمی</span>{% endif %}
+          </div>
+          {% endif %}
+          {% if c.destination %}
+          <p class="campaigns-mobile-card__dest" dir="ltr" title="{{ c.destination }}">
+            {% include "includes/lucide_icon.html" with name="link-2" size="sm" %}
+            <span>{{ c.destination|shorten_url:34 }}</span>
+          </p>
+          {% endif %}
+          <div class="campaigns-mobile-card__kpis tabnums" aria-label="شاخص‌های کمپین">
+            <div class="campaigns-mobile-kpi">
+              <span class="campaigns-mobile-kpi__label">نمایش</span>
+              <span class="campaigns-mobile-kpi__value">{% if m.has_stats %}{{ m.impressions|format_count }}{% else %}—{% endif %}</span>
+            </div>
+            <div class="campaigns-mobile-kpi">
+              <span class="campaigns-mobile-kpi__label">کلیک</span>
+              <span class="campaigns-mobile-kpi__value">{% if m.has_stats %}{{ m.clicks|format_count }}{% else %}—{% endif %}</span>
+            </div>
+            <div class="campaigns-mobile-kpi campaigns-mobile-kpi--accent">
+              <span class="campaigns-mobile-kpi__label">نرخ کلیک</span>
+              <span class="campaigns-mobile-kpi__value">{% if m.has_stats %}{{ row.ctr|persian_digits }}٪{% else %}—{% endif %}</span>
+            </div>
+            <div class="campaigns-mobile-kpi">
+              <span class="campaigns-mobile-kpi__label">مصرف</span>
+              <span class="campaigns-mobile-kpi__value campaigns-mobile-kpi__value--ton">{% ton_amount m.spent_ton hint=0 %}</span>
+            </div>
+          </div>
         </div>
-        <p class="campaign-mobile-card__meta muted">
-          <span>{{ c.get_target_type_display|default:"—" }}</span>
-          <span aria-hidden="true">·</span>
-          <span>{{ row.placement_label }}</span>
-        </p>
-        <p class="muted cell-destination" dir="ltr">{{ c.destination|shorten_url:36 }}</p>
-        <div class="campaign-mobile-card__stats">
-          <div><span class="label">نمایش</span><span class="tabnums">{% if m.has_stats %}{{ m.impressions|format_count }}{% else %}—{% endif %}</span></div>
-          <div><span class="label">کلیک</span><span class="tabnums">{% if m.has_stats %}{{ m.clicks|format_count }}{% else %}—{% endif %}</span></div>
-          <div><span class="label">نرخ کلیک</span><span class="tabnums">{% if m.has_stats %}{{ row.ctr|persian_digits }}٪{% else %}—{% endif %}</span></div>
-          <div><span class="label">مصرف</span><span>{% ton_amount m.spent_ton %}</span></div>
-        </div>
+        <span class="campaigns-mobile-card__go" aria-hidden="true">{% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}</span>
       </a>
-      <footer class="campaign-mobile-card__foot">
-        <a class="btn btn-ghost btn-sm" href="{% url 'campaigns:detail' c.id %}">جزئیات</a>
-        {% if c.status == 'draft' %}
-        <a class="btn btn-primary btn-sm" href="{% url 'campaigns:wizard' c.id %}">ادامه ویزارد</a>
+      {% if c.status == 'draft' %}
+      <footer class="campaigns-mobile-card__foot">
+        <a class="campaigns-table__link-btn campaigns-table__link-btn--primary" href="{% url 'campaigns:wizard' c.id %}">ادامه ویزارد</a>
         {% include "includes/campaign_delete_form.html" with campaign=c %}
-        {% endif %}
       </footer>
+      {% endif %}
     </article>
     {% endwith %}
     {% endfor %}

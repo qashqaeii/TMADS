@@ -1,11 +1,12 @@
-<header class="dash-header dash-header--luxe dash-header--editorial dash-header--with-sub campaign-dashboard__header">
-  <div class="dash-header__main">
+<header class="dash-header dash-header--luxe campaigns-list-hero" aria-label="سرفصل کمپین‌ها">
+  <div class="dash-header__main campaigns-list-hero__lead">
     <h1>کمپین‌ها</h1>
-    <p class="page-sub">مدیریت و پایش تبلیغات فعال</p>
+    <span class="campaigns-list-hero__rule" aria-hidden="true"></span>
+    <p class="campaigns-list-hero__sub">مدیریت و پایش تبلیغات فعال</p>
   </div>
   <div class="dash-header__actions">
     <form method="post" action="{% url 'campaigns:refresh_stats' %}">{% csrf_token %}
-      <button type="submit" class="btn btn-ghost btn-sm">بروزرسانی آمار</button>
+      <button type="submit" class="btn btn-ghost btn-sm btn-quiet">بروزرسانی آمار</button>
     </form>
     <a class="btn btn-primary btn-sm" href="{% url 'campaigns:wizard_new' %}">ساخت تبلیغ</a>
   </div>

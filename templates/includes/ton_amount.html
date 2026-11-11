@@ -4,10 +4,12 @@
   {% if symbol %}<span class="ton-amount__sym" aria-hidden="true">{{ symbol }}</span>{% endif %}
   <span class="ton-amount__val tabnums">{{ amount|format_ton }}</span>
   {% if show_hint %}
-  <span class="ton-amount__tip" role="tooltip">
+  <span class="ton-amount__tip ui-tip-surface" role="tooltip">
     <span class="ton-amount__tip-toman tabnums">≈ {{ irr_total|irr_to_toman|format_irr }} تومان</span>
     {% if rate_hint %}<span class="ton-amount__tip-meta muted">{{ rate_hint }}</span>{% endif %}
   </span>
+  {% elif show_inline_equiv %}
+  <span class="ton-amount__equiv muted tabnums">≈ {{ irr_total|irr_to_toman|format_irr }} ت</span>
   {% endif %}
   {% else %}
   <span class="ton-amount__val">—</span>

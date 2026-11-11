@@ -1,6 +1,7 @@
-<div class="exec-menu" x-data="{ open: false }" @keydown.escape.window="open = false">
-  <button type="button" class="btn btn-ghost btn-sm exec-menu__trigger" @click="open = !open" :aria-expanded="open" aria-haspopup="menu">
-    بیشتر
+<div class="exec-menu exec-menu--detail campaign-detail__toolbar-item" x-data="{ open: false }" @keydown.escape.window="open = false">
+  <button type="button" class="exec-menu__trigger campaign-detail__action campaign-detail__action--more" @click="open = !open" :aria-expanded="open" aria-haspopup="menu">
+    <span class="campaign-detail__action-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="ellipsis" size="sm" %}</span>
+    <span class="campaign-detail__action-label">بیشتر</span>
   </button>
   <div class="exec-menu__panel" x-show="open" x-transition.opacity @click.outside="open = false" x-cloak role="menu">
     <a role="menuitem" class="exec-menu__item" href="{% url 'campaigns:wizard' campaign.id %}">ویرایش ویزارد</a>

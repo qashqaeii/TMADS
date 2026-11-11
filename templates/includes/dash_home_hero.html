@@ -1,0 +1,25 @@
+{% load core_filters %}
+<header class="dash-hero" aria-label="سرفصل داشبورد">
+  <div class="dash-hero__lead">
+    <h1 class="dash-hero__title">داشبورد</h1>
+    <span class="dash-hero__rule" aria-hidden="true"></span>
+    <p class="dash-hero__subtitle">نمای کلی عملکرد کمپین‌های شما</p>
+  </div>
+  <div class="dash-hero__toolbar">
+    {% if ton_rate_display %}
+    <p
+      class="dash-hero__chip tabnums"
+      title="{% if not ton_rate_display.is_fresh %}آخرین نرخ ثبت‌شده در سیستم{% else %}نرخ فعلی هر گرام{% endif %}"
+    >
+      <span class="dash-hero__chip-label">گرام</span>
+      <span class="dash-hero__chip-value">{{ ton_rate_display.irr_per_ton|irr_to_toman|format_count }}</span>
+      <span class="dash-hero__chip-unit">ت</span>
+      {% if not ton_rate_display.is_fresh %}<span class="dash-hero__chip-dot" aria-label="نرخ لحظه‌ای نیست"></span>{% endif %}
+    </p>
+    {% endif %}
+    <a class="dash-hero__cta btn btn-primary btn-sm" href="{% url 'campaigns:wizard_new' %}">
+      {% include "includes/lucide_icon.html" with name="plus" size="btn" %}
+      <span>ساخت تبلیغ</span>
+    </a>
+  </div>
+</header>

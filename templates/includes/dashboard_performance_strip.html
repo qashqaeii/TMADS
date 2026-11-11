@@ -1,27 +1,27 @@
 {% load core_filters %}
 <section class="metric-strip metric-strip--dashboard" aria-label="عملکرد تبلیغات">
-  <header class="metric-strip__head">
-    <h2 class="metric-strip__title">عملکرد تبلیغات</h2>
-    <p class="metric-strip__footnote tabnums">
-      <span>{{ active_count|format_count }} کمپین فعال</span>
-      <span class="metric-strip__dot" aria-hidden="true">·</span>
-      <span>{{ total_campaigns|format_count }} کمپین کل</span>
-    </p>
-  </header>
-  <div class="metric-strip__metrics" role="list">
-    <div class="metric-strip__item metric-strip__item--hero" role="listitem">
-      <span class="metric-strip__value tabnums">{{ impressions|format_count }}</span>
-      <span class="metric-strip__label">نمایش</span>
-    </div>
-    <span class="metric-strip__sep" aria-hidden="true"></span>
-    <div class="metric-strip__item" role="listitem">
-      <span class="metric-strip__value tabnums">{{ clicks|format_count }}</span>
-      <span class="metric-strip__label">کلیک</span>
-    </div>
-    <span class="metric-strip__sep" aria-hidden="true"></span>
-    <div class="metric-strip__item metric-strip__item--accent" role="listitem">
-      <span class="metric-strip__value tabnums">{{ ctr|persian_digits }}٪</span>
-      <span class="metric-strip__label">CTR وزنی</span>
+  <div class="metric-strip__layout">
+    <header class="metric-strip__intro">
+      <h2 class="metric-strip__title">عملکرد تبلیغات</h2>
+      <p class="metric-strip__footnote tabnums">
+        <span>{{ active_count|format_count }} کمپین فعال</span>
+        <span class="metric-strip__dot" aria-hidden="true">·</span>
+        <span>{{ total_campaigns|format_count }} کمپین کل</span>
+      </p>
+    </header>
+    <div class="metric-strip__grid" role="list">
+      <div class="metric-strip__cell metric-strip__cell--hero" role="listitem">
+        <span class="metric-strip__value tabnums">{{ impressions|format_count }}</span>
+        <span class="metric-strip__label">نمایش</span>
+      </div>
+      <div class="metric-strip__cell" role="listitem">
+        <span class="metric-strip__value tabnums">{{ clicks|format_count }}</span>
+        <span class="metric-strip__label">کلیک</span>
+      </div>
+      <div class="metric-strip__cell metric-strip__cell--accent" role="listitem">
+        <span class="metric-strip__value tabnums">{{ ctr|persian_digits }}٪</span>
+        <span class="metric-strip__label">نرخ کلیک کل</span>
+      </div>
     </div>
   </div>
 </section>

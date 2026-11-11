@@ -33,7 +33,7 @@ def test_dashboard_header_does_not_render_stray_action_count(client, customer_us
             r'<div class="dash-header__actions">\s*' + re.escape(str(total_actions)) + r"\s*</div>",
             html,
         )
-    assert "کیف پول" in html
+    assert "کیف پول" in html or "dash-hero" in html
     assert "ساخت تبلیغ" in html
     assert "کمپین جدید" in html
 

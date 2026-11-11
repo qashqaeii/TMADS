@@ -1,0 +1,7 @@
+{% comment %}
+  Lucide — آیکن آماده (lucide-mount.js).
+  size: nav | kpi | exec | sm | md | btn
+{% endcomment %}
+<span class="icon-shell icon-shell--{{ size|default:'kpi' }} icon-motion" data-lucide-host="{{ name }}">
+  <i data-lucide="{{ name }}" class="lucide-svg df-lucide-svg" aria-hidden="true"{% if title %} title="{{ title }}"{% endif %}></i>
+</span>
