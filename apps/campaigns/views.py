@@ -65,12 +65,14 @@ from .wizard import validate_step
 @login_required
 @customer_required
 def campaign_list(request):
-    campaigns = optimize_campaign_list_queryset(
-        Campaign.objects.filter(customer=request.user.customer_profile)
-    )
+    customer = request.user.customer_profile
+    base_qs = Campaign.objects.filter(customer=customer)
+    has_any_campaigns = base_qs.exists()
+    campaigns = optimize_campaign_list_queryset(base_qs)
     q = request.GET.get("q", "").strip()
     status = request.GET.get("status", "").strip()
     placement = request.GET.get("placement", "").strip()
+    filter_active = bool(q or status or placement)
     if q:
         campaigns = campaigns.filter(Q(name__icontains=q) | Q(destination__icontains=q))
     if status:
@@ -105,6 +107,8 @@ def campaign_list(request):
             "sort": sort,
             "placement_choices": Campaign.Placement.choices,
             "status_choices": Campaign.Status.choices,
+            "has_any_campaigns": has_any_campaigns,
+            "filter_active": filter_active,
         },
     )
 

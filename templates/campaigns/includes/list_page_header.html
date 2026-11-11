@@ -1,0 +1,14 @@
+<header class="dash-header dash-header--luxe campaign-dashboard__header">
+  <div class="dash-header__main">
+    <div class="dash-header__title-row">
+      <span class="dash-header__kicker">تبلیغات</span>
+      <h1>کمپین‌ها</h1>
+    </div>
+  </div>
+  <div class="dash-header__actions">
+    <form method="post" action="{% url 'campaigns:refresh_stats' %}">{% csrf_token %}
+      <button type="submit" class="btn btn-ghost btn-sm">بروزرسانی آمار</button>
+    </form>
+    <a class="btn btn-primary btn-sm" href="{% url 'campaigns:wizard_new' %}">ایجاد کمپین</a>
+  </div>
+</header>

@@ -256,17 +256,40 @@
 
       {% elif step == 5 %}
       <h2 class="section-title">بررسی نهایی تبلیغ</h2>
-      <ul style="margin:0 0 1rem;padding-inline-start:1.1rem">
-        <li>هدف: {{ campaign.get_target_type_display|default:campaign.target_type|default:"—" }}</li>
-        <li dir="ltr">مقصد: {{ campaign.destination|default:"—" }}</li>
-        <li>جایگاه: {{ campaign.get_placement_display|default:campaign.placement|default:"—" }}</li>
-      </ul>
-      {% if quote_totals %}
-      <div class="card-muted card-pad" style="margin-bottom:1rem">
-        <div class="finance-line"><span>مبلغ رزرو</span><strong>{{ quote_totals.total_irr|irr_to_toman|format_irr }} تومان</strong></div>
+      <p class="studio-hint studio-hint--tight">قبل از پرداخت، خلاصهٔ زیر را با پیش‌نمایش کنار صفحه مقایسه کنید.</p>
+      <div class="studio-review card-muted card-pad" aria-label="خلاصه کمپین">
+        <div class="studio-review__row">
+          <span class="studio-review__label">نوع هدف‌گیری</span>
+          <span class="studio-review__value">{{ campaign.get_target_type_display|default:campaign.target_type|default:"—" }}</span>
+        </div>
+        <div class="studio-review__row">
+          <span class="studio-review__label">مقصد</span>
+          <span class="studio-review__value" dir="ltr">{{ campaign.destination|default:"—" }}</span>
+        </div>
+        <div class="studio-review__row">
+          <span class="studio-review__label">جایگاه نمایش</span>
+          <span class="studio-review__value">{{ campaign.get_placement_display|default:campaign.placement|default:"—" }}</span>
+        </div>
+        {% if campaign.budget_irr %}
+        <div class="studio-review__row">
+          <span class="studio-review__label">بودجه کل</span>
+          <span class="studio-review__value tabnums">{{ campaign.budget_irr|irr_to_toman|format_irr }} تومان</span>
+        </div>
+        {% endif %}
+        {% if creative and creative.ad_text %}
+        <div class="studio-review__row">
+          <span class="studio-review__label">متن تبلیغ</span>
+          <span class="studio-review__value" dir="auto">{{ creative.ad_text|truncatechars:120 }}</span>
+        </div>
+        {% endif %}
       </div>
+      {% if quote_totals %}
+      <article class="card card-pad card-muted studio-finance-card">
+        <h3 class="section-title" style="font-size:.95rem;margin:0 0 .65rem">پرداخت و رزرو</h3>
+        <div class="finance-line"><span>مبلغ رزرو (شامل کارمزد)</span><strong class="tabnums">{{ quote_totals.total_irr|irr_to_toman|format_irr }} تومان</strong></div>
+      </article>
       {% endif %}
-      {% if wallet %}<p class="muted">موجودی کیف پول: <strong>{{ wallet.available_irr|irr_to_toman|format_irr }} تومان</strong></p>{% endif %}
+      {% if wallet %}<p class="muted studio-hint">موجودی کیف پول: <strong class="tabnums">{{ wallet.available_irr|irr_to_toman|format_irr }} تومان</strong></p>{% endif %}
       {% include "campaigns/includes/policy_panel.html" %}
       <label class="choice-card" style="margin-top:1rem" id="field-terms"><input type="checkbox" name="terms_accepted" value="1" required>
         <a href="{% url 'public:terms' %}" target="_blank" rel="noopener">شرایط TMADS</a>،
@@ -282,11 +305,11 @@
       {% endif %}
       {% endif %}
 
-      <p id="draft-save-status" class="muted" style="margin-top:1rem;font-size:.85rem" aria-live="polite">
+      <p id="draft-save-status" class="muted studio-draft-status" aria-live="polite">
         {% if campaign.draft_saved_at %}آخرین ذخیره: {{ campaign.draft_saved_at|timesince }} پیش{% else %}آماده ذخیره خودکار{% endif %}
       </p>
 
-      <div class="hero-actions" style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border)">
+      <div class="hero-actions studio-actions-bar">
         {% if step > 1 %}<button class="btn btn-ghost" name="action" value="back" type="submit">قبلی</button>{% endif %}
         <button class="btn btn-ghost" name="action" value="save_draft" type="submit">ذخیره پیش‌نویس</button>
         {% if step == 5 %}

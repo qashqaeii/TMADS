@@ -7,20 +7,7 @@
 {% endblock %}
 {% block content %}
 <div class="app-stack">
-<header class="dash-header dash-header--luxe campaign-dashboard__header">
-  <div class="dash-header__main">
-    <div class="dash-header__title-row">
-      <span class="dash-header__kicker">تبلیغات</span>
-      <h1>کمپین‌ها</h1>
-    </div>
-  </div>
-  <div class="dash-header__actions">
-    <form method="post" action="{% url 'campaigns:refresh_stats' %}">{% csrf_token %}
-      <button type="submit" class="btn btn-ghost btn-sm">بروزرسانی آمار</button>
-    </form>
-    <a class="btn btn-primary btn-sm" href="{% url 'campaigns:wizard_new' %}">ایجاد کمپین</a>
-  </div>
-</header>
+{% include "campaigns/includes/list_page_header.html" %}
 
 <div class="kpi-exec-grid kpi-exec-grid--5">
   <article class="kpi-exec"><span class="kpi-exec__icon">{% include "includes/kpi_icon.html" with name="bolt" %}</span><div class="kpi-exec__body"><span class="kpi-exec__label">فعال</span><span class="kpi-exec__value">{{ kpis.active_count|format_count }}</span></div></article>
@@ -29,6 +16,10 @@
   <article class="kpi-exec"><span class="kpi-exec__icon">{% include "includes/kpi_icon.html" with name="percent" %}</span><div class="kpi-exec__body"><span class="kpi-exec__label">نرخ کلیک وزنی</span><span class="kpi-exec__value">{{ kpis.weighted_ctr|persian_digits }}٪</span></div></article>
   <article class="kpi-exec"><span class="kpi-exec__icon">{% include "includes/kpi_icon.html" with name="wallet" %}</span><div class="kpi-exec__body"><span class="kpi-exec__label">هزینه گرام</span><span class="kpi-exec__value">{% ton_amount kpis.total_spent_ton %}</span></div></article>
 </div>
+
+{% if has_any_campaigns and not has_portfolio_chart %}
+<p class="portfolio-stats-note muted" role="status">نمودار روند در دسترس نیست — پس از اتصال تبلیغ به API و همگام‌سازی آمار، اینجا نمایش داده می‌شود.</p>
+{% endif %}
 
 {% if has_portfolio_chart %}
 <section class="card card--lift card-pad campaign-portfolio-chart">
@@ -75,18 +66,24 @@
 <article class="card table-card card--lift campaign-table-card">
   <div class="table-toolbar table-toolbar--split">
     <span class="muted table-toolbar__lead">{{ kpis.campaign_count }} کمپین{% if kpis.any_stale %} · <span class="sync-hint">آمار قدیمی</span>{% endif %}</span>
-    <span class="muted table-toolbar__label">مرتب‌سازی</span>
-    <div class="sort-pills">
+    <div class="table-toolbar__cluster">
+      <label class="table-density-toggle">
+        <input type="checkbox" id="campaign-advanced-cols" class="table-density-toggle__input">
+        <span>ستون‌های پیشرفته</span>
+      </label>
+      <span class="muted table-toolbar__label">مرتب‌سازی</span>
+      <div class="sort-pills">
       <a class="sort-pill {% if sort == '-views' %}is-active{% endif %}" href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.status %}status={{ request.GET.status }}&{% endif %}{% if request.GET.placement %}placement={{ request.GET.placement }}&{% endif %}sort=-views">بازدید</a>
       <a class="sort-pill {% if sort == '-ctr' %}is-active{% endif %}" href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.status %}status={{ request.GET.status }}&{% endif %}{% if request.GET.placement %}placement={{ request.GET.placement }}&{% endif %}sort=-ctr">CTR</a>
       <a class="sort-pill {% if sort == '-spent' %}is-active{% endif %}" href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.status %}status={{ request.GET.status }}&{% endif %}{% if request.GET.placement %}placement={{ request.GET.placement }}&{% endif %}sort=-spent">هزینه</a>
       <a class="sort-pill {% if sort == '-created_at' or sort == '' %}is-active{% endif %}" href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.status %}status={{ request.GET.status }}&{% endif %}{% if request.GET.placement %}placement={{ request.GET.placement }}&{% endif %}sort=-created_at">جدیدترین</a>
+      </div>
     </div>
   </div>
 
   {% if campaign_rows %}
   <div class="table-wrap table-wrap--scroll campaign-table-desktop">
-    <table class="data-table data-table--campaigns">
+    <table class="data-table data-table--campaigns" id="campaign-data-table">
       <thead>
         <tr>
           <th>کمپین</th>
@@ -94,14 +91,14 @@
           <th>جایگاه</th>
           <th>وضعیت</th>
           <th class="num">نمایش</th>
-          <th class="spark">روند</th>
+          <th class="spark col-advanced">روند</th>
           <th class="num">کلیک</th>
           <th class="num">نرخ کلیک</th>
-          <th class="num">ورود</th>
-          <th class="num">هزینه هزارنمایش</th>
+          <th class="num col-advanced">ورود</th>
+          <th class="num col-advanced">هزینه هزارنمایش</th>
           <th class="num">مصرف</th>
-          <th class="num">باقی‌مانده</th>
-          <th>بروزرسانی</th>
+          <th class="num col-advanced">باقی‌مانده</th>
+          <th class="col-advanced">بروزرسانی</th>
           <th></th>
         </tr>
       </thead>
@@ -117,7 +114,7 @@
         <td>{{ row.placement_label }}</td>
         <td><span class="status {{ c.status|campaign_status_class }}">{{ c.get_status_display }}</span></td>
         <td class="num tabnums">{% if m.has_stats %}{{ m.impressions|format_count }}{% else %}<span class="muted">—</span>{% endif %}</td>
-        <td class="sparkline-cell">
+        <td class="sparkline-cell col-advanced">
           {% if row.sparkline_max %}
           <div class="sparkline" role="img" aria-label="روند هفت‌روزه نمایش">
             {% for v in row.sparkline %}
@@ -128,11 +125,11 @@
         </td>
         <td class="num tabnums">{% if m.has_stats %}{{ m.clicks|format_count }}{% else %}—{% endif %}</td>
         <td class="num tabnums">{% if m.has_stats %}{{ row.ctr|persian_digits }}٪{% else %}—{% endif %}</td>
-        <td class="num tabnums">{% if m.has_stats %}{{ m.actions|format_count }}{% else %}—{% endif %}</td>
-        <td class="num tabnums">{% ton_amount m.cpm %}</td>
+        <td class="num tabnums col-advanced">{% if m.has_stats %}{{ m.actions|format_count }}{% else %}—{% endif %}</td>
+        <td class="num tabnums col-advanced">{% ton_amount m.cpm %}</td>
         <td class="num tabnums">{% ton_amount m.spent_ton %}</td>
-        <td class="num tabnums">{% ton_amount m.remaining_ton %}</td>
-        <td><small class="muted">{% if m.last_updated %}{{ m.last_updated|jalali_datetime }}{% else %}—{% endif %}{% if m.stats_stale %}<span class="sync-hint" title="قدیمی">●</span>{% endif %}</small></td>
+        <td class="num tabnums col-advanced">{% ton_amount m.remaining_ton %}</td>
+        <td class="col-advanced"><small class="muted">{% if m.last_updated %}{{ m.last_updated|jalali_datetime }}{% else %}—{% endif %}{% if m.stats_stale %}<span class="sync-hint" title="قدیمی">●</span>{% endif %}</small></td>
         <td class="row-actions">
           <a class="btn btn-ghost btn-sm" href="{% url 'campaigns:detail' c.id %}">جزئیات</a>
           {% include "includes/campaign_delete_form.html" with campaign=c %}
@@ -153,19 +150,26 @@
           <strong>{{ c.name|default:"بدون نام" }}</strong>
           <span class="status {{ c.status|campaign_status_class }}">{{ c.get_status_display }}</span>
         </div>
+        <p class="campaign-mobile-card__meta muted">
+          <span>{{ c.get_target_type_display|default:"—" }}</span>
+          <span aria-hidden="true">·</span>
+          <span>{{ row.placement_label }}</span>
+        </p>
         <p class="muted cell-destination" dir="ltr">{{ c.destination|shorten_url:36 }}</p>
         <div class="campaign-mobile-card__stats">
-          <div><span class="label">نمایش</span><span class="tabnums">{{ m.impressions|format_count }}</span></div>
-          <div><span class="label">نرخ کلیک</span><span class="tabnums">{{ row.ctr|persian_digits }}٪</span></div>
+          <div><span class="label">نمایش</span><span class="tabnums">{% if m.has_stats %}{{ m.impressions|format_count }}{% else %}—{% endif %}</span></div>
+          <div><span class="label">کلیک</span><span class="tabnums">{% if m.has_stats %}{{ m.clicks|format_count }}{% else %}—{% endif %}</span></div>
+          <div><span class="label">نرخ کلیک</span><span class="tabnums">{% if m.has_stats %}{{ row.ctr|persian_digits }}٪{% else %}—{% endif %}</span></div>
           <div><span class="label">مصرف</span><span>{% ton_amount m.spent_ton %}</span></div>
         </div>
       </a>
-      {% if c.status == 'draft' %}
       <footer class="campaign-mobile-card__foot">
-        <a class="btn btn-ghost btn-sm" href="{% url 'campaigns:wizard' c.id %}">ادامه ویزارد</a>
+        <a class="btn btn-ghost btn-sm" href="{% url 'campaigns:detail' c.id %}">جزئیات</a>
+        {% if c.status == 'draft' %}
+        <a class="btn btn-primary btn-sm" href="{% url 'campaigns:wizard' c.id %}">ادامه ویزارد</a>
         {% include "includes/campaign_delete_form.html" with campaign=c %}
+        {% endif %}
       </footer>
-      {% endif %}
     </article>
     {% endwith %}
     {% endfor %}
@@ -184,14 +188,43 @@
   {% endif %}
 
   {% else %}
-  <div class="empty-state card-pad">
-    <strong>کمپینی یافت نشد</strong>
-    <p class="muted">فیلتر را تغییر دهید یا اولین کمپین را بسازید.</p>
-    <a class="btn btn-primary" href="{% url 'campaigns:wizard_new' %}">ایجاد کمپین</a>
+  <div class="empty-state card-pad empty-state--campaigns">
+    {% if filter_active %}
+    <strong>نتیجه‌ای با این فیلتر نیست</strong>
+    <p class="muted">عبارت جستجو یا وضعیت را تغییر دهید، یا فیلترها را پاک کنید.</p>
+    <a class="btn btn-ghost" href="{% url 'campaigns:list' %}">پاک کردن فیلترها</a>
+    {% elif not has_any_campaigns %}
+    <strong>هنوز کمپینی ندارید</strong>
+    <p class="muted">با استودیو پنج‌مرحله‌ای، اولین تبلیغ تلگرام را بسازید — پیش‌نویس خودکار ذخیره می‌شود.</p>
+    <a class="btn btn-primary" href="{% url 'campaigns:wizard_new' %}">ایجاد اولین کمپین</a>
+    {% else %}
+    <strong>کمپینی در این صفحه نیست</strong>
+    <p class="muted">صفحهٔ بعد را امتحان کنید یا فیلترها را بررسی کنید.</p>
+    {% endif %}
   </div>
   {% endif %}
 </article>
 
+<script>
+(function () {
+  var toggle = document.getElementById("campaign-advanced-cols");
+  var table = document.getElementById("campaign-data-table");
+  if (!toggle || !table) return;
+  var key = "tmads_campaign_advanced_cols";
+  try {
+    if (localStorage.getItem(key) === "1") {
+      toggle.checked = true;
+      table.classList.add("is-advanced");
+    }
+  } catch (e) { /* ignore */ }
+  toggle.addEventListener("change", function () {
+    table.classList.toggle("is-advanced", toggle.checked);
+    try {
+      localStorage.setItem(key, toggle.checked ? "1" : "0");
+    } catch (e) { /* ignore */ }
+  });
+})();
+</script>
 {% if has_portfolio_chart %}
 <script>
 (function () {
