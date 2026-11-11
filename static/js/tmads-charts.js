@@ -26,10 +26,19 @@
     const n = Number(v);
     if (Number.isNaN(n)) return "";
     const abs = Math.abs(n);
-    if (abs >= 1_000_000) return (n / 1_000_000).toFixed(1).replace(".", "٫") + "M";
-    if (abs >= 10_000) return Math.round(n / 1_000) + "K";
-    if (abs >= 1_000) return (n / 1_000).toFixed(1).replace(".", "٫") + "K";
-    return String(Math.round(n));
+    try {
+      if (abs >= 1000) {
+        return new Intl.NumberFormat("fa-IR", {
+          notation: "compact",
+          maximumFractionDigits: abs >= 10000 ? 0 : 1,
+        }).format(n);
+      }
+      return new Intl.NumberFormat("fa-IR", { maximumFractionDigits: 0 }).format(Math.round(n));
+    } catch (_e) {
+      if (abs >= 1_000_000) return (n / 1_000_000).toFixed(1).replace(".", "٫") + "م";
+      if (abs >= 1_000) return (n / 1_000).toFixed(1).replace(".", "٫") + "ه";
+      return String(Math.round(n));
+    }
   }
 
   function formatPct(v) {
@@ -242,7 +251,7 @@
     const analyticsMode = Boolean(opts.analyticsMode);
     const overviewMini = Boolean(opts.overviewMini);
     const compact = Boolean(opts.compact);
-    const useArea = !compact;
+    const useArea = analyticsMode || (!compact && !portfolio);
     const showCtr = Boolean(opts.showCtr) && !portfolio;
     const legendItems = portfolio ? ["نمایش", "کلیک"] : ["نمایش", "کلیک", "ورود"];
     if (showCtr) legendItems.push("نرخ کلیک");
@@ -260,23 +269,22 @@
     };
 
     if (useArea) {
-      impressionsSeries.lineStyle = { width: 2.75, color: COLORS.impressions };
+      impressionsSeries.lineStyle = { width: analyticsMode ? 2.25 : 2.75, color: COLORS.impressions };
       impressionsSeries.itemStyle = { color: COLORS.impressions, borderWidth: 2, borderColor: "#fff" };
-      impressionsSeries.areaStyle = { color: areaFill("42, 171, 238") };
+      impressionsSeries.areaStyle = {
+        color: areaFill("42, 171, 238"),
+        opacity: analyticsMode ? 0.85 : 1,
+      };
     } else {
       impressionsSeries.barMaxWidth = portfolio ? 20 : 24;
       impressionsSeries.barGap = portfolio ? "35%" : "22%";
       impressionsSeries.itemStyle = {
         borderRadius: [6, 6, 2, 2],
         color: barFill("#6CC8F6", "#2AABEE"),
-        shadowColor: "rgba(42, 171, 238, 0.25)",
-        shadowBlur: 6,
-        shadowOffsetY: 2,
       };
       impressionsSeries.emphasis = {
         itemStyle: {
           color: barFill("#8ED4F9", "#177DC7"),
-          shadowBlur: 12,
         },
       };
     }
@@ -290,24 +298,23 @@
       symbol: "circle",
       symbolSize: portfolio ? 7 : 6,
       lineStyle: {
-        width: portfolio ? 2.5 : 2.5,
+        width: portfolio ? 2.5 : 2.25,
         color: COLORS.clicks,
-        shadowColor: "rgba(23, 125, 199, 0.35)",
-        shadowBlur: 4,
-        shadowOffsetY: 2,
       },
       itemStyle: {
         color: "#fff",
         borderColor: COLORS.clicks,
         borderWidth: 2,
       },
-      yAxisIndex: portfolio ? 1 : 0,
+      yAxisIndex: portfolio || analyticsMode ? 1 : 0,
       z: 3,
-      emphasis: { focus: "series", scale: true },
+      emphasis: { focus: "series", scale: analyticsMode },
     };
 
-    if (portfolio) {
-      clicksSeries.areaStyle = { color: areaFill("23, 125, 199") };
+    if (portfolio || analyticsMode) {
+      clicksSeries.areaStyle = analyticsMode
+        ? undefined
+        : { color: areaFill("23, 125, 199") };
     }
 
     const series = [impressionsSeries, clicksSeries];
@@ -320,14 +327,16 @@
         data: data.actions,
         showSymbol: lbl.length <= 20,
         symbolSize: 6,
-        lineStyle: { width: 2, color: COLORS.actions },
+        lineStyle: { width: 1.75, color: COLORS.actions },
         itemStyle: { color: COLORS.actions },
-        yAxisIndex: 0,
+        yAxisIndex: analyticsMode ? 0 : 0,
         z: 2,
       });
     }
 
+    let ctrAxisIndex = 1;
     if (showCtr && data.ctr && data.ctr.length) {
+      ctrAxisIndex = analyticsMode ? 2 : showCtr && !portfolio ? 1 : 1;
       series.push({
         name: "نرخ کلیک",
         type: "line",
@@ -336,7 +345,7 @@
         showSymbol: false,
         lineStyle: { width: 1.5, type: "dashed", color: COLORS.ctr },
         itemStyle: { color: COLORS.ctr },
-        yAxisIndex: 1,
+        yAxisIndex: ctrAxisIndex,
         z: 4,
       });
     }
@@ -348,6 +357,16 @@
         axisSideCount(hideAxisNames ? "" : "نمایش", COLORS.impressions, "left"),
         axisSideCount(hideAxisNames ? "" : "کلیک", COLORS.clicks, "right"),
       ];
+    } else if (analyticsMode) {
+      yAxis = [
+        axisSideCount("نمایش / ورود", COLORS.impressions, "left"),
+        axisSideCount("کلیک", COLORS.clicks, "right"),
+      ];
+      if (showCtr && data.ctr && data.ctr.length) {
+        const ctrAxis = axisCtr();
+        ctrAxis.offset = 0;
+        yAxis.push(ctrAxis);
+      }
     } else {
       yAxis = [axisCount("تعداد")];
       if (showCtr && data.ctr && data.ctr.length) {

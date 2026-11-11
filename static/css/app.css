@@ -446,7 +446,7 @@ table.data-table th { color: var(--muted); font-weight: 600; font-size: .85rem; 
 }
 
 .topbar {
-  padding: .85rem var(--app-gutter);
+  padding: .5rem var(--app-gutter);
   position: sticky;
   top: 0;
   z-index: 10;
@@ -457,7 +457,7 @@ table.data-table th { color: var(--muted); font-weight: 600; font-size: .85rem; 
   flex-shrink: 0;
   box-sizing: border-box;
 }
-.topbar-title { font-weight: 700; font-size: 1.05rem; }
+.topbar-title { font-weight: 600; font-size: .9rem; min-width: 0; }
 
 .empty-state {
   text-align: center;

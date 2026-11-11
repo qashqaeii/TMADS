@@ -22,7 +22,7 @@
   {% include "includes/kpi_exec_card.html" with icon="percent" label="نرخ کلیک" value=ctr|persian_digits suffix="٪" %}
 </div>
 
-<div class="panel-grid panel-2">
+<div class="panel-grid panel-2 panel-2--performance">
   <section class="card card--lift dash-chart-card">
     <header class="dash-chart-card__head">
       <h2 class="section-title">روند نمایش و کلیک</h2>
@@ -34,22 +34,25 @@
     {% include "includes/chart_empty_dash.html" with has_linked_ads=has_linked_ads show_steps=1 %}
     {% endif %}
   </section>
-  <section class="card card--lift wallet-panel">
+  <section class="card card--lift wallet-panel wallet-panel--compact">
     <h2 class="section-title">کیف پول</h2>
-    {% with total=wallet.available_irr|add:wallet.reserved_irr %}
-    <div class="wallet-bar" aria-hidden="true">
-      {% if total %}
-      <span style="width:{% widthratio wallet.available_irr total 100 %}%"></span>
-      <span style="width:{% widthratio wallet.reserved_irr total 100 %}%"></span>
-      {% endif %}
+    <div class="wallet-panel__viz">
+      {% with total=wallet.available_irr|add:wallet.reserved_irr %}
+      <div class="wallet-bar" aria-hidden="true">
+        {% if total %}
+        <span style="width:{% widthratio wallet.available_irr total 100 %}%"></span>
+        <span style="width:{% widthratio wallet.reserved_irr total 100 %}%"></span>
+        {% endif %}
+      </div>
+      {% endwith %}
+      <div class="wallet-stats">
+        <div><small>موجودی قابل استفاده</small><strong class="tabnums">{{ wallet.available_irr|irr_to_toman|format_irr }} تومان</strong></div>
+        <div><small>رزرو کمپین</small><strong class="tabnums">{{ wallet.reserved_irr|irr_to_toman|format_irr }} تومان</strong></div>
+      </div>
     </div>
-    {% endwith %}
-    <div class="wallet-stats">
-      <div><small>موجودی</small><strong>{{ wallet.available_irr|irr_to_toman|format_irr }} تومان</strong></div>
-      <div><small>رزرو</small><strong>{{ wallet.reserved_irr|irr_to_toman|format_irr }} تومان</strong></div>
-    </div>
-    <div class="dash-header__actions" style="margin-top:1rem">
+    <div class="wallet-panel__actions">
       <a class="btn btn-primary btn-sm" href="{% url 'finance:topup' %}">شارژ</a>
+      <a class="btn btn-ghost btn-sm" href="{% url 'finance:wallet' %}">جزئیات</a>
       <a class="btn btn-ghost btn-sm" href="{% url 'finance:transactions' %}">تراکنش‌ها</a>
     </div>
   </section>
@@ -91,7 +94,7 @@
     {% else %}
     <div class="dash-panel__empty empty-state">
       <strong>اولین کمپین خود را بسازید</strong>
-      <p class="muted">ویزارد ۸ مرحله‌ای با پیش‌نویس خودکار</p>
+      <p class="muted">استودیو ساخت تبلیغ — ۵ مرحله با پیش‌نویس خودکار</p>
       <a class="btn btn-primary btn-sm" href="{% url 'campaigns:wizard_new' %}">شروع</a>
     </div>
     {% endif %}

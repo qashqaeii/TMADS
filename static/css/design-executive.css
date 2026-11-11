@@ -96,15 +96,27 @@ body.app-body {
   background: rgba(255, 255, 255, 0.92);
   border-bottom: 1px solid var(--border-default);
   backdrop-filter: blur(16px);
-  padding-block: 0.9rem;
+  padding-block: 0.5rem;
+  min-height: 2.75rem;
 }
 .topbar-title {
   font-weight: 600;
-  color: var(--text-secondary);
-  font-size: 0.9rem;
+  color: var(--text-heading);
+  font-size: 0.88rem;
+  min-width: 0;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 @media (min-width: 901px) {
+  body.is-app .topbar-title {
+    display: none;
+  }
   .topbar-cta { display: none; }
+  body.is-app .topbar {
+    justify-content: flex-end;
+  }
 }
 
 /* ── Sidebar (executive minimal) ── */
@@ -178,10 +190,11 @@ body.app-body {
   color: var(--brand-primary);
 }
 .sidebar-link .nav-icon {
-  width: 1.85rem;
-  height: 1.85rem;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
+  width: 1.5rem;
+  height: 1.5rem;
+  background: transparent;
+  border-radius: 6px;
+  opacity: 0.92;
 }
 
 .sidebar-link--accent {
@@ -305,7 +318,8 @@ body.app-body {
   color: rgba(186, 199, 213, 0.55);
 }
 
-/* Mobile menu */
+/* Mobile menu — display only below sidebar breakpoint (see app.css .mobile-only) */
+@media (max-width: 900px) {
 .topbar-menu {
   display: inline-flex;
   align-items: center;
@@ -350,6 +364,7 @@ body.app-body {
 }
 .topbar-menu__bars::before { top: -5px; }
 .topbar-menu__bars::after { top: 5px; }
+}
 
 /* ── Page frame ── */
 .page-frame { gap: var(--section-gap); }
@@ -538,7 +553,10 @@ body.app-body {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   max-width: 36rem;
 }
-@media (max-width: 1100px) {
+@media (max-width: 1280px) {
+  .kpi-exec-grid--5 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 900px) {
   .kpi-exec-grid--5 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 720px) {
@@ -550,21 +568,19 @@ body.app-body {
 .kpi-exec {
   position: relative;
   display: grid;
-  grid-template-columns: 2.75rem minmax(0, 1fr);
+  grid-template-columns: 2.15rem minmax(0, 1fr);
   grid-template-areas:
     "icon label"
     "value value";
-  column-gap: 0.85rem;
-  row-gap: 0.75rem;
+  column-gap: 0.65rem;
+  row-gap: 0.35rem;
   align-content: start;
-  padding: 1.35rem 1.4rem 1.4rem;
-  min-height: 7.35rem;
+  padding: 0.95rem 1rem 1rem;
+  min-height: 5.25rem;
   background: var(--surface-primary);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-md);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.65),
-    var(--shadow-card);
+  box-shadow: var(--shadow-card);
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 .kpi-exec:hover {
@@ -575,17 +591,17 @@ body.app-body {
 }
 .kpi-exec__icon {
   grid-area: icon;
-  width: 2.75rem;
-  height: 2.75rem;
+  width: 2.15rem;
+  height: 2.15rem;
   border-radius: var(--radius-sm);
   background: var(--brand-soft);
   color: var(--brand-action);
-  border: 1px solid rgba(42, 171, 238, 0.12);
+  border: none;
   display: grid;
   place-items: center;
   flex-shrink: 0;
 }
-.kpi-exec__icon svg { width: 1.15rem; height: 1.15rem; stroke: currentColor; fill: none; stroke-width: 1.75; }
+.kpi-exec__icon svg { width: 1rem; height: 1rem; stroke: currentColor; fill: none; stroke-width: 1.75; }
 .kpi-exec__body {
   display: contents;
 }
@@ -601,11 +617,11 @@ body.app-body {
 .kpi-exec__value {
   grid-area: value;
   width: 100%;
-  font-size: clamp(1.35rem, 2.2vw, 1.65rem);
+  font-size: clamp(1.2rem, 1.8vw, 1.45rem);
   font-weight: 700;
   line-height: 1.15;
   color: var(--text-heading);
-  letter-spacing: -0.035em;
+  letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
   word-break: break-word;
 }
@@ -3489,6 +3505,36 @@ body.is-public .public-nav-bar .brand-lockup span {
   flex-wrap: wrap;
   gap: 0.45rem;
   margin-top: 0.85rem;
+}
+@media (min-width: 961px) {
+  body.is-app .panel-grid.panel-2--performance {
+    grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr);
+    align-items: stretch;
+  }
+}
+.wallet-panel--compact {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 1rem 1.05rem 1.05rem;
+}
+.wallet-panel--compact .section-title {
+  margin: 0 0 0.65rem;
+  font-size: 0.95rem;
+}
+.wallet-panel__viz {
+  margin-bottom: 0.75rem;
+}
+.wallet-panel__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: auto;
+  padding-top: 0.65rem;
+}
+body.is-app .rate-strip {
+  padding: 0.55rem 0.85rem;
+  gap: 0.5rem 0.85rem;
 }
 @media (max-width: 720px) {
   body.is-app .panel-grid.panel-2 {

@@ -69,15 +69,15 @@
 
   <div class="detail-tabs campaign-detail__tabs" x-data="{ tab: 'overview' }">
     <div class="tab-bar tab-bar--exec" role="tablist" aria-label="بخش‌های کمپین">
-      <button type="button" role="tab" :class="{ 'is-active': tab === 'overview' }" @click="tab = 'overview'; $nextTick(() => window.dispatchEvent(new Event('tmads-charts-resize')))">نمای کلی</button>
-      <button type="button" role="tab" :class="{ 'is-active': tab === 'analytics' }" @click="tab = 'analytics'; $nextTick(() => window.dispatchEvent(new Event('tmads-charts-resize')))">تحلیل</button>
-      <button type="button" role="tab" :class="{ 'is-active': tab === 'creative' }" @click="tab = 'creative'">محتوا</button>
-      <button type="button" role="tab" :class="{ 'is-active': tab === 'targeting' }" @click="tab = 'targeting'">هدف‌گیری</button>
-      <button type="button" role="tab" :class="{ 'is-active': tab === 'finance' }" @click="tab = 'finance'">بودجه</button>
-      <button type="button" role="tab" :class="{ 'is-active': tab === 'history' }" @click="tab = 'history'">تاریخچه</button>
+      <button type="button" role="tab" id="campaign-tab-overview" aria-controls="campaign-panel-overview" :aria-selected="tab === 'overview'" :tabindex="tab === 'overview' ? 0 : -1" :class="{ 'is-active': tab === 'overview' }" @click="tab = 'overview'; $nextTick(() => window.dispatchEvent(new Event('tmads-charts-resize')))">نمای کلی</button>
+      <button type="button" role="tab" id="campaign-tab-analytics" aria-controls="campaign-panel-analytics" :aria-selected="tab === 'analytics'" :tabindex="tab === 'analytics' ? 0 : -1" :class="{ 'is-active': tab === 'analytics' }" @click="tab = 'analytics'; $nextTick(() => window.dispatchEvent(new Event('tmads-charts-resize')))">تحلیل</button>
+      <button type="button" role="tab" id="campaign-tab-creative" aria-controls="campaign-panel-creative" :aria-selected="tab === 'creative'" :tabindex="tab === 'creative' ? 0 : -1" :class="{ 'is-active': tab === 'creative' }" @click="tab = 'creative'">محتوا</button>
+      <button type="button" role="tab" id="campaign-tab-targeting" aria-controls="campaign-panel-targeting" :aria-selected="tab === 'targeting'" :tabindex="tab === 'targeting' ? 0 : -1" :class="{ 'is-active': tab === 'targeting' }" @click="tab = 'targeting'">هدف‌گیری</button>
+      <button type="button" role="tab" id="campaign-tab-finance" aria-controls="campaign-panel-finance" :aria-selected="tab === 'finance'" :tabindex="tab === 'finance' ? 0 : -1" :class="{ 'is-active': tab === 'finance' }" @click="tab = 'finance'">بودجه</button>
+      <button type="button" role="tab" id="campaign-tab-history" aria-controls="campaign-panel-history" :aria-selected="tab === 'history'" :tabindex="tab === 'history' ? 0 : -1" :class="{ 'is-active': tab === 'history' }" @click="tab = 'history'">تاریخچه</button>
     </div>
 
-    <div class="tab-panel" role="tabpanel" x-show="tab === 'overview'" x-cloak>
+    <div class="tab-panel" role="tabpanel" id="campaign-panel-overview" aria-labelledby="campaign-tab-overview" x-show="tab === 'overview'" x-cloak>
       <div class="panel-grid panel-2 campaign-detail__split">
         <section class="card card--lift card-pad detail-panel">
           <h2 class="section-title">عملکرد تبدیل</h2>
@@ -129,7 +129,7 @@
       {% endif %}
     </div>
 
-    <div class="tab-panel" role="tabpanel" x-show="tab === 'analytics'" x-cloak>
+    <div class="tab-panel" role="tabpanel" id="campaign-panel-analytics" aria-labelledby="campaign-tab-analytics" x-show="tab === 'analytics'" x-cloak>
       <div class="campaign-analytics-suite">
         <section class="card card--lift analytics-module analytics-module--trend">
           <header class="analytics-module__head analytics-head analytics-head--trend">
@@ -208,7 +208,7 @@
       </div>
     </div>
 
-    <div class="tab-panel" role="tabpanel" x-show="tab === 'creative'" x-cloak>
+    <div class="tab-panel" role="tabpanel" id="campaign-panel-creative" aria-labelledby="campaign-tab-creative" x-show="tab === 'creative'" x-cloak>
       <section class="card card--lift card-pad detail-panel">
         <h2 class="section-title">پیش‌نمایش تبلیغ</h2>
         {% if creative %}
@@ -226,7 +226,7 @@
       </section>
     </div>
 
-    <div class="tab-panel" role="tabpanel" x-show="tab === 'targeting'" x-cloak>
+    <div class="tab-panel" role="tabpanel" id="campaign-panel-targeting" aria-labelledby="campaign-tab-targeting" x-show="tab === 'targeting'" x-cloak>
       <section class="card card--lift card-pad detail-panel targeting-board-wrap">
         <header class="targeting-board__hero">
           <div>
@@ -244,7 +244,7 @@
       </section>
     </div>
 
-    <div class="tab-panel" role="tabpanel" x-show="tab === 'finance'" x-cloak>
+    <div class="tab-panel" role="tabpanel" id="campaign-panel-finance" aria-labelledby="campaign-tab-finance" x-show="tab === 'finance'" x-cloak>
       <section class="card card--lift card-pad detail-panel">
         <h2 class="section-title">بودجه و سفارش</h2>
         {% if order %}
@@ -264,7 +264,7 @@
       </section>
     </div>
 
-    <div class="tab-panel" role="tabpanel" x-show="tab === 'history'" x-cloak>
+    <div class="tab-panel" role="tabpanel" id="campaign-panel-history" aria-labelledby="campaign-tab-history" x-show="tab === 'history'" x-cloak>
       <section class="card card--lift card-pad detail-panel detail-panel--history">
         <h2 class="section-title">تاریخچه وضعیت</h2>
         <ul class="activity-feed">
