@@ -10023,7 +10023,8 @@ body.is-app .topbar-notify {
 
 .campaign-detail--luxe .info-module,
 .campaign-detail--luxe .card--lift,
-.campaign-detail--luxe .detail-panel {
+.campaign-detail--luxe .detail-panel,
+.campaign-detail--luxe .campaign-detail-panel {
   border: 1px solid var(--dash-luxe-stroke);
   border-radius: var(--dash-luxe-radius);
   box-shadow: none;
@@ -10220,6 +10221,396 @@ body.is-app .topbar-notify {
 @media (max-width: 420px) {
   .campaign-overview-metrics {
     grid-template-columns: 1fr;
+  }
+}
+
+/* —— Campaign detail — content / targeting / budget / history (luxe) —— */
+.campaign-detail-panel {
+  padding: 0.78rem 0.9rem 0.85rem;
+}
+.campaign-detail-panel-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+.campaign-detail-panel__head {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-bottom: 0.62rem;
+  padding-bottom: 0.52rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--dash-luxe-stroke) 78%, transparent);
+}
+.campaign-detail-panel__head.targeting-board__hero {
+  margin-bottom: 0.72rem;
+  padding-bottom: 0.58rem;
+}
+.campaign-detail-panel__glyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--dash-luxe-stroke) 85%, transparent);
+  background: color-mix(in srgb, var(--surface-soft) 35%, var(--surface-primary));
+  color: var(--brand-action);
+}
+.campaign-detail-panel__glyph .icon-shell--sm svg {
+  width: 0.88rem;
+  height: 0.88rem;
+}
+.campaign-detail-panel__head-text {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+.campaign-detail-panel__title,
+.campaign-detail-panel--targeting .targeting-board__hero-title {
+  margin: 0;
+  font-size: 0.84rem;
+  font-weight: 640;
+  letter-spacing: -0.02em;
+  color: var(--text-heading);
+  line-height: 1.3;
+}
+.campaign-detail-panel__hint,
+.campaign-detail-panel--targeting .targeting-board__hero-hint {
+  margin: 0.22rem 0 0;
+  font-size: 0.72rem;
+  line-height: 1.45;
+  max-width: 40rem;
+}
+.campaign-detail-panel__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.35rem;
+  padding: 1.35rem 1rem 1.45rem;
+  border-radius: 12px;
+  border: 1px dashed color-mix(in srgb, var(--dash-luxe-stroke) 88%, transparent);
+  background: color-mix(in srgb, var(--surface-soft) 22%, var(--surface-primary));
+}
+.campaign-detail-panel__empty-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.35rem;
+  height: 2.35rem;
+  border-radius: 50%;
+  color: var(--dash-luxe-muted);
+  background: var(--surface-primary);
+  border: 1px solid color-mix(in srgb, var(--dash-luxe-stroke) 85%, transparent);
+  margin-bottom: 0.15rem;
+}
+.campaign-detail-panel__empty-title {
+  margin: 0;
+  font-size: 0.86rem;
+  font-weight: 640;
+  color: var(--text-heading);
+}
+.campaign-detail-panel__empty-text {
+  margin: 0;
+  font-size: 0.74rem;
+  line-height: 1.5;
+  max-width: 22rem;
+}
+.campaign-detail-panel__empty-btn {
+  margin-top: 0.45rem;
+}
+.campaign-detail-panel__cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.55rem;
+  padding: 0.34rem 0.72rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--brand-action) 32%, var(--dash-luxe-stroke));
+  background: color-mix(in srgb, var(--brand-action) 10%, var(--surface-primary));
+  font-size: 0.72rem;
+  font-weight: 650;
+  color: var(--brand-action);
+  text-decoration: none;
+  transition:
+    background 0.2s var(--ease-premium),
+    border-color 0.2s var(--ease-premium);
+}
+.campaign-detail-panel__cta:hover {
+  background: color-mix(in srgb, var(--brand-action) 16%, var(--surface-primary));
+}
+.campaign-detail-panel__foot-note {
+  margin: 0.55rem 0 0;
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+.campaign-creative-luxe {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  gap: 0.75rem 1rem;
+  align-items: start;
+}
+.campaign-creative-luxe__frame {
+  padding: 0.55rem;
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--dash-luxe-stroke) 82%, transparent);
+  background: color-mix(in srgb, var(--surface-soft) 28%, var(--surface-primary));
+}
+.campaign-creative-luxe__chip {
+  margin: 0.45rem 0 0;
+  font-size: 0.68rem;
+  text-align: center;
+}
+.campaign-creative-luxe__aside {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 0.35rem 0.15rem 0.2rem;
+}
+.campaign-detail-spec {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 1px solid color-mix(in srgb, var(--dash-luxe-stroke) 78%, transparent);
+  border-radius: 12px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--surface-soft) 16%, var(--surface-primary));
+}
+.campaign-detail-spec__row {
+  display: grid;
+  grid-template-columns: 6.25rem minmax(0, 1fr);
+  gap: 0.5rem;
+  align-items: start;
+  padding: 0.48rem 0.58rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--dash-luxe-stroke) 72%, transparent);
+}
+.campaign-detail-spec__row:last-child {
+  border-bottom: none;
+}
+.campaign-detail-spec__label {
+  font-size: 0.62rem;
+  font-weight: 600;
+  color: var(--dash-luxe-muted);
+  line-height: 1.35;
+}
+.campaign-detail-spec__value {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-heading);
+  line-height: 1.35;
+  word-break: break-word;
+}
+.campaign-creative-luxe__dest {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0.55rem 0 0;
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  min-width: 0;
+}
+.campaign-creative-luxe__dest > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.campaign-detail--luxe .campaign-detail-panel--targeting .targeting-board__section {
+  border-top-color: color-mix(in srgb, var(--dash-luxe-stroke) 80%, transparent);
+  padding-top: 0.95rem;
+}
+.campaign-detail--luxe .campaign-detail-panel--targeting .targeting-board__copy-all {
+  border-radius: 999px;
+  font-size: 0.7rem;
+  padding: 0.3rem 0.62rem;
+  border-color: color-mix(in srgb, var(--brand-action) 28%, var(--dash-luxe-stroke));
+  background: color-mix(in srgb, var(--brand-action) 8%, var(--surface-primary));
+  box-shadow: none;
+}
+.campaign-detail--luxe .campaign-detail-panel--targeting .targeting-card {
+  border: 1px solid color-mix(in srgb, var(--dash-luxe-stroke) 85%, transparent);
+  border-radius: 12px;
+  background: var(--surface-primary);
+  box-shadow: none;
+  min-height: 3.85rem;
+  padding: 0.55rem 0.62rem;
+  transform: none;
+}
+.campaign-detail--luxe .campaign-detail-panel--targeting .targeting-card:hover,
+.campaign-detail--luxe .campaign-detail-panel--targeting .targeting-card:focus-visible {
+  border-color: color-mix(in srgb, var(--brand-action) 30%, var(--dash-luxe-stroke));
+  background: color-mix(in srgb, var(--surface-soft) 28%, var(--surface-primary));
+  box-shadow: none;
+  transform: none;
+}
+.campaign-detail--luxe .campaign-detail-panel--targeting .targeting-card__avatar {
+  width: 2.1rem;
+  height: 2.1rem;
+  border-radius: 9px;
+  font-size: 0.76rem;
+  border-color: color-mix(in srgb, var(--dash-luxe-stroke) 80%, transparent);
+  background: color-mix(in srgb, var(--surface-soft) 45%, var(--surface-primary));
+}
+.campaign-detail--luxe .campaign-detail-panel--targeting .targeting-grid {
+  grid-template-columns: repeat(auto-fill, minmax(15.5rem, 1fr));
+  gap: 0.45rem;
+}
+.campaign-finance-meter .budget-meter--exec {
+  margin: 0;
+}
+.campaign-finance-meter .budget-ring-board {
+  padding: 0.15rem 0.05rem 0.25rem;
+}
+.campaign-detail-finance-kpis {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.42rem;
+  list-style: none;
+  margin: 0 0 0.65rem;
+  padding: 0;
+}
+@media (min-width: 640px) {
+  .campaign-detail-finance-kpis {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+.campaign-detail-finance-kpis__item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.14rem;
+  padding: 0.48rem 0.52rem;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--dash-luxe-stroke) 78%, transparent);
+  background: color-mix(in srgb, var(--surface-soft) 20%, var(--surface-primary));
+  min-width: 0;
+}
+.campaign-detail-finance-kpis__label {
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: var(--dash-luxe-muted);
+}
+.campaign-detail-finance-kpis__value {
+  font-size: 0.8rem;
+  font-weight: 650;
+  color: var(--text-heading);
+  line-height: 1.2;
+}
+.campaign-detail-finance-kpis__value .ton-amount {
+  font-size: inherit;
+  font-weight: inherit;
+}
+.campaign-detail-finance-kpis__item--accent .campaign-detail-finance-kpis__value {
+  color: var(--brand-action);
+}
+.campaign-detail-finance-rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--dash-luxe-stroke) 78%, transparent);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.campaign-detail-finance-rows__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.35rem 0.75rem;
+  padding: 0.5rem 0.62rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--dash-luxe-stroke) 72%, transparent);
+}
+.campaign-detail-finance-rows__row:last-child {
+  border-bottom: none;
+}
+.campaign-detail-finance-rows__label {
+  font-size: 0.68rem;
+  font-weight: 550;
+  color: var(--dash-luxe-muted);
+}
+.campaign-detail-finance-rows__value {
+  font-size: 0.8rem;
+  font-weight: 650;
+  color: var(--text-heading);
+}
+.campaign-history-timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0.15rem 0 0.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  max-height: min(28rem, 56vh);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+.campaign-history-timeline__item {
+  display: grid;
+  grid-template-columns: 0.65rem minmax(0, 1fr);
+  gap: 0.55rem 0.65rem;
+  padding: 0.55rem 0.35rem 0.62rem;
+  position: relative;
+}
+.campaign-history-timeline__item:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0.28rem;
+  top: 1.35rem;
+  bottom: 0;
+  width: 1px;
+  background: color-mix(in srgb, var(--dash-luxe-stroke) 85%, transparent);
+}
+.campaign-history-timeline__rail {
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-top: 0.35rem;
+  border-radius: 50%;
+  background: var(--brand-action);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand-action) 18%, transparent);
+  flex-shrink: 0;
+  z-index: 1;
+}
+.campaign-history-timeline__body {
+  min-width: 0;
+}
+.campaign-history-timeline__status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.32rem 0.4rem;
+}
+.campaign-history-timeline__from {
+  font-size: 0.72rem;
+  font-weight: 500;
+}
+.campaign-history-timeline__arrow {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1;
+}
+.campaign-history-timeline__note {
+  margin: 0.28rem 0 0;
+  font-size: 0.76rem;
+  line-height: 1.45;
+  color: var(--text-secondary);
+}
+.campaign-history-timeline__time {
+  display: block;
+  margin-top: 0.22rem;
+  font-size: 0.66rem;
+}
+@media (max-width: 720px) {
+  .campaign-creative-luxe {
+    grid-template-columns: 1fr;
+  }
+  .campaign-detail-spec__row {
+    grid-template-columns: 1fr;
+    gap: 0.12rem;
+  }
+  .campaign-detail-finance-kpis {
+    grid-template-columns: 1fr 1fr;
   }
 }
 
