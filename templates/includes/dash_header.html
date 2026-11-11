@@ -8,8 +8,8 @@
     {% if subtitle %}<p class="page-sub">{{ subtitle }}</p>{% endif %}
     {% if meta %}<div class="dash-header__meta">{{ meta|safe }}</div>{% endif %}
   </div>
-  {% if actions %}
-  <div class="dash-header__actions">{{ actions|safe }}</div>
+  {% if header_actions %}
+  <div class="dash-header__actions">{{ header_actions|safe }}</div>
   {% elif secondary_action_url or action_url %}
   <div class="dash-header__actions">
     {% if secondary_action_url %}<a class="btn btn-ghost btn-sm" href="{{ secondary_action_url }}">{{ secondary_action_label|default:"بیشتر" }}</a>{% endif %}

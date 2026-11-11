@@ -93,6 +93,25 @@ def campaign_status_label(code: str) -> str:
         return code or "—"
 
 
+_TELEGRAM_REMOTE_STATUS_FA = {
+    "active": "فعال در تلگرام",
+    "on_hold": "در انتظار (On Hold)",
+    "stopped": "متوقف‌شده",
+    "declined": "رد شده توسط تلگرام",
+    "in_review": "در حال بررسی تلگرام",
+    "ready_for_review": "آمادهٔ بررسی",
+    "approved": "تأیید شده",
+}
+
+
+@register.filter
+def telegram_remote_status_fa(value):
+    key = str(value or "").strip().lower()
+    if not key:
+        return "—"
+    return _TELEGRAM_REMOTE_STATUS_FA.get(key, value)
+
+
 @register.filter
 def campaign_status_class(status: str) -> str:
     mapping = {

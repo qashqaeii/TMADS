@@ -21,16 +21,6 @@
 <p class="portfolio-stats-note muted" role="status">نمودار روند در دسترس نیست — پس از اتصال تبلیغ به API و همگام‌سازی آمار، اینجا نمایش داده می‌شود.</p>
 {% endif %}
 
-{% if has_portfolio_chart %}
-<section class="card card--lift card-pad campaign-portfolio-chart">
-  <header class="chart-head">
-    <h2 class="section-title">روند کلی تبلیغات (۳۰ روز)</h2>
-    <p class="muted chart-head__sub">جمع نمایش و کلیک همهٔ کمپین‌های متصل — بازهٔ روزانه</p>
-  </header>
-  <div id="portfolio-chart" class="chart-box chart-box--medium" role="img" aria-label="روند پورتفolio"></div>
-</section>
-{% endif %}
-
 <section class="filter-exec-shell" aria-label="فیلتر کمپین‌ها">
   <form method="get" class="filter-exec">
     <div class="filter-exec__grid filter-exec__grid--campaigns">
@@ -73,10 +63,10 @@
       </label>
       <span class="muted table-toolbar__label">مرتب‌سازی</span>
       <div class="sort-pills">
-      <a class="sort-pill {% if sort == '-views' %}is-active{% endif %}" href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.status %}status={{ request.GET.status }}&{% endif %}{% if request.GET.placement %}placement={{ request.GET.placement }}&{% endif %}sort=-views">بازدید</a>
-      <a class="sort-pill {% if sort == '-ctr' %}is-active{% endif %}" href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.status %}status={{ request.GET.status }}&{% endif %}{% if request.GET.placement %}placement={{ request.GET.placement }}&{% endif %}sort=-ctr">CTR</a>
-      <a class="sort-pill {% if sort == '-spent' %}is-active{% endif %}" href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.status %}status={{ request.GET.status }}&{% endif %}{% if request.GET.placement %}placement={{ request.GET.placement }}&{% endif %}sort=-spent">هزینه</a>
-      <a class="sort-pill {% if sort == '-created_at' or sort == '' %}is-active{% endif %}" href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.status %}status={{ request.GET.status }}&{% endif %}{% if request.GET.placement %}placement={{ request.GET.placement }}&{% endif %}sort=-created_at">جدیدترین</a>
+      <a class="sort-pill {% if sort == '-views' %}is-active{% endif %}" href="{% querystring sort='-views' %}">بازدید</a>
+      <a class="sort-pill {% if sort == '-ctr' %}is-active{% endif %}" href="{% querystring sort='-ctr' %}">CTR</a>
+      <a class="sort-pill {% if sort == '-spent' %}is-active{% endif %}" href="{% querystring sort='-spent' %}">هزینه</a>
+      <a class="sort-pill {% if sort == '-created_at' or sort == '' %}is-active{% endif %}" href="{% querystring sort='-created_at' %}">جدیدترین</a>
       </div>
     </div>
   </div>
@@ -130,10 +120,7 @@
         <td class="num tabnums">{% ton_amount m.spent_ton %}</td>
         <td class="num tabnums col-advanced">{% ton_amount m.remaining_ton %}</td>
         <td class="col-advanced"><small class="muted">{% if m.last_updated %}{{ m.last_updated|jalali_datetime }}{% else %}—{% endif %}{% if m.stats_stale %}<span class="sync-hint" title="قدیمی">●</span>{% endif %}</small></td>
-        <td class="row-actions">
-          <a class="btn btn-ghost btn-sm" href="{% url 'campaigns:detail' c.id %}">جزئیات</a>
-          {% include "includes/campaign_delete_form.html" with campaign=c %}
-        </td>
+        <td class="row-actions">{% include "campaigns/includes/list_row_actions.html" with campaign=c %}</td>
       </tr>
       {% endwith %}
       {% endfor %}
@@ -178,11 +165,11 @@
   {% if page_obj.paginator.num_pages > 1 %}
   <nav class="pagination" aria-label="صفحه‌بندی">
     {% if page_obj.has_previous %}
-    <a class="btn btn-ghost btn-sm" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.placement %}&placement={{ request.GET.placement }}{% endif %}&sort={{ sort }}">قبلی</a>
+    <a class="btn btn-ghost btn-sm" href="{% querystring page=page_obj.previous_page_number %}">قبلی</a>
     {% endif %}
     <span class="muted">صفحه {{ page_obj.number }} از {{ page_obj.paginator.num_pages }}</span>
     {% if page_obj.has_next %}
-    <a class="btn btn-ghost btn-sm" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.placement %}&placement={{ request.GET.placement }}{% endif %}&sort={{ sort }}">بعدی</a>
+    <a class="btn btn-ghost btn-sm" href="{% querystring page=page_obj.next_page_number %}">بعدی</a>
     {% endif %}
   </nav>
   {% endif %}
@@ -204,6 +191,16 @@
   </div>
   {% endif %}
 </article>
+
+{% if has_portfolio_chart %}
+<details class="campaign-portfolio-disclosure card card--lift card-pad campaign-portfolio-chart">
+  <summary class="campaign-portfolio-disclosure__summary">
+    <span class="section-title">تحلیل پورتفولیو (۳۰ روز)</span>
+    <span class="muted">جمع نمایش و کلیک — برای باز کردن کلیک کنید</span>
+  </summary>
+  <div id="portfolio-chart" class="chart-box chart-box--medium chart-box--compact-list" role="img" aria-label="روند پورتفolio"></div>
+</details>
+{% endif %}
 
 <script>
 (function () {
@@ -229,10 +226,27 @@
 <script>
 (function () {
   const data = {{ portfolio_chart_json|safe }};
-  const el = document.getElementById('portfolio-chart');
+  const el = document.getElementById("portfolio-chart");
+  const disclosure = document.querySelector(".campaign-portfolio-disclosure");
   if (!el || !data.dates || !data.dates.length) return;
+  let chartInstance = null;
+  function mountChart() {
+    if (chartInstance) {
+      chartInstance.resize();
+      return;
+    }
+    chartInstance = TMADSCharts.portfolioChart(el, data);
+  }
   (window.tmadsRunWhenReady || function (cb) { cb(); })(function () {
-    TMADSCharts.portfolioChart(el, data);
+    if (!disclosure || disclosure.open) {
+      mountChart();
+      return;
+    }
+    disclosure.addEventListener("toggle", function () {
+      if (disclosure.open) {
+        mountChart();
+      }
+    });
   });
 })();
 </script>

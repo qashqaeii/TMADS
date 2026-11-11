@@ -92,9 +92,15 @@
           <h2 class="section-title">اتصال تبلیغ</h2>
           {% for ad in remote_ads %}
           <dl class="stat-rows">
-            <div class="stat-rows__row"><dt>شناسه</dt><dd><code class="code-inline" dir="ltr">{{ ad.remote_ad_id|default:"—" }}</code></dd></div>
-            <div class="stat-rows__row"><dt>وضعیت تلگرام</dt><dd>{{ ad.remote_status|default:"—" }}</dd></div>
-            {% if ad.promotion_url %}<div class="stat-rows__row"><dt>لینک</dt><dd dir="ltr" class="muted">{{ ad.promotion_url|shorten_url:36 }}</dd></div>{% endif %}
+            <div class="stat-rows__row"><dt>شناسه تبلیغ</dt><dd><code class="code-inline" dir="ltr" title="{{ ad.remote_ad_id }}">{{ ad.remote_ad_id|default:"—" }}</code></dd></div>
+            <div class="stat-rows__row">
+              <dt>وضعیت در تلگرام</dt>
+              <dd>
+                <span>{{ ad.remote_status|telegram_remote_status_fa }}</span>
+                {% if ad.remote_status %}<span class="muted remote-status-raw" dir="ltr" title="کد API">({{ ad.remote_status }})</span>{% endif %}
+              </dd>
+            </div>
+            {% if ad.promotion_url %}<div class="stat-rows__row"><dt>آدرس تبلیغ</dt><dd dir="ltr" class="muted"><a href="{{ ad.promotion_url }}" rel="noopener noreferrer">{{ ad.promotion_url|shorten_url:40 }}</a></dd></div>{% endif %}
           </dl>
           {% empty %}
           <p class="detail-panel__hint muted">پس از تأیید و اتصال به تلگرام، آمار اینجا همگام می‌شود.</p>

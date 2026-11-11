@@ -96,8 +96,8 @@ body.app-body {
   background: rgba(255, 255, 255, 0.92);
   border-bottom: 1px solid var(--border-default);
   backdrop-filter: blur(16px);
-  padding-block: 0.5rem;
-  min-height: 2.75rem;
+  padding-block: 0.35rem;
+  min-height: 2.35rem;
 }
 .topbar-title {
   font-weight: 600;
@@ -1423,7 +1423,7 @@ html.motion-ready .motion-reveal.is-revealed {
   display: grid;
   grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
   gap: 0.85rem;
-  align-items: stretch;
+  align-items: start;
 }
 @media (max-width: 1000px) {
   .dash-panels--split {
@@ -1436,7 +1436,10 @@ html.motion-ready .motion-reveal.is-revealed {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  min-height: 12rem;
+  min-height: 0;
+}
+.dash-panel:has(.dash-recent-list) {
+  min-height: 0;
 }
 .dash-panel__head {
   display: flex;
@@ -1470,16 +1473,14 @@ html.motion-ready .motion-reveal.is-revealed {
   border: none;
   background: transparent;
 }
+.dash-panel__empty--compact {
+  padding: 0.85rem 1.15rem 1rem;
+}
 
 .dash-recent-list {
   list-style: none;
   margin: 0;
-  padding: 0.35rem 0.5rem;
-  max-height: min(32rem, 56vh);
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  scrollbar-width: thin;
-  scrollbar-color: var(--border-strong) transparent;
+  padding: 0.35rem 0.5rem 0.5rem;
 }
 .dash-recent-list li:last-child .dash-recent-item {
   border-bottom: none;
@@ -1629,7 +1630,10 @@ html.motion-ready .motion-reveal.is-revealed {
   font-size: 0.68rem;
 }
 .activity-feed__empty {
-  padding: 1.15rem;
+  padding: 0;
+}
+.dash-panel--activity:has(.dash-panel__empty) {
+  align-self: start;
 }
 
 .site-header {
@@ -3006,10 +3010,75 @@ html.motion-ready .sidebar.is-open {
 
 .row-actions {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
   justify-content: flex-end;
   gap: 0.25rem;
+}
+.row-actions__group {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.3rem;
+}
+.row-actions__overflow {
+  position: relative;
+}
+.row-actions__overflow > summary {
+  list-style: none;
+}
+.row-actions__overflow > summary::-webkit-details-marker {
+  display: none;
+}
+.row-actions__menu {
+  position: absolute;
+  inset-inline-end: 0;
+  top: calc(100% + 0.2rem);
+  z-index: 5;
+  min-width: 9.5rem;
+  padding: 0.35rem;
+  background: var(--surface-primary);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-card);
+}
+.row-actions__menu .campaign-delete-form {
+  display: block;
+  width: 100%;
+}
+.row-actions__menu .campaign-delete-form button {
+  width: 100%;
+  justify-content: center;
+}
+.remote-status-raw {
+  font-size: 0.72rem;
+  margin-inline-start: 0.35rem;
+}
+.campaign-portfolio-disclosure {
+  margin-top: 0.85rem;
+}
+.campaign-portfolio-disclosure__summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.35rem 1rem;
+  cursor: pointer;
+  list-style: none;
+  padding: 0;
+  margin: 0 0 0.75rem;
+}
+.campaign-portfolio-disclosure__summary::-webkit-details-marker {
+  display: none;
+}
+.campaign-portfolio-disclosure[open] .campaign-portfolio-disclosure__summary {
+  margin-bottom: 0.65rem;
+  padding-bottom: 0.65rem;
+  border-bottom: 1px solid var(--border-default);
+}
+.chart-box--compact-list {
+  min-height: 240px;
 }
 .campaign-delete-form {
   display: inline-flex;

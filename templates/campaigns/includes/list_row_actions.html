@@ -1,0 +1,12 @@
+<div class="row-actions__group">
+  <a class="btn btn-primary btn-sm" href="{% url 'campaigns:detail' campaign.id %}">جزئیات</a>
+  {% if campaign.status == 'draft' %}
+  <a class="btn btn-ghost btn-sm" href="{% url 'campaigns:wizard' campaign.id %}">ادامه پیش‌نویس</a>
+  <details class="row-actions__overflow">
+    <summary class="btn btn-ghost btn-sm row-actions__more" aria-label="عملیات بیشتر">⋯</summary>
+    <div class="row-actions__menu">
+      {% include "includes/campaign_delete_form.html" with campaign=campaign %}
+    </div>
+  </details>
+  {% endif %}
+</div>

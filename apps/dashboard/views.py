@@ -21,7 +21,7 @@ def home(request):
 
     wallet = ensure_wallet(customer)
 
-    recent_qs = campaigns.order_by("-updated_at")[:12]
+    recent_qs = campaigns.order_by("-updated_at")[:6]
     recent_rows = build_campaign_list_rows(recent_qs)
     activity = (
         CampaignStatusHistory.objects.filter(campaign__customer=customer)
@@ -32,7 +32,6 @@ def home(request):
 
     impressions = int(portfolio["total_impressions"])
     clicks = int(portfolio["total_clicks"])
-    actions = int(portfolio["total_actions"])
     ctr = portfolio["weighted_ctr"]
 
     from apps.campaigns.analytics import portfolio_timeseries
@@ -61,7 +60,6 @@ def home(request):
             "total_campaigns": campaigns.count(),
             "impressions": impressions,
             "clicks": clicks,
-            "actions": actions,
             "ctr": ctr,
             "wallet": wallet,
             "recent_rows": recent_rows,

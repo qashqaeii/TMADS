@@ -10,7 +10,7 @@
 {% with name=user.customer_profile.display_name|default:user.get_username %}
 {% url 'finance:wallet' as wallet_url %}
 {% url 'campaigns:wizard_new' as wizard_url %}
-{% include "includes/dash_header.html" with title="داشبورد" hint=name secondary_action_url=wallet_url secondary_action_label="کیف پول" action_url=wizard_url action_label="کمپین جدید" action_primary=1 %}
+{% include "includes/dash_header.html" with title="داشبورد" hint=name secondary_action_url=wallet_url secondary_action_label="کیف پول" action_url=wizard_url action_label="کمپین جدید" action_primary=1 only %}
 {% endwith %}
 
 {% include "includes/rate_strip.html" %}
@@ -125,9 +125,8 @@
       {% endfor %}
     </ul>
     {% else %}
-    <div class="dash-panel__empty activity-feed__empty">
+    <div class="dash-panel__empty dash-panel__empty--compact activity-feed__empty">
       <p class="muted">هنوز رویدادی ثبت نشده است.</p>
-      <p class="muted" style="font-size:.82rem;margin:.35rem 0 0">پس از ذخیره پیش‌نویس یا تغییر وضعیت، اینجا نمایش داده می‌شود.</p>
     </div>
     {% endif %}
   </section>
