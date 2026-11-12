@@ -1,6 +1,6 @@
 # TMADS — unified premium redesign
 
-Requested deadline: 2026-11-13 07:00 Asia/Tehran. This is a target, not a verified completion promise.
+User removed the deadline. Continue until every template meets the agreed design and verification criteria.
 Baseline: e12297395a486f40475e4a96e592341b88f4ced9. Scope: all 71 HTML templates, including shared partials, public, auth, customer and operations pages.
 
 ## Design contract
@@ -13,6 +13,8 @@ Implement a restrained, coherent Persian RTL premium SaaS design, preserving Tel
 - Shared components: shell/sidebar/mobile navigation, header, button, form field, select/checkbox, tabs, KPI, table/mobile record, badge, modal, toast, empty/loading/error state and chart frame.
 - One clear primary action per section; useful data density; consistent mobile touch targets near 44px; visible keyboard focus, labels, semantic headings, reduced motion. No horizontal page overflow at 390/768/1440px; data tables may have deliberate contained scrolling.
 - Preserve existing routes, Django blocks/context, CSRF, permission guards, input names, JS hooks, event bindings, financial numbers and actual functionality.
+
+Explicit detail scope: sidebars, headers, KPI cards, tables, dialogs/modals, dropdown menus, subtle enter/exit transitions, hover/focus/pressed/disabled states. Motion must be restrained, interruptible, and respect reduced-motion preferences. Preserve focus and keyboard usability.
 
 ## Execution order
 
@@ -30,7 +32,7 @@ For repeatability use the GitHub source and this document; do not rely on transi
 
 ## Completion criteria
 
-Every inventory row has implementation status and verification evidence; consistent tokens/components across all page families; responsive RTL flows preserve behavior; actual checks recorded, no false pass claims. At/after deadline, stop starting design changes and report completed/remaining/blocked work and commit URLs. Once complete, pause the automation; no endless polishing.
+Every inventory row has implementation status and verification evidence; consistent tokens/components across all page families; responsive RTL flows preserve behavior; actual checks recorded, no false pass claims. Report completed/remaining/blocked work and commit URLs after each run. Once complete, pause the automation; no endless polishing.
 
 ## Inventory
 
