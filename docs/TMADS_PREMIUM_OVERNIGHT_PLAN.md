@@ -1,13 +1,13 @@
 # TMADS — unified premium redesign
 
 User removed the deadline. Continue until every template meets the agreed design and verification criteria.
-Baseline: e12297395a486f40475e4a96e592341b88f4ced9. Scope: all 71 HTML templates, including shared partials, public, auth, customer and operations pages.
+Baseline: e12297395a486f40475e4a96e592341b88f4ced9. Scope: original 71 HTML templates plus the shared auth_field.html (72 total), including shared partials, public, auth, customer and operations pages.
 
 ## Design contract
 
 Implement a restrained, coherent Persian RTL premium SaaS design, preserving Telegram blue brand identity. This is an implementation assignment, not an audit-only task. Use a single documented token/component system; no repeated aesthetic rewrites.
 
-- Surfaces: canvas #F6F8FB, white cards, text #142437, muted #5D6B7C, borders #E4EAF1. Brand #2AABEE; darker action blue #087DB7 for white-text controls, verify contrast. Semantic success/warning/error muted and readable.
+- Surfaces: canvas #F6F8FB, white cards, text #142437, muted #5D6B7C, borders #E4EAF1. Brand #2AABEE; darker action blue #0878AD for white-text controls, verify contrast. Semantic success/warning/error muted and readable.
 - Typography: consistent Persian-capable font stack; use available approved font resources, readable body 14–16px, clear compact headings, tabular numeric amounts. Preserve Persian/Latin direction where appropriate.
 - Spacing: 4/8/12/16/24/32/48px scale. Card radius 16px, controls 10px, subtle borders/shadows. Avoid heavy boxes, excessive gradients and decorative clutter.
 - Shared components: shell/sidebar/mobile navigation, header, button, form field, select/checkbox, tabs, KPI, table/mobile record, badge, modal, toast, empty/loading/error state and chart frame.
@@ -38,15 +38,15 @@ Every inventory row has implementation status and verification evidence; consist
 
 | Template | Implementation | Verification |
 |---|---|---|
-| `templates/accounts/login.html` | Pending | Not verified in this pass |
-| `templates/accounts/password_reset.html` | Pending | Not verified in this pass |
-| `templates/accounts/password_reset_complete.html` | Pending | Not verified in this pass |
-| `templates/accounts/password_reset_confirm.html` | Pending | Not verified in this pass |
-| `templates/accounts/password_reset_done.html` | Pending | Not verified in this pass |
+| `templates/accounts/login.html` | Implemented; visual QA pending | Django compile/render checked; browser unavailable |
+| `templates/accounts/password_reset.html` | Implemented; visual QA pending | Django compile/render checked; browser unavailable |
+| `templates/accounts/password_reset_complete.html` | Implemented; visual QA pending | Django compile/render checked; browser unavailable |
+| `templates/accounts/password_reset_confirm.html` | Implemented; visual QA pending | Django compile/render checked; browser unavailable |
+| `templates/accounts/password_reset_done.html` | Implemented; visual QA pending | Django compile/render checked; browser unavailable |
 | `templates/accounts/profile.html` | Pending | Not verified in this pass |
-| `templates/accounts/register.html` | Pending | Not verified in this pass |
-| `templates/app_shell.html` | Pending | Not verified in this pass |
-| `templates/base.html` | Pending | Not verified in this pass |
+| `templates/accounts/register.html` | Implemented; visual QA pending | Django compile/render checked; browser unavailable |
+| `templates/app_shell.html` | Implemented; visual QA pending | Django compile/render checked; browser unavailable |
+| `templates/base.html` | Implemented; visual QA pending | Django compile/render checked; browser unavailable |
 | `templates/campaigns/detail.html` | Pending | Not verified in this pass |
 | `templates/campaigns/includes/list_page_header.html` | Pending | Not verified in this pass |
 | `templates/campaigns/includes/list_row_actions.html` | Pending | Not verified in this pass |
@@ -105,10 +105,12 @@ Every inventory row has implementation status and verification evidence; consist
 | `templates/public/how_it_works.html` | Pending | Not verified in this pass |
 | `templates/public/legal_page.html` | Pending | Not verified in this pass |
 | `templates/public/pricing.html` | Pending | Not verified in this pass |
-| `templates/public_base.html` | Pending | Not verified in this pass |
+| `templates/public_base.html` | Implemented; visual QA pending | Django compile/render checked; browser unavailable |
 | `templates/support/create.html` | Pending | Not verified in this pass |
 | `templates/support/detail.html` | Pending | Not verified in this pass |
 | `templates/support/list.html` | Pending | Not verified in this pass |
+
+| `templates/includes/auth_field.html` | Implemented; visual QA pending | Shared bound field/error/help rendering checked |
 
 ## Progress
 
@@ -117,3 +119,12 @@ Every inventory row has implementation status and verification evidence; consist
 - Verification: static inspection of 9 intended replacements; CSS brace balance zero; calculated white/action contrast 4.88:1 and white/muted text contrast 5.44:1 for the updated solid tokens. These measurements do not certify all component combinations. No runtime/browser tests executed in this pass. Earlier reports are historical only.
 
 - Automation configured hourly at :30 Asia/Tehran with no deadline; stop after completion. Routine progress belongs in this document, not user notifications. Ask only for a genuine blocker requiring user intervention. Next: complete shared components/cascade review and inspect all consuming templates, then proceed through the inventory.
+
+## Batch 1 — navigation, shared controls and authentication
+
+- Updated existing component rules in design-executive.css (not a new override stylesheet): spacing/control tokens, 44px touch controls, focus indication, invalid/disabled field states, auth spacing and sidebar label contrast.
+- Base/app/public shells: skip navigation, mobile drawer close control, correct RTL drawer edge, initial backdrop cloaking, focus containment/restoration and inert background, current-page indication. Preserved Alpine open/close handlers and all routes. Account links now use ordinary link semantics instead of incomplete ARIA menu roles.
+- Six authentication templates: shared bound fields with labels/help/errors, login autocomplete, recovery success icon/state and consistent actions. Removed environment label from public footer.
+- Verification during preparation: manage.py check clean; collectstatic completed; all 72 templates compiled; invalid registration, dashboard shell and both reset-confirm branches rendered. Existing suite: 70 passed in 14.43s after installing environment-only socksio and collecting static assets (NOBITEX_HTTP_TIMEOUT_SECONDS=1, NOBITEX_HTTP_RETRIES=0). node --check navigation.js passed. No backend or requirements files changed.
+- Browser attempt failed: installed Chromium launch rejected socket() with Operation not permitted; bundled browser download also returned a truncated archive. No visual viewport pass is claimed. Browser QA at 390/768/1440 remains pending; this does not block remaining source work.
+- Next: support/profile/notifications, then campaign/customer shared components. Preserve this batch rather than repeating it. Implementation commit: this batch commit; exact SHA will be recorded in the next progress update.

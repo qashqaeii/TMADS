@@ -5,21 +5,22 @@
   <div class="auth-card auth-card--exec">
     <h1>ورود به حساب</h1>
     <p class="muted">به داشبورد کمپین و کیف پول دسترسی پیدا کنید.</p>
-    <form method="post" class="form-stack" style="max-width:none">
+    <form method="post" class="form-stack">
       {% csrf_token %}
-      {% if form.non_field_errors %}<div class="form-error">{{ form.non_field_errors }}</div>{% endif %}
+      {% if form.non_field_errors %}<div class="form-error" role="alert">{{ form.non_field_errors }}</div>{% endif %}
       <div class="field">
         <label for="id_username">نام کاربری</label>
-        <input type="text" name="username" id="id_username" required autofocus value="{{ form.username.value|default:'' }}">
-        {% if form.username.errors %}<div class="form-error">{{ form.username.errors }}</div>{% endif %}
+        <input type="text" name="username" id="id_username" required autofocus autocomplete="username" value="{{ form.username.value|default:'' }}">
+        {% if form.username.errors %}<div class="form-error" role="alert">{{ form.username.errors }}</div>{% endif %}
       </div>
       <div class="field">
         <label for="id_password">رمز عبور</label>
-        <input type="password" name="password" id="id_password" required>
+        <input type="password" name="password" id="id_password" required autocomplete="current-password">
       </div>
       <button class="btn btn-primary btn-lg" type="submit">ورود</button>
-      <p class="muted" style="margin:0;font-size:.9rem">حساب ندارید؟ <a href="{% url 'accounts:register' %}">ثبت‌نام</a> · <a href="{% url 'accounts:password_reset' %}">فراموشی رمز</a></p>
+      <p class="auth-links">حساب ندارید؟ <a href="{% url 'accounts:register' %}">ثبت‌نام</a> · <a href="{% url 'accounts:password_reset' %}">فراموشی رمز</a></p>
     </form>
   </div>
 </section>
 {% endblock %}
+

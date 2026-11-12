@@ -3,8 +3,8 @@
 {% block body_class %}is-app{% endblock %}
 {% block body %}
 <div class="app-layout" x-data="{ open: false, accountOpen: false }" @keydown.escape.window="open = false; accountOpen = false">
-  <div class="sidebar-backdrop mobile-only" x-show="open" x-transition.opacity @click="open = false" aria-hidden="true"></div>
-  <aside class="sidebar sidebar--premium" :class="{ 'is-open': open }" id="app-sidebar">
+  <div class="sidebar-backdrop mobile-only" x-show="open" x-transition.opacity @click="open = false" x-cloak aria-hidden="true"></div>
+  <aside class="sidebar sidebar--premium" :class="{ 'is-open': open }" id="app-sidebar" aria-label="ناوبری پنل" data-mobile-drawer>
     <header class="sidebar-head">
       <a class="sidebar-brand brand-lockup" href="{% url 'dashboard:home' %}">
         {% include "includes/brand_mark.html" %}
@@ -13,6 +13,7 @@
           <small>تبلیغات تلگرام</small>
         </span>
       </a>
+      <button type="button" class="sidebar-close mobile-only" @click="open = false" aria-label="بستن منو">{% include "includes/lucide_icon.html" with name="x" size="btn" %}</button>
     </header>
 
     <div class="sidebar-scroll">
@@ -132,18 +133,18 @@
           <span class="topbar-cta__label">کمپین جدید</span>
         </a>
         <span class="topbar-account-wrap">
-          <button type="button" class="topbar-account" @click="accountOpen = !accountOpen" :aria-expanded="accountOpen" aria-haspopup="menu" aria-label="منوی حساب">
+          <button type="button" class="topbar-account" @click="accountOpen = !accountOpen" :aria-expanded="accountOpen" aria-controls="account-navigation" aria-label="منوی حساب">
             <span class="topbar-account__avatar" aria-hidden="true">{{ user.get_username|slice:":1" }}</span>
           </button>
-          <div class="topbar-account-menu" x-show="accountOpen" x-transition.opacity @click.outside="accountOpen = false" x-cloak role="menu">
-            <a role="menuitem" class="topbar-account-menu__item" href="{% url 'accounts:profile' %}">پروفایل</a>
-            <a role="menuitem" class="topbar-account-menu__item" href="{% url 'finance:wallet' %}">کیف پول</a>
-            <a role="menuitem" class="topbar-account-menu__item topbar-account-menu__item--danger" href="{% url 'accounts:logout' %}">خروج</a>
+          <div id="account-navigation" class="topbar-account-menu" x-show="accountOpen" x-transition.opacity @click.outside="accountOpen = false" x-cloak aria-label="پیوندهای حساب">
+            <a class="topbar-account-menu__item" href="{% url 'accounts:profile' %}">پروفایل</a>
+            <a class="topbar-account-menu__item" href="{% url 'finance:wallet' %}">کیف پول</a>
+            <a class="topbar-account-menu__item topbar-account-menu__item--danger" href="{% url 'accounts:logout' %}">خروج</a>
           </div>
         </span>
       </div>
     </header>
-    <main class="app-content {% block container_class %}container-wide{% endblock %}">
+    <main id="main-content" tabindex="-1" class="app-content {% block container_class %}container-wide{% endblock %}">
       <div class="page-frame">
         {% block content %}{% endblock %}
       </div>

@@ -48,7 +48,15 @@
   --shadow-card: 0 3px 18px rgba(16, 31, 51, 0.035);
   --shadow-floating: 0 12px 36px rgba(16, 31, 51, 0.1);
 
-  --radius-sm: 8px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --control-height: 44px;
+
+  --radius-sm: 10px;
   --radius-md: 12px;
   --radius-lg: 16px;
   --radius-xl: 20px;
@@ -422,7 +430,11 @@ body.app-body {
   background: var(--sidebar-bg) !important;
 }
 .sidebar-head {
-  padding: 0.9rem 0.85rem 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-4);
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 .sidebar-brand-text strong {
@@ -430,7 +442,7 @@ body.app-body {
   font-size: 0.95rem;
 }
 .sidebar-brand-text small {
-  color: rgba(186, 199, 213, 0.55);
+  color: var(--sidebar-text);
   font-size: 0.68rem;
 }
 .sidebar .brand-mark { color: var(--brand-primary); }
@@ -447,10 +459,10 @@ body.app-body {
   font-size: 0.62rem;
   font-weight: 600;
   letter-spacing: 0.08em;
-  color: rgba(186, 199, 213, 0.45);
+  color: var(--sidebar-text);
 }
 .sidebar-group-label--admin {
-  color: rgba(186, 199, 213, 0.5);
+  color: var(--sidebar-text);
   margin-top: 0.65rem;
 }
 .sidebar-admin-block {
@@ -617,8 +629,8 @@ body.app-body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.35rem;
-  height: 2.35rem;
+  width: var(--control-height);
+  height: var(--control-height);
   padding: 0;
   margin: 0;
   border: 1px solid var(--border-default);
@@ -1161,7 +1173,7 @@ body.app-body {
 }
 
 /* ── Buttons ── */
-.btn { border-radius: 11px; font-weight: 600; font-size: 0.88rem; }
+.btn { border-radius: var(--radius-sm); font-weight: 600; font-size: 0.88rem; min-height: var(--control-height); gap: var(--space-2); }
 .btn-primary {
   background: var(--brand-action);
   border-color: var(--brand-action);
@@ -1185,7 +1197,7 @@ body.app-body {
   color: var(--text-heading);
 }
 .btn:focus-visible {
-  outline: 2px solid var(--brand-primary);
+  outline: 2px solid var(--brand-action);
   outline-offset: 2px;
 }
 
@@ -1198,7 +1210,7 @@ body.app-body {
   border-radius: var(--radius-sm);
   background: var(--surface-primary);
   color: var(--text-primary);
-  min-height: 2.65rem;
+  min-height: var(--control-height);
 }
 .field input:focus,
 .field select:focus,
@@ -1206,6 +1218,33 @@ body.app-body {
   border-color: var(--brand-primary);
   box-shadow: 0 0 0 3px rgba(42, 171, 238, 0.18);
   outline: none;
+}
+
+/* Shared interaction primitives; keep alongside forms/buttons, not page overrides. */
+.skip-link { position: fixed; inset-block-start: 8px; inset-inline-start: 8px; z-index: 200; padding: 12px 20px; background: var(--surface-primary); color: var(--brand-action); border-radius: var(--radius-sm); box-shadow: var(--shadow-floating); transform: translateY(-160%); }
+.skip-link:focus { transform: translateY(0); }
+body.app-body :where(a, button, summary, [tabindex="0"]):focus-visible { outline: 2px solid var(--brand-action); outline-offset: 3px; }
+.sidebar :where(a, button):focus-visible { outline-color: #8cd5ff; }
+.btn:disabled, .btn[aria-disabled="true"] { opacity: .55; cursor: not-allowed; box-shadow: none; transform: none; }
+.field input::placeholder, .field textarea::placeholder { color: var(--text-muted); opacity: 1; }
+.field input[type="checkbox"], .field input[type="radio"] { min-height: 0; width: 18px; height: 18px; accent-color: var(--brand-action); }
+.field:has(.form-error) :is(input, select, textarea) { border-color: var(--danger); }
+.field-help { font-size: .8rem; line-height: 1.75; color: var(--text-secondary); }
+.field-help ul, .form-error ul { margin: 0; padding-inline-start: 1.2rem; }
+.auth-card--exec .form-stack { max-width: none; gap: var(--space-4); }
+.auth-card--exec .form-stack > .btn, .auth-card--exec > .btn { width: 100%; }
+.auth-links { margin: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-2) var(--space-4); font-size: .875rem; line-height: 1.8; color: var(--text-secondary); }
+.auth-state-icon { width: 48px; height: 48px; display: grid; place-items: center; margin-block-end: var(--space-4); border-radius: var(--radius-md); background: var(--brand-soft); color: var(--brand-action); }
+.sidebar-close { align-items: center; justify-content: center; flex-shrink: 0; width: 44px; height: 44px; padding: 0; border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--sidebar-text); cursor: pointer; }
+.sidebar-close:hover { background: var(--sidebar-hover); color: white; }
+@media (max-width: 900px) {
+  html.app-nav-open { overflow: hidden; }
+  .sidebar:not(.is-open) { visibility: hidden; }
+  .sidebar { height: 100dvh; display: flex; flex-direction: column; }
+  .sidebar-scroll { min-height: 0; flex: 1; overflow-y: auto; overscroll-behavior: contain; }
+  .sidebar a.sidebar-link { min-height: var(--control-height); display: flex; align-items: center; }
+  .topbar-menu, .topbar-action, .topbar--premium .topbar-account { min-width: var(--control-height); min-height: var(--control-height); }
+  .field input, .field select, .field textarea { font-size: 1rem; }
 }
 
 /* ── Tables ── */
@@ -3594,7 +3633,7 @@ html.motion-ready .sidebar.is-open {
 }
 .auth-card--exec {
   width: min(100%, 24rem);
-  padding: 1.5rem 1.4rem 1.6rem;
+  padding: clamp(1.25rem, 4vw, 2rem);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-lg);
   background: var(--surface-primary);
@@ -3602,7 +3641,8 @@ html.motion-ready .sidebar.is-open {
 }
 .auth-card--exec h1 {
   margin: 0;
-  font-size: 1.2rem;
+  font-size: clamp(1.25rem, 3vw, 1.5rem);
+  line-height: 1.5;
   color: var(--text-heading);
 }
 .auth-card--exec > .muted {
@@ -3674,7 +3714,7 @@ html.motion-ready .sidebar.is-open {
   font-weight: 600;
 }
 .tab-bar button:focus-visible {
-  outline: 2px solid var(--brand-primary);
+  outline: 2px solid var(--brand-action);
   outline-offset: 2px;
 }
 .dash-toolbar {
@@ -4903,7 +4943,7 @@ body.is-public .public-nav-bar .brand-lockup span {
 .public-nav-sheet {
   position: fixed;
   top: 0;
-  inset-inline-end: 0;
+  inset-inline-start: 0;
   width: min(21rem, 92vw);
   max-width: 100%;
   height: 100dvh;
@@ -4911,7 +4951,7 @@ body.is-public .public-nav-bar .brand-lockup span {
   display: flex;
   flex-direction: column;
   background: linear-gradient(180deg, var(--surface-primary) 0%, var(--page-bg) 100%);
-  border-inline-start: 1px solid var(--border-default);
+  border-inline-end: 1px solid var(--border-default);
   box-shadow: -24px 0 56px rgba(16, 31, 51, 0.14);
   transform: translate3d(108%, 0, 0);
   opacity: 0;
@@ -5938,7 +5978,7 @@ body.is-app .rate-strip {
   cursor: not-allowed;
 }
 .chart-range__btn:focus-visible {
-  outline: 2px solid var(--brand-primary);
+  outline: 2px solid var(--brand-action);
   outline-offset: 2px;
 }
 .campaign-detail__split + .campaign-detail__trend,
@@ -7437,7 +7477,7 @@ body.is-app .sync-hint[title] {
   background: var(--brand-action);
 }
 .schedule-cell:focus-visible {
-  outline: 2px solid var(--brand-primary);
+  outline: 2px solid var(--brand-action);
   outline-offset: 1px;
 }
 .schedule-presets {
@@ -10634,3 +10674,4 @@ body.is-app .topbar-notify {
     justify-content: space-between;
   }
 }
+
