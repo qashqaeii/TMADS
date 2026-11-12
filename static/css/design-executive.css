@@ -3755,6 +3755,7 @@ html.motion-ready .sidebar.is-open {
   transform: translate3d(-2px, 0, 0);
 }
 .record-list__meta {
+  flex: 1;
   min-width: 0;
 }
 .record-list__meta strong {
@@ -3805,6 +3806,9 @@ html.motion-ready .sidebar.is-open {
   text-decoration: underline;
 }
 .msg-bubble {
+  max-width: min(85%, 46rem);
+  align-self: flex-start;
+  overflow-wrap: anywhere;
   padding: 0.75rem 0.9rem;
   border-radius: var(--radius-md);
   border: 1px solid var(--border-default);
@@ -3812,6 +3816,7 @@ html.motion-ready .sidebar.is-open {
   font-size: 0.88rem;
 }
 .msg-bubble.is-staff {
+  align-self: flex-end;
   background: var(--brand-soft);
   border-color: rgba(42, 171, 238, 0.2);
 }
@@ -3829,6 +3834,19 @@ html.motion-ready .sidebar.is-open {
   gap: 0.55rem;
 }
 
+.section-description { margin: 0; color: var(--text-secondary); font-size: .875rem; line-height: 1.8; }
+.form-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--space-3); }
+.account-settings { align-items: start; }
+.account-settings .form-stack { max-width: none; }
+.message-text { margin: 0 0 var(--space-2); white-space: pre-wrap; line-height: 1.85; }
+.message-meta { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--space-3); color: var(--text-secondary); font-size: .75rem; }
+.chat-compose > .btn { align-self: flex-end; }
+.notification-panel .activity-feed__empty { padding: var(--space-6); text-align: center; }
+@media (max-width: 520px) {
+  .msg-bubble { max-width: 96%; }
+  .form-actions > .btn { flex: 1; }
+  .record-list__item { flex-wrap: wrap; }
+}
 /* ══ Campaigns — analytics UI ══ */
 .chart-head {
   display: flex;

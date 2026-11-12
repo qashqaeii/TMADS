@@ -4,12 +4,13 @@
 {% block content %}
 <div class="app-stack">
 {% include "includes/dash_header.html" with eyebrow="پشتیبانی" title="تیکت جدید" %}
-<form method="post" class="card card--lift card-pad form-stack" style="max-width:36rem">
+<form method="post" class="card card--lift card-pad form-stack" aria-label="ثبت درخواست پشتیبانی">
   {% csrf_token %}
   {% if campaign_id %}<input type="hidden" name="campaign_id" value="{{ campaign_id }}"><p class="muted ops-pill">مرتبط با کمپین <code dir="ltr">{{ campaign_id }}</code></p>{% endif %}
-  <div class="field"><label>موضوع</label><input name="subject" placeholder="مشکل پرداخت یا کمپین" required></div>
-  <div class="field"><label>شرح</label><textarea name="body" rows="5" required placeholder="جزئیات را بنویسید…"></textarea></div>
-  <button class="btn btn-primary" type="submit">ثبت تیکت</button>
+  <div class="field"><label for="ticket-subject">موضوع</label><input id="ticket-subject" name="subject" placeholder="مشکل پرداخت یا کمپین" required></div>
+  <div class="field"><label for="ticket-body">شرح درخواست</label><textarea id="ticket-body" aria-describedby="ticket-help" name="body" rows="5" required placeholder="جزئیات را بنویسید…"></textarea></div>
+  <p class="section-description" id="ticket-help">مراحل بروز مشکل را بنویسید؛ رمز عبور و اطلاعات کارت بانکی را ارسال نکنید.</p>
+  <div class="form-actions"><a class="btn btn-ghost" href="{% url 'support:list' %}">بازگشت</a><button class="btn btn-primary" type="submit">ثبت تیکت</button></div>
 </form>
 </div>
 {% endblock %}

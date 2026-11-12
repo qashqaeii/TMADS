@@ -43,7 +43,7 @@ Every inventory row has implementation status and verification evidence; consist
 | `templates/accounts/password_reset_complete.html` | Implemented; visual QA pending | Django compile/render checked; browser unavailable |
 | `templates/accounts/password_reset_confirm.html` | Implemented; visual QA pending | Django compile/render checked; browser unavailable |
 | `templates/accounts/password_reset_done.html` | Implemented; visual QA pending | Django compile/render checked; browser unavailable |
-| `templates/accounts/profile.html` | Pending | Not verified in this pass |
+| `templates/accounts/profile.html` | Implemented; visual QA pending | Compiled and empty/populated GETs verified |
 | `templates/accounts/register.html` | Implemented; visual QA pending | Django compile/render checked; browser unavailable |
 | `templates/app_shell.html` | Implemented; visual QA pending | Django compile/render checked; browser unavailable |
 | `templates/base.html` | Implemented; visual QA pending | Django compile/render checked; browser unavailable |
@@ -57,7 +57,7 @@ Every inventory row has implementation status and verification evidence; consist
 | `templates/campaigns/list.html` | Pending | Not verified in this pass |
 | `templates/campaigns/wizard.html` | Pending | Not verified in this pass |
 | `templates/dashboard/home.html` | Pending | Not verified in this pass |
-| `templates/dashboard/notifications.html` | Pending | Not verified in this pass |
+| `templates/dashboard/notifications.html` | Implemented; visual QA pending | Compiled and empty/populated GETs verified |
 | `templates/finance/invoice_detail.html` | Pending | Not verified in this pass |
 | `templates/finance/invoices.html` | Pending | Not verified in this pass |
 | `templates/finance/refunds.html` | Pending | Not verified in this pass |
@@ -106,9 +106,9 @@ Every inventory row has implementation status and verification evidence; consist
 | `templates/public/legal_page.html` | Pending | Not verified in this pass |
 | `templates/public/pricing.html` | Pending | Not verified in this pass |
 | `templates/public_base.html` | Implemented; visual QA pending | Django compile/render checked; browser unavailable |
-| `templates/support/create.html` | Pending | Not verified in this pass |
-| `templates/support/detail.html` | Pending | Not verified in this pass |
-| `templates/support/list.html` | Pending | Not verified in this pass |
+| `templates/support/create.html` | Implemented; visual QA pending | Compiled and empty/populated GETs verified |
+| `templates/support/detail.html` | Implemented; visual QA pending | Compiled and empty/populated GETs verified |
+| `templates/support/list.html` | Implemented; visual QA pending | Compiled and empty/populated GETs verified |
 
 | `templates/includes/auth_field.html` | Implemented; visual QA pending | Shared bound field/error/help rendering checked |
 
@@ -127,4 +127,13 @@ Every inventory row has implementation status and verification evidence; consist
 - Six authentication templates: shared bound fields with labels/help/errors, login autocomplete, recovery success icon/state and consistent actions. Removed environment label from public footer.
 - Verification during preparation: manage.py check clean; collectstatic completed; all 72 templates compiled; invalid registration, dashboard shell and both reset-confirm branches rendered. Existing suite: 70 passed in 14.43s after installing environment-only socksio and collecting static assets (NOBITEX_HTTP_TIMEOUT_SECONDS=1, NOBITEX_HTTP_RETRIES=0). node --check navigation.js passed. No backend or requirements files changed.
 - Browser attempt failed: installed Chromium launch rejected socket() with Operation not permitted; bundled browser download also returned a truncated archive. No visual viewport pass is claimed. Browser QA at 390/768/1440 remains pending; this does not block remaining source work.
-- Next: support/profile/notifications, then campaign/customer shared components. Preserve this batch rather than repeating it. Implementation commit: this batch commit; exact SHA will be recorded in the next progress update.
+- Next: support/profile/notifications, then campaign/customer shared components. Preserve this batch rather than repeating it. Implementation commit: [fd9c31a](https://github.com/qashqaeii/TMADS/commit/fd9c31a603b9a2b0a511660b38cfe5da070d2ba4).
+
+## Batch 2 — profile, support and notifications
+
+- Profile uses labelled fields, isolated LTR contact values, shared password error/help components and aligned form spacing.
+- Ticket form now has explicit field labels, clear back/submit actions; conversation preserves line breaks, distinguishes support replies, wraps long text and provides labelled reply composer and timestamps.
+- Ticket list uses semantic timestamps; notifications have a non-color unread indicator for assistive technology, readable empty state and hide the unnecessary bulk action when empty.
+- Existing CSS component rules extended in place; no backend files, routes, permissions, form names or financial logic changed.
+- Current verification: manage.py check clean; all 72 templates compile; seven authenticated GETs cover profile and support/notifications empty and populated states using transaction-rolled-back local fixtures. CSS parse: zero errors. Existing pytest suite: 70 passed in 21.66s with environment-only socksio plus 1s/no-retry Nobitex test configuration. Navigation JS syntax checked. Browser interaction/viewport QA remains pending due to launch restriction recorded above.
+- Next execution: dashboard and campaign shared headers/KPI/menus, then wizard. Do not treat pending visual QA as completed. Review the inherited components in each consumer before updating its inventory row.
