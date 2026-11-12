@@ -113,5 +113,7 @@ Every inventory row has implementation status and verification evidence; consist
 ## Progress
 
 - Planning: full HTML inventory captured from remote main; design contract and bounded execution workflow recorded.
-- Implementation: not started in this redesign pass.
-- Verification: no new runtime or browser tests executed in this pass. Earlier reports are historical only.
+- Foundation implementation started: commit e949e66496685604f8eac2b20e3d1fb95eb07c5e updates existing color/motion tokens and restores explicit topbar keyboard focus. No template is marked complete yet.
+- Verification: static inspection of 9 intended replacements; CSS brace balance zero; calculated white/action contrast 4.88:1 and white/muted text contrast 5.44:1 for the updated solid tokens. These measurements do not certify all component combinations. No runtime/browser tests executed in this pass. Earlier reports are historical only.
+
+- Automation configured hourly at :30 Asia/Tehran with no deadline; stop after completion. Routine progress belongs in this document, not user notifications. Ask only for a genuine blocker requiring user intervention. Next: complete shared components/cascade review and inspect all consuming templates, then proceed through the inventory.
