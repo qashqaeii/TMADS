@@ -1,8 +1,8 @@
 /* TMADS — Telegram Executive Blue */
 
 :root {
-  --brand-primary: #249fe5;
-  --brand-action: #147fc5;
+  --brand-primary: #2aabee;
+  --brand-action: #0878ad;
   --brand-hover: #1269aa;
   --brand-soft: #eaf5fc;
 
@@ -12,7 +12,7 @@
   --sidebar-text: #bac7d5;
   --sidebar-text-active: #ffffff;
 
-  --page-bg: #f7f9fc;
+  --page-bg: #f6f8fb;
   --surface-primary: #ffffff;
   --surface-secondary: #f1f5f9;
   --surface-hover: #f7fbfe;
@@ -20,7 +20,7 @@
   --text-primary: #14243a;
   --text-heading: #14243a;
   --text-secondary: #43536a;
-  --text-muted: #8794a7;
+  --text-muted: #5d6b7c;
 
   --border-default: #e6ebf1;
   --border-strong: #d6e0e9;
@@ -78,10 +78,10 @@
   --ease-soft: cubic-bezier(0.33, 0.82, 0.52, 1);
   --duration-fast: 0.18s;
   --duration-ui: 0.28s;
-  --duration-enter: 0.55s;
-  --duration-kpi: 0.65s;
-  --stagger-section: 0.055s;
-  --stagger-kpi: 0.045s;
+  --duration-enter: 0.32s;
+  --duration-kpi: 0.38s;
+  --stagger-section: 0.035s;
+  --stagger-kpi: 0.025s;
 }
 
 /* —— Lucide icon shell (global) —— */
@@ -295,9 +295,9 @@ body.app-body {
     box-shadow var(--duration-ui) var(--ease-premium),
     transform var(--duration-fast) var(--ease-premium);
 }
-.topbar-action:hover,
 .topbar-action:focus-visible {
-  outline: none;
+  outline: 2px solid var(--brand-action);
+  outline-offset: 3px;
 }
 .topbar-action--ghost {
   border-color: color-mix(in srgb, var(--stroke) 72%, transparent);
