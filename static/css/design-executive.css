@@ -3785,6 +3785,20 @@ html.motion-ready .sidebar.is-open {
 .notification-item.is-unread .activity-feed__line strong {
   color: var(--text-heading);
 }
+/* Financial records share the same restrained surface and spacing scale. */
+.finance-page { min-width: 0; }
+.finance-form { width: 100%; max-width: 32rem; }
+.finance-form__actions { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.finance-entry { display: grid; gap: var(--space-1); min-width: 0; }
+.finance-entry time { font-size: .8125rem; }
+.finance-invoice .finance-line { gap: var(--space-4); align-items: baseline; }
+.finance-invoice__description, .finance-invoice__reference { overflow-wrap: anywhere; min-width: 0; }
+.finance-page .table-wrap:focus-visible { outline: 2px solid var(--brand-action); outline-offset: -2px; }
+@media (max-width: 600px) {
+  .finance-page .metric-strip__metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .finance-form__actions .btn { flex: 1 1 auto; }
+  .finance-invoice .finance-line { flex-wrap: wrap; }
+}
 .wallet-ledger {
   list-style: none;
   margin: 0;

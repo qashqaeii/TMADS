@@ -1,23 +1,24 @@
-﻿{% extends "app_shell.html" %}
+{% extends "app_shell.html" %}
 {% load core_filters %}
 {% block page_title %}فاکتورها{% endblock %}
 {% block container_class %}container-wide{% endblock %}
 {% block content %}
-<div class="app-stack">
+<div class="app-stack finance-page">
 {% url 'finance:wallet' as wallet_url %}
 {% include "includes/dash_header.html" with eyebrow="مالی" title="فاکتورها" action_url=wallet_url action_label="کیف پول" %}
 {% if invoices %}
 <article class="card table-card card--lift">
-  <div class="table-wrap">
+  <div class="table-wrap" tabindex="0" role="region" aria-label="فاکتورهای حساب">
     <table class="data-table">
-      <thead><tr><th>شماره</th><th>شرح</th><th>مبلغ</th><th>تاریخ</th></tr></thead>
+      <caption class="sr-only">فاکتورهای حساب</caption>
+      <thead><tr><th scope="col">شماره</th><th scope="col">شرح</th><th scope="col">مبلغ</th><th scope="col">تاریخ</th></tr></thead>
       <tbody>
       {% for inv in invoices %}
       <tr>
         <td dir="ltr"><a href="{% url 'finance:invoice_detail' inv.id %}">{{ inv.invoice_number }}</a></td>
         <td>{{ inv.description|default:"—" }}</td>
         <td class="tabnums">{{ inv.amount_irr|irr_to_toman|format_irr }} تومان</td>
-        <td>{{ inv.created_at|jalali_datetime }}</td>
+        <td><time datetime="{{ inv.created_at|date:'c' }}">{{ inv.created_at|jalali_datetime }}</time></td>
       </tr>
       {% endfor %}
       </tbody>

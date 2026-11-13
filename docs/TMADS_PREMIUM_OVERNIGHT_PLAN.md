@@ -58,12 +58,12 @@ Every inventory row has implementation status and verification evidence; consist
 | `templates/campaigns/wizard.html` | Implemented; visual QA pending | Compiled; studio GET matrix and existing tests passed |
 | `templates/dashboard/home.html` | In progress; shared interaction/readability pass | Django compilation and existing suite passed; visual QA pending |
 | `templates/dashboard/notifications.html` | Implemented; visual QA pending | Compiled and empty/populated GETs verified |
-| `templates/finance/invoice_detail.html` | Pending | Not verified in this pass |
-| `templates/finance/invoices.html` | Pending | Not verified in this pass |
-| `templates/finance/refunds.html` | Pending | Not verified in this pass |
-| `templates/finance/topup.html` | Pending | Not verified in this pass |
-| `templates/finance/transactions.html` | Pending | Not verified in this pass |
-| `templates/finance/wallet.html` | Pending | Not verified in this pass |
+| `templates/finance/invoice_detail.html` | Implemented; visual QA pending | Compiled; authenticated financial GET checks and existing suite passed |
+| `templates/finance/invoices.html` | Implemented; visual QA pending | Compiled; authenticated financial GET checks and existing suite passed |
+| `templates/finance/refunds.html` | Implemented; visual QA pending | Compiled; authenticated financial GET checks and existing suite passed |
+| `templates/finance/topup.html` | Implemented; visual QA pending | Compiled; authenticated financial GET checks and existing suite passed |
+| `templates/finance/transactions.html` | Implemented; visual QA pending | Compiled; authenticated financial GET checks and existing suite passed |
+| `templates/finance/wallet.html` | Implemented; visual QA pending | Compiled; authenticated financial GET checks and existing suite passed |
 | `templates/includes/app_page_header.html` | Pending | Not verified in this pass |
 | `templates/includes/brand_mark.html` | Pending | Not verified in this pass |
 | `templates/includes/campaign_actions_menu.html` | In progress; shared interaction/readability pass | Django compilation and existing suite passed; visual QA pending |
@@ -162,3 +162,13 @@ Implementation commit: [85487e8](https://github.com/qashqaeii/TMADS/commit/85487
 - Verification: manage.py check clean; collectstatic completed; node --check ad-studio.js passed; all 72 templates compiled; CSS parsed without top-level errors. Existing suite: 70 passed in 17.32s. Additional isolated, transaction-rolled-back GET matrix: 20 passed in 5.28s (four targeting types × five wizard steps; status, current-step markup, preview heading and CSRF checks). Test-only temporary matrix was not committed. Same environment-only 1s/no-retry Nobitex configuration as previous batch.
 - Browser QA at 390/768/1440 remains pending under the previously recorded browser restriction. Keyboard code was syntax checked, not browser-interaction certified. No visual completion claim; automation remains active.
 - Next: finance and operations page families; retain this implementation and complete cross-page visual QA when a browser is available. Targeting board and other shared includes still need the inventory review.
+
+## Batch 5 — customer finance pages
+
+- Wallet: explicit toman units and semantic transaction timestamps, clear transaction link; mobile summary uses two columns. Top-up and refund forms: bound labels, readable spacing, amount help, back navigation and an explanation when no eligible order exists. POST names, minimum amount, eligibility/disabled guards and CSRF unchanged.
+- Transactions/invoices/refunds: named keyboard-focusable scroll regions, table captions, scoped headers and semantic dates; clearer empty transaction state and explicit balance units.
+- Invoice detail: a named summary surface with long description/reference wrapping. Added a compact finance component section beside existing wallet rules, using shared spacing/color/radius tokens; no new animation or override stylesheet.
+- Files: templates/finance/{wallet,topup,transactions,invoices,invoice_detail,refunds}.html; static/css/design-executive.css.
+- Actual validation: environment dependencies had to be reinstalled after Django was initially unavailable (no requirements changes). manage.py check clean; collectstatic completed; CSS parsed without top-level errors. Existing suite: 70 passed in 18.71s. Temporary isolated finance check: 1 passed in 1.62s, covering seven authenticated GETs (five list/form routes plus populated invoice list/detail) and compilation of all 72 templates. Used 1s/no-retry Nobitex environment settings. Temporary check not committed.
+- No live payments, deployment or production data changes. Browser screenshots/interaction and 390/768/1440 viewport checks remain unverified under the previously recorded environment limitation. All source work is retained; do not count visual QA as completed.
+- Next: seven operations templates, public page family, remaining shared includes; then cross-page QA and completion review. Automation remains active.
