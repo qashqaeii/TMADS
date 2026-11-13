@@ -153,6 +153,8 @@ Implementation commit: [db1decd](https://github.com/qashqaeii/TMADS/commit/db1de
 
 ## Batch 4 — five-step studio, preview and weekly schedule
 
+Implementation commit: [85487e8](https://github.com/qashqaeii/TMADS/commit/85487e8845f9e0c0330c03a2280b8a72fac2d42c).
+
 - Studio: associated 24 previously unbound field labels with controls, marked current progress step, clarified professional-mode copy, unified form/preview surfaces and spacing, added visible focus to choice cards and responsive action buttons. Existing POST names, target choices, financial fields and submit actions are preserved.
 - Preview partial: named complementary region and semantic heading, shared search icon, long-content wrapping. Policy panel: Persian severity labels while retaining existing severity classes, findings, guards and refresh hooks.
 - Weekly schedule: 44px hour targets with contained horizontal scrolling and sticky day labels. Added named cells and roving keyboard focus (RTL left/right, up/down, Home/End); Space/Enter use the existing toggle handler. No schedule mask, timezone or persistence logic changed.
