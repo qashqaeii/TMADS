@@ -188,6 +188,8 @@ Implementation: [51662f7](https://github.com/qashqaeii/TMADS/commit/51662f79b7bd
 
 ## Batch 7 — public page structure and reading experience
 
+Implementation: [4e9e41a](https://github.com/qashqaeii/TMADS/commit/4e9e41a31577c7ae000035e41bd1f9a28a0291eb).
+
 - Added concise hero descriptions on about/contact/FAQ/features/how-it-works/pricing. Features have a correct heading hierarchy; the process is a numbered ordered list with Persian counters. Dashboard preview explicitly identifies sample data.
 - Legal prose now has responsive internal padding and long-text wrapping; unavailable legal content shows a customer-facing empty state and support link instead of an internal source path. Contact actions are explicit; pricing title is semantic.
 - FAQ summaries have 44px targets, visible keyboard focus and an expanded-state accent. Policy accordion shares the focus treatment; routes and legal body content remain unchanged.
