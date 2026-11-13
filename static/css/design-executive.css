@@ -1513,6 +1513,15 @@ body.is-public {
   border-color: var(--brand-primary);
 }
 
+/* Operations records and review controls use shared tokens. */
+.operations-page { min-width: 0; }
+.operations-page .panel-grid > * { min-width: 0; }
+.operations-page .finance-line { gap: var(--space-4); flex-wrap: wrap; }
+.operations-wrap, .operations-page td code { overflow-wrap: anywhere; }
+.operations-note { min-width: 10rem; max-width: 16rem; }
+.operations-error { border-color: var(--danger); background: var(--danger-bg); }
+.operations-page .table-wrap:focus-visible { outline: 2px solid var(--brand-action); outline-offset: -2px; }
+.operations-page .ops-links a { min-height: var(--control-height); display: inline-flex; align-items: center; }
 .ops-links {
   display: flex;
   flex-wrap: wrap;

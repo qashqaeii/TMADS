@@ -3,7 +3,7 @@
 {% block container_class %}container-wide{% endblock %}
 {% block page_title %}نرخ گرام{% endblock %}
 {% block content %}
-<div class="app-stack">
+<div class="app-stack operations-page">
 {% include "includes/dash_header.html" with eyebrow="عملیات" title="نرخ گرام" %}
 {% if live_rate %}
 <div class="kpi-exec-grid kpi-exec-grid--5">
@@ -52,7 +52,7 @@
   <section class="card card--lift card-pad">
     <h2 class="section-title">نوبیتکس</h2>
     <p class="muted" style="font-size:.85rem">جفت آمار: گرام به ریال · دفتر سفارش گرام و ریال</p>
-    <form method="post">{% csrf_token %}<input type="hidden" name="action" value="refresh_nobitex">
+    <form method="post" class="form-stack">{% csrf_token %}<input type="hidden" name="action" value="refresh_nobitex">
       <button class="btn btn-primary" type="submit">بروزرسانی دستی از نوبیتکس</button>
     </form>
     <p class="muted" style="margin-top:1rem;font-size:.82rem">کارمزد پلتفرم: {{ fee_percent|persian_digits }}٪ · بافر نوسان: {{ buffer_percent|persian_digits }}٪</p>
@@ -61,23 +61,23 @@
   <section class="card card--lift card-pad form-stack">
     <h2 class="section-title">نرخ دستی جایگزین</h2>
     <form method="post">{% csrf_token %}<input type="hidden" name="action" value="manual">
-      <div class="field"><label>ریال به ازای یک گرام</label><input name="irr_per_ton" type="number" inputmode="numeric" dir="ltr" required></div>
-      <div class="field"><label>دلیل</label><input name="reason" placeholder="قطعی ارتباط، سیاست موقت…"></div>
+      <div class="field"><label for="manual-rate">ریال به ازای یک گرام</label><input id="manual-rate" name="irr_per_ton" type="number" inputmode="numeric" dir="ltr" required></div>
+      <div class="field"><label for="manual-rate-reason">دلیل</label><input id="manual-rate-reason" name="reason" placeholder="قطعی ارتباط، سیاست موقت…"></div>
       <button class="btn btn-ghost" type="submit">ثبت جایگزین ۲۴ ساعته</button>
     </form>
   </section>
 </div>
 <section class="card card--lift table-card">
   <h2 class="section-title card-pad" style="padding-bottom:0">تاریخچه</h2>
-  <div class="table-wrap"><table class="data-table">
-    <thead><tr><th>منبع</th><th>نرخ (ریال)</th><th>فعال</th><th>زمان</th></tr></thead>
+  <div class="table-wrap" tabindex="0" role="region" aria-label="تاریخچه نرخ گرام"><table class="data-table"><caption class="sr-only">تاریخچه نرخ گرام</caption>
+    <thead><tr><th scope="col">منبع</th><th scope="col">نرخ (ریال)</th><th scope="col">فعال</th><th scope="col">زمان</th></tr></thead>
     <tbody>
     {% for r in rates %}
     <tr>
       <td>{{ r.source|rate_source_fa }}</td>
       <td class="tabnums">{% if r.details.irr_per_ton %}{{ r.details.irr_per_ton|format_count }}{% else %}—{% endif %}</td>
       <td>{% if r.is_active %}بله{% else %}—{% endif %}</td>
-      <td>{{ r.created_at|jalali_datetime }}</td>
+      <td><time datetime="{{ r.created_at|date:'c' }}">{{ r.created_at|jalali_datetime }}</time></td>
     </tr>
     {% empty %}
     <tr><td colspan="4"><div class="empty-state card-pad" style="border:none;background:transparent;text-align:center"><p class="muted" style="margin:0">هنوز نرخی ثبت نشده است.</p></div></td></tr>
