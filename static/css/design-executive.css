@@ -752,7 +752,7 @@ body.app-body {
   max-width: 52ch;
 }
 .dash-header--luxe:not(.dash-header--with-sub) .page-sub {
-  display: none;
+  display: block;
 }
 .dash-header--with-sub .page-sub {
   display: block;
@@ -1901,7 +1901,7 @@ html.motion-ready .motion-reveal.is-revealed {
   order: 0;
 }
 .dash-home--premium .dash-kpi-tile__name {
-  font-size: 0.68rem;
+  font-size: 0.8125rem;
   font-weight: 500;
   color: var(--dash-luxe-muted);
   letter-spacing: 0.03em;
@@ -7001,10 +7001,12 @@ body.is-app .rate-strip {
   background: var(--surface-primary);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-elevated);
+  box-shadow: var(--shadow-floating);
+  max-width: calc(100vw - 2rem);
 }
 .exec-menu__item {
   display: block;
+  min-height: var(--control-height);
   padding: 0.5rem 0.65rem;
   border-radius: calc(var(--radius-md) - 3px);
   font-size: 0.84rem;
@@ -7017,6 +7019,7 @@ body.is-app .rate-strip {
   color: var(--text-heading);
 }
 .exec-menu__item button {
+  min-height: 32px;
   width: 100%;
   border: none;
   background: none;
@@ -7039,6 +7042,19 @@ body.is-app .rate-strip {
 }
 .tg-preview--premium .bubble {
   box-shadow: var(--shadow-card);
+}
+/* Native disclosure menus share the existing floating panel design. */
+details.exec-menu > summary { list-style: none; cursor: pointer; }
+details.exec-menu > summary::-webkit-details-marker { display: none; }
+details.exec-menu[open] > summary { color: var(--brand-action); background: var(--brand-soft); }
+[data-disclosure-menu][open] > :not(summary) { animation: disclosure-enter var(--duration-fast) var(--ease-premium); }
+@keyframes disclosure-enter { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+.dash-hero__rate-note { color: var(--text-secondary); font-size: .75rem; }
+@media (pointer: coarse) {
+  .chart-range .chart-range__btn, .campaigns-table__link-btn { min-height: var(--control-height); }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-disclosure-menu][open] > :not(summary) { animation: none; }
 }
 /* TON amount — Toman on hover */
 .ton-amount {

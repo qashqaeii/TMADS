@@ -2,11 +2,11 @@
   <div class="dash-header__main campaigns-list-hero__lead">
     <h1>کمپین‌ها</h1>
     <span class="campaigns-list-hero__rule" aria-hidden="true"></span>
-    <p class="campaigns-list-hero__sub">مدیریت و پایش تبلیغات فعال</p>
+    <p class="campaigns-list-hero__sub">مدیریت پیش‌نویس‌ها و پایش تبلیغات</p>
   </div>
   <div class="dash-header__actions">
     <form method="post" action="{% url 'campaigns:refresh_stats' %}">{% csrf_token %}
-      <button type="submit" class="btn btn-ghost btn-sm btn-quiet">بروزرسانی آمار</button>
+      <button type="submit" class="btn btn-ghost btn-sm btn-quiet">به‌روزرسانی آمار</button>
     </form>
     <a class="btn btn-primary btn-sm" href="{% url 'campaigns:wizard_new' %}">ساخت تبلیغ</a>
   </div>

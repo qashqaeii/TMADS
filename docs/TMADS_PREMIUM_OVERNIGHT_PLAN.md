@@ -47,16 +47,16 @@ Every inventory row has implementation status and verification evidence; consist
 | `templates/accounts/register.html` | Implemented; visual QA pending | Django compile/render checked; browser unavailable |
 | `templates/app_shell.html` | Implemented; visual QA pending | Django compile/render checked; browser unavailable |
 | `templates/base.html` | Implemented; visual QA pending | Django compile/render checked; browser unavailable |
-| `templates/campaigns/detail.html` | Pending | Not verified in this pass |
-| `templates/campaigns/includes/list_page_header.html` | Pending | Not verified in this pass |
-| `templates/campaigns/includes/list_row_actions.html` | Pending | Not verified in this pass |
+| `templates/campaigns/detail.html` | In progress; shared interaction/readability pass | Django compilation and existing suite passed; visual QA pending |
+| `templates/campaigns/includes/list_page_header.html` | In progress; shared interaction/readability pass | Django compilation and existing suite passed; visual QA pending |
+| `templates/campaigns/includes/list_row_actions.html` | In progress; shared interaction/readability pass | Django compilation and existing suite passed; visual QA pending |
 | `templates/campaigns/includes/policy_panel.html` | Pending | Not verified in this pass |
 | `templates/campaigns/includes/schedule_grid.html` | Pending | Not verified in this pass |
 | `templates/campaigns/includes/studio_preview.html` | Pending | Not verified in this pass |
 | `templates/campaigns/includes/targeting_board.html` | Pending | Not verified in this pass |
-| `templates/campaigns/list.html` | Pending | Not verified in this pass |
+| `templates/campaigns/list.html` | In progress; shared interaction/readability pass | Django compilation and existing suite passed; visual QA pending |
 | `templates/campaigns/wizard.html` | Pending | Not verified in this pass |
-| `templates/dashboard/home.html` | Pending | Not verified in this pass |
+| `templates/dashboard/home.html` | In progress; shared interaction/readability pass | Django compilation and existing suite passed; visual QA pending |
 | `templates/dashboard/notifications.html` | Implemented; visual QA pending | Compiled and empty/populated GETs verified |
 | `templates/finance/invoice_detail.html` | Pending | Not verified in this pass |
 | `templates/finance/invoices.html` | Pending | Not verified in this pass |
@@ -66,16 +66,16 @@ Every inventory row has implementation status and verification evidence; consist
 | `templates/finance/wallet.html` | Pending | Not verified in this pass |
 | `templates/includes/app_page_header.html` | Pending | Not verified in this pass |
 | `templates/includes/brand_mark.html` | Pending | Not verified in this pass |
-| `templates/includes/campaign_actions_menu.html` | Pending | Not verified in this pass |
+| `templates/includes/campaign_actions_menu.html` | In progress; shared interaction/readability pass | Django compilation and existing suite passed; visual QA pending |
 | `templates/includes/campaign_budget_band.html` | Pending | Not verified in this pass |
 | `templates/includes/campaign_delete_form.html` | Pending | Not verified in this pass |
 | `templates/includes/campaign_lifecycle.html` | Pending | Not verified in this pass |
 | `templates/includes/campaign_metrics_strip.html` | Pending | Not verified in this pass |
 | `templates/includes/chart_empty_dash.html` | Pending | Not verified in this pass |
-| `templates/includes/chart_range.html` | Pending | Not verified in this pass |
+| `templates/includes/chart_range.html` | In progress; shared interaction/readability pass | Django compilation and existing suite passed; visual QA pending |
 | `templates/includes/charts_exec_scripts.html` | Pending | Not verified in this pass |
-| `templates/includes/dash_header.html` | Pending | Not verified in this pass |
-| `templates/includes/dash_home_hero.html` | Pending | Not verified in this pass |
+| `templates/includes/dash_header.html` | In progress; shared interaction/readability pass | Django compilation and existing suite passed; visual QA pending |
+| `templates/includes/dash_home_hero.html` | In progress; shared interaction/readability pass | Django compilation and existing suite passed; visual QA pending |
 | `templates/includes/dash_home_kpi.html` | Pending | Not verified in this pass |
 | `templates/includes/dashboard_performance_strip.html` | Pending | Not verified in this pass |
 | `templates/includes/kpi_exec_card.html` | Pending | Not verified in this pass |
@@ -137,3 +137,14 @@ Every inventory row has implementation status and verification evidence; consist
 - Existing CSS component rules extended in place; no backend files, routes, permissions, form names or financial logic changed.
 - Current verification: manage.py check clean; all 72 templates compile; seven authenticated GETs cover profile and support/notifications empty and populated states using transaction-rolled-back local fixtures. CSS parse: zero errors. Existing pytest suite: 70 passed in 21.66s with environment-only socksio plus 1s/no-retry Nobitex test configuration. Navigation JS syntax checked. Browser interaction/viewport QA remains pending due to launch restriction recorded above.
 - Next execution: dashboard and campaign shared headers/KPI/menus, then wizard. Do not treat pending visual QA as completed. Review the inherited components in each consumer before updating its inventory row.
+
+## Batch 3 — dashboard readability and campaign interactions
+
+- Previous batch implementation: [61be12c](https://github.com/qashqaeii/TMADS/commit/61be12c4d4a34b52cb73980caef776b6d9f22c57).
+- Dashboard header/hero: visible contextual subtitle, explicit toman label and readable stale-rate text; increased KPI label size in the existing component rule. Dashboard record timestamps now expose machine-readable dates.
+- Campaign list: scoped table headings, caption and keyboard-focusable scroll region; concise header description and labelled row disclosure. Detail action menu now uses native details/summary; existing URLs, delete guard, confirmation and CSRF remain intact.
+- Shared interactions: Escape restores disclosure focus, outside clicks dismiss disclosures, opening one closes others. Campaign tabs support RTL arrow keys and Home/End via existing click handlers; panels are keyboard focusable. Chart range buttons expose initial pressed state. Menu controls use consistent touch sizes, restrained entrance motion and reduced-motion opt-out.
+- Files: templates/dashboard/home.html; templates/campaigns/{list,detail}.html; templates/campaigns/includes/{list_page_header,list_row_actions}.html; templates/includes/{dash_header,dash_home_hero,campaign_actions_menu,chart_range}.html; static/js/navigation.js; static/css/design-executive.css.
+- Verification actually executed: 70 existing pytest tests passed in 18.46s (NOBITEX_HTTP_TIMEOUT_SECONDS=1, NOBITEX_HTTP_RETRIES=0); manage.py check clean; collectstatic completed; all 72 templates compiled with config.settings.local; CSS top-level parse zero errors; node --check navigation.js passed. An initial compilation command used the settings package instead of local settings and failed to locate templates; corrected command passed.
+- Browser interaction and 390/768/1440 visual QA remain pending; no screenshots or visual completion claimed. Source changes are a coherent improvement pass, not certification of the full dashboard/campaign family. No backend changes.
+- Next: complete wizard and its targeting/schedule/preview/policy partials; then finance/operations/public families. Leave automation active.

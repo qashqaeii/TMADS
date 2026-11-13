@@ -23,6 +23,45 @@
       if (field.querySelector('.form-error')) input.setAttribute('aria-invalid', 'true');
     });
 
+    document.querySelectorAll('[data-disclosure-menu]').forEach(function (menu) {
+      menu.addEventListener('keydown', function (event) {
+        if (event.key !== 'Escape' || !menu.open) return;
+        event.preventDefault();
+        menu.open = false;
+        menu.querySelector('summary').focus();
+      });
+      menu.addEventListener('toggle', function () {
+        if (!menu.open) return;
+        document.querySelectorAll('[data-disclosure-menu][open]').forEach(function (other) {
+          if (other !== menu) other.open = false;
+        });
+      });
+    });
+    document.addEventListener('click', function (event) {
+      document.querySelectorAll('[data-disclosure-menu][open]').forEach(function (menu) {
+        if (!menu.contains(event.target)) menu.open = false;
+      });
+    });
+    document.querySelectorAll('[role="tablist"]').forEach(function (list) {
+      list.addEventListener('keydown', function (event) {
+        var current = event.target.closest('[role="tab"]');
+        if (!current || event.altKey || event.ctrlKey || event.metaKey) return;
+        var tabs = Array.from(list.querySelectorAll('[role="tab"]')).filter(function (tab) {
+          return !tab.disabled && tab.getAttribute('aria-disabled') !== 'true';
+        });
+        var index = tabs.indexOf(current);
+        var rtl = getComputedStyle(list).direction === 'rtl';
+        if (event.key === 'Home') index = 0;
+        else if (event.key === 'End') index = tabs.length - 1;
+        else if (event.key === 'ArrowRight') index += rtl ? -1 : 1;
+        else if (event.key === 'ArrowLeft') index += rtl ? 1 : -1;
+        else return;
+        event.preventDefault();
+        var next = tabs[(index + tabs.length) % tabs.length];
+        if (next) { next.click(); next.focus(); }
+      });
+    });
+
     document.querySelectorAll('[data-mobile-drawer]').forEach(function (drawer) {
       var trigger = document.querySelector('[aria-controls="' + drawer.id + '"]');
       var close = drawer.querySelector('.sidebar-close, .public-nav-sheet__close');

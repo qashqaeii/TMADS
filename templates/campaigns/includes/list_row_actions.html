@@ -2,8 +2,8 @@
   <a class="campaigns-table__link-btn campaigns-table__link-btn--primary" href="{% url 'campaigns:detail' campaign.id %}">مشاهده</a>
   {% if campaign.status == 'draft' %}
   <a class="campaigns-table__link-btn" href="{% url 'campaigns:wizard' campaign.id %}">ادامه پیش‌نویس</a>
-  <details class="row-actions__overflow">
-    <summary class="btn btn-ghost btn-sm row-actions__more" aria-label="عملیات بیشتر">⋯</summary>
+  <details class="row-actions__overflow" data-disclosure-menu>
+    <summary class="btn btn-ghost btn-sm row-actions__more" aria-label="عملیات بیشتر برای {{ campaign.name|default:'کمپین' }}">⋯</summary>
     <div class="row-actions__menu">
       {% include "includes/campaign_delete_form.html" with campaign=campaign %}
     </div>
