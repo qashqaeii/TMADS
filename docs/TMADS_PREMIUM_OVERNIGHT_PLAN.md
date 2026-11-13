@@ -177,6 +177,8 @@ Implementation: [87d193b](https://github.com/qashqaeii/TMADS/commit/87d193bdf2fa
 
 ## Batch 6 — operations UI
 
+Implementation: [51662f7](https://github.com/qashqaeii/TMADS/commit/51662f79b7bd4b0227014f119fe00df8c8c8fe99).
+
 - Seven operations templates now use a common page scope. Tables have named focusable scroll regions, captions and scoped column headings; audit/rate timestamps are semantic. Campaign review and manual-rate controls have associated labels; refund notes have unique labels per row and usable width.
 - Campaign creative keeps line breaks; destination and code fields wrap long values. API error presentation uses semantic design tokens and an alert role. Operations shortcuts have 44px targets; overview KPI region has an accessible name. Refund amount uses the full toman label and filtered empty-state copy is accurate.
 - Files: templates/operations/{overview,campaigns,campaign_review,refunds,exchange_rates,audit_logs,api_status}.html; static/css/design-executive.css.
