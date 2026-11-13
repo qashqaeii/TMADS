@@ -97,14 +97,14 @@ Every inventory row has implementation status and verification evidence; consist
 | `templates/operations/overview.html` | In progress; shared operations UI pass | Compiled and empty/unsaved-context render checked; visual QA pending |
 | `templates/operations/refunds.html` | In progress; shared operations UI pass | Compiled and empty/unsaved-context render checked; visual QA pending |
 | `templates/policies/ad_policies.html` | Pending | Not verified in this pass |
-| `templates/public/about.html` | Pending | Not verified in this pass |
-| `templates/public/contact.html` | Pending | Not verified in this pass |
-| `templates/public/faq.html` | Pending | Not verified in this pass |
-| `templates/public/features.html` | Pending | Not verified in this pass |
-| `templates/public/home.html` | Pending | Not verified in this pass |
-| `templates/public/how_it_works.html` | Pending | Not verified in this pass |
-| `templates/public/legal_page.html` | Pending | Not verified in this pass |
-| `templates/public/pricing.html` | Pending | Not verified in this pass |
+| `templates/public/about.html` | In progress; public readability/structure pass | Public GETs and template compilation passed; visual QA pending |
+| `templates/public/contact.html` | In progress; public readability/structure pass | Public GETs and template compilation passed; visual QA pending |
+| `templates/public/faq.html` | In progress; public readability/structure pass | Public GETs and template compilation passed; visual QA pending |
+| `templates/public/features.html` | In progress; public readability/structure pass | Public GETs and template compilation passed; visual QA pending |
+| `templates/public/home.html` | In progress; public readability/structure pass | Public GETs and template compilation passed; visual QA pending |
+| `templates/public/how_it_works.html` | In progress; public readability/structure pass | Public GETs and template compilation passed; visual QA pending |
+| `templates/public/legal_page.html` | In progress; public readability/structure pass | Public GETs and template compilation passed; visual QA pending |
+| `templates/public/pricing.html` | In progress; public readability/structure pass | Public GETs and template compilation passed; visual QA pending |
 | `templates/public_base.html` | Implemented; visual QA pending | Django compile/render checked; browser unavailable |
 | `templates/support/create.html` | Implemented; visual QA pending | Compiled and empty/populated GETs verified |
 | `templates/support/detail.html` | Implemented; visual QA pending | Compiled and empty/populated GETs verified |
@@ -185,3 +185,13 @@ Implementation: [51662f7](https://github.com/qashqaeii/TMADS/commit/51662f79b7bd
 - Validation actually executed: manage.py check clean; collectstatic completed; 70 existing tests passed in 17.47s with 1s/no-retry Nobitex settings. All 72 templates compiled; seven operations templates rendered with empty/unsaved fixture contexts (not live endpoint/API verification); CSS top-level parse passed.
 - No POST executed against operations, no remote API invocation, no permissions/financial/backend changes. Browser and populated operations interaction checks still pending; rows remain in progress rather than claiming full visual completion.
 - Next: public pages and remaining shared includes; populated operations render checks and final responsive/browser QA. Continue automation; full redesign is not complete.
+
+## Batch 7 — public page structure and reading experience
+
+- Added concise hero descriptions on about/contact/FAQ/features/how-it-works/pricing. Features have a correct heading hierarchy; the process is a numbered ordered list with Persian counters. Dashboard preview explicitly identifies sample data.
+- Legal prose now has responsive internal padding and long-text wrapping; unavailable legal content shows a customer-facing empty state and support link instead of an internal source path. Contact actions are explicit; pricing title is semantic.
+- FAQ summaries have 44px targets, visible keyboard focus and an expanded-state accent. Policy accordion shares the focus treatment; routes and legal body content remain unchanged.
+- Files: templates/public/{home,about,contact,faq,features,how_it_works,legal_page,pricing}.html; static/css/design-executive.css.
+- Actual checks: manage.py check clean, collectstatic completed, 11 public GETs returned 200, all 72 templates compiled and CSS top-level parsing passed.
+- The initial test-run polling action was rejected by automatic approval review because the test command attempted an external Nobitex connection. No success is claimed for that run. A safer isolated rerun disabled socket create_connection/connect/connect_ex with a temporary pytest plugin: 70 tests passed in 12.61s. No network approval requested or needed; future runs must use network-disabled tests rather than relying on timeout settings alone.
+- Browser viewport/interaction QA is still outstanding; public templates remain in progress rather than visually certified. No backend/payment/schema changes. Next: remaining shared includes, populated state coverage and final visual QA; keep automation active.

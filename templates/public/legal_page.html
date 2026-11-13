@@ -3,11 +3,11 @@
 {% block content %}
 {% include "includes/public_hero.html" with title=title compact=1 %}
 <section class="section public-section container">
-  <article class="card card--lift card-pad legal-prose legal-md">
+  <article aria-label="{{ title }}" class="card card--lift card-pad legal-prose legal-md">
     {% if body_text %}
       {{ body_text|linebreaksbr }}
     {% else %}
-      <p>متن در <code>docs/legal/{{ slug }}.md</code> قابل ویرایش است.</p>
+      <p class="muted">متن این صفحه در حال آماده‌سازی است.</p><a href="{% url 'public:contact' %}">ارتباط با پشتیبانی</a>
     {% endif %}
   </article>
 </section>
