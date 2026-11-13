@@ -140,6 +140,8 @@ Every inventory row has implementation status and verification evidence; consist
 
 ## Batch 3 — dashboard readability and campaign interactions
 
+Implementation commit: [db1decd](https://github.com/qashqaeii/TMADS/commit/db1decd0c6d3418366ccfb308457e7ad0d8a069a).
+
 - Previous batch implementation: [61be12c](https://github.com/qashqaeii/TMADS/commit/61be12c4d4a34b52cb73980caef776b6d9f22c57).
 - Dashboard header/hero: visible contextual subtitle, explicit toman label and readable stale-rate text; increased KPI label size in the existing component rule. Dashboard record timestamps now expose machine-readable dates.
 - Campaign list: scoped table headings, caption and keyboard-focusable scroll region; concise header description and labelled row disclosure. Detail action menu now uses native details/summary; existing URLs, delete guard, confirmation and CSRF remain intact.
