@@ -10,7 +10,7 @@
     </label>
   </div>
   <p class="muted" style="font-size:.8rem;margin:.35rem 0 .75rem">
-    منطقهٔ زمانی: ایران (UTC+3:30). هر خانه یک ساعت کامل است — مطابق API تلگرام.
+    منطقهٔ زمانی: ایران (UTC+3:30). هر خانه یک ساعت کامل است — برای انتخاب، روی خانه بزنید. با کلیدهای جهت‌دار بین ساعت‌ها حرکت کنید.
   </p>
   <input type="hidden" name="schedule_json" data-schedule-json value="{{ schedule_json|escape }}">
   <input type="hidden" name="schedule_timezone" value="{{ schedule_timezone|default:12600 }}">
@@ -35,7 +35,7 @@
           {% for h in schedule_hours %}
           <td>
             <button type="button" class="schedule-cell" data-hour="{{ h }}" aria-pressed="false"
-                    title="{{ day.label }} {{ h|persian_digits }}"></button>
+                    aria-label="{{ day.label }}، ساعت {{ h|persian_digits }}" title="{{ day.label }} {{ h|persian_digits }}"></button>
           </td>
           {% endfor %}
         </tr>

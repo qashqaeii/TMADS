@@ -50,12 +50,12 @@ Every inventory row has implementation status and verification evidence; consist
 | `templates/campaigns/detail.html` | In progress; shared interaction/readability pass | Django compilation and existing suite passed; visual QA pending |
 | `templates/campaigns/includes/list_page_header.html` | In progress; shared interaction/readability pass | Django compilation and existing suite passed; visual QA pending |
 | `templates/campaigns/includes/list_row_actions.html` | In progress; shared interaction/readability pass | Django compilation and existing suite passed; visual QA pending |
-| `templates/campaigns/includes/policy_panel.html` | Pending | Not verified in this pass |
-| `templates/campaigns/includes/schedule_grid.html` | Pending | Not verified in this pass |
-| `templates/campaigns/includes/studio_preview.html` | Pending | Not verified in this pass |
+| `templates/campaigns/includes/policy_panel.html` | Implemented; visual QA pending | Compiled; studio GET matrix and existing tests passed |
+| `templates/campaigns/includes/schedule_grid.html` | Implemented; visual QA pending | Compiled; studio GET matrix and existing tests passed |
+| `templates/campaigns/includes/studio_preview.html` | Implemented; visual QA pending | Compiled; studio GET matrix and existing tests passed |
 | `templates/campaigns/includes/targeting_board.html` | Pending | Not verified in this pass |
 | `templates/campaigns/list.html` | In progress; shared interaction/readability pass | Django compilation and existing suite passed; visual QA pending |
-| `templates/campaigns/wizard.html` | Pending | Not verified in this pass |
+| `templates/campaigns/wizard.html` | Implemented; visual QA pending | Compiled; studio GET matrix and existing tests passed |
 | `templates/dashboard/home.html` | In progress; shared interaction/readability pass | Django compilation and existing suite passed; visual QA pending |
 | `templates/dashboard/notifications.html` | Implemented; visual QA pending | Compiled and empty/populated GETs verified |
 | `templates/finance/invoice_detail.html` | Pending | Not verified in this pass |
@@ -150,3 +150,13 @@ Implementation commit: [db1decd](https://github.com/qashqaeii/TMADS/commit/db1de
 - Verification actually executed: 70 existing pytest tests passed in 18.46s (NOBITEX_HTTP_TIMEOUT_SECONDS=1, NOBITEX_HTTP_RETRIES=0); manage.py check clean; collectstatic completed; all 72 templates compiled with config.settings.local; CSS top-level parse zero errors; node --check navigation.js passed. An initial compilation command used the settings package instead of local settings and failed to locate templates; corrected command passed.
 - Browser interaction and 390/768/1440 visual QA remain pending; no screenshots or visual completion claimed. Source changes are a coherent improvement pass, not certification of the full dashboard/campaign family. No backend changes.
 - Next: complete wizard and its targeting/schedule/preview/policy partials; then finance/operations/public families. Leave automation active.
+
+## Batch 4 — five-step studio, preview and weekly schedule
+
+- Studio: associated 24 previously unbound field labels with controls, marked current progress step, clarified professional-mode copy, unified form/preview surfaces and spacing, added visible focus to choice cards and responsive action buttons. Existing POST names, target choices, financial fields and submit actions are preserved.
+- Preview partial: named complementary region and semantic heading, shared search icon, long-content wrapping. Policy panel: Persian severity labels while retaining existing severity classes, findings, guards and refresh hooks.
+- Weekly schedule: 44px hour targets with contained horizontal scrolling and sticky day labels. Added named cells and roving keyboard focus (RTL left/right, up/down, Home/End); Space/Enter use the existing toggle handler. No schedule mask, timezone or persistence logic changed.
+- Files: templates/campaigns/wizard.html; templates/campaigns/includes/{schedule_grid,studio_preview,policy_panel}.html; static/css/design-executive.css; static/js/ad-studio.js.
+- Verification: manage.py check clean; collectstatic completed; node --check ad-studio.js passed; all 72 templates compiled; CSS parsed without top-level errors. Existing suite: 70 passed in 17.32s. Additional isolated, transaction-rolled-back GET matrix: 20 passed in 5.28s (four targeting types × five wizard steps; status, current-step markup, preview heading and CSRF checks). Test-only temporary matrix was not committed. Same environment-only 1s/no-retry Nobitex configuration as previous batch.
+- Browser QA at 390/768/1440 remains pending under the previously recorded browser restriction. Keyboard code was syntax checked, not browser-interaction certified. No visual completion claim; automation remains active.
+- Next: finance and operations page families; retain this implementation and complete cross-page visual QA when a browser is available. Targeting board and other shared includes still need the inventory review.
