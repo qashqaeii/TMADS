@@ -165,6 +165,8 @@ Implementation commit: [85487e8](https://github.com/qashqaeii/TMADS/commit/85487
 
 ## Batch 5 — customer finance pages
 
+Implementation: [87d193b](https://github.com/qashqaeii/TMADS/commit/87d193bdf2fa8ba4d930d0144547bfc78abb20f8).
+
 - Wallet: explicit toman units and semantic transaction timestamps, clear transaction link; mobile summary uses two columns. Top-up and refund forms: bound labels, readable spacing, amount help, back navigation and an explanation when no eligible order exists. POST names, minimum amount, eligibility/disabled guards and CSRF unchanged.
 - Transactions/invoices/refunds: named keyboard-focusable scroll regions, table captions, scoped headers and semantic dates; clearer empty transaction state and explicit balance units.
 - Invoice detail: a named summary surface with long description/reference wrapping. Added a compact finance component section beside existing wallet rules, using shared spacing/color/radius tokens; no new animation or override stylesheet.
