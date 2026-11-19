@@ -78,3 +78,14 @@
 .pp-home .ui-landing-end{background:linear-gradient(125deg,#122a42,#194b73);border-radius:24px;padding:clamp(24px,4vw,42px);margin-block-start:34px}
 .pp-home .ui-landing-end h2{font-size:clamp(1.25rem,2.5vw,1.75rem)}
 @media(max-width:600px){.pp-home .ui-product-visual{border-radius:18px}.pp-home-index{justify-content:flex-start;gap:0 8px}.pp-home .ui-product-window__body{min-height:0}.pp-home .ui-landing-copy h1{font-size:clamp(1.85rem,7.5vw,2.35rem)}}
+
+
+.pp-features .pp-feature-core{gap:16px}
+.ui-final.pp-features .pp-feature-core .feature-card{min-height:210px;position:relative;align-content:start;gap:12px;padding:clamp(18px,2.6vw,28px);border-radius:20px}
+.pp-features .pp-feature-core .feature-card:first-child{background:linear-gradient(145deg,#fff,#edf6fd);border-color:#c7deef}
+.pp-features .feature-card__icon{width:48px;height:48px;border-radius:14px;background:#eaf4fc;color:var(--pp-blue)}
+.pp-features .pp-feature-advanced .ui-public-feature-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.pp-features .pp-feature-advanced .feature-card{min-height:140px;border-radius:16px}
+.pp-features .ui-landing-end{border-radius:22px;padding:clamp(22px,4vw,35px)}
+@media(max-width:600px){.ui-final.pp-features .pp-feature-core .feature-card{min-height:0}.pp-features .pp-feature-advanced .ui-public-feature-grid{grid-template-columns:minmax(0,1fr)}}
+
