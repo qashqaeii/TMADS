@@ -15,7 +15,7 @@
     </svg>
   </div>
   <div class="dash-chart-empty__content">
-    <strong>{{ title|default:"نمودار روند هنوز آماده نیست" }}</strong>
+    <span class="ui-empty__icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="chart-no-axes-combined" size="md" %}</span><strong>{{ title|default:"نمودار روند هنوز آماده نیست" }}</strong>
     <p class="muted">{{ message|default:"برای نمایش نمودار روزانه، تبلیغ باید به تلگرام متصل شود و آمار همگام شود." }}</p>
     <ul class="dash-chart-empty__steps muted">
       {% if show_steps %}

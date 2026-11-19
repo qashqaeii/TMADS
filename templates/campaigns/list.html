@@ -47,7 +47,7 @@
     </div>
     <input type="hidden" name="sort" value="{{ sort }}">
     <div class="campaigns-filter__actions">
-      <button class="campaigns-filter__btn campaigns-filter__btn--apply" type="submit">اعمال</button>
+      <button class="campaigns-filter__btn campaigns-filter__btn--apply" type="submit">{% include "includes/lucide_icon.html" with name="filter" size="sm" %} اعمال فیلتر</button>
       {% if request.GET.q or request.GET.status or request.GET.placement %}
       <a class="campaigns-filter__btn campaigns-filter__btn--clear" href="{% url 'campaigns:list' %}">پاک‌سازی</a>
       {% endif %}
@@ -75,10 +75,10 @@
       <div class="campaigns-table__sort" role="group" aria-label="مرتب‌سازی">
         <span class="campaigns-table__sort-label">مرتب‌سازی</span>
         <div class="campaigns-table__sort-track sort-pills">
-          <a class="sort-pill campaigns-table__sort-pill {% if sort == '-views' %}is-active{% endif %}" href="{% querystring sort='-views' page=None %}">بازدید</a>
-          <a class="sort-pill campaigns-table__sort-pill {% if sort == '-ctr' %}is-active{% endif %}" href="{% querystring sort='-ctr' page=None %}">نرخ کلیک</a>
-          <a class="sort-pill campaigns-table__sort-pill {% if sort == '-spent' %}is-active{% endif %}" href="{% querystring sort='-spent' page=None %}">هزینه</a>
-          <a class="sort-pill campaigns-table__sort-pill {% if sort == '-created_at' or sort == '' %}is-active{% endif %}" href="{% querystring sort='-created_at' page=None %}">جدیدترین</a>
+          <a class="sort-pill campaigns-table__sort-pill {% if sort == '-views' %}is-active{% endif %}"{% if sort == '-views' %} aria-current="true"{% endif %} href="{% querystring sort='-views' page=None %}">بازدید</a>
+          <a class="sort-pill campaigns-table__sort-pill {% if sort == '-ctr' %}is-active{% endif %}"{% if sort == '-ctr' %} aria-current="true"{% endif %} href="{% querystring sort='-ctr' page=None %}">نرخ کلیک</a>
+          <a class="sort-pill campaigns-table__sort-pill {% if sort == '-spent' %}is-active{% endif %}"{% if sort == '-spent' %} aria-current="true"{% endif %} href="{% querystring sort='-spent' page=None %}">هزینه</a>
+          <a class="sort-pill campaigns-table__sort-pill {% if sort == '-created_at' or sort == '' %}is-active{% endif %}"{% if sort == '-created_at' or sort == '' %} aria-current="true"{% endif %} href="{% querystring sort='-created_at' page=None %}">جدیدترین</a>
         </div>
       </div>
     </div>

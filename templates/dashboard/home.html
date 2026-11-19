@@ -1,7 +1,7 @@
 {% extends "app_shell.html" %}
 {% load core_filters humanize static %}
 {% block container_class %}container-wide{% endblock %}
-{% block page_title %}<span class="sr-only">داشبورد</span>{% endblock %}
+{% block page_title %}داشبورد{% endblock %}
 {% block charts_head %}
 {% if has_chart %}{% include "includes/charts_exec_scripts.html" %}{% endif %}
 {% endblock %}
@@ -29,11 +29,10 @@
     </article>
     <div class="ui-dashboard-rail">
       {% include "includes/wallet_module_compact.html" with wallet=wallet %}
-      {% include "dashboard/includes/activity_compact.html" %}
-    </div>
+     </div>
   </section>
 
-  <section class="dash-bottom ui-dashboard-recent" aria-label="کمپین‌های اخیر">
+  <section class="dash-bottom ui-dashboard-recent" aria-label="کمپین‌های اخیر و فعالیت‌ها">
     <article class="dash-board dash-board--campaigns">
       <header class="dash-board__head">
         <div class="dash-board__title">
@@ -90,7 +89,7 @@
       </ul>
       {% else %}
       <div class="dash-board__empty dash-board__empty--lux">
-        <p class="dash-board__empty-title">اولین کمپین را بسازید</p>
+        <span class="ui-empty__icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="megaphone" size="md" %}</span><p class="dash-board__empty-title">اولین کمپین را بسازید</p>
         <p class="muted">۵ مرحله · پیش‌نویس خودکار</p>
         <a class="btn btn-primary btn-sm" href="{% url 'campaigns:wizard_new' %}">
           {% include "includes/lucide_icon.html" with name="plus" size="btn" %}
@@ -99,8 +98,7 @@
       </div>
       {% endif %}
     </article>
-
-
+    {% include "dashboard/includes/activity_compact.html" %}
   </section>
 </div>
 

@@ -79,3 +79,23 @@
 @media(min-width:1101px) { .ui-final .ui-studio .studio-layout { grid-template-columns:minmax(0,1fr) minmax(270px,340px); }.ui-final .ui-studio .ui-studio-preview { position:sticky;top:78px; }.ui-preview-link { display:none; } }
 @media(max-width:1100px) { .ui-final .ui-studio .studio-layout { grid-template-columns:minmax(0,1fr);grid-template-areas:"main" "preview"; } .ui-final .ui-studio .ui-studio-preview { position:static; } }
 @media(max-width:700px) { .ui-final .ui-studio .wizard-progress--exec { display:flex;overflow-x:auto; }.ui-final .ui-studio .wizard-step { flex:0 0 auto; }.ui-final .ui-studio .target-grid { grid-template-columns:minmax(0,1fr); }.ui-final .ui-studio .target-card { min-height:0; }.ui-final .ui-studio .studio-mode-toggle { grid-template-columns:minmax(0,1fr); }.ui-final .ui-studio-footer .studio-actions-bar .btn-primary { flex-basis:100%;margin:0; } }
+
+/* Step-first studio: predictable fields, visible actions and controlled preview. */
+.ui-final .ui-studio .wizard-progress--exec { padding:6px;gap:4px; }
+.ui-final .ui-studio .wizard-step { min-width:0;justify-content:flex-start; }
+.ui-final .ui-studio .wizard-step .ui-step-label { line-height:1.55; }
+.ui-final .ui-studio .wizard-step.is-active { box-shadow:inset 0 0 0 1px #cce2f2; }
+.ui-final .ui-studio .studio-form { padding:var(--ui-card-pad); }
+.ui-final .ui-studio .ui-studio-form-head { border-bottom:1px solid var(--ui-border);padding-bottom:10px; }
+.ui-final .ui-studio .target-card { min-height:116px;padding:13px; }
+.ui-final .ui-studio .target-card .ui-target-symbol { width:36px;height:36px; }
+.ui-final .ui-studio .choice-card:focus-within { outline:2px solid var(--ui-focus);outline-offset:2px; }
+.ui-final .ui-studio .card-muted { border:1px solid var(--ui-border);border-radius:12px;background:var(--ui-soft);box-shadow:none;min-width:0; }
+.ui-final .ui-studio details.card-muted > summary { cursor:pointer;font-size:.9rem;color:var(--ui-ink);font-weight:650; }
+.ui-final .ui-studio .ui-studio-preview { padding:16px;max-inline-size:100%; }
+.ui-final .ui-studio .ui-preview-device { border-radius:14px; }
+.ui-final .ui-studio .studio-finance-card,.ui-final .ui-studio .ui-studio-wallet { min-width:0; }
+.ui-final .ui-studio .studio-draft-status[data-state=error] { color:var(--ui-danger); }
+.ui-final .ui-studio .studio-draft-status[data-state=ok] { color:var(--ui-success); }
+@media(max-width:1250px){.ui-final .ui-studio .studio-layout{grid-template-columns:minmax(0,1fr);grid-template-areas:"main" "preview"}.ui-final .ui-studio .ui-studio-preview{position:static}.ui-final .ui-studio .ui-preview-link{display:inline-flex}}
+@media(max-width:700px){.ui-final .ui-studio .wizard-step{min-height:44px}.ui-final .ui-studio .target-card{min-height:0}.ui-final .ui-studio .studio-actions-bar>.btn{min-height:44px}}

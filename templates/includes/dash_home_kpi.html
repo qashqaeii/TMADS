@@ -10,7 +10,7 @@
       <span class="dash-kpi-board__pill">{{ total_campaigns|format_count }} کمپین</span>
     </div>
   </header>
-  <p class="ui-metric-coverage muted" role="status">آمار کل دریافتی از {{ portfolio.stats_count|format_count }} از {{ portfolio.linked_count|format_count }} کمپین متصل؛ خط تیره یعنی داده موجود نیست.</p>
+   
   <div class="dash-kpi-board__grid" role="list">
     <article class="dash-kpi-tile dash-kpi-tile--hero" role="listitem">
       <div class="dash-kpi-tile__head">
@@ -34,4 +34,5 @@
       <p class="dash-kpi-tile__value tabnums">{% if portfolio.has_ctr %}{{ ctr|persian_digits }}<span class="dash-kpi-tile__suffix">٪</span>{% else %}—{% endif %}</p>
     </article>
   </div>
+  <p class="ui-metric-coverage muted" role="status">{% include "includes/lucide_icon.html" with name="info" size="sm" %} آمار کل دریافتی از {{ portfolio.stats_count|format_count }} از {{ portfolio.linked_count|format_count }} کمپین متصل؛ خط تیره یعنی داده موجود نیست.</p>
 </section>

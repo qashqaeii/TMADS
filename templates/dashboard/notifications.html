@@ -22,8 +22,8 @@
       </div>
     </li>
     {% empty %}
-    <li class="activity-feed__empty">
-      <strong>اعلانی نیست</strong>
+    <li class="activity-feed__empty ui-empty">
+      <span class="ui-empty__icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="bell" size="md" %}</span><h2>اعلانی نیست</h2>
       <p class="section-description">وقتی کمپین یا پرداختی ثبت شود، اینجا نمایش داده می‌شود.</p>
     </li>
     {% endfor %}

@@ -56,3 +56,33 @@
  .ui-final .ui-dashboard .dash-campaign-card__meta { grid-row:1;grid-column:2; }
  .ui-final .ui-dashboard .dash-chart-card--lux { padding:13px; }
 }
+
+/* Dashboard keeps recent work within reach by separating the activity rail. */
+.ui-final .ui-dashboard .dash-hero { padding-block-end:12px; }
+.ui-final .ui-dashboard .dash-kpi-board { padding:16px 20px 12px; }
+.ui-final .ui-dashboard .dash-kpi-board__head { margin-bottom:10px; }
+.ui-final .ui-dashboard .dash-kpi-tile__head { align-items:center;gap:9px; }
+.ui-final .ui-dashboard .dash-kpi-tile__glyph { color:var(--ui-action);background:#eaf3fa;border-radius:9px;width:35px;height:35px;display:grid;place-items:center; }
+.ui-final .ui-dashboard .dash-kpi-tile__value { margin-block:7px 0; }
+.ui-final .ui-dashboard .ui-metric-coverage { display:flex;align-items:flex-start;gap:6px;padding-top:10px;margin:10px 0 0;border-top:1px solid var(--ui-border);font-size:.77rem; }
+.ui-final .ui-dashboard .dash-workspace.ui-dashboard-workspace,.ui-final .ui-dashboard .dash-bottom.ui-dashboard-recent { display:grid;grid-template-columns:minmax(0,1.9fr) minmax(250px,1fr);gap:16px;align-items:start; }
+.ui-final .ui-dashboard .dash-chart-card--lux,.ui-final .ui-dashboard .wallet-module--dash-rail { padding:18px; }
+.ui-final .ui-dashboard .dash-chart-card__body .chart-box--dash-home { height:clamp(230px,21vw,300px);min-height:230px; }
+.ui-final .ui-dashboard .dash-chart-card__empty { min-height:218px; }
+.ui-final .ui-dashboard .dash-chart-empty__content { display:grid;justify-items:start;gap:8px; }
+.ui-final .ui-dashboard .dash-chart-empty__content p { margin:0; }
+.ui-final .ui-dashboard .dash-chart-empty__steps { margin:0; }
+.ui-final .ui-dashboard .wallet-module__rows { gap:13px; }
+.ui-final .ui-dashboard .wallet-module__row.ui-wallet-available { border-radius:10px;background:var(--ui-soft);padding:12px; }
+.ui-final .ui-dashboard .wallet-module__row.ui-wallet-available dd { font-size:clamp(1.25rem,2.25vw,1.8rem);color:var(--ui-ink);line-height:1.45; }
+.ui-final .ui-dashboard .wallet-module__links { padding-top:11px;border-top:1px solid var(--ui-border); }
+.ui-final .ui-dashboard .dash-campaign-card { grid-template-columns:minmax(0,1fr) auto;gap:10px; }
+.ui-final .ui-dashboard .dash-campaign-card__stats { grid-row:2;grid-column:1/-1; }
+.ui-final .ui-dashboard .dash-campaign-card__meta { grid-row:1;grid-column:2; }
+.ui-final .ui-dashboard .dash-campaign-card__head { flex-wrap:wrap; }
+.ui-final .ui-dashboard .dash-campaign-card__when { font-size:.72rem; }
+.ui-final .ui-dashboard .dash-board__empty { display:grid;justify-items:center;gap:8px;padding:24px 12px; }
+.ui-final .ui-notifications .notification-panel { max-width:1080px;width:100%; }
+.ui-final .ui-notifications .notification-item.is-unread { border-inline-start:3px solid var(--ui-action); }
+@media(max-width:1200px){.ui-final .ui-dashboard .dash-workspace.ui-dashboard-workspace,.ui-final .ui-dashboard .dash-bottom.ui-dashboard-recent{grid-template-columns:minmax(0,1fr)}.ui-dashboard-rail{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:650px){.ui-final .ui-dashboard .dash-kpi-board{padding:12px}.ui-final .ui-dashboard .dash-kpi-tile__glyph{width:30px;height:30px}.ui-final .ui-dashboard .dash-chart-card--lux{padding:14px}.ui-final .ui-dashboard .dash-campaign-card__meta{max-width:115px}}

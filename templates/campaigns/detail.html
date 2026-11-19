@@ -61,7 +61,7 @@
       <div class="campaign-detail__toolbar-track" role="group" aria-label="میانبرهای عملیاتی">
         {% if budget.has_remote %}
         <a class="campaign-detail__action campaign-detail__action--primary campaign-detail__toolbar-item" href="{% url 'campaigns:remote_management' campaign.id %}">
-          <span class="campaign-detail__action-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="pause" size="sm" %}</span>
+          <span class="campaign-detail__action-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="sliders-horizontal" size="sm" %}</span>
           <span class="campaign-detail__action-label">مدیریت تبلیغ</span>
         </a>
         <a class="campaign-detail__action campaign-detail__toolbar-item" href="{% url 'campaigns:intraday' campaign.id %}"><span class="campaign-detail__action-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="line-chart" size="sm" %}</span><span class="campaign-detail__action-label">آمار درون‌روزی</span></a>
