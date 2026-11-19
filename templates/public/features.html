@@ -3,13 +3,13 @@
 {% block content %}
 {% include "includes/public_hero.html" with title="امکانات" subtitle="از ساخت پیش‌نویس تا پیگیری نتیجهٔ کمپین" show_subtitle=1 compact=1 %}
 <section class="section public-section container">
-  <div class="feature-grid">
-    <article class="feature-card"><span class="feature-card__icon" aria-hidden="true">۱</span><h2>ویزارد کمپین</h2><p class="muted">هدف، مقصد، جایگاه، خلاقه، بودجه و پرداخت.</p></article>
-    <article class="feature-card"><span class="feature-card__icon" aria-hidden="true">۲</span><h2>کیف پول ریالی</h2><p class="muted">شارژ، رزرو بودجه و پیش‌فاکتور شفاف.</p></article>
-    <article class="feature-card"><span class="feature-card__icon" aria-hidden="true">۳</span><h2>گزارش زنده</h2><p class="muted">نمودار روزانه و KPI با همگام‌سازی API.</p></article>
-    <article class="feature-card"><span class="feature-card__icon" aria-hidden="true">۴</span><h2>عملیات داخلی</h2><p class="muted">تأیید کمپین، نرخ ارز و ممیزی.</p></article>
-    <article class="feature-card"><span class="feature-card__icon" aria-hidden="true">۵</span><h2>اعلان‌ها</h2><p class="muted">رویدادهای پرداخت و وضعیت کمپین.</p></article>
-    <article class="feature-card"><span class="feature-card__icon" aria-hidden="true">۶</span><h2>پشتیبانی</h2><p class="muted">تیکت با پیگیری وضعیت.</p></article>
+  <div class="feature-grid ui-public-feature-grid">
+    <article class="feature-card"><span class="feature-card__icon ui-target-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="layers" size="md" %}</span><h2>ویزارد کمپین</h2><p class="muted">هدف، مقصد، جایگاه، محتوا، بودجه و پرداخت.</p></article>
+    <article class="feature-card"><span class="feature-card__icon ui-target-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="wallet" size="md" %}</span><h2>کیف پول ریالی</h2><p class="muted">شارژ، رزرو بودجه و پیش‌فاکتور شفاف.</p></article>
+    <article class="feature-card"><span class="feature-card__icon ui-target-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="line-chart" size="md" %}</span><h2>گزارش همگام‌شده</h2><p class="muted">نمودار روزانه و KPI با همگام‌سازی API.</p></article>
+    <article class="feature-card"><span class="feature-card__icon ui-target-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="clipboard-check" size="md" %}</span><h2>عملیات داخلی</h2><p class="muted">تأیید کمپین، نرخ ارز و ممیزی.</p></article>
+    <article class="feature-card"><span class="feature-card__icon ui-target-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="bell" size="md" %}</span><h2>اعلان‌ها</h2><p class="muted">رویدادهای پرداخت و وضعیت کمپین.</p></article>
+    <article class="feature-card"><span class="feature-card__icon ui-target-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="headphones" size="md" %}</span><h2>پشتیبانی</h2><p class="muted">تیکت با پیگیری وضعیت.</p></article>
   </div>
   <div class="cta-band" style="margin-top:2rem">
     <h2>آماده شروع هستید؟</h2>

@@ -3,7 +3,7 @@
 {% block content %}
 {% include "includes/public_hero.html" with title="تعرفه" subtitle="هزینه‌ها را پیش از پرداخت بررسی کنید" show_subtitle=1 compact=1 %}
 <section class="section public-section container">
-  <div class="pricing-shell">
+  <div class="pricing-shell ui-public-pricing">
     <article class="pricing-card--exec">
       <p class="badge-tg--exec badge-tg" style="margin:0">مدل شفاف</p>
       <h2 class="price-tag">کارمزد درصدی</h2>
@@ -11,11 +11,11 @@
       <ul>
         <li>پیش‌فاکتور با نرخ گرام</li>
         <li>رزرو از کیف پول ریالی</li>
-        <li>درگاه آزمایشی در محیط توسعه</li>
-        <li>درگاه واقعی در تولید</li>
+        <li>نمایش مبلغ نهایی قبل از ثبت سفارش</li>
+        <li>پرداخت پس از فعال بودن سرویس مالی</li>
       </ul>
       <a class="btn btn-primary btn-lg" href="{% url 'accounts:register' %}" style="width:100%">شروع</a>
-    </article>
+    </article><aside class="ui-public-pricing-guide"><h2>مبلغ سفارش چگونه تعیین می‌شود؟</h2><dl><div><dt>بودجه تبلیغ</dt><dd>اعتبار درخواستی برای کمپین</dd></div><div><dt>کارمزد پلتفرم</dt><dd>طبق تنظیمات و پیش‌فاکتور</dd></div><div><dt>نرخ تبدیل</dt><dd>نرخ معتبر و ضوابط سفارش</dd></div></dl><p>مبلغ قطعی و مدت اعتبار آن قبل از پرداخت در استودیو نمایش داده می‌شود.</p></aside>
   </div>
 </section>
 {% endblock %}

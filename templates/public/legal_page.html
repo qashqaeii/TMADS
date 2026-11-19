@@ -3,7 +3,7 @@
 {% block content %}
 {% include "includes/public_hero.html" with title=title compact=1 %}
 <section class="section public-section container">
-  <article aria-label="{{ title }}" class="card card--lift card-pad legal-prose legal-md">
+  <article aria-label="{{ title }}" class="card card-pad legal-prose legal-md ui-public-reading">
     {% if body_text %}
       {{ body_text|linebreaksbr }}
     {% else %}

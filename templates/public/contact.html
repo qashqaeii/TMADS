@@ -3,8 +3,8 @@
 {% block content %}
 {% include "includes/public_hero.html" with title="تماس" subtitle="برای پیگیری درخواست‌ها و دریافت راهنمایی" show_subtitle=1 compact=1 %}
 <section class="section public-section container">
-  <article class="contact-card contact-card--exec">
-    <h2>پشتیبانی مشتریان</h2>
+  <article class="contact-card contact-card--exec ui-public-contact">
+    <span class="ui-target-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="headphones" size="md" %}</span><h2>پشتیبانی مشتریان</h2>
     <p class="muted">پس از ورود، از بخش پشتیبانی تیکت ثبت کنید.</p>
     {% if user.is_authenticated %}
     <a class="btn btn-primary" href="{% url 'support:create' %}">ثبت تیکت</a>

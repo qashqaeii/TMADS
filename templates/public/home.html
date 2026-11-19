@@ -1,92 +1,46 @@
 {% extends "public_base.html" %}
 {% block title %}{{ PRODUCT_NAME }} — تبلیغات تلگرام{% endblock %}
 {% block content %}
-<section class="hero hero--telegram hero--exec container hero--public-mobile">
-  <div class="hero-grid hero-grid--public">
-    <div class="hero-copy">
-      <p class="badge-tg badge-tg--exec">تبلیغات تلگرام — بدون حساب شخصی</p>
-      <h1>{{ PRODUCT_TAGLINE }}</h1>
-      <p class="lead">کمپین بسازید، ریالی پرداخت کنید، گزارش بگیرید — بدون نیاز به حساب شخصی Telegram Ads.</p>
-      <div class="hero-actions">
-        <a class="btn btn-primary btn-lg" href="{% url 'accounts:register' %}">شروع تبلیغات</a>
-        <a class="btn btn-ghost btn-lg" href="{% url 'public:how_it_works' %}">نحوه کار</a>
-      </div>
-      <ul class="check-list muted">
-        <li>استودیو ساخت تبلیغ — ۵ مرحله با پیش‌نویس خودکار</li>
-        <li>کیف پول ریالی + پیش‌فاکتور شفاف</li>
-        <li>گزارش همگام‌شده از API</li>
-      </ul>
-      <div class="trust-strip">
-        <span>✓ جداسازی داده مشتری</span>
-        <span>✓ رزرو بودجه امن</span>
-        <span>✓ پنل عملیات داخلی</span>
-      </div>
-    </div>
-    <div class="hero-panel hero-panel--exec card--lift" aria-hidden="true">
-      <p class="hero-panel__title">پیش‌نمایش داشبورد · دادهٔ نمونه</p>
-      <div class="kpi-exec-grid kpi-exec-grid--compact">
-        <article class="kpi-exec kpi-exec--compact">
-          <span class="kpi-exec__icon">{% include "includes/kpi_icon.html" with name="bolt" %}</span>
-          <div class="kpi-exec__body">
-            <span class="kpi-exec__label">کمپین فعال</span>
-            <span class="kpi-exec__value">۳</span>
-          </div>
-        </article>
-        <article class="kpi-exec kpi-exec--compact">
-          <span class="kpi-exec__icon">{% include "includes/kpi_icon.html" with name="eye" %}</span>
-          <div class="kpi-exec__body">
-            <span class="kpi-exec__label">نمایش</span>
-            <span class="kpi-exec__value">۱۶۸٬۴۱۶</span>
-          </div>
-        </article>
-        <article class="kpi-exec kpi-exec--compact">
-          <span class="kpi-exec__icon">{% include "includes/kpi_icon.html" with name="click" %}</span>
-          <div class="kpi-exec__body">
-            <span class="kpi-exec__label">کلیک</span>
-            <span class="kpi-exec__value">۵٬۱۰۹</span>
-          </div>
-        </article>
-        <article class="kpi-exec kpi-exec--compact">
-          <span class="kpi-exec__icon">{% include "includes/kpi_icon.html" with name="percent" %}</span>
-          <div class="kpi-exec__body">
-            <span class="kpi-exec__label">نرخ کلیک</span>
-            <span class="kpi-exec__value">۳٫۰۳٪</span>
-          </div>
-        </article>
-      </div>
-      <div class="tg-preview" style="margin-top:1rem">
-        <div class="bubble">
-          <strong>نمونه تبلیغ</strong>
-          <p style="margin:.35rem 0 .2rem">مخاطبان هدف خود را در تلگرام پیدا کنید.</p>
-          <span class="cta">شروع</span>
+<div class="ui-public-home">
+<section class="container ui-landing-hero">
+  <div class="ui-landing-copy">
+    <span class="ui-landing-kicker"><span aria-hidden="true"></span> پلتفرم مدیریت تبلیغات تلگرام</span>
+    <h1>تبلیغات تلگرام،<br><em>با کنترل بیشتر.</em></h1>
+    <p>کمپین‌های خود را طراحی کنید، مخاطبان را انتخاب کنید، هزینه‌ها را پیش از پرداخت ببینید و عملکرد را در یک داشبورد فارسی دنبال کنید.</p>
+    <div class="ui-landing-actions">{% if user.is_authenticated %}<a class="btn btn-primary btn-lg" href="{% url 'dashboard:home' %}">ورود به داشبورد {% include "includes/lucide_icon.html" with name="arrow-left" size="btn" %}</a>{% else %}<a class="btn btn-primary btn-lg" href="{% url 'accounts:register' %}">ایجاد حساب {% include "includes/lucide_icon.html" with name="arrow-left" size="btn" %}</a>{% endif %}<a class="btn btn-ghost btn-lg" href="{% url 'public:how_it_works' %}">نحوه کار</a></div>
+    <div class="ui-landing-proof"><span>{% include "includes/lucide_icon.html" with name="check-circle" size="sm" %} پیش‌فاکتور شفاف</span><span>{% include "includes/lucide_icon.html" with name="check-circle" size="sm" %} گزارش یکپارچه</span><span>{% include "includes/lucide_icon.html" with name="check-circle" size="sm" %} بررسی قبل از ارسال</span></div>
+  </div>
+  <div class="ui-product-visual" aria-label="نمای شماتیک پنل مدیریت با اطلاعات نمونه">
+    <div class="ui-product-window">
+      <header class="ui-product-window__head"><span class="ui-product-brand">{% include "includes/brand_mark.html" %} <strong>{{ PRODUCT_NAME }}</strong></span><span class="ui-sample-label">داده نمونه</span></header>
+      <div class="ui-product-window__body">
+        <div class="ui-product-window__nav" aria-hidden="true">{% include "includes/lucide_icon.html" with name="layout-grid" size="md" %}{% include "includes/lucide_icon.html" with name="megaphone" size="md" %}{% include "includes/lucide_icon.html" with name="wallet" size="md" %}{% include "includes/lucide_icon.html" with name="line-chart" size="md" %}</div>
+        <div class="ui-product-window__main">
+          <div class="ui-product-title"><div><strong>نمای کلی تبلیغات</strong><small>شاخص‌های نمونه</small></div><span class="ui-product-mock-action">کمپین جدید +</span></div>
+          <div class="ui-product-metrics"><article><small>نمایش</small><strong>۱۶۸٬۴۱۶</strong></article><article><small>کلیک</small><strong>۵٬۱۰۹</strong></article><article><small>نرخ کلیک</small><strong>۳٫۰۳٪</strong></article></div>
+          <div class="ui-product-workflow"><span class="ui-product-feature-icon">{% include "includes/lucide_icon.html" with name="crosshair" size="md" %}</span><div><strong>انتخاب مخاطب</strong><small>هدف‌گیری پیش از ارسال</small></div><span class="ui-product-chip">پیش‌نویس</span></div>
+          <div class="ui-product-workflow"><span class="ui-product-feature-icon">{% include "includes/lucide_icon.html" with name="wallet" size="md" %}</span><div><strong>بررسی بودجه</strong><small>اعتبار و کارمزد تفکیک‌شده</small></div>{% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}</div>
+          <div class="ui-product-workflow"><span class="ui-product-feature-icon">{% include "includes/lucide_icon.html" with name="line-chart" size="md" %}</span><div><strong>تحلیل عملکرد</strong><small>گزارش داده‌های همگام‌شده</small></div>{% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}</div>
         </div>
       </div>
     </div>
+    <p class="ui-product-caption">نمای مفهومی محصول؛ اعداد صرفاً نمونه‌اند.</p>
   </div>
 </section>
-<section class="section public-section container">
-  <div class="section-head section-head--exec">
-    <h2>مسیر شما تا انتشار</h2>
-    <p>از ایده تا گزارش — در یک تجربه یکپارچه و فارسی</p>
+<section class="container ui-landing-section">
+  <header class="ui-landing-section-head"><div><p>هدف‌گیری</p><h2>از جستجو تا ربات‌ها</h2></div><a href="{% url 'public:features' %}">همه امکانات {% include "includes/lucide_icon.html" with name="arrow-left" size="sm" %}</a></header>
+  <div class="ui-landing-targets">
+    <article><span class="ui-target-symbol">{% include "includes/lucide_icon.html" with name="search" size="md" %}</span><h3>جستجو</h3><p>عبارت‌های جستجوی منتخب</p></article>
+    <article><span class="ui-target-symbol">{% include "includes/lucide_icon.html" with name="bot" size="md" %}</span><h3>ربات‌ها</h3><p>ربات‌های هدف واجد شرایط</p></article>
+    <article><span class="ui-target-symbol">{% include "includes/lucide_icon.html" with name="users" size="md" %}</span><h3>کاربران</h3><p>موقعیت و ویژگی‌های مخاطب</p></article>
+    <article><span class="ui-target-symbol">{% include "includes/lucide_icon.html" with name="megaphone" size="md" %}</span><h3>کانال‌ها</h3><p>زبان، موضوع یا کانال مشخص</p></article>
   </div>
-  <div class="steps-row steps-row--exec" style="margin-top:1rem">
-    <article class="card card--lift step-card">
-      <h3>طراحی کمپین</h3>
-      <p class="muted">هدف، مقصد، جایگاه، متن و بودجه — با پیش‌نمایش شبیه تلگرام.</p>
-    </article>
-    <article class="card card--lift step-card">
-      <h3>پرداخت امن</h3>
-      <p class="muted">رزرو از کیف پول پس از پیش‌فاکتور. درگاه تولید پس از تأیید شما.</p>
-    </article>
-    <article class="card card--lift step-card">
-      <h3>گزارش حرفه‌ای</h3>
-      <p class="muted">نمایش، کلیک و ورود در نمودار روزانه با تاریخ شمسی.</p>
-    </article>
-  </div>
-  <div class="cta-band">
-    <h2>آماده اولین کمپین هستید؟</h2>
-    <p>ثبت‌نام رایگان است. محیط آزمایشی برای تست کیف پول و ویزارد فعال است.</p>
-    <a class="btn btn-primary btn-lg" href="{% url 'accounts:register' %}">ایجاد حساب</a>
-  </div>
+  <p class="ui-landing-note">امکان ارسال و جایگاه‌های قابل استفاده به شرایط حساب، تأییدهای لازم و قابلیت‌های تلگرام وابسته است.</p>
 </section>
+<section class="container ui-landing-section ui-landing-process">
+  <header class="ui-landing-section-head"><div><p>مسیر کار</p><h2>از پیش‌نویس تا بررسی نتیجه</h2></div></header>
+  <div class="ui-landing-steps"><article><span>۰۱</span><h3>طراحی کمپین</h3><p>هدف، متن، مقصد و بودجه را مشخص کنید.</p></article><article><span>۰۲</span><h3>بررسی سفارش</h3><p>پیش‌فاکتور و قوانین را مرور کنید.</p></article><article><span>۰۳</span><h3>پایش عملکرد</h3><p>پس از انتشار و همگام‌سازی، شاخص‌های تبلیغ را ببینید.</p></article></div>
+  <div class="ui-landing-end"><div><h2>اولین پیش‌نویس خود را بسازید.</h2><p>صدور سفارش و ارسال وابسته به وضعیت سرویس و بررسی‌های لازم است.</p></div><a class="btn btn-primary btn-lg" href="{% url 'accounts:register' %}">شروع ساخت حساب</a></div>
+</section>
+</div>
 {% endblock %}

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block body_class %}is-public{% endblock %}
 {% block body %}
-<header class="site-header site-header--exec">
+<header class="site-header site-header--exec ui-public-header">
   <div
     class="container public-nav-shell"
     x-data="{ open: false }"
@@ -116,7 +116,7 @@
   </div>
 </header>
 <main id="main-content" tabindex="-1" class="site-main site-main--public">{% block content %}{% endblock %}</main>
-<footer class="site-footer site-footer--exec section-muted">
+<footer class="site-footer site-footer--exec section-muted ui-public-footer">
   <div class="container footer-grid footer-grid--rich footer-grid--public">
     <div class="footer-col">
       <a href="{% url 'public:home' %}" class="brand brand-lockup">{% include "includes/brand_mark.html" %}<span>{{ PRODUCT_NAME }}</span></a>
