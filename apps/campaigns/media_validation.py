@@ -121,3 +121,31 @@ def validate_telegram_creative_media(upload):
     finally:
         upload.seek(0)
     return []
+
+
+def validate_website_photo(upload):
+    """Official uploadWebsitePhoto contract plus content verification."""
+    if not upload or not 0 < upload.size <= 1024 * 1024:
+        return ["تصویر وب‌سایت باید حداکثر یک مگابایت باشد."]
+    suffix = Path(upload.name or "").suffix.lower()
+    expected = {".jpg": "JPEG", ".jpeg": "JPEG", ".png": "PNG"}.get(suffix)
+    if not expected:
+        return ["برای لوگوی وب‌سایت فقط JPEG یا PNG قابل استفاده است."]
+    try:
+        upload.seek(0)
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", Image.DecompressionBombWarning)
+            with Image.open(upload) as img:
+                if img.format != expected or img.width < 150 or img.height < 150 or img.width * img.height > MAX_IMAGE_PIXELS:
+                    return ["تصویر وب‌سایت باید حداقل ۱۵۰×۱۵۰ پیکسل و سالم باشد."]
+                if getattr(img, "is_animated", False):
+                    return ["تصویر متحرک مجاز نیست."]
+                img.verify()
+            upload.seek(0)
+            with Image.open(upload) as img:
+                img.load()
+    except (OSError, ValueError, SyntaxError, Image.DecompressionBombError, Image.DecompressionBombWarning):
+        return ["تصویر وب‌سایت معتبر نیست."]
+    finally:
+        upload.seek(0)
+    return []

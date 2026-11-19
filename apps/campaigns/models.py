@@ -91,6 +91,7 @@ class AdCreative(TenantOwnedModel):
     ad_text = models.TextField(blank=True)
     cta_label = models.CharField(max_length=64, blank=True)
     media = models.FileField(upload_to="ad_media/", blank=True)
+    website_photo = models.FileField(upload_to="website_photos/", blank=True)
 
     class Meta:
         ordering = ["-created_at"]

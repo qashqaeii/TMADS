@@ -227,6 +227,15 @@ def apply_studio_step(campaign: Campaign, step: int, data, files=None) -> None:
         elif data.get("remove_creative_media") == "1":
             # Do not delete a storage object which another cloned/legacy row might reference.
             creative.media = ""
+        website_upload = (files or {}).get("website_photo") if files else None
+        if website_upload:
+            from apps.campaigns.media_validation import validate_website_photo
+            errors = validate_website_photo(website_upload)
+            if errors:
+                raise ValueError("؛ ".join(errors))
+            creative.website_photo = website_upload
+        elif data.get("remove_website_photo") == "1":
+            creative.website_photo = ""
         creative.save()
         promote, _ = parse_promote_url((data.get("destination") or campaign.destination or "").strip())
         if promote:

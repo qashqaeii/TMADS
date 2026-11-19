@@ -337,6 +337,17 @@ def campaign_wizard(request, campaign_id=None):
         if not _draft_revision_matches(campaign, request.POST):
             messages.error(request, "نسخه یا مرحله پیش‌نویس تغییر کرده است؛ صفحه جدید را بررسی کنید.")
             return redirect("campaigns:wizard", campaign_id=campaign.id)
+        if action == "verify_website_photo" and step == 3:
+            from apps.telegram_ads.services.website_photo import upload_saved_website_photo
+            from apps.telegram_ads.exceptions import TelegramAdsError
+            try:
+                if request.FILES or request.POST.get("remove_website_photo") == "1":
+                    raise ValueError("ابتدا تصویر را ذخیره کنید و سپس آن را انتقال دهید.")
+                upload_saved_website_photo(campaign, actor=request.user)
+                messages.success(request, "شناسه تصویر وب‌سایت تأیید شد. تبلیغ منتشر نشده است.")
+            except (ValueError, TelegramAdsError):
+                messages.error(request, "انتقال تصویر انجام نشد یا نتیجه آن نیازمند بررسی است.")
+            return redirect("campaigns:wizard", campaign_id=campaign.id)
         if action == "verify_media" and step == 3:
             from apps.telegram_ads.services.media import upload_saved_media
             from apps.telegram_ads.exceptions import TelegramAdsError
@@ -360,6 +371,16 @@ def campaign_wizard(request, campaign_id=None):
             errors = validate_studio_step(campaign, step, request.POST, strict=strict_next)
         except (TypeError, ValueError, OverflowError):
             errors = ["فرمت اطلاعات واردشده معتبر نیست."]
+        website_upload = request.FILES.get("website_photo")
+        if website_upload:
+            from apps.campaigns.media_validation import validate_website_photo
+            from apps.telegram_ads.targeting.website import is_external
+            if step != 3 or not is_external(request.POST.get("destination") or campaign.destination):
+                errors.append("تصویر وب‌سایت فقط برای مقصد HTTPS خارجی قابل ذخیره است.")
+            elif request.POST.get("remove_website_photo") == "1":
+                errors.append("حذف و بارگذاری تصویر وب‌سایت را هم‌زمان انتخاب نکنید.")
+            else:
+                errors.extend(validate_website_photo(website_upload))
         upload = request.FILES.get("creative_media")
         if upload:
             from apps.campaigns.media_validation import validate_telegram_creative_media
@@ -496,9 +517,12 @@ def campaign_wizard(request, campaign_id=None):
         studio_mode = "simple"
 
     from apps.telegram_ads.services.media import media_receipt, media_upload_enabled
+    from apps.telegram_ads.services.website_photo import website_photo_receipt, website_photo_enabled
     ctx = {
         "campaign": campaign,
         "media_uploaded": bool(media_receipt(campaign)),
+        "website_photo_uploaded": bool(website_photo_receipt(campaign)),
+        "website_photo_enabled": website_photo_enabled(),
         "media_upload_enabled": media_upload_enabled(),
         "step": step,
         "steps": STUDIO_STEPS,

@@ -221,7 +221,10 @@ def validate_submission_ready(campaign) -> StudioValidationResult:
     elif (campaign.ad_settings or {}).get("photo_id") or (campaign.ad_settings or {}).get("video_id"):
         result.errors.append("شناسه رسانه قدیمی قابل تأیید نیست؛ فایل جدید ثبت کنید.")
     from apps.telegram_ads.targeting.website import website_submission_errors
+    from apps.telegram_ads.services.website_photo import website_photo_receipt
     result.errors.extend(website_submission_errors(campaign.destination,campaign.ad_settings or {}))
+    if creative and creative.website_photo and not website_photo_receipt(campaign):
+        result.errors.append("تصویر وب‌سایت پیش از پرداخت باید با تأیید دریافت شناسه به تلگرام منتقل شود.")
     if config.get("audience_ids") or config.get("exclude_audience_ids"):
         result.errors.append("مخاطبان اختصاصی نیازمند مسیردهی حساب مستقل تأییدشده هستند.")
     if not campaign.destination:

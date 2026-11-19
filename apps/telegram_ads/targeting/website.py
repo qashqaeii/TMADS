@@ -41,5 +41,5 @@ def website_submission_errors(destination,values):
     if is_external(destination) and not getattr(settings,"TELEGRAM_ADS_WEBSITE_ENABLED",False):
         errors.append("ارسال تبلیغ با مقصد وب‌سایت هنوز برای حساب فعال نشده است.")
     if values.get("website_photo_id") or values.get("conversion_event_id"):
-        errors.append("مالکیت تصویر وب‌سایت یا رویداد تبدیل در حساب تبلیغاتی هنوز تأیید نشده است.")
+        errors.append("شناسه تصویر یا رویداد تبدیل بدون رسید قابل استفاده نیست.")
     return errors

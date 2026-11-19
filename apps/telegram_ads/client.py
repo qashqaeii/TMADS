@@ -250,6 +250,14 @@ class TelegramAdsClient:
         )
 
 
+    def upload_website_photo(self, file, *, filename: str):
+        if not (settings.TELEGRAM_ADS_WRITE_ENABLED and settings.TELEGRAM_ADS_PAID_SUBMISSION_ENABLED
+                and getattr(settings, "TELEGRAM_ADS_MEDIA_UPLOAD_ENABLED", False)
+                and getattr(settings, "TELEGRAM_ADS_WEBSITE_ENABLED", False)):
+            raise TelegramAdsWriteDisabled("Website photo upload is disabled")
+        return self._run("upload_website_photo",
+            lambda client: _model_to_dict(client.upload_website_photo(file, filename=filename)))
+
     def upload_creative_media(self, file, *, filename: str, is_video: bool):
         if not (settings.TELEGRAM_ADS_WRITE_ENABLED and settings.TELEGRAM_ADS_PAID_SUBMISSION_ENABLED
                 and getattr(settings, "TELEGRAM_ADS_MEDIA_UPLOAD_ENABLED", False)):

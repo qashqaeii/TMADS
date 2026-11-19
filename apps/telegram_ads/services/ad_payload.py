@@ -109,8 +109,12 @@ def build_create_ad_payload(
         payload["additional_info"] = str(settings["additional_info"])[:64]
     if settings.get("website_name"):
         payload["website_name"] = settings["website_name"]
-    if settings.get("website_photo_id"):
-        payload["website_photo_id"] = settings["website_photo_id"]
+    if creative and creative.website_photo:
+        from apps.telegram_ads.services.website_photo import website_photo_receipt
+        website_id = website_photo_receipt(campaign)
+        if not website_id:
+            raise ValueError("رسید معتبر تصویر وب‌سایت موجود نیست.")
+        payload["website_photo_id"] = website_id
     if settings.get("button"):
         payload["button"] = settings["button"]
     if settings.get("conversion_event_id"):

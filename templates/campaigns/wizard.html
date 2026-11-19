@@ -217,7 +217,19 @@
       <p class="muted">تبلیغ جستجو متن اسپانسری جداگانه ندارد؛ عنوان و مقصد در پیش‌نمایش نشان داده می‌شوند.</p>
       {% endif %}
       <div class="field"><label for="studio-control-14">لینک مقصد</label><input id="studio-control-14" name="destination" value="{{ campaign.destination }}" dir="ltr"></div>
-      <details class="card-muted card-pad form-stack" {% if campaign.ad_settings.website_name %}open{% endif %}><summary>تنظیمات مقصد وب‌سایت</summary><p class="field-help">فقط برای لینک خارجی. ارسال منوط به مجوز و قابلیت حساب است.</p><div class="field"><label for="website-name">نام وب‌سایت (حداکثر ۴۰ کاراکتر)</label><input id="website-name" name="website_name" maxlength="40" value="{{ campaign.ad_settings.website_name|default:'' }}"></div><div class="field"><label for="website-button">دکمه رسمی تبلیغ</label><select id="website-button" name="button">{% for value,label in website_buttons %}<option value="{{ value }}" {% if campaign.ad_settings.button == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div></details>
+      <details class="card-muted card-pad form-stack" {% if campaign.ad_settings.website_name %}open{% endif %}><summary>تنظیمات مقصد وب‌سایت</summary><p class="field-help">فقط برای لینک خارجی. ارسال منوط به مجوز و قابلیت حساب است.</p><div class="field"><label for="website-name">نام وب‌سایت (حداکثر ۴۰ کاراکتر)</label><input id="website-name" name="website_name" maxlength="40" value="{{ campaign.ad_settings.website_name|default:'' }}"></div><div class="field">
+        <label for="website-photo">تصویر وب‌سایت (اختیاری)</label>
+        <input id="website-photo" type="file" name="website_photo" accept="image/jpeg,image/png" aria-describedby="website-photo-hint">
+        <p id="website-photo-hint" class="field-help">JPEG یا PNG، حداکثر یک مگابایت، حداقل ۱۵۰×۱۵۰ پیکسل. قبل از پرداخت باید شناسه اختصاصی آن از تلگرام تأیید شود.</p>
+        {% if creative and creative.website_photo %}
+          <div class="ui-studio-wallet"><span>فایل تصویر وب‌سایت ذخیره شده است.</span>
+            {% if website_photo_uploaded %}<span class="status status-active">شناسه معتبر دریافت شد</span>
+            {% elif website_photo_enabled %}<button class="btn btn-ghost btn-sm" type="submit" name="action" value="verify_website_photo" formnovalidate data-confirm-title="انتقال تصویر وب‌سایت" data-confirm-message="فقط تصویر ذخیره‌شده به تلگرام منتقل می‌شود. هیچ بودجه‌ای اختصاص داده نمی‌شود." data-confirm-label="انتقال تصویر" data-confirm-tone="primary">انتقال تصویر به تلگرام</button>
+            {% else %}<span class="status status-warn">انتقال در این حساب فعال نیست</span>{% endif %}
+          </div>
+          <label class="choice-card"><input type="checkbox" name="remove_website_photo" value="1"> حذف فایل ذخیره‌شده در پیش‌نویس</label>
+        {% endif %}
+      </div><div class="field"><label for="website-button">دکمه رسمی تبلیغ</label><select id="website-button" name="button">{% for value,label in website_buttons %}<option value="{{ value }}" {% if campaign.ad_settings.button == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div></details>
       <label class="choice-card studio-pro-only" style="margin-top:.5rem"><input type="checkbox" name="show_userpic" value="1" {% if campaign.ad_settings.show_userpic %}checked{% endif %}> نمایش تصویر ربات/کانال مقصد</label>
       {% if campaign.target_type == 'channels' or campaign.target_type == 'users' or creative.media %}
       <div class="field">
