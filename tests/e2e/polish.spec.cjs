@@ -31,7 +31,7 @@ test('customer workspace and local-only amount selector', async ({page}) => {
   await page.locator('#id_password').fill(password);
   await page.locator('form button[type="submit"]').click();
   await expect(page.locator('.ui-shell')).toBeVisible();
-  for (const path of ['/app/', '/app/notifications/', '/campaigns/', '/finance/wallet/', '/finance/transactions/', '/finance/invoices/', '/finance/refunds/', '/support/', '/support/new/', '/accounts/profile/', '/app/ad-policies/']) {
+  for (const path of ['/app/', '/app/notifications/', '/campaigns/', '/finance/wallet/', '/finance/transactions/', '/finance/invoices/', '/finance/refunds/', '/support/', '/support/new/', '/accounts/profile/', '/accounts/advertiser-account/', '/accounts/advertiser-account/ads/', '/accounts/advertiser-assets/', '/app/ad-policies/']) {
     await assertPage(page, path);
     await expect(page.locator('.ui-shell')).toBeVisible();
   }

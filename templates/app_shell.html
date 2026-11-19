@@ -85,6 +85,7 @@
             <span class="nav-icon">{% include "includes/nav_icon.html" with icon="api" %}</span>
             <span class="nav-label">وضعیت API</span>
           </a>
+          <a href="{% url 'operations:release_readiness' %}" class="sidebar-link {% if '/ops/release-readiness' in request.path %}active{% endif %}"{% if '/ops/release-readiness' in request.path %} aria-current="page"{% endif %}><span class="nav-icon">{% include "includes/lucide_icon.html" with name="shield-check" size="sm" %}</span><span class="nav-label">آمادگی انتشار</span></a>
           <a href="{% url 'operations:audit' %}" class="sidebar-link {% if '/ops/audit' in request.path %}active{% endif %}"{% if '/ops/audit' in request.path %} aria-current="page"{% endif %}>
             <span class="nav-icon">{% include "includes/nav_icon.html" with icon="audit" %}</span>
             <span class="nav-label">ممیزی</span>

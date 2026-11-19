@@ -1,4 +1,5 @@
 {% extends "app_shell.html" %}
+{% load core_filters %}
 {% block page_title %}آمادگی انتشار{% endblock %}
 {% block content %}
 <div class="app-stack operations-page ui-ops ui-release">
@@ -7,13 +8,13 @@
   <div><span class="ui-target-symbol">{% include "includes/lucide_icon.html" with name="shield-check" size="md" %}</span>
   <h2>{% if can_launch %}پیش‌شرط‌های قابل‌اندازه‌گیری برقرارند{% else %}انتشار عمومی هنوز مجاز نیست{% endif %}</h2>
   <p>این صفحه هیچ پرداخت، درخواست نوشتن تلگرام یا تغییر تنظیماتی انجام نمی‌دهد.</p></div>
-  <div class="ui-release-numbers" aria-label="خلاصه وضعیت"><span><strong>{{ ready }}</strong> آماده</span><span><strong>{{ blocked }}</strong> مسدود</span><span><strong>{{ pending }}</strong> نیازمند تأیید</span></div>
+  <div class="ui-release-numbers" aria-label="خلاصه وضعیت"><span><small>آماده</small><strong>{{ ready|format_count }}</strong></span><span><small>مسدود</small><strong>{{ blocked|format_count }}</strong></span><span><small>نیازمند تأیید</small><strong>{{ pending|format_count }}</strong></span></div>
 </section>
 <section class="card card-pad">
   <header class="dash-panel__head"><h2 class="section-title">چک‌لیست انتشار</h2><span class="muted">اطلاعات حساس نمایش داده نمی‌شوند</span></header>
   <div class="ui-release-checks">
   {% for item in items %}
-  <article class="ui-release-check">
+  <article class="ui-release-check ui-release-check--{{ item.state }}">
     <span class="ui-release-check__icon" aria-hidden="true">{% if item.state == "ready" %}{% include "includes/lucide_icon.html" with name="check-circle" size="md" %}{% elif item.state == "blocked" %}{% include "includes/lucide_icon.html" with name="x-circle" size="md" %}{% else %}{% include "includes/lucide_icon.html" with name="clock" size="md" %}{% endif %}</span>
     <div><h3>{{ item.label }}</h3><p>{{ item.explanation }}</p></div>
     <span class="status {% if item.state == 'ready' %}status-active{% elif item.state == 'blocked' %}status-danger{% else %}status-warn{% endif %}">{% if item.state == 'ready' %}آماده{% elif item.state == 'blocked' %}مسدود{% else %}در انتظار{% endif %}</span>
@@ -21,6 +22,6 @@
   {% endfor %}
   </div>
 </section>
-<a href="{% url 'operations:api_status' %}" class="btn btn-ghost">مشاهده وضعیت API</a>
+<div class="hero-actions"><a href="{% url 'operations:api_status' %}" class="btn btn-ghost">مشاهده وضعیت API</a><a href="{% url 'operations:overview' %}" class="btn btn-ghost">بازگشت به مرکز عملیات</a></div>
 </div>
 {% endblock %}

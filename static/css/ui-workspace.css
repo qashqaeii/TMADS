@@ -192,3 +192,21 @@
 .ui-release-check p {margin:5px 0 0;color:var(--ui-muted);line-height:1.75;font-size:.8rem}
 .ui-release-check>.status {flex:none}
 @media(max-width:600px){.ui-release-check{flex-wrap:wrap}.ui-release-check>.status{margin-inline-start:auto}}
+
+/* Release readiness is read-only and distinguishes blocked from pending. */
+.ui-final .ui-release-summary { display:grid;grid-template-columns:minmax(0,1fr) minmax(240px,1fr);gap:20px;align-items:center; }
+.ui-release-summary h2 { font-size:1.15rem;margin:8px 0;line-height:1.6; }
+.ui-release-summary p { margin:0;color:var(--ui-muted);font-size:.85rem;line-height:1.85; }
+.ui-release-numbers { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px; }
+.ui-release-numbers > span { display:grid;gap:8px;text-align:center;padding:12px 6px;border:1px solid var(--ui-border);border-radius:10px;background:var(--ui-soft); }
+.ui-release-numbers small { color:var(--ui-muted);font-size:.75rem; }
+.ui-release-numbers strong { font-size:1.5rem;line-height:1.4;color:var(--ui-ink); }
+.ui-release-checks { display:grid;gap:0; }
+.ui-release-check { display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:start;gap:12px;padding:14px 0;border-top:1px solid var(--ui-border); }
+.ui-release-check__icon { color:var(--ui-muted);padding-top:2px; }
+.ui-release-check--ready .ui-release-check__icon { color:var(--ui-success); }
+.ui-release-check--blocked .ui-release-check__icon { color:var(--ui-danger); }
+.ui-release-check h3 { font-size:.93rem;margin:0 0 4px;line-height:1.6; }
+.ui-release-check p { margin:0;color:var(--ui-muted);font-size:.83rem;line-height:1.8; }
+@media(max-width:1000px){.ui-final .ui-release-summary{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:520px){.ui-release-check{grid-template-columns:auto minmax(0,1fr)}.ui-release-check>.status{grid-column:2;justify-self:start}}

@@ -36,6 +36,7 @@ def test_public_ui_shell(client, route):
     "finance:wallet", "finance:topup", "finance:transactions",
     "finance:invoices", "finance:refunds", "support:list", "support:create",
     "accounts:profile", "policies:ad_policies",
+    "accounts:related_account", "accounts:related_ads", "accounts:advertiser_assets",
 ])
 def test_customer_ui_shell(client, customer_user, route):
     client.force_login(customer_user)
@@ -60,3 +61,31 @@ def test_draft_detail_and_wizard_markup(client, customer_user):
     assert b'draft_revision' in wizard.content
     assert b'csrfmiddlewaretoken' in wizard.content
     assert b'aria-current="step"' in wizard.content
+
+
+@pytest.mark.django_db
+def test_related_ads_empty_state_does_not_contact_api(client, customer_user):
+    from unittest.mock import patch
+
+    client.force_login(customer_user)
+    with patch("apps.telegram_ads.account_ad_views.verified_client") as api:
+        response = client.get(reverse("accounts:related_ads"))
+        assert response.status_code == 200
+        assert b'ui-assets' in response.content
+        assert b'ui-empty' in response.content
+        api.assert_not_called()
+
+
+@pytest.mark.django_db
+def test_release_workspace_uses_shared_shell(client, customer_user):
+    from apps.accounts.models import User
+
+    url = reverse("operations:release_readiness")
+    client.force_login(customer_user)
+    assert client.get(url).status_code == 403
+    manager = User.objects.create_user(username="ui-ops-review", role=User.Role.ADMIN)
+    client.force_login(manager)
+    response = client.get(url)
+    assert response.status_code == 200
+    assert b'ui-release-checks' in response.content
+    assert b'ui-final' in response.content
