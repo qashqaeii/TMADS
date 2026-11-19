@@ -243,7 +243,7 @@ def check_promote_url_format(promote_url: str, *, allow_external: bool = False) 
             )
         )
 
-    is_telegram = "t.me" in host or "telegram.me" in host or parsed.scheme == "tg"
+    is_telegram = parsed.hostname in {"t.me","telegram.me","www.t.me","www.telegram.me"} or parsed.scheme == "tg"
     if not is_telegram and not allow_external:
         findings.append(
             _meta_finding(

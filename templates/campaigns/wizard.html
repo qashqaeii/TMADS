@@ -139,6 +139,7 @@
         <textarea name="channel_ids" hidden data-channel-hidden dir="ltr">{% if campaign.targeting %}{% for c in campaign.targeting.config.channel_ids %}{{ c }}
 {% endfor %}{% endif %}</textarea>
       </div>
+      <div class="field studio-pro-only" data-multiselect data-field="exclude_topic_ids" data-catalog='{{ catalog_topics_json|escape }}' data-kind="topic"><label for="excluded-channel-topic">موضوعات مستثنی</label><input id="excluded-channel-topic" type="search" data-ms-search placeholder="جستجوی موضوع…" autocomplete="off"><ul class="catalog-suggest" data-ms-results hidden></ul><p data-ms-status class="field-help" aria-live="polite"></p><ul class="chip-list" data-ms-chips></ul><div data-ms-hidden>{% if campaign.targeting %}{% for tid in campaign.targeting.config.exclude_topic_ids %}<input type="hidden" name="exclude_topic_ids" value="{{ tid }}">{% endfor %}{% endif %}</div></div>
       <div class="field studio-pro-only"><label for="studio-control-7">کانال‌های مستثنی</label><textarea id="studio-control-7" name="exclude_channel_ids" rows="2" dir="ltr">{% if campaign.targeting %}{% for c in campaign.targeting.config.exclude_channel_ids %}{{ c }}
 {% endfor %}{% endif %}</textarea></div>
       {% elif campaign.target_type == 'users' %}
@@ -183,6 +184,16 @@
           {% if campaign.targeting %}{% for code in campaign.targeting.config.language_codes %}<input type="hidden" name="language_codes" value="{{ code }}">{% endfor %}{% endif %}
         </div>
       </div>
+      <section class="card-muted card-pad form-stack studio-pro-only" aria-label="ترکیب مخاطب و مستثنی‌ها">
+        <h3 class="section-title">ترکیب مخاطب و مستثنی‌ها</h3>
+        <label class="choice-card"><input type="checkbox" name="intersect_topics" value="1" {% if campaign.targeting.config.intersect_topics %}checked{% endif %}> مخاطب باید به تمام موضوعات انتخاب‌شده علاقه داشته باشد</label>
+        <div class="field" data-multiselect data-field="exclude_topic_ids" data-catalog='{{ catalog_topics_json|escape }}' data-kind="topic"><label for="excluded-user-topic">موضوعات مستثنی</label><input id="excluded-user-topic" type="search" data-ms-search placeholder="جستجوی موضوع…" autocomplete="off"><ul class="catalog-suggest" data-ms-results hidden></ul><p data-ms-status class="field-help" aria-live="polite"></p><ul class="chip-list" data-ms-chips></ul><div data-ms-hidden>{% if campaign.targeting %}{% for tid in campaign.targeting.config.exclude_topic_ids %}<input type="hidden" name="exclude_topic_ids" value="{{ tid }}">{% endfor %}{% endif %}</div></div>
+        <div class="field"><label for="user-channel-included">مخاطبان کانال‌های انتخابی (هر کانال یک خط)</label><textarea id="user-channel-included" name="channel_ids" rows="3" dir="ltr" placeholder="@channel">{% if campaign.targeting %}{% for c in campaign.targeting.config.channel_ids %}{{ c }}
+{% endfor %}{% endif %}</textarea></div>
+        <div class="field"><label for="user-channel-excluded">مخاطبان کانال‌های مستثنی</label><textarea id="user-channel-excluded" name="exclude_channel_ids" rows="3" dir="ltr" placeholder="@channel">{% if campaign.targeting %}{% for c in campaign.targeting.config.exclude_channel_ids %}{{ c }}
+{% endfor %}{% endif %}</textarea></div>
+        <p class="field-help">کانال‌ها پیش از ارسال با API بررسی می‌شوند. مخاطبان اختصاصی حساب مستقل در مسیر جداگانه قرار دارند.</p>
+      </section>
       <div class="field studio-pro-only"><label for="studio-control-11">دستگاه</label>
         <select id="studio-control-11" name="device">
           <option value="">همه</option>
@@ -206,6 +217,7 @@
       <p class="muted">تبلیغ جستجو متن اسپانسری جداگانه ندارد؛ عنوان و مقصد در پیش‌نمایش نشان داده می‌شوند.</p>
       {% endif %}
       <div class="field"><label for="studio-control-14">لینک مقصد</label><input id="studio-control-14" name="destination" value="{{ campaign.destination }}" dir="ltr"></div>
+      <details class="card-muted card-pad form-stack" {% if campaign.ad_settings.website_name %}open{% endif %}><summary>تنظیمات مقصد وب‌سایت</summary><p class="field-help">فقط برای لینک خارجی. ارسال منوط به مجوز و قابلیت حساب است.</p><div class="field"><label for="website-name">نام وب‌سایت (حداکثر ۴۰ کاراکتر)</label><input id="website-name" name="website_name" maxlength="40" value="{{ campaign.ad_settings.website_name|default:'' }}"></div><div class="field"><label for="website-button">دکمه رسمی تبلیغ</label><select id="website-button" name="button">{% for value,label in website_buttons %}<option value="{{ value }}" {% if campaign.ad_settings.button == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div></details>
       <label class="choice-card studio-pro-only" style="margin-top:.5rem"><input type="checkbox" name="show_userpic" value="1" {% if campaign.ad_settings.show_userpic %}checked{% endif %}> نمایش تصویر ربات/کانال مقصد</label>
       {% if campaign.target_type == 'channels' or campaign.target_type == 'users' or creative.media %}
       <div class="field">

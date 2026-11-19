@@ -138,7 +138,11 @@ def parse_targeting_payload(data, target_type: str) -> dict[str, Any]:
         cfg["language_codes"] = getlist("language_codes")
         cfg["topic_ids"] = [int(x) for x in getlist("topic_ids") if str(x).isdigit()]
         cfg["exclude_topic_ids"] = [int(x) for x in getlist("exclude_topic_ids") if str(x).isdigit()]
-        cfg["intersect_topics"] = bool(data.get("intersect_topics"))
+        cfg["intersect_topics"] = data.get("intersect_topics") == "1"
+        from apps.telegram_ads.targeting.normalize import parse_bot_peer_input
+        for field in ("channel_ids","exclude_channel_ids"):
+            values=[line.strip() for raw in getlist(field) for line in raw.splitlines() if line.strip()]
+            cfg[field]=[parse_bot_peer_input(value)[0] or value for value in values]
         cfg["device"] = (data.get("device") or "").strip() or None
         cfg["exclude_political_channels"] = bool(data.get("exclude_political_channels"))
         cfg["political_channels_only"] = bool(data.get("political_channels_only"))
@@ -231,6 +235,10 @@ def apply_studio_step(campaign: Campaign, step: int, data, files=None) -> None:
         for key in ("show_userpic", "destination_rights_confirmed", "profile_complete_confirmed",
                     "channel_active_confirmed", "bot_functional_confirmed"):
             settings[key] = data.get(key) == "1"
+        from apps.telegram_ads.targeting.website import website_fields
+        for key in ("website_name","button","website_photo_id","conversion_event_id"):
+            settings.pop(key,None)
+        settings.update(website_fields(campaign.destination,data))
         campaign.ad_settings = settings
 
     elif step == 4:
@@ -317,8 +325,12 @@ def validate_budget_inputs(campaign, data, *, strict):
             errors.append("فرمت تاریخ زمان‌بندی معتبر نیست.")
     if strict and all(dates) and dates[1] <= dates[0]:
         errors.append("زمان توقف باید بعد از زمان فعال‌سازی باشد.")
-    if strict and data.get("schedule_enabled") and not parse_schedule_payload(data):
-        errors.append("برای زمان‌بندی هفتگی حداقل یک بازه معتبر انتخاب کنید.")
+    if data.get("schedule_enabled"):
+        schedule=parse_schedule_payload(data)
+        if strict and not schedule:
+            errors.append("برای زمان‌بندی هفتگی حداقل یک بازه و منطقه زمانی معتبر انتخاب کنید.")
+        if schedule and schedule.get("use_viewer_timezone") and campaign.target_type != "users":
+            errors.append("زمان مخاطب فقط برای هدف‌گیری کاربران مجاز است.")
     return list(dict.fromkeys(errors))
 
 
@@ -345,14 +357,19 @@ def validate_studio_step(campaign: Campaign, step: int, data, *, strict: bool) -
         )
         return result.errors
     if step == 3:
-        if campaign.target_type == Campaign.TargetType.SEARCH:
-            return []
-        text = (data.get("ad_text") or "").strip()
-        if strict and len(text) < 1:
-            return ["متن تبلیغ را وارد کنید."]
-        if len(text) > 160:
-            return ["متن تبلیغ بیش از حد مجاز است."]
-        return []
+        from apps.telegram_ads.targeting.website import validate_website_fields, website_fields
+        destination=(data.get("destination") or campaign.destination or "").strip()
+        normalized,url_errors=parse_promote_url(destination)
+        errors=validate_website_fields(normalized,website_fields(normalized,data),strict=strict)
+        if strict:
+            errors.extend(url_errors)
+        if campaign.target_type != Campaign.TargetType.SEARCH:
+            text = (data.get("ad_text") or "").strip()
+            if strict and len(text) < 1:
+                errors.append("متن تبلیغ را وارد کنید.")
+            if len(text) > 160:
+                errors.append("متن تبلیغ بیش از حد مجاز است.")
+        return errors
     if step == 4:
         return validate_budget_inputs(campaign, data, strict=strict)
     if step == 5 and strict:

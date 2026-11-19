@@ -56,12 +56,18 @@ def parse_schedule_payload(data) -> dict[str, Any] | None:
         return None
     if not any(masks_int):
         return None
-    tz_raw = data.get("schedule_timezone") or parsed.get("timezone") or IRAN_SCHEDULE_TIMEZONE_SEC
+    tz_raw = data.get("schedule_timezone")
+    if tz_raw in (None,""):
+        tz_raw = parsed.get("timezone",IRAN_SCHEDULE_TIMEZONE_SEC)
+    if tz_raw is None:
+        tz_raw=IRAN_SCHEDULE_TIMEZONE_SEC
     try:
         tz = int(tz_raw)
     except (TypeError, ValueError):
-        tz = IRAN_SCHEDULE_TIMEZONE_SEC
-    use_viewer = bool(parsed.get("use_viewer_timezone")) if isinstance(parsed, dict) else False
+        return None
+    use_viewer = data.get("schedule_viewer_timezone") == "1"
+    if use_viewer:
+        tz=None
     schedule = InputAdSchedule(
         week_hours_mask=masks_int,
         timezone=tz,
@@ -95,3 +101,8 @@ def preset_business_hours() -> list[int]:
     for i in range(5):
         masks[i] = work_mask
     return masks
+
+
+def schedule_timezone_choices():
+    from telead.limits import SCHEDULE_TIMEZONES
+    return [(offset, "UTC" if offset==0 else f"UTC{'+' if offset>0 else '-'}{abs(offset)//3600:02d}:{abs(offset)%3600//60:02d}") for offset in sorted(SCHEDULE_TIMEZONES)]

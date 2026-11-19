@@ -723,7 +723,8 @@
     function persist() {
       hidden.value = JSON.stringify({
         week_hours_mask: masks,
-        timezone: parseInt(root.getAttribute("data-timezone") || "12600", 10),
+        timezone: parseInt((root.querySelector('[name="schedule_timezone"]') || {}).value || "12600", 10),
+        use_viewer_timezone: !!(root.querySelector('[name="schedule_viewer_timezone"]') || {}).checked,
       });
       paint();
       if (summary) summary.textContent = summarize();
@@ -755,6 +756,12 @@
 
     load();
     paint();
+    var viewer = root.querySelector('[name="schedule_viewer_timezone"]');
+    var zone = root.querySelector('[name="schedule_timezone"]');
+    function syncZone() { if(zone) zone.disabled=!!(viewer && viewer.checked); }
+    if(viewer) viewer.addEventListener("change",function(){syncZone();persist();});
+    if(zone) zone.addEventListener("change",persist);
+    syncZone();
 
     var cells = Array.from(root.querySelectorAll(".schedule-cell"));
     cells.forEach(function (cell, index) {

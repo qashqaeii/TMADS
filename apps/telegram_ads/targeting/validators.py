@@ -71,7 +71,19 @@ def _validate_target_config(target_type: str, config: dict[str, Any], *, strict:
         )
         result.errors.extend(bot_errors)
 
+    if target_type in {"users","channels"}:
+        from apps.telegram_ads.targeting.normalize import parse_bot_peer_input
+        included={str(peer).casefold() for peer in cfg.get("channel_ids",[])}
+        excluded={str(peer).casefold() for peer in cfg.get("exclude_channel_ids",[])}
+        if included & excluded:
+            result.errors.append("یک کانال نمی‌تواند هم‌زمان در فهرست هدف و مستثنی‌ها باشد.")
+        if any(type(peer) is not int and not parse_bot_peer_input(peer)[0] for key in ("channel_ids","exclude_channel_ids") for peer in cfg.get(key,[])):
+            result.errors.append("نام کاربری کانال معتبر نیست.")
+        if set(cfg.get("topic_ids",[])) & set(cfg.get("exclude_topic_ids",[])):
+            result.errors.append("موضوع هدف و مستثنی نباید مشترک باشد.")
     if target_type == "users":
+        if cfg.get("intersect_topics") and len(cfg.get("topic_ids",[]))<2:
+            result.warnings.append("ترکیب علایق با کمتر از دو موضوع، تفاوتی ایجاد نمی‌کند.")
         placement = cfg.get("placement_api") or cfg.get("placement") or ""
         if strict and not placement:
             result.warnings.append("جایگاه نمایش برای کاربران انتخاب نشده است.")
@@ -157,6 +169,10 @@ def validate_studio_config(
         result.errors.append("عنوان داخلی تبلیغ بیش از حد مجاز است.")
 
     settings = ad_settings or {}
+    from apps.telegram_ads.targeting.website import validate_website_fields
+    result.errors.extend(validate_website_fields(promote_url,settings,strict=strict))
+    if (settings.get("schedule") or {}).get("use_viewer_timezone") and target_type != "users":
+        result.errors.append("منطقه زمانی بیننده فقط با هدف‌گیری کاربران سازگار است.")
     freq = settings.get("impression_frequency")
     if freq is not None:
         low, high = IMPRESSION_FREQUENCY_RANGE
@@ -204,6 +220,10 @@ def validate_submission_ready(campaign) -> StudioValidationResult:
             result.errors.append("شناسه معتبر رسانه از تلگرام دریافت نشده است؛ قبل از پرداخت فایل را منتقل یا حذف کنید.")
     elif (campaign.ad_settings or {}).get("photo_id") or (campaign.ad_settings or {}).get("video_id"):
         result.errors.append("شناسه رسانه قدیمی قابل تأیید نیست؛ فایل جدید ثبت کنید.")
+    from apps.telegram_ads.targeting.website import website_submission_errors
+    result.errors.extend(website_submission_errors(campaign.destination,campaign.ad_settings or {}))
+    if config.get("audience_ids") or config.get("exclude_audience_ids"):
+        result.errors.append("مخاطبان اختصاصی نیازمند مسیردهی حساب مستقل تأییدشده هستند.")
     if not campaign.destination:
         result.errors.append("مقصد تبلیغ الزامی است.")
     if campaign.budget_irr <= 0:
