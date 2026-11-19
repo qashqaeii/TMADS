@@ -7,7 +7,10 @@ from django.conf import settings
 from django.utils import timezone
 
 from apps.telegram_ads.client import TelegramAdsClient
-from apps.telegram_ads.exceptions import TelegramAdsError, TelegramAdsNotConfigured
+from apps.telegram_ads.exceptions import (
+    TelegramAdsApiError, TelegramAdsError, TelegramAdsNotConfigured,
+    TelegramAdsTransportError,
+)
 from apps.telegram_ads.models import APICapability
 
 logger = logging.getLogger(__name__)
@@ -21,8 +24,9 @@ READ_PROBES: tuple[tuple[str, str], ...] = (
     ("account.report", "get_account_report"),
     ("audiences.list", "get_audiences_list"),
     ("pixel.events", "get_pixel_events_list"),
+    ("pixel.read", "get_pixel"),
     ("ads.list", "get_ads_list"),
-    ("ads.get", "get_ads_list"),  # same permission tier
+    ("ads.get", "get_ads_by_id"),
     ("ads.stats", "get_ad_stats"),
     ("ads.transactions", "get_ad_transactions_list"),
     ("targeting.languages", "get_target_languages_list"),
@@ -72,10 +76,16 @@ def _probe_read(client: TelegramAdsClient, method: str, *, sample_ad_id: int | N
             c.get_account_report(now.year,now.month)
         elif method == "get_audiences_list":
             c.get_audiences_list(limit=1)
+        elif method == "get_pixel":
+            c.get_pixel()
         elif method == "get_pixel_events_list":
             c.get_pixel_events_list(limit=1)
         elif method == "get_ads_list":
             c.get_ads_list(limit=1)
+        elif method == "get_ads_by_id":
+            if not sample_ad_id:
+                return APICapability.State.UNVERIFIED, {"reason": "no_linked_ad_for_probe"}
+            c.get_ads_by_id([sample_ad_id])
         elif method == "get_ad_stats":
             if not sample_ad_id:
                 return APICapability.State.UNVERIFIED, {"reason": "no_linked_ad_for_probe"}
@@ -97,7 +107,7 @@ def _probe_read(client: TelegramAdsClient, method: str, *, sample_ad_id: int | N
         elif method == "get_target_countries_list":
             c.get_target_countries_list()
         elif method == "get_target_bot":
-            c.get_target_bot("HyperTunnelbot")
+            c.get_target_bot("@vote")
         else:
             return APICapability.State.UNVERIFIED, {"reason": f"unknown probe {method}"}
     return APICapability.State.SUPPORTED, {}
@@ -119,14 +129,23 @@ def refresh_api_capabilities(*, sample_ad_id: int | None = None) -> int:
         details: dict = {}
         try:
             state, details = _probe_read(client, method, sample_ad_id=sample_ad_id)
-            if state == APICapability.State.UNVERIFIED and details.get("reason") == "no_linked_ad_for_probe":
-                state = APICapability.State.TEMPORARY
-        except TelegramAdsError as exc:
-            state = APICapability.State.PERMISSION_DENIED
-            details = {"error": exc.__class__.__name__, "message": str(exc)[:200]}
+            # No sample is not a service outage or proof of denied permission.
+        except TelegramAdsApiError as exc:
+            api_code = str(exc.api_code or "").upper()
+            denied = api_code in {"ACCESS_DENIED", "PERMISSION_DENIED", "TOKEN_INVALID", "TOKEN_EXPIRED", "AUTH_KEY_INVALID"}
+            state = APICapability.State.PERMISSION_DENIED if denied else (
+                APICapability.State.TEMPORARY if exc.retryable else APICapability.State.UNVERIFIED
+            )
+            details = {"error": api_code, "reason": "telegram_api_response"}
+        except (TelegramAdsTransportError, TelegramAdsNotConfigured):
+            state = APICapability.State.TEMPORARY
+            details = {"reason": "network_or_configuration_unavailable"}
+        except TelegramAdsError:
+            state = APICapability.State.UNVERIFIED
+            details = {"reason": "api_status_unverified"}
         except Exception as exc:  # noqa: BLE001
             state = APICapability.State.TEMPORARY
-            details = {"error": str(exc)[:200]}
+            details = {"error": type(exc).__name__, "reason": "probe_failed"}
 
         APICapability.objects.update_or_create(
             feature_key=feature_key,
@@ -137,10 +156,10 @@ def refresh_api_capabilities(*, sample_ad_id: int | None = None) -> int:
     for feature_key, api_method in WRITE_FEATURES:
         if not settings.TELEGRAM_ADS_WRITE_ENABLED:
             state = APICapability.State.UNVERIFIED
-            details = {"reason": "TELEGRAM_ADS_WRITE_ENABLED=false", "api_method": api_method}
+            details = {"reason": "write_disabled_by_tmads_not_api_capability", "api_method": api_method}
         else:
             state = APICapability.State.UNVERIFIED
-            details = {"reason": "write not probed in dry probe", "api_method": api_method}
+            details = {"reason": "write_not_probed_for_safety", "api_method": api_method}
         APICapability.objects.update_or_create(
             feature_key=feature_key,
             defaults={"state": state, "details": details, "last_checked_at": now},
