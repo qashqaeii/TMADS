@@ -265,3 +265,51 @@ def manage_pixel_event(actor, data):
     except Exception:
         AccountAssetOperation.objects.filter(pk=operation.pk).update(state="uncertain")
         raise TelegramAdsError("نتیجه تغییر رویداد نامطمئن است؛ عملیات را تکرار نکنید.") from None
+
+
+
+def reset_unused_audience(actor, data):
+    """Irreversible reset only for a verified unused custom audience.
+
+    Does not accept user supplied audience counts; no contact data is logged.
+    """
+    row = owned_account(actor)
+    if not row or not enabled() or data.get("consent") != "on" or data.get("confirm_text") != "RESET":
+        raise ValueError("تأیید صریح RESET و مجوز حساب اختصاصی لازم است.")
+    try:
+        audience_id = int(data.get("audience_id") or "")
+        nonce = signing.loads(data.get("nonce", ""), salt=SALT, max_age=900)
+        operation_id = uuid.UUID(nonce["operation"])
+        if nonce["account"] != str(row.pk) or not 0 < audience_id < 2147483648:
+            raise ValueError
+    except (ValueError, TypeError, KeyError, signing.BadSignature):
+        raise ValueError("شناسه گروه یا اعتبار فرم معتبر نیست.") from None
+
+    with transaction.atomic():
+        row = RelatedAccountRequest.objects.select_for_update().get(pk=row.pk, customer=actor.customer_profile)
+        if row.status != RelatedAccountRequest.Status.PROVISIONED or row.customer.is_suspended:
+            raise PermissionDenied
+        if (AccountAssetOperation.objects.filter(pk=operation_id).exists() or
+                row.asset_operations.filter(state__in=["executing", "uncertain"]).exists()):
+            raise ValueError("عملیات قبلی در جریان یا نیازمند تطبیق است.")
+        client = verified_client(row)
+        items = client.get_audiences_by_ids([audience_id], account_id=row.remote_account_id)
+        if (not isinstance(items, list) or len(items) != 1 or
+                not isinstance(items[0], dict) or str(items[0].get("audience_id")) != str(audience_id)
+                or type(items[0].get("ads_count")) is not int
+                or items[0]["ads_count"] != 0):
+            raise ValueError("گروه قابل خالی‌سازی نیست؛ مالکیت یا نبود تبلیغ مرتبط تأیید نشد.")
+        op = AccountAssetOperation.objects.create(
+            pk=operation_id, account=row, action="audience_reset", remote_id=str(audience_id),
+        )
+    try:
+        outcome = client.reset_unused_audience(
+            account_id=row.remote_account_id, audience_id=audience_id,
+        )
+        if not isinstance(outcome, dict) or str(outcome.get("audience_id")) != str(audience_id):
+            raise ValueError("نتیجه خالی‌سازی از API تأیید نشد.")
+        AccountAssetOperation.objects.filter(pk=op.pk).update(state="completed")
+        return op
+    except Exception:
+        AccountAssetOperation.objects.filter(pk=op.pk).update(state="uncertain")
+        raise TelegramAdsError("نتیجه خالی‌سازی نامطمئن است؛ درخواست را تکرار نکنید.") from None

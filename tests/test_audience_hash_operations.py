@@ -110,3 +110,28 @@ def test_pixel_event_is_not_deleted_if_unknown_or_used(customer_user):
         op.refresh_from_db()
         assert op.state=="completed"
         verified.return_value.change_pixel_event.assert_called_once()
+
+
+
+@pytest.mark.django_db
+def test_reset_requires_unused_audience_and_explicit_phrase(customer_user):
+    from apps.telegram_ads.services.customer_assets import reset_unused_audience, issue_nonce
+    row=RelatedAccountRequest.objects.create(customer=customer_user.customer_profile,
+        status="provisioned", title="Example", consent_at=timezone.now(),
+        main_account_id="main", remote_account_id="child")
+    with patch("apps.telegram_ads.services.customer_assets.enabled", return_value=True), patch(
+        "apps.telegram_ads.services.customer_assets.verified_client"
+    ) as verified:
+        payload={"audience_id":"52","nonce":issue_nonce(row),"consent":"on","confirm_text":"RESET"}
+        verified.return_value.get_audiences_by_ids.return_value=[{"audience_id":52,"ads_count":1}]
+        with pytest.raises(ValueError):
+            reset_unused_audience(customer_user,payload)
+        verified.return_value.reset_unused_audience.assert_not_called()
+        verified.return_value.get_audiences_by_ids.return_value=[{"audience_id":52,"ads_count":0}]
+        with pytest.raises(ValueError):
+            reset_unused_audience(customer_user,{**payload,"confirm_text":"reset"})
+        verified.return_value.reset_unused_audience.return_value={"audience_id":52}
+        op=reset_unused_audience(customer_user,payload)
+        op.refresh_from_db()
+        assert op.state=="completed"
+        verified.return_value.reset_unused_audience.assert_called_once()

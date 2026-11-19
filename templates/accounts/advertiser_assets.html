@@ -53,6 +53,20 @@
   {% else %}<p class="ui-studio-warning">حذف گروه تا تعیین تکلیف عملیات قبلی و فعال بودن مجوز متوقف است.</p>{% endif %}
 </section>
 {% endif %}
+{% if section == 'audiences' %}
+<section class="card card-pad form-stack ui-audience-reset">
+  <div class="ui-form-intro"><span class="ui-target-symbol">{% include "includes/lucide_icon.html" with name="eraser" size="md" %}</span><div><h2>خالی‌کردن کامل گروه مخاطبان</h2><p>تنها در صورتی که هیچ تبلیغی به گروه متصل نباشد. این عملیات بازگشت‌پذیر نیست.</p></div></div>
+  {% if enabled and not unresolved %}
+  <form method="post" class="form-stack" action="{% url 'accounts:audience_reset' %}">{% csrf_token %}
+    <input type="hidden" name="nonce" value="{{ nonce }}">
+    <div class="field"><label for="reset-audience-id">شناسه گروه</label><input id="reset-audience-id" name="audience_id" inputmode="numeric" pattern="[0-9]+" maxlength="10" required autocomplete="off"></div>
+    <div class="field"><label for="reset-audience-phrase">برای تأیید، عبارت RESET را وارد کنید</label><input id="reset-audience-phrase" name="confirm_text" required pattern="RESET" maxlength="5" dir="ltr" autocomplete="off" spellcheck="false"></div>
+    <label class="choice-card"><input type="checkbox" name="consent" required> حذف تمام اعضای این گروه را تأیید می‌کنم.</label>
+    <button type="submit" class="btn btn-danger-soft" data-confirm-title="خالی‌کردن گروه" data-confirm-message="همه مخاطبان گروه از تلگرام حذف می‌شوند و این تغییر بازگشت‌پذیر نیست. فقط گروه بدون تبلیغ مرتبط خالی می‌شود." data-confirm-label="خالی‌کردن گروه">تأیید خالی‌سازی</button>
+  </form>
+  {% else %}<p class="ui-studio-warning">این عملیات تا تعیین تکلیف دسترسی یا عملیات قبلی غیرفعال است.</p>{% endif %}
+</section>
+{% endif %}
 {% if section == 'events' %}
 <section class="card card-pad form-stack ui-event-management">
   <div class="ui-form-intro"><span class="ui-target-symbol">{% include "includes/lucide_icon.html" with name="target" size="md" %}</span><div><h2>مدیریت رویدادهای تبدیل</h2><p>رویداد خودکار قابل تغییر نیست. حذف تنها برای رویداد دستی بدون تبلیغ مرتبط مجاز است.</p></div></div>

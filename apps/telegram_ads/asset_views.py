@@ -5,7 +5,7 @@ from django.views.decorators.http import require_http_methods, require_POST
 from django.views.decorators.cache import never_cache
 from apps.accounts.permissions import customer_required
 from apps.telegram_ads.exceptions import TelegramAdsError
-from apps.telegram_ads.services.customer_assets import owned_account, verified_client, enabled, issue_nonce, create_asset, change_audience_contacts, delete_unused_audience, manage_pixel_event, EVENT_TYPES
+from apps.telegram_ads.services.customer_assets import owned_account, verified_client, enabled, issue_nonce, create_asset, change_audience_contacts, delete_unused_audience, reset_unused_audience, manage_pixel_event, EVENT_TYPES
 
 @login_required
 @customer_required
@@ -86,4 +86,18 @@ def customer_pixel_event_manage(request):
         messages.success(request, "نتیجه تغییر رویداد توسط API تلگرام تأیید شد.")
     except (ValueError, TelegramAdsError):
         messages.error(request, "رویداد تغییر نکرد یا نتیجه آن نامطمئن است؛ بدون تطبیق دوباره ارسال نکنید.")
+    return redirect("accounts:advertiser_assets")
+
+
+
+@login_required
+@customer_required
+@never_cache
+@require_POST
+def customer_audience_reset(request):
+    try:
+        reset_unused_audience(request.user, request.POST)
+        messages.success(request, "خالی‌سازی گروه مخاطبان از طرف تلگرام تأیید شد.")
+    except (ValueError, TelegramAdsError):
+        messages.error(request, "خالی‌سازی تأیید نشد یا نتیجه نامطمئن است؛ درخواست را تکرار نکنید.")
     return redirect("accounts:advertiser_assets")

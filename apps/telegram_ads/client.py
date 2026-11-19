@@ -289,6 +289,16 @@ class TelegramAdsClient:
         return self._run("audiences_by_ids",
             lambda c: [_model_to_dict(item) for item in c.get_audiences_by_id(ids, account_id=account_id)])
 
+    def reset_unused_audience(self, *, account_id, audience_id):
+        if not account_id or not (settings.TELEGRAM_ADS_WRITE_ENABLED
+                and settings.TELEGRAM_ADS_PAID_SUBMISSION_ENABLED
+                and getattr(settings, "TELEGRAM_ADS_CUSTOMER_ASSETS_ENABLED", False)):
+            raise TelegramAdsWriteDisabled("Audience reset is disabled")
+        return self._run("audience_reset",
+            lambda c: _model_to_dict(
+                c.edit_audience(audience_id, account_id=account_id, reset_phones=True)
+            ))
+
     def delete_unused_audience(self, *, account_id, audience_id):
         if not account_id or not (settings.TELEGRAM_ADS_WRITE_ENABLED
                 and settings.TELEGRAM_ADS_PAID_SUBMISSION_ENABLED
