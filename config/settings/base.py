@@ -137,6 +137,7 @@ CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = TIME_ZONE
 
 CELERY_BEAT_SCHEDULE = {
+    "dispatch-transactional-sms": {"task": "apps.notifications.tasks.dispatch_sms", "schedule": 60.0},
     "sync-active-ad-stats-hourly": {
         "task": "apps.telegram_ads.tasks.task_sync_active_ad_stats",
         "schedule": 3600.0,
@@ -175,6 +176,19 @@ TELEGRAM_ADS_RELATED_ACCOUNTS_ENABLED = env.bool("TELEGRAM_ADS_RELATED_ACCOUNTS_
 TELEGRAM_ADS_WEBSITE_ENABLED = env.bool("TELEGRAM_ADS_WEBSITE_ENABLED", default=False)
 TELEGRAM_ADS_CUSTOMER_ASSETS_ENABLED = env.bool("TELEGRAM_ADS_CUSTOMER_ASSETS_ENABLED", default=False)
 
+# Transactional SMS — off until separate TMADS credentials/patterns are approved.
+SMS_ENABLED = env.bool("SMS_ENABLED", default=False)
+SMS_PROVIDER = env("SMS_PROVIDER", default="console").strip().lower()
+FARAZSMS_API_KEY = env("FARAZSMS_API_KEY", default="")
+FARAZSMS_LINE_NUMBER = env("FARAZSMS_LINE_NUMBER", default="")
+FARAZSMS_OTP_LINE_NUMBER = env("FARAZSMS_OTP_LINE_NUMBER", default="")
+FARAZSMS_PATTERNS = {
+    "verify_mobile": env("FARAZSMS_PATTERN_VERIFY_MOBILE", default=""),
+    "wallet_credit": env("FARAZSMS_PATTERN_WALLET_CREDIT", default=""),
+    "budget_low": env("FARAZSMS_PATTERN_BUDGET_LOW", default=""),
+    "campaign_status": env("FARAZSMS_PATTERN_CAMPAIGN_STATUS", default=""),
+}
+FARAZSMS_OTP_ATTR = env("FARAZSMS_OTP_ATTR", default="code")
 # Payments
 PAYMENT_GATEWAY = env("PAYMENT_GATEWAY", default="fake")
 PAYMENT_FAKE_ENABLED = env("PAYMENT_FAKE_ENABLED")
