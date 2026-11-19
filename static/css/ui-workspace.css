@@ -85,3 +85,36 @@
 .ui-example-bad { color:var(--ui-danger); }
 @media(max-width:950px) { .ui-support-flow { grid-template-columns:minmax(0,1fr); } }
 @media(max-width:600px) { .ui-final .ui-ticket-list .record-list__item { padding:12px;gap:8px; }.ui-ticket-arrow { display:none; }.ui-final .ui-conversation .chat-thread { padding:12px; }.ui-final .ui-conversation .msg-bubble { max-width:96%; }.ui-final .ui-conversation .chat-compose { padding:12px; }.ui-final .ui-conversation .chat-compose > button { width:100%; } }
+
+/* Operations: clear decision areas, consistent dense tables and explicit status. */
+.ui-final .ui-ops .ui-ops-kpis { display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));gap:12px; }
+.ui-final .ui-ops .kpi-exec { padding:15px;min-height:0;border:1px solid var(--ui-border);border-radius:var(--ui-radius);background:white;box-shadow:var(--ui-shadow); }
+.ui-final .ui-ops .kpi-exec__value { font-size:clamp(1.1rem,2vw,1.55rem); }
+.ui-final .ui-ops .kpi-exec__label { font-size:.8rem;color:var(--ui-muted); }
+.ui-ops-overview,.ui-ops-api-layout { display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start; }
+.ui-ops-links { display:grid;gap:0; }
+.ui-ops-links h2 { margin:0 0 10px; }
+.ui-ops-links a { display:flex;align-items:center;gap:10px;border-top:1px solid var(--ui-border);padding:12px 0;color:var(--ui-action);font-size:.88rem; }
+.ui-ops-links a > span:nth-child(2) { flex:1; }
+.ui-final .ui-ops .table-card { overflow:hidden;padding:0; }
+.ui-final .ui-ops .data-table { font-size:.85rem;min-width:560px; }
+.ui-final .ui-ops .data-table th { background:var(--ui-soft);color:var(--ui-muted);font-weight:650; }
+.ui-final .ui-ops .data-table :is(th,td) { padding:12px 14px; }
+.ui-final .ui-ops .data-table td { overflow-wrap:anywhere; }
+.ui-final .ui-ops .data-table tbody tr:hover td { background:#f7fafd; }
+.ui-final .ui-ops .filter-exec__grid--inline { display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px; }
+.ui-filter-submit { flex:none; }
+.ui-final .ui-ops .ui-ops-review-layout { display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:16px;align-items:start; }
+.ui-final .ui-ops .finance-line { padding:10px 0;gap:10px; }
+.ui-ops-payload { border:1px solid var(--ui-border);border-radius:9px;padding:10px;color:var(--ui-muted);font-size:.82rem; }
+.ui-ops-payload summary { cursor:pointer;color:var(--ui-action); }
+.ui-ops-payload pre { font-size:.76rem;max-height:240px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;text-align:left; }
+.ui-refund-action { min-width:190px;display:grid;gap:8px; }
+.ui-refund-buttons { display:flex;gap:6px; }
+.ui-ops-reason { max-width:240px; }
+.ui-ops-reason summary { cursor:pointer; }
+.ui-ops-reason p { margin:5px 0;color:var(--ui-muted);white-space:pre-wrap; }
+.ui-audit-action { color:var(--ui-ink);background:var(--ui-soft);border-radius:6px;padding:4px 7px;display:inline-block; }
+.ui-dialog--primary .ui-dialog__symbol { background:#e8f3fb;color:var(--ui-action); }
+@media(max-width:1050px) { .ui-ops-overview,.ui-ops-api-layout,.ui-final .ui-ops .ui-ops-review-layout { grid-template-columns:minmax(0,1fr); } }
+@media(max-width:540px) { .ui-final .ui-ops .filter-exec__grid--inline { align-items:stretch; }.ui-final .ui-ops .filter-exec__field,.ui-filter-submit { width:100%; }.ui-filter-submit .btn { width:100%; } }

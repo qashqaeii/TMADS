@@ -3,21 +3,21 @@
 {% block page_title %}بازپرداخت‌ها{% endblock %}
 {% block container_class %}container-wide{% endblock %}
 {% block content %}
-<div class="app-stack operations-page">
+<div class="app-stack operations-page ui-ops">
 {% include "includes/dash_header.html" with eyebrow="عملیات" title="بازپرداخت" %}
 <section class="filter-exec-shell" aria-label="فیلتر بازپرداخت">
   <form method="get" class="filter-exec">
     <div class="filter-exec__grid filter-exec__grid--inline">
       <div class="filter-exec__field">
         <label class="filter-exec__label" for="ops-refund-status">وضعیت</label>
-        <select id="ops-refund-status" class="filter-exec__control" name="status" onchange="this.form.submit()">
-          <option value="">همه وضعیت‌ها</option>
+        <select id="ops-refund-status" class="filter-exec__control" name="status">
+          <option value="" {% if not filter_status %}selected{% endif %}>همه وضعیت‌ها</option>
           <option value="open" {% if filter_status == 'open' %}selected{% endif %}>باز</option>
           <option value="review" {% if filter_status == 'review' %}selected{% endif %}>بررسی</option>
-          <option value="paid" {% if filter_status == 'paid' %}selected{% endif %}>پرداخت‌شده</option>
+          <option value="approved" {% if filter_status == "approved" %}selected{% endif %}>تأیید شده</option><option value="paid" {% if filter_status == 'paid' %}selected{% endif %}>پرداخت‌شده</option>
           <option value="rejected" {% if filter_status == 'rejected' %}selected{% endif %}>رد شده</option>
         </select>
-      </div>
+      </div><div class="ui-filter-submit"><button class="btn btn-primary" type="submit">اعمال فیلتر</button></div>
     </div>
   </form>
 </section>
@@ -31,15 +31,15 @@
         <tr>
           <td>{{ r.customer }}</td>
           <td>{{ r.amount_irr|irr_to_toman|format_irr }} تومان</td>
-          <td><span class="status status-info">{{ r.get_status_display }}</span></td>
-          <td style="max-width:220px">{{ r.reason|truncatechars:100 }}</td>
+          <td><span class="status {% if r.status == 'paid' or r.status == 'approved' %}status-active{% elif r.status == 'rejected' %}status-danger{% else %}status-warn{% endif %}">{{ r.get_status_display }}</span></td>
+          <td class="ui-ops-reason"><details><summary>{{ r.reason|truncatechars:55|default:"—" }}</summary><p>{{ r.reason|default:"—" }}</p></details></td>
           <td>
             {% if r.status == 'open' or r.status == 'review' %}
-            <form method="post" class="filter-row" style="margin:0">{% csrf_token %}
+            <form method="post" class="ui-refund-action">{% csrf_token %}
               <input type="hidden" name="refund_id" value="{{ r.id }}">
-              <button class="btn btn-primary btn-sm" name="action" value="approve" type="submit">تأیید</button>
-              <button class="btn btn-danger btn-sm" name="action" value="reject" type="submit">رد</button>
-              <label class="sr-only" for="refund-note-{{ r.id }}">دلیل رد درخواست {{ r.customer }}</label><input id="refund-note-{{ r.id }}" name="note" placeholder="دلیل رد" class="operations-note">
+              <div class="field"><label for="refund-note-{{ r.id }}">توضیح تصمیم</label><input id="refund-note-{{ r.id }}" name="note" placeholder="دلیل رد یا توضیح" class="operations-note"></div>
+              <div class="ui-refund-buttons"><button class="btn btn-primary btn-sm" name="action" value="approve" type="submit" data-confirm-title="تأیید بازپرداخت" data-confirm-message="در صورت وجود رزرو معتبر، تأیید باعث تغییر موجودی کیف پول مشتری می‌شود. ادامه می‌دهید؟" data-confirm-label="تأیید بازپرداخت" data-confirm-tone="primary" onclick="return window.tmadsConfirmReady || confirm('در صورت وجود رزرو معتبر، تأیید باعث تغییر موجودی کیف پول مشتری می‌شود. ادامه می‌دهید؟');">تأیید</button>
+              <button class="btn btn-danger-soft btn-sm" name="action" value="reject" type="submit" data-confirm-title="رد درخواست" data-confirm-message="تصمیم رد درخواست بازپرداخت ثبت می‌شود. ادامه می‌دهید؟" data-confirm-label="رد بازپرداخت" data-confirm-tone="danger" onclick="return window.tmadsConfirmReady || confirm('تصمیم رد درخواست بازپرداخت ثبت می‌شود. ادامه می‌دهید؟');">رد</button></div>
             </form>
             {% else %}—{% endif %}
           </td>

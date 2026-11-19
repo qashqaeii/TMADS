@@ -3,9 +3,9 @@
 {% block page_title %}مرکز عملیات{% endblock %}
 {% block container_class %}container-wide{% endblock %}
 {% block content %}
-<div class="app-stack operations-page">
+<div class="app-stack operations-page ui-ops">
   {% include "includes/dash_header.html" with eyebrow="عملیات" title="مرکز عملیات" %}
-  <div class="kpi-exec-grid" role="region" aria-label="خلاصه عملیات">
+  <div class="kpi-exec-grid ui-ops-kpis" role="region" aria-label="خلاصه عملیات">
     <article class="kpi-exec">
       <span class="kpi-exec__icon">{% include "includes/kpi_icon.html" with name="users" %}</span>
       <div class="kpi-exec__body">
@@ -35,17 +35,16 @@
       </div>
     </article>
   </div>
-  <section class="card card--lift card-pad">
-    <h2 class="section-title">بدهی کیف پول</h2>
+  <div class="ui-ops-overview"><section class="card card-pad"><div class="ui-form-intro"><span class="ui-target-symbol">{% include "includes/lucide_icon.html" with name="wallet" size="md" %}</span><div><h2>تعهدات کیف پول</h2><p>مانده حساب مشتریان، به ریال</p></div></div>
     <div class="finance-line"><span>موجودی کل (ریال)</span><strong class="tabnums" dir="ltr">{{ wallet_liabilities.available|default:0|intcomma }}</strong></div>
     <div class="finance-line"><span>رزرو کل (ریال)</span><strong class="tabnums" dir="ltr">{{ wallet_liabilities.reserved|default:0|intcomma }}</strong></div>
   </section>
-  <nav class="ops-links" aria-label="میانبرهای عملیات">
-    <a href="{% url 'operations:campaigns' %}">بررسی کمپین‌ها</a>
-    <a href="{% url 'operations:refunds' %}">بازپرداخت‌ها</a>
-    <a href="{% url 'operations:exchange_rates' %}">نرخ گرام (تون)</a>
-    <a href="{% url 'operations:api_status' %}">وضعیت API</a>
-    <a href="{% url 'operations:audit' %}">لاگ ممیزی</a>
-  </nav>
+  <nav class="card card-pad ui-ops-links" aria-label="میانبرهای عملیات"><h2 class="section-title">دسترسی سریع</h2>
+    <a href="{% url 'operations:campaigns' %}">{% include "includes/lucide_icon.html" with name="megaphone" size="md" %}<span>بررسی کمپین‌ها</span>{% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}</a>
+    <a href="{% url 'operations:refunds' %}">{% include "includes/lucide_icon.html" with name="rotate-ccw" size="md" %}<span>بازپرداخت‌ها</span>{% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}</a>
+    <a href="{% url 'operations:exchange_rates' %}">{% include "includes/lucide_icon.html" with name="coins" size="md" %}<span>نرخ گرام (تون)</span>{% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}</a>
+    <a href="{% url 'operations:api_status' %}">{% include "includes/lucide_icon.html" with name="activity" size="md" %}<span>وضعیت API</span>{% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}</a>
+    <a href="{% url 'operations:audit' %}">{% include "includes/lucide_icon.html" with name="shield-check" size="md" %}<span>لاگ ممیزی</span>{% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}</a>
+  </nav></div>
 </div>
 {% endblock %}

@@ -3,10 +3,10 @@
 {% block container_class %}container-wide{% endblock %}
 {% block page_title %}نرخ گرام{% endblock %}
 {% block content %}
-<div class="app-stack operations-page">
+<div class="app-stack operations-page ui-ops">
 {% include "includes/dash_header.html" with eyebrow="عملیات" title="نرخ گرام" %}
 {% if live_rate %}
-<div class="kpi-exec-grid kpi-exec-grid--5">
+<div class="kpi-exec-grid kpi-exec-grid--5 ui-ops-kpis">
   <article class="kpi-exec">
     <span class="kpi-exec__icon">{% include "includes/kpi_icon.html" with name="click" %}</span>
     <div class="kpi-exec__body">
@@ -60,10 +60,10 @@
   </section>
   <section class="card card--lift card-pad form-stack">
     <h2 class="section-title">نرخ دستی جایگزین</h2>
-    <form method="post">{% csrf_token %}<input type="hidden" name="action" value="manual">
-      <div class="field"><label for="manual-rate">ریال به ازای یک گرام</label><input id="manual-rate" name="irr_per_ton" type="number" inputmode="numeric" dir="ltr" required></div>
+    <form method="post" class="form-stack">{% csrf_token %}<input type="hidden" name="action" value="manual">
+      <div class="field"><label for="manual-rate">ریال به ازای یک گرام</label><input id="manual-rate" name="irr_per_ton" type="number" inputmode="numeric" min="1" step="1" dir="ltr" required></div>
       <div class="field"><label for="manual-rate-reason">دلیل</label><input id="manual-rate-reason" name="reason" placeholder="قطعی ارتباط، سیاست موقت…"></div>
-      <button class="btn btn-ghost" type="submit">ثبت جایگزین ۲۴ ساعته</button>
+      <button class="btn btn-ghost" type="submit" data-confirm-title="نرخ دستی" data-confirm-message="نرخ دستی در قیمت‌گذاری اثر می‌گذارد. مقدار و دلیل را بررسی کرده‌اید؟" data-confirm-label="ثبت نرخ" data-confirm-tone="primary" onclick="return window.tmadsConfirmReady || confirm('نرخ دستی در قیمت‌گذاری اثر می‌گذارد. مقدار و دلیل را بررسی کرده‌اید؟');">ثبت جایگزین ۲۴ ساعته</button>
     </form>
   </section>
 </div>

@@ -3,7 +3,7 @@
 {% block container_class %}container-wide{% endblock %}
 {% block page_title %}ممیزی{% endblock %}
 {% block content %}
-<div class="app-stack operations-page">
+<div class="app-stack operations-page ui-ops">
 {% include "includes/dash_header.html" with eyebrow="امنیت" title="ممیزی" %}
 <article class="card table-card card--lift">
   <div class="table-wrap" tabindex="0" role="region" aria-label="رویدادهای ممیزی">
@@ -12,7 +12,7 @@
       <tbody>
         {% for log in logs %}
           <tr>
-            <td><code>{{ log.action }}</code></td>
+            <td><code class="ui-audit-action" dir="ltr">{{ log.action }}</code></td>
             <td>{{ log.actor|default:"—" }}</td>
             <td dir="ltr">{{ log.entity_type }} {{ log.entity_id|default:"" }}</td>
             <td><time datetime="{{ log.created_at|date:'c' }}">{{ log.created_at|jalali_datetime }}</time></td>

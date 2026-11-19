@@ -3,19 +3,19 @@
 {% block container_class %}container-wide{% endblock %}
 {% block page_title %}وضعیت API{% endblock %}
 {% block content %}
-<div class="app-stack operations-page">
+<div class="app-stack operations-page ui-ops">
 {% include "includes/dash_header.html" with eyebrow="عملیات" title="وضعیت API" %}
 {% if error %}<article class="card card-pad operations-error" role="alert"><strong>خطا</strong><p class="muted">{{ error }}</p></article>{% endif %}
 
-<div class="panel-grid panel-2">
+<div class="ui-ops-api-layout">
   {% if account %}
   <section class="card card--lift card-pad">
     <h2 class="section-title">حساب جاری (getCurrentAccount)</h2>
     <div class="finance-line"><span>عنوان</span><strong>{{ account.title|default:"—" }}</strong></div>
     <div class="finance-line"><span>ارز</span><strong dir="ltr">{{ account.currency|default:"—" }}</strong></div>
-    <div class="finance-line"><span>مصرف کل</span><strong>{% ton_amount account.spent_budget %}</strong></div>
-    <div class="finance-line"><span>باقی‌مانده</span><strong>{% ton_amount account.remaining_budget %}</strong></div>
-    <div class="finance-line"><span>بودجه تبلیغات</span><strong>{% ton_amount account.ads_budget %}</strong></div>
+    <div class="finance-line"><span>مصرف کل</span><strong>{% if account.currency == 'TON' %}{% ton_amount account.spent_budget %}{% else %}<bdi>{{ account.spent_budget|default_if_none:"—" }} {{ account.currency|default:"" }}</bdi>{% endif %}</strong></div>
+    <div class="finance-line"><span>باقی‌مانده</span><strong>{% if account.currency == 'TON' %}{% ton_amount account.remaining_budget %}{% else %}<bdi>{{ account.remaining_budget|default_if_none:"—" }} {{ account.currency|default:"" }}</bdi>{% endif %}</strong></div>
+    <div class="finance-line"><span>بودجه تبلیغات</span><strong>{% if account.currency == 'TON' %}{% ton_amount account.ads_budget %}{% else %}<bdi>{{ account.ads_budget|default_if_none:"—" }} {{ account.currency|default:"" }}</bdi>{% endif %}</strong></div>
     <div class="finance-line"><span>Account ID</span><code dir="ltr">{{ account.account_id|default:"—" }}</code></div>
     <p class="muted" style="font-size:.82rem;margin-top:1rem">مبالغ حساب در API ممکن است گرام (تون)، یورو یا استار تلگرام باشد.</p>
   </section>
@@ -29,7 +29,7 @@
       {% for c in capabilities %}
       <tr>
         <td><code dir="ltr">{{ c.feature_key }}</code></td>
-        <td><span class="status {{ c.state }}">{{ c.get_state_display }}</span></td>
+        <td><span class="status {% if c.state == 'supported' %}status-active{% elif c.state == 'permission_denied' or c.state == 'unsupported' %}status-danger{% elif c.state == 'temporary' %}status-warn{% else %}status-draft{% endif %}">{{ c.get_state_display }}</span></td>
         <td class="muted" style="font-size:.82rem">{% if c.details.reason %}{{ c.details.reason }}{% elif c.details.error %}{{ c.details.error }}{% else %}—{% endif %}</td>
       </tr>
       {% empty %}

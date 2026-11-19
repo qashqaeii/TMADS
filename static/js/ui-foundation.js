@@ -16,14 +16,21 @@
     window.tmadsConfirmReady = true;
     document.addEventListener("submit", function (event) {
       var form = event.target;
-      if (!(form instanceof HTMLFormElement) || !form.dataset.confirmMessage) return;
+      if (!(form instanceof HTMLFormElement)) return;
       if (bypass === form) { bypass = null; return; }
+      var source = event.submitter && event.submitter.dataset.confirmMessage ? event.submitter.dataset : form.dataset;
+      if (!source.confirmMessage) return;
       event.preventDefault();
       if (dialog.open) return;
       pending = { form:form, submitter:event.submitter, focus:document.activeElement };
-      dialog.querySelector("#ui-confirm-title").textContent = form.dataset.confirmTitle || "تأیید عملیات";
-      dialog.querySelector("#ui-confirm-description").textContent = form.dataset.confirmMessage;
-      dialog.querySelector("[data-confirm-action]").textContent = form.dataset.confirmLabel || "تأیید";
+      dialog.querySelector("#ui-confirm-title").textContent = source.confirmTitle || "تأیید عملیات";
+      dialog.querySelector("#ui-confirm-description").textContent = source.confirmMessage;
+      var confirmButton = dialog.querySelector("[data-confirm-action]");
+      confirmButton.textContent = source.confirmLabel || "تأیید";
+      var primary = source.confirmTone === "primary";
+      confirmButton.classList.toggle("btn-primary", primary);
+      confirmButton.classList.toggle("btn-danger", !primary);
+      dialog.classList.toggle("ui-dialog--primary", primary);
       dialog.returnValue = "cancel";
       dialog.showModal();
     }, true);
