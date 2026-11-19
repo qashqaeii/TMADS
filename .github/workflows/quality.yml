@@ -1,0 +1,47 @@
+name: TMADS quality checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quality-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      DJANGO_SETTINGS_MODULE: config.settings.local
+      APP_ENV: LOCAL
+      SECRET_KEY: ci-only-not-a-production-secret
+      TELEGRAM_ADS_API_TOKEN: ""
+      TELEGRAM_ADS_WRITE_ENABLED: "false"
+      TELEGRAM_ADS_PAID_SUBMISSION_ENABLED: "false"
+      PAYMENT_GATEWAY: fake
+      PAYMENT_FAKE_ENABLED: "true"
+      NOBITEX_HTTP_TIMEOUT_SECONDS: "1"
+      NOBITEX_HTTP_RETRIES: "0"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: python -m pip install -r requirements.txt
+      - run: python manage.py check
+      - run: python manage.py makemigrations --check --dry-run
+      - run: python manage.py collectstatic --noinput
+      - run: find static/js -name '*.js' -print0 | xargs -0 -r -n1 node --check
+      - run: python -m pytest -q
