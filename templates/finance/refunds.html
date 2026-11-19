@@ -3,10 +3,10 @@
 {% block page_title %}بازپرداخت{% endblock %}
 {% block container_class %}container-wide{% endblock %}
 {% block content %}
-<div class="app-stack finance-page">
+<div class="app-stack finance-page ui-finance">
 {% include "includes/dash_header.html" with eyebrow="مالی" title="بازپرداخت" %}
-<section class="card card--lift card-pad form-stack">
-  <h2 class="section-title">ثبت درخواست</h2>
+<div class="ui-finance-flow"><section class="card card-pad form-stack">
+  <div class="ui-form-intro"><span class="ui-target-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="rotate-ccw" size="md" %}</span><div><h2>ثبت درخواست بازپرداخت</h2><p>سفارش واجد شرایط و دلیل درخواست را مشخص کنید.</p></div></div>
   <form method="post" class="form-stack finance-form">{% csrf_token %}
     <div class="field">
       <label for="refund-order">سفارش</label>
@@ -23,19 +23,19 @@
     <button class="btn btn-primary" type="submit" {% if not order_choices %}disabled{% endif %}>ثبت درخواست</button>
     {% if not order_choices %}<p class="field-help">در حال حاضر سفارش واجد شرایط بازپرداخت ندارید.</p>{% endif %}
   </form>
-</section>
+</section><aside class="card card-pad ui-finance-guide"><h2 class="section-title">شرایط بازپرداخت</h2><p>درخواست پس از بررسی وضعیت سفارش و اعتبار رزروشده تصمیم‌گیری می‌شود. ثبت درخواست به معنی تأیید بازپرداخت نیست.</p><a href="{% url 'support:list' %}">ارتباط با پشتیبانی</a></aside></div>
 <section class="card card--lift table-card">
   <h2 class="section-title card-pad" style="padding-bottom:0">درخواست‌های من</h2>
   {% if refunds %}
   <div class="table-wrap" tabindex="0" role="region" aria-label="درخواست‌های بازپرداخت">
-    <table class="data-table">
+    <table class="data-table ui-finance-table">
       <caption class="sr-only">درخواست‌های بازپرداخت</caption>
       <thead><tr><th scope="col">مبلغ</th><th scope="col">وضعیت</th><th scope="col">تاریخ</th></tr></thead>
       <tbody>
       {% for r in refunds %}
       <tr>
         <td class="tabnums">{{ r.amount_irr|irr_to_toman|format_irr }} تومان</td>
-        <td><span class="status status--compact status-info">{{ r.get_status_display }}</span></td>
+        <td><span class="status status--compact {% if r.status == 'approved' %}status-active{% elif r.status == 'rejected' %}status-danger{% else %}status-warn{% endif %}">{{ r.get_status_display }}</span></td>
         <td><time datetime="{{ r.created_at|date:'c' }}">{{ r.created_at|jalali_datetime }}</time></td>
       </tr>
       {% endfor %}

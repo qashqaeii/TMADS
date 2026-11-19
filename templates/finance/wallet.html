@@ -3,21 +3,22 @@
 {% block page_title %}کیف پول{% endblock %}
 {% block container_class %}container-wide{% endblock %}
 {% block content %}
-<div class="app-stack finance-page">
+<div class="app-stack finance-page ui-finance">
 {% url 'finance:topup' as topup_url %}
-{% include "includes/dash_header.html" with title="کیف پول" subtitle="موجودی قابل استفاده و رزرو کمپین" with_sub=1 action_url=topup_url action_label="شارژ" action_primary=1 %}
-<section class="metric-strip metric-strip--wallet" aria-label="خلاصه کیف پول">
-  <div class="metric-strip__metrics" role="list">
-    <div class="metric-strip__item metric-strip__item--hero" role="listitem">
-      <span class="metric-strip__value tabnums">{{ wallet.available_irr|irr_to_toman|format_irr }}</span>
-      <span class="metric-strip__label">موجودی (تومان)</span>
-    </div>
-    <span class="metric-strip__sep" aria-hidden="true"></span>
-    <div class="metric-strip__item" role="listitem">
-      <span class="metric-strip__value tabnums">{{ wallet.reserved_irr|irr_to_toman|format_irr }}</span>
-      <span class="metric-strip__label">رزرو (تومان)</span>
-    </div>
-  </div>
+{% include "includes/dash_header.html" with title="کیف پول" subtitle="مدیریت اعتبار، رزرو و گردش مالی" with_sub=1 %}
+<section class="ui-wallet-layout" aria-label="خلاصه کیف پول">
+  <article class="ui-wallet-feature">
+    <div class="ui-wallet-feature__head"><span>{% include "includes/lucide_icon.html" with name="wallet" size="md" %} موجودی قابل استفاده</span><span class="ui-wallet-currency">تومان</span></div>
+    <strong class="ui-wallet-amount tabnums">{{ wallet.available_irr|irr_to_toman|format_irr }}</strong>
+    <p>اعتبار قابل استفاده برای سفارش تبلیغات</p>
+    <a class="btn btn-primary" href="{% url 'finance:topup' %}">{% include "includes/lucide_icon.html" with name="plus" size="btn" %} شارژ کیف پول</a>
+  </article>
+  <article class="ui-finance-summary">
+    <header><span class="ui-target-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="lock" size="md" %}</span><h2>مبلغ رزروشده</h2></header>
+    <strong class="ui-finance-amount tabnums">{{ wallet.reserved_irr|irr_to_toman|format_irr }} <small>تومان</small></strong>
+    <p>رزرو مربوط به سفارش‌ها؛ با موجودی قابل استفاده متفاوت است.</p>
+    <div class="ui-finance-links"><a href="{% url 'finance:invoices' %}">فاکتورها {% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}</a><a href="{% url 'finance:refunds' %}">بازپرداخت {% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}</a></div>
+  </article>
 </section>
 <article class="card table-card card--lift">
   <header class="dash-panel__head" style="border-bottom:1px solid var(--border-default)">
@@ -29,10 +30,7 @@
     <li class="finance-line"><span class="finance-entry"><span>{{ e.get_entry_type_display }}</span><time class="muted" datetime="{{ e.created_at|date:'c' }}">{{ e.created_at|jalali_datetime }}</time></span><strong class="tabnums"><bdi>{{ e.amount_irr|irr_to_toman|format_irr }}</bdi> تومان</strong></li>
     {% empty %}<li class="muted" style="padding:.75rem 0">تراکنشی نیست.</li>{% endfor %}
   </ul>
-  <div class="wallet-ledger__actions">
-    <a href="{% url 'finance:invoices' %}">فاکتورها</a>
-    <a href="{% url 'finance:refunds' %}">بازپرداخت</a>
-  </div>
+
 </article>
 </div>
 {% endblock %}
