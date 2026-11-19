@@ -271,14 +271,14 @@ class TelegramAdsClient:
     def get_account_statistics(self, *, from_time, to_time, interval=86400):
         return self._run("account_stats", lambda c: [_model_to_dict(x) for x in c.get_account_stats(from_time,to_time,interval)])
 
-    def get_audiences(self, *, offset=0, limit=50):
-        return self._run("audiences_list", lambda c: _model_to_dict(c.get_audiences_list(offset=offset,limit=limit)))
+    def get_audiences(self, *, offset=0, limit=50, account_id=None):
+        return self._run("audiences_list", lambda c: _model_to_dict(c.get_audiences_list(offset=offset,limit=limit,account_id=account_id)))
 
-    def get_pixel_info(self):
-        return self._run("pixel_info", lambda c: _model_to_dict(c.get_pixel()))
+    def get_pixel_info(self, *, account_id=None):
+        return self._run("pixel_info", lambda c: _model_to_dict(c.get_pixel(account_id=account_id)))
 
-    def get_pixel_events(self, *, offset=0, limit=50):
-        return self._run("pixel_events", lambda c: _model_to_dict(c.get_pixel_events_list(offset=offset,limit=limit)))
+    def get_pixel_events(self, *, offset=0, limit=50, account_id=None):
+        return self._run("pixel_events", lambda c: _model_to_dict(c.get_pixel_events_list(offset=offset,limit=limit,account_id=account_id)))
 
 
     def create_related_account(self, *, title, details, idempotency_key):
@@ -286,3 +286,20 @@ class TelegramAdsClient:
                 and getattr(settings,"TELEGRAM_ADS_RELATED_ACCOUNTS_ENABLED",False)):
             raise TelegramAdsWriteDisabled("Related account provisioning is disabled")
         return self._run("related_account_create",lambda c:_model_to_dict(c.create_account(title,**details,idempotency_key=idempotency_key)))
+
+
+    def create_customer_asset(self, *, account_id, action, title, event_type, operation_id):
+        if not account_id or not (settings.TELEGRAM_ADS_WRITE_ENABLED
+                and settings.TELEGRAM_ADS_PAID_SUBMISSION_ENABLED
+                and getattr(settings, "TELEGRAM_ADS_CUSTOMER_ASSETS_ENABLED", False)):
+            raise TelegramAdsWriteDisabled("Customer assets are disabled")
+        key = "tmads-asset-" + str(operation_id)
+        def perform(client):
+            if action == "audience":
+                return _model_to_dict(client.create_audience(title, account_id=account_id, idempotency_key=key))
+            if action == "pixel":
+                return _model_to_dict(client.create_pixel(account_id=account_id, idempotency_key=key))
+            if action == "event":
+                return _model_to_dict(client.create_pixel_event(title, event_type, account_id=account_id, idempotency_key=key))
+            raise ValueError("Unknown asset action")
+        return self._run("customer_asset_create", perform)

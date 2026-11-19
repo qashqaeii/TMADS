@@ -51,3 +51,15 @@ class RelatedAccountRequest(UUIDModel, TimeStampedModel):
         ordering = ["-created_at"]
         constraints = [models.UniqueConstraint(fields=["main_account_id","remote_account_id"],
             condition=~models.Q(remote_account_id=""), name="unique_related_account_binding")]
+
+
+class AccountAssetOperation(UUIDModel, TimeStampedModel):
+    account = models.ForeignKey(RelatedAccountRequest,on_delete=models.PROTECT,related_name="asset_operations")
+    action = models.CharField(max_length=16)
+    state = models.CharField(max_length=16,default="executing")
+    remote_id = models.CharField(max_length=256,blank=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        constraints = [models.UniqueConstraint(fields=["account"],
+            condition=models.Q(state__in=["executing","uncertain"]),name="one_unresolved_asset_operation")]
