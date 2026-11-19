@@ -47,12 +47,14 @@
   }
 
   function formatPct(v) {
+    if (v === null || v === undefined || v === "") return "—";
     const n = Number(v);
     if (Number.isNaN(n)) return "—";
     return (Math.round(n * 10) / 10).toString().replace(".", "٫") + "٪";
   }
 
   function formatCountFull(v) {
+    if (v === null || v === undefined || v === "") return "—";
     const n = Number(v);
     if (Number.isNaN(n)) return "—";
     try {
@@ -261,7 +263,7 @@
     const compact = Boolean(opts.compact);
     const useArea = analyticsMode || (!compact && !portfolio);
     const showCtr = Boolean(opts.showCtr) && !portfolio;
-    const legendItems = portfolio ? ["نمایش", "کلیک"] : ["نمایش", "کلیک", "ورود"];
+    const legendItems = portfolio ? ["نمایش", "کلیک"] : ["نمایش", "کلیک", "اقدام"];
     if (showCtr) legendItems.push("نرخ کلیک");
 
     const impressionsSeries = {
@@ -329,7 +331,7 @@
 
     if (!portfolio) {
       series.push({
-        name: "ورود",
+        name: "اقدام",
         type: "line",
         smooth: true,
         data: data.actions,
@@ -367,7 +369,7 @@
       ];
     } else if (analyticsMode) {
       yAxis = [
-        axisSideCount("نمایش / ورود", COLORS.impressions, "left"),
+        axisSideCount("نمایش / اقدام", COLORS.impressions, "left"),
         axisSideCount("کلیک", COLORS.clicks, "right"),
       ];
       if (showCtr && data.ctr && data.ctr.length) {
@@ -502,7 +504,7 @@
       (el && el.classList && el.classList.contains("chart-box--spend-luxe")) ||
       (el && el.closest && el.closest(".campaign-analytics-spend"));
     const many = data.dates.length > 20;
-    const spentSeries = (data.spent || []).map((v) => Number(v) || 0);
+    const spentSeries = (data.spent || []).filter((v) => v !== null && v !== undefined && Number.isFinite(Number(v))).map(Number);
     const peakSpent = Math.max(...spentSeries, 0.0001);
     chart.setOption({
       color: [luxeSpend ? "#B8944A" : COLORS.spent],
@@ -621,7 +623,7 @@
       `<text class="funnel-svg__value" x="${cx}" y="${yVal}" text-anchor="middle">${formatCountFull(value)}</text>`;
 
     el.innerHTML =
-      `<div class="funnel-viz" role="img" aria-label="قیف تبدیل: نمایش ${formatCountFull(imp)}، کلیک ${formatCountFull(clk)}، ورود ${formatCountFull(act)}">` +
+      `<div class="funnel-viz" role="img" aria-label="قیف تبدیل: نمایش ${formatCountFull(imp)}، کلیک ${formatCountFull(clk)}، اقدام ${formatCountFull(act)}">` +
       `<svg class="funnel-svg" viewBox="0 0 280 172" xmlns="http://www.w3.org/2000/svg" focusable="false" aria-hidden="true">` +
       `<defs>` +
       `<linearGradient id="tmads-fg-imp" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#5ecdf9"/><stop offset="100%" stop-color="#2aabee"/></linearGradient>` +
@@ -639,7 +641,7 @@
         : `<g class="funnel-svg__texts">` +
           txt("نمایش", imp, 26, 46) +
           txt("کلیک", clk, 82, 102) +
-          txt("ورود", act, 138, 158) +
+          txt("اقدام", act, 138, 158) +
           `</g>`) +
       `</svg></div>`;
     el.classList.add("funnel-viz-host--ready");
@@ -671,7 +673,7 @@
     const steps = [
       { name: "نمایش", value: imp, itemStyle: { color: funnelSegmentGradient("#4BC4F7", "#2AABEE") } },
       { name: "کلیک", value: clk, itemStyle: { color: funnelSegmentGradient("#3D95D4", "#177DC7") } },
-      { name: "ورود", value: act, itemStyle: { color: funnelSegmentGradient("#1F9B78", "#16866A") } },
+      { name: "اقدام", value: act, itemStyle: { color: funnelSegmentGradient("#1F9B78", "#16866A") } },
     ];
     chart.setOption({
       animationDuration: 600,
@@ -737,7 +739,7 @@
     const steps = [
       { value: imp, name: "نمایش" },
       { value: clk, name: "کلیک" },
-      { value: act, name: "ورود" },
+      { value: act, name: "اقدام" },
     ];
     const maxVal = Math.max(imp, clk, act, 1);
     chart.setOption({

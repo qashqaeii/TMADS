@@ -378,7 +378,8 @@
                 <span class="campaign-analytics-spend__total-equiv muted tabnums" data-period-kpi="spent-toman">—</span>
               </div>
             </header>
-            {% if has_chart %}
+            {% if has_spend_chart %}
+            <p class="muted">روزهای فاقد هزینه تأییدشده به گرام، بدون مقدار نمایش داده می‌شوند.</p>
             <div class="campaign-analytics-spend__legend" aria-hidden="true">
               <span class="campaign-analytics-spend__legend-swatch"></span>
               <span class="campaign-analytics-spend__legend-text">مصرف هر روز (TON)</span>
@@ -389,7 +390,7 @@
             {% else %}
             <div class="campaign-analytics-spend__empty">
               <span class="campaign-analytics-spend__empty-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="coins" size="kpi" %}</span>
-              <p class="campaign-analytics-spend__empty-title">مصرف روزانه هنوز ثبت نشده</p>
+              <p class="campaign-analytics-spend__empty-title">هزینه روزانه به گرام هنوز تأیید نشده</p>
               <p class="campaign-analytics-spend__empty-text muted">پس از اتصال تبلیغ و بروزرسانی آمار، هزینهٔ روزانه اینجا نمایش داده می‌شود.</p>
             </div>
             <div id="campaign-spend-chart" class="campaign-analytics-spend__host--sr" hidden aria-hidden="true"></div>
@@ -670,19 +671,20 @@
       var imp = sum(slice.impressions);
       var clk = sum(slice.clicks);
       var act = sum(slice.actions);
-      var spent = sum(slice.spent);
+      var spentKnown = Array.isArray(slice.spent) && slice.spent.length > 0 && slice.spent.every(function(v){ return v !== null && Number.isFinite(Number(v)); });
+      var spent = spentKnown ? sum(slice.spent) : null;
       var ctr = imp > 0 ? Math.round((clk / imp) * 1000) / 10 : 0;
       var spentTon = spent ? Math.round(spent * 10000) / 10000 : 0;
       var spentToman = '—';
-      if (spentTon > 0 && tonIrrPerTon > 0) {
+      if (spentKnown && spentTon > 0 && tonIrrPerTon > 0) {
         spentToman = '≈ ' + faNum(Math.round((spentTon * tonIrrPerTon) / 10)) + ' تومان';
       }
       var map = {
         impressions: faNum(imp),
         clicks: faNum(clk),
         actions: faNum(act),
-        ctr: (ctr ? ctr.toString().replace('.', '٫') : '۰') + '٪',
-        spent: spentTon ? faNum(spentTon) : '۰',
+        ctr: imp > 0 ? faNum(ctr) + '٪' : '—',
+        spent: spentKnown ? faNum(spentTon) : '—',
         'spent-toman': spentToman,
       };
       document.querySelectorAll('[data-period-kpi]').forEach(function (el) {
@@ -728,7 +730,7 @@
             grid: { bottom: 76, right: 10, top: 36, left: 6 },
           });
         }
-        if (spend) {
+        if (spend && !spend.hidden) {
           TMADSCharts.spendChart(spend, slice, { compact: true, premium: true });
         }
         updatePeriodKpis(slice);

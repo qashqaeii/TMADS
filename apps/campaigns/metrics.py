@@ -4,7 +4,7 @@ from dataclasses import dataclass, replace
 from decimal import Decimal
 from typing import Any
 
-from django.db.models import Prefetch, QuerySet, Sum
+from django.db.models import Prefetch, QuerySet
 from django.utils import timezone
 
 from apps.campaigns.models import Campaign, CampaignStatisticsSnapshot, TelegramAdvertisement
@@ -109,16 +109,8 @@ def ctr_percent(impressions: int, clicks: int) -> float:
 
 def campaign_sparkline(campaign: Campaign, *, days: int = 7) -> list[int]:
     """آخرین N روز نمایش روزانه (snapshot) — برای mini chart لیست."""
-    rows = list(
-        CampaignStatisticsSnapshot.objects.filter(advertisement__campaign=campaign)
-        .values("snapshot_date")
-        .annotate(total=Sum("impressions"))
-        .order_by("snapshot_date")
-        .values_list("total", flat=True)
-    )
-    if days and len(rows) > days:
-        rows = rows[-days:]
-    return [int(x) for x in rows]
+    from apps.campaigns.analytics import _rows_for_campaign
+    return [row["impressions"] for row in _rows_for_campaign(campaign, limit=days)]
 
 
 @dataclass

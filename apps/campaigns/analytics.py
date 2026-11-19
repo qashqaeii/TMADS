@@ -17,15 +17,11 @@ def _fa_date_label(value: date) -> str:
     return text.translate(str.maketrans("0123456789", "۰۱۲۳۴۵۶۷۸۹"))
 
 
-def _period_metrics_from_snapshot(row: dict[str, Any]) -> tuple[int, int, int, Decimal]:
+def _period_metrics_from_snapshot(row: dict[str, Any]) -> tuple[int, int, int, Decimal | None]:
     impressions = int(row.get("impressions") or 0)
     clicks = int(row.get("clicks") or 0)
     actions = int(row.get("actions") or 0)
-    spent = row.get("spent_ton")
-    if spent is None or spent == "":
-        spent_val = Decimal("0")
-    else:
-        spent_val = Decimal(str(spent))
+    spent_val = _decimal(row.get("spent_ton"))
 
     raw = row.get("raw")
     if isinstance(raw, dict):
@@ -36,8 +32,8 @@ def _period_metrics_from_snapshot(row: dict[str, Any]) -> tuple[int, int, int, D
             clicks = _int(raw["clicks"]) or 0
         if "actions" in raw or "joins" in raw:
             actions = _int(raw.get("actions", raw.get("joins"))) or 0
-        if raw.get("currency") and str(raw["currency"]).upper() != "TON":
-            spent_val = Decimal("0")
+        if raw and (str(raw.get("currency") or "").upper() != "TON" or raw.get("spent_verified") is False):
+            spent_val = None
 
 
     return impressions, clicks, actions, spent_val
@@ -67,7 +63,10 @@ def _rows_for_campaign(campaign: Campaign, *, limit: int | None = 45) -> list[di
         bucket["impressions"] += impressions
         bucket["clicks"] += clicks
         bucket["actions"] += actions
-        bucket["spent_ton"] += spent_val
+        if spent_val is None or bucket["spent_ton"] is None:
+            bucket["spent_ton"] = None
+        else:
+            bucket["spent_ton"] += spent_val
 
     rows = sorted(by_date.values(), key=lambda item: item["snapshot_date"])
     if limit is not None and limit > 0 and len(rows) > limit:
@@ -80,7 +79,7 @@ def chart_has_signal(payload: dict[str, Any]) -> bool:
         return False
     for key in ("impressions", "clicks", "actions", "spent"):
         series = payload.get(key) or []
-        if any((float(v) if key == "spent" else int(v)) > 0 for v in series):
+        if any(v is not None and (float(v) if key == "spent" else int(v)) > 0 for v in series):
             return True
     return False
 
@@ -137,7 +136,7 @@ def _chart_from_rows(rows: list[dict[str, Any]]) -> dict:
     impressions = [int(r["impressions"]) for r in rows]
     clicks = [int(r["clicks"]) for r in rows]
     actions = [int(r["actions"]) for r in rows]
-    spent = [float(r["spent_ton"] or 0) for r in rows]
+    spent = [float(r["spent_ton"]) if r["spent_ton"] is not None else None for r in rows]
     ctr = [ctr_percent(imp, clk) for imp, clk in zip(impressions, clicks, strict=False)]
     return {
         "dates": dates,
@@ -150,14 +149,17 @@ def _chart_from_rows(rows: list[dict[str, Any]]) -> dict:
     }
 
 
-def portfolio_timeseries(customer, *, days: int = 30) -> dict:
+def portfolio_timeseries(customer, *, days: int = 30, campaign_ids=None) -> dict:
     """جمع آمار روزانه همهٔ کمپین‌های مشتری (بازهٔ روزانه API)."""
     end = timezone.localdate()
     start = end - timedelta(days=max(1, days) - 1)
     snapshots = CampaignStatisticsSnapshot.objects.filter(
         advertisement__campaign__customer=customer,
         snapshot_date__range=(start, end),
-    ).values("snapshot_date", "impressions", "clicks", "actions", "spent_ton", "raw")
+    )
+    if campaign_ids is not None:
+        snapshots = snapshots.filter(advertisement__campaign_id__in=campaign_ids)
+    snapshots = snapshots.values("snapshot_date", "impressions", "clicks", "actions", "spent_ton", "raw")
     by_date: dict[date, dict[str, Any]] = {}
     for row in snapshots.iterator():
         bucket = by_date.setdefault(row["snapshot_date"], {
@@ -168,7 +170,10 @@ def portfolio_timeseries(customer, *, days: int = 30) -> dict:
         bucket["impressions"] += impressions
         bucket["clicks"] += clicks
         bucket["actions"] += actions
-        bucket["spent_ton"] += spent
+        if spent is None or bucket["spent_ton"] is None:
+            bucket["spent_ton"] = None
+        else:
+            bucket["spent_ton"] += spent
     rows = sorted(by_date.values(), key=lambda row: row["snapshot_date"])
     return _chart_from_rows(rows)
 

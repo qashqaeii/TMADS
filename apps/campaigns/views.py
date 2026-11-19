@@ -100,7 +100,8 @@ def campaign_list(request):
 
     kpis = aggregate_portfolio_kpis(rows)
     performance_insights = build_portfolio_performance_insights(rows)
-    portfolio_chart = portfolio_timeseries(request.user.customer_profile, days=30)
+    portfolio_chart = portfolio_timeseries(request.user.customer_profile, days=30,
+        campaign_ids=[row.campaign.pk for row in rows])
     paginator = Paginator(rows, 20)
     page_obj = paginator.get_page(request.GET.get("page"))
 
@@ -216,6 +217,7 @@ def campaign_detail(request, campaign_id):
             "performance_badges": performance_badges,
             "has_chart": has_chart,
             "chart_has_signal": chart_has_signal(chart),
+            "has_spend_chart": any(v is not None for v in chart.get("spent", [])),
             "chart_json": json.dumps(chart, ensure_ascii=False),
             "funnel_json": json.dumps(funnel_from_metrics(metrics), ensure_ascii=False),
             "budget": budget_delivery_context(campaign, metrics),

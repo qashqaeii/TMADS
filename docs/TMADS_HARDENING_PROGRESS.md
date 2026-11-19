@@ -132,3 +132,6 @@ Only POST duplicates a campaign; copied drafts exclude previous policy acceptanc
 
 ## Read-only sync and import safeguards
 Status sync locks the campaign before applying remote fields and never overwrites financial locks or terminal local exceptions. Unknown status does not become a false pause; imported and exceptional workflows do not fabricate prior lifecycle milestones. Repeat import preserves protected orders and projects; default-named but nonempty drafts are not pruned. Allocation verification compares remote destination to the locked campaign, not mutable sync metadata. Runtime verification pending.
+
+## Analytics display consistency
+Unverified daily amounts remain null rather than fabricated zero in charts and period totals; filtered campaign charts follow the same filter as list KPIs. Sparkline uses corrected daily parsing. Performance ratings limit conversion comparisons to a shared known action type. Duplication shortcut submits POST with CSRF. Regression coverage added, CI still unavailable (latest run 44507127586 failed before runner/steps). Historical rows with no raw source remain subject to audit; current code does not guess a foreign-currency conversion.

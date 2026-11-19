@@ -24,13 +24,13 @@ class LensSpec:
 
 LENSES: tuple[LensSpec, ...] = (
     LensSpec("reach", "بیشترین نمایش", "نمایش"),
-    LensSpec("engagement", "بیشترین کلیک", "کلیک"),
-    LensSpec("conversion", "بیشترین ورود از کلیک‌ها", "ورود"),
-    LensSpec("efficiency", "ارزان‌ترین هر ورود", "هر ورود"),
+    LensSpec("engagement", "بیشترین نرخ کلیک", "کلیک"),
+    LensSpec("conversion", "بیشترین نرخ اقدام", "اقدام"),
+    LensSpec("efficiency", "کمترین هزینه هر اقدام", "هر اقدام"),
 )
 
-CHAMPION_LENS_LABEL = "بهترین کمپین شما"
-CHAMPION_BADGE_TITLE = "بهترین کمپین شما"
+CHAMPION_LENS_LABEL = "کمپین با امتیاز بالاتر"
+CHAMPION_BADGE_TITLE = "کمپین با امتیاز بالاتر"
 
 
 @dataclass(frozen=True)
@@ -63,14 +63,14 @@ class PortfolioPerformanceInsights:
 
 
 def _conversion_rate(row: CampaignListRow) -> float:
-    if not row.metrics.clicks:
+    if not row.metrics.has_actions or not row.metrics.clicks:
         return 0.0
     return round(row.metrics.actions * 100.0 / row.metrics.clicks, 2)
 
 
 def _cost_per_action(row: CampaignListRow) -> Decimal | None:
     if (
-        row.metrics.actions
+        row.metrics.has_actions and row.metrics.actions
         and row.metrics.spent_ton is not None
         and row.metrics.spent_ton > 0
     ):
@@ -82,7 +82,7 @@ def _eligible_rows(rows: list[CampaignListRow]) -> list[CampaignListRow]:
     return [
         r
         for r in rows
-        if r.metrics.has_stats and r.metrics.impressions >= MIN_IMPRESSIONS_ELIGIBLE
+        if r.metrics.has_ctr and not r.metrics.stats_stale and r.metrics.impressions >= MIN_IMPRESSIONS_ELIGIBLE
     ]
 
 
@@ -170,18 +170,18 @@ def _reasons_for_row(
         extra = _compare_to_average(conv, avg_conv or 0) if avg_conv else None
         if extra:
             reasons.append(
-                f"از {row.metrics.clicks} کلیک، {row.metrics.actions} ورود ({conv}٪) — {extra}"
+                f"از {row.metrics.clicks} کلیک، {row.metrics.actions} اقدام ({conv}٪) — {extra}"
             )
         else:
             reasons.append(
-                f"از {row.metrics.clicks} کلیک، {row.metrics.actions} نفر وارد شده ({conv}٪)"
+                f"از {row.metrics.clicks} کلیک، {row.metrics.actions} اقدام ثبت شده ({conv}٪)"
             )
     elif lens_key == "efficiency" and cpa is not None and row.metrics.actions:
         extra = _compare_to_average(float(cpa), avg_cpa or 0, higher_is_better=False) if avg_cpa else None
         if extra:
-            reasons.append(f"هر ورود کم‌هزینه‌تر بوده — {extra}")
+            reasons.append(f"هر اقدام کم‌هزینه‌تر بوده — {extra}")
         else:
-            reasons.append("برای هر ورود، کمتر از بقیهٔ کمپین‌ها هزینه شده")
+            reasons.append("برای هر اقدام، کمتر از بقیهٔ کمپین‌ها هزینه شده")
     elif lens_key == "overall":
         extra_ctr = _compare_to_average(row.ctr, avg_ctr)
         if extra_ctr:
@@ -192,7 +192,7 @@ def _reasons_for_row(
             extra_conv = _compare_to_average(conv, avg_conv or 0) if avg_conv else None
             if extra_conv:
                 reasons.append(
-                    f"بعد از کلیک هم خوب جواب داده ({conv}٪ ورود) — {extra_conv}"
+                    f"بعد از کلیک هم خوب جواب داده ({conv}٪ اقدام) — {extra_conv}"
                 )
         if row.metrics.impressions >= 1000 and len(reasons) < 2:
             reasons.append(f"تعداد نمایش بالا ({row.metrics.impressions} بار)")
@@ -243,7 +243,10 @@ def build_portfolio_performance_insights(rows: list[CampaignListRow]) -> Portfol
         sum(r.ctr for r in eligible) / len(eligible),
         2,
     )
-    conv_rows = [r for r in eligible if r.metrics.clicks >= MIN_CLICKS_CONVERSION]
+    # Conversion comparisons only make sense for the same explicitly known event.
+    action_types = {r.metrics.action_type for r in eligible}
+    same_action = len(action_types) == 1 and bool(next(iter(action_types))) and all(r.metrics.has_actions for r in eligible)
+    conv_rows = [r for r in eligible if same_action and r.metrics.clicks >= MIN_CLICKS_CONVERSION]
     avg_conv = (
         round(sum(_conversion_rate(r) for r in conv_rows) / len(conv_rows), 2)
         if conv_rows
@@ -252,7 +255,7 @@ def build_portfolio_performance_insights(rows: list[CampaignListRow]) -> Portfol
     cpa_values = [
         float(c)
         for r in eligible
-        if (c := _cost_per_action(r)) is not None and r.metrics.actions >= MIN_ACTIONS_EFFICIENCY
+        if same_action and (c := _cost_per_action(r)) is not None and r.metrics.actions >= MIN_ACTIONS_EFFICIENCY
     ]
     avg_cpa = round(sum(cpa_values) / len(cpa_values), 4) if cpa_values else None
 
@@ -265,10 +268,10 @@ def build_portfolio_performance_insights(rows: list[CampaignListRow]) -> Portfol
         parts = [
             0.28 * _normalize(impressions_list, float(row.metrics.impressions)),
             0.32 * _normalize(ctr_list, row.ctr),
-            0.25 * _normalize(conv_list, _conversion_rate(row)),
+            0.25 * _normalize(conv_list, _conversion_rate(row)) if same_action else 0.125,
         ]
         cpa = _cost_per_action(row)
-        if cpa is not None and float(cpa) > 0 and max(cpa_list) > 0:
+        if same_action and cpa is not None and float(cpa) > 0 and max(cpa_list) > 0:
             parts.append(0.15 * (1.0 - _normalize(cpa_list, float(cpa))))
         else:
             parts.append(0.15 * 0.35)
@@ -326,7 +329,7 @@ def build_portfolio_performance_insights(rows: list[CampaignListRow]) -> Portfol
             )
         )
 
-    conv_pool = [r for r in eligible if r.metrics.clicks >= MIN_CLICKS_CONVERSION]
+    conv_pool = conv_rows
     if conv_pool:
         conv_row = max(conv_pool, key=_conversion_rate)
         lens_winners.append(
@@ -347,7 +350,7 @@ def build_portfolio_performance_insights(rows: list[CampaignListRow]) -> Portfol
     eff_pool = [
         r
         for r in eligible
-        if r.metrics.actions >= MIN_ACTIONS_EFFICIENCY and _cost_per_action(r) is not None
+        if same_action and r.metrics.actions >= MIN_ACTIONS_EFFICIENCY and _cost_per_action(r) is not None
     ]
     if eff_pool:
         eff_row = min(eff_pool, key=lambda r: float(_cost_per_action(r) or 0))

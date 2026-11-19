@@ -32,7 +32,9 @@
         <a class="campaigns-insights__hero-name" href="{% url 'campaigns:detail' performance_insights.champion.campaign_id %}">{{ performance_insights.champion.campaign_name }}</a>
         <div class="campaigns-insights__hero-ctas">
           <a class="campaigns-insights__cta campaigns-insights__cta--primary" href="{% url 'campaigns:detail' performance_insights.champion.campaign_id %}">مشاهده</a>
-          <a class="campaigns-insights__cta" href="{% url 'campaigns:duplicate' performance_insights.champion.campaign_id %}">مشابه</a>
+          <form method="post" action="{% url 'campaigns:duplicate' performance_insights.champion.campaign_id %}">
+            {% csrf_token %}<button type="submit" class="campaigns-insights__cta">مشابه</button>
+          </form>
         </div>
       </div>
       <p class="campaigns-insights__hero-badge">{{ performance_insights.champion.lens_label }}</p>
@@ -40,7 +42,7 @@
         <li>{{ performance_insights.champion.impressions|format_count }} نمایش</li>
         <li>{{ performance_insights.champion.ctr|persian_digits }}٪ کلیک</li>
         {% if performance_insights.champion.actions %}
-        <li>{{ performance_insights.champion.conversion_rate|persian_digits }}٪ ورود</li>
+        <li>{{ performance_insights.champion.conversion_rate|persian_digits }}٪ اقدام</li>
         {% endif %}
       </ul>
       {% if performance_insights.champion.reasons %}
@@ -86,7 +88,7 @@
   <details class="campaigns-insights__meta">
     <summary class="campaigns-insights__meta-trigger">روش محاسبه</summary>
     <p class="campaigns-insights__meta-body muted">
-      نمایش، کلیک، ورود و هزینهٔ هر ورود با هم سنجیده می‌شود. حداقل {{ 50|persian_digits }} نمایش برای هر کمپین لازم است.
+      امتیاز بر اساس نمایش و نرخ کلیک است؛ مقایسه اقدام و هزینه هر اقدام فقط برای هدف تبدیلی یکسان و آمار قابل اتکا انجام می‌شود. حداقل {{ 50|persian_digits }} نمایش برای هر کمپین لازم است.
     </p>
   </details>
 </section>

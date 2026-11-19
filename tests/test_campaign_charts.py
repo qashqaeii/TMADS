@@ -92,3 +92,10 @@ def test_portfolio_timeseries_sums_customer_ads():
     chart = portfolio_timeseries(customer, days=60)
     assert chart["impressions"] == [300]
     assert chart["clicks"] == [30]
+
+
+def test_unverified_currency_is_not_zero_spend():
+    row = {"impressions": 10, "clicks": 1, "actions": 0,
+           "spent_ton": Decimal("5"), "raw": {"currency": "EUR"}}
+    assert _period_metrics_from_snapshot(row)[3] is None
+    assert not chart_has_signal({"dates": ["2026-01-01"], "spent": [None]})
