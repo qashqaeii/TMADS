@@ -3,6 +3,8 @@ from pathlib import Path
 
 import pytest
 from django.template.loader import get_template
+from django.templatetags.static import static
+from django.test import SimpleTestCase
 from django.urls import reverse
 
 
@@ -25,7 +27,12 @@ def test_all_project_html_templates_compile():
 def test_public_ui_shell(client, route):
     response = client.get(reverse(route))
     assert response.status_code == 200, route
-    assert b'ui-foundation.css' in response.content
+    # Manifest storage adds a content hash after collectstatic (as in CI).
+    # Verify the exact stylesheet link, not an unhashed filename substring.
+    stylesheet = static('css/ui-foundation.css')
+    SimpleTestCase().assertContains(
+        response, f'<link rel="stylesheet" href="{stylesheet}">', html=True,
+    )
     assert b'id="ui-confirmation"' in response.content
     assert b'dir="rtl"' in response.content
 
