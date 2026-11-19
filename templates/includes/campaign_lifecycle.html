@@ -27,7 +27,7 @@
 {% else %}
 <ol class="campaign-lifecycle{% if variant == 'track' %} campaign-lifecycle--track{% endif %}" aria-label="مراحل کمپین">
   {% for step in lifecycle_steps %}
-  <li class="campaign-lifecycle__step campaign-lifecycle__step--{{ step.state }}{% if step.is_terminal and step.state == 'current' %} is-terminal{% endif %}">
+  <li class="campaign-lifecycle__step campaign-lifecycle__step--{{ step.state }}{% if step.is_terminal and step.state == 'current' %} is-terminal{% endif %}"{% if step.state == 'current' %} aria-current="step"{% endif %}>
     <span class="campaign-lifecycle__dot" aria-hidden="true"></span>
     <span class="campaign-lifecycle__label">{{ step.label }}</span>
   </li>

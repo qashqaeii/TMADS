@@ -1,5 +1,5 @@
 /* TMADS final UI contract: shared controls, surfaces, feedback and dialog.
-   Loaded after legacy executive styles; page-specific layouts live in ui-pages.css.
+   Loaded after legacy executive styles; page-specific layouts live in the ui-* modules.
    Keep the existing Executive Blue identity and use these tokens for new work. */
 :root {
   --ui-action: #126fa9;
@@ -42,12 +42,12 @@
 .ui-final :is(.btn,.topbar-action,.campaigns-filter__btn,.campaigns-table__link-btn,.campaign-detail__action):not(:disabled):hover { transform:none; box-shadow:none; }
 .ui-final :is(.btn-primary,.topbar-action--primary,.campaigns-filter__btn--apply,.campaigns-table__link-btn--primary,.campaign-detail__action--primary) { background:var(--ui-action); border-color:var(--ui-action); color:#fff; }
 .ui-final :is(.btn-primary,.topbar-action--primary,.campaigns-filter__btn--apply,.campaigns-table__link-btn--primary,.campaign-detail__action--primary):not(:disabled):hover { background:var(--ui-action-hover);border-color:var(--ui-action-hover);color:#fff; }
-.ui-final :is(.btn-ghost,.btn-quiet,.campaigns-filter__btn--clear,.campaigns-table__link-btn:not(.campaigns-table__link-btn--primary),.campaign-detail__action:not(.campaign-detail__action--primary),.ui-icon-button) { background:var(--ui-panel);border-color:var(--ui-border);color:var(--ui-ink); }
-.ui-final :is(.btn-ghost,.btn-quiet,.campaigns-filter__btn--clear,.campaigns-table__link-btn:not(.campaigns-table__link-btn--primary),.campaign-detail__action:not(.campaign-detail__action--primary),.ui-icon-button):not(:disabled):hover { background:var(--ui-soft);border-color:#b4c8da;color:var(--ui-action-hover); }
-.ui-final .btn-danger { background:var(--ui-danger);border-color:var(--ui-danger);color:#fff; }
-.ui-final .btn-danger:not(:disabled):hover { background:#8e1730;border-color:#8e1730;color:#fff; }
-.ui-final .btn-danger-soft { background:var(--ui-danger-soft);border-color:#f0cad3;color:var(--ui-danger); }
-.ui-final .btn-danger-soft:not(:disabled):hover { background:#fbe2e8;border-color:#d99aa9;color:var(--ui-danger); }
+.ui-final :is(.btn-ghost,.btn-quiet,.campaigns-filter__btn--clear,.campaigns-table__link-btn:where(:not(.campaigns-table__link-btn--primary)),.campaign-detail__action:where(:not(.campaign-detail__action--primary)),.ui-icon-button) { background:var(--ui-panel);border-color:var(--ui-border);color:var(--ui-ink); }
+.ui-final :is(.btn-ghost,.btn-quiet,.campaigns-filter__btn--clear,.campaigns-table__link-btn:where(:not(.campaigns-table__link-btn--primary)),.campaign-detail__action:where(:not(.campaign-detail__action--primary)),.ui-icon-button):not(:disabled):hover { background:var(--ui-soft);border-color:#b4c8da;color:var(--ui-action-hover); }
+.ui-final .btn.btn-danger { background:var(--ui-danger);border-color:var(--ui-danger);color:#fff; }
+.ui-final .btn.btn-danger:not(:disabled):hover { background:#8e1730;border-color:#8e1730;color:#fff; }
+.ui-final .btn.btn-danger-soft { background:var(--ui-danger-soft);border-color:#f0cad3;color:var(--ui-danger); }
+.ui-final .btn.btn-danger-soft:not(:disabled):hover { background:#fbe2e8;border-color:#d99aa9;color:var(--ui-danger); }
 .ui-final :is(.btn-sm,.campaigns-table__link-btn) { min-height:36px;padding:6px 11px;font-size:.8125rem; }
 .ui-final .btn-lg { min-height:48px;padding:10px 20px; }
 .ui-final :is(button,.btn,input,select,textarea,summary)[disabled],.ui-final [aria-disabled="true"] { opacity:.55;cursor:not-allowed;transform:none;box-shadow:none; }

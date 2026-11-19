@@ -35,7 +35,7 @@
       {% for r in refunds %}
       <tr>
         <td class="tabnums">{{ r.amount_irr|irr_to_toman|format_irr }} تومان</td>
-        <td><span class="status status--compact {% if r.status == 'approved' %}status-active{% elif r.status == 'rejected' %}status-danger{% else %}status-warn{% endif %}">{{ r.get_status_display }}</span></td>
+        <td><span class="status status--compact {% if r.status == 'approved' or r.status == 'paid' %}status-active{% elif r.status == 'rejected' %}status-danger{% else %}status-warn{% endif %}">{{ r.get_status_display }}</span></td>
         <td><time datetime="{{ r.created_at|date:'c' }}">{{ r.created_at|jalali_datetime }}</time></td>
       </tr>
       {% endfor %}

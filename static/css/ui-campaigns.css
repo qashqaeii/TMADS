@@ -81,3 +81,12 @@
  .ui-final .ui-campaign-detail .campaign-detail__action { min-height:44px; }
  .ui-final .ui-campaign-detail :is(.campaign-overview-card,.campaign-detail-panel,.campaign-trend-card,.campaign-analytics-trend,.campaign-analytics-funnel,.campaign-analytics-spend) { padding:13px; }
 }
+
+/* Supplemental campaign primitives: one reading and interaction scale. */
+.ui-final .chart-range { display:flex;flex-wrap:wrap;align-items:center;gap:4px;padding:4px;background:var(--ui-soft);border:1px solid var(--ui-border);border-radius:10px;max-width:100%; }
+.ui-final .chart-range .chart-range__btn { min-height:36px;padding:6px 10px;border:1px solid transparent;border-radius:7px;background:transparent;color:var(--ui-muted);font-size:.8rem;font-weight:600;box-shadow:none; }
+.ui-final .chart-range .chart-range__btn:is(.is-active,[aria-pressed=true]) { background:#fff;border-color:var(--ui-border);color:var(--ui-action); }
+.ui-final .lifecycle-rail__label,.ui-final .campaign-lifecycle__label { font-size:.82rem;line-height:1.7;overflow-wrap:anywhere; }
+.ui-final .lifecycle-rail__step--current .lifecycle-rail__node { border-color:var(--ui-action);color:var(--ui-action);background:#e9f3fb; }
+.ui-final .ui-tip-surface { border:1px solid var(--ui-border);border-radius:10px;box-shadow:var(--ui-overlay-shadow); }
+@media(max-width:600px){.ui-final .chart-range .chart-range__btn{min-height:44px;}}

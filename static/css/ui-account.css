@@ -11,7 +11,7 @@
 .ui-final .ui-auth-card .field :is(input,textarea) { width:100%; }
 .ui-final .ui-auth-card .form-error { padding:10px 12px;border:1px solid #edc7cf;background:var(--ui-danger-soft);border-radius:8px; }
 .ui-password-wrap { position:relative;display:flex;align-items:center; }
-.ui-final .ui-password-wrap input { width:100%;padding-inline-end:86px; }
+.ui-final .field .ui-password-wrap > input { width:100%;padding-inline-end:86px !important; }
 .ui-password-toggle { position:absolute;inset-inline-end:6px;display:inline-flex;align-items:center;justify-content:center;border:0;background:transparent;color:var(--ui-action);font:inherit;font-size:.76rem;font-weight:650;min-height:34px;padding:4px 9px;border-radius:6px;cursor:pointer; }
 .ui-password-toggle[aria-pressed=true] { background:#eaf4fb; }
 .ui-profile-summary { display:flex;align-items:center;gap:14px;padding:20px;border:1px solid var(--ui-border);border-radius:var(--ui-radius);background:#fff;min-width:0; }

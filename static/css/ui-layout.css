@@ -1,7 +1,7 @@
 /* Shared application layout. All pages inherit one spacing and reading scale. */
 .ui-shell { --sidebar-width:248px; --app-gutter:clamp(16px,2.7vw,32px); --section-gap:18px; background:var(--ui-canvas); }
 .ui-final .ui-shell .app-main { min-width:0; }
-.ui-final .ui-shell .app-content { padding-block:24px 44px; background-color:var(--ui-canvas); }
+.ui-final .ui-shell .app-content { padding-block:24px 44px; background-color:var(--ui-canvas); background-image:none; }
 .ui-final .ui-shell .page-frame { width:100%; min-width:0; gap:18px; }
 .ui-final .ui-shell .sidebar--premium { box-shadow:none;border-inline-end:1px solid #20334b; }
 .ui-final .ui-shell .sidebar--premium::before { background:linear-gradient(180deg,rgb(16 29 48 / .80),rgb(16 29 48 / .96)); }
@@ -50,3 +50,6 @@
  .ui-final .ui-page-heading { align-items:flex-start; }
  .ui-final .ui-page-heading .dash-header__actions { width:100%; }
 }
+
+.ui-final .ui-shell .sidebar :focus-visible { outline-color:#9cd4f5; }
+@media(max-width:900px){ .ui-final .ui-shell :is(.topbar-account,.topbar-action--ghost,.topbar-menu){ min-width:44px;min-height:44px; } }
