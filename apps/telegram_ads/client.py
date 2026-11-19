@@ -279,3 +279,10 @@ class TelegramAdsClient:
 
     def get_pixel_events(self, *, offset=0, limit=50):
         return self._run("pixel_events", lambda c: _model_to_dict(c.get_pixel_events_list(offset=offset,limit=limit)))
+
+
+    def create_related_account(self, *, title, details, idempotency_key):
+        if not (settings.TELEGRAM_ADS_WRITE_ENABLED and settings.TELEGRAM_ADS_PAID_SUBMISSION_ENABLED
+                and getattr(settings,"TELEGRAM_ADS_RELATED_ACCOUNTS_ENABLED",False)):
+            raise TelegramAdsWriteDisabled("Related account provisioning is disabled")
+        return self._run("related_account_create",lambda c:_model_to_dict(c.create_account(title,**details,idempotency_key=idempotency_key)))

@@ -1,0 +1,16 @@
+{% extends "app_shell.html" %}
+{% load core_filters %}
+{% block page_title %}حساب تبلیغاتی{% endblock %}
+{% block content %}
+<div class="app-stack ui-account-page">
+{% include "includes/dash_header.html" with title="حساب تبلیغاتی" subtitle="درخواست حساب مرتبط با تلگرام" with_sub=1 %}
+{% if row %}<section class="card card-pad form-stack"><div class="ui-remote-summary"><h2 class="section-title">{{ row.title }}</h2><span class="status {% if row.status == 'provisioned' %}status-active{% elif row.status == 'rejected' %}status-danger{% else %}status-warn{% endif %}">{{ row.get_status_display }}</span></div>{% if row.remote_account_id %}<div class="finance-line"><span>شناسه حساب</span><bdi>{{ row.remote_account_id }}</bdi></div>{% endif %}{% if row.note %}<p class="muted">{{ row.note }}</p>{% endif %}</section>{% endif %}
+{% if not row or row.status == "rejected" %}
+<div class="ui-finance-flow"><form method="post" class="card card-pad form-stack">{% csrf_token %}
+<div class="ui-form-intro"><span class="ui-target-symbol">{% include "includes/lucide_icon.html" with name="building-2" size="md" %}</span><div><h2>مشخصات حساب</h2><p>اطلاعات واقعی کسب‌وکار را وارد کنید.</p></div></div>
+{% for field in form %}<div class="field"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% if field.errors %}<div class="form-error" role="alert">{{ field.errors }}</div>{% endif %}</div>{% endfor %}
+<button class="btn btn-primary" type="submit">ثبت درخواست</button></form>
+<aside class="card card-pad ui-finance-guide"><h2 class="section-title">درباره حساب مرتبط</h2><p>ایجاد حساب منوط به مجوز تلگرام و بررسی اپراتور است. اطلاعات در صورت اجرای درخواست برای تلگرام ارسال می‌شوند. ایجاد حساب به معنی فعال شدن انتقال اعتبار یا انتشار کمپین نیست.</p></aside></div>
+{% else %}<p class="ui-studio-warning">مسیردهی کمپین و انتقال اعتبار به حساب‌های مرتبط هنوز فعال نیست؛ حساب مرکزی و تبلیغات موجود بدون تغییر باقی می‌مانند.</p>{% endif %}
+</div>
+{% endblock %}

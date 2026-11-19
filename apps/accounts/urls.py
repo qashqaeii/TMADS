@@ -2,6 +2,7 @@ from django.contrib.auth import views as auth_views
 from django.urls import path, reverse_lazy
 
 from . import views
+from apps.telegram_ads.related_views import customer_related_account
 
 app_name = "accounts"
 
@@ -9,6 +10,7 @@ urlpatterns = [
     path("register/", views.register_view, name="register"),
     path("login/", views.login_view, name="login"),
     path("logout/", views.logout_view, name="logout"),
+    path("advertiser-account/", customer_related_account, name="related_account"),
     path("profile/", views.profile_view, name="profile"),
     path(
         "password-reset/",
