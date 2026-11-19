@@ -5,11 +5,12 @@ from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
 from apps.accounts.permissions import customer_required
 from apps.ai.provider import AiError, available
-from apps.ai.features import creative_variants
+from apps.ai.features import creative_variants, analyze_campaign
 from .ownership import get_customer_campaign
 from .studio import ensure_studio_step
 
 ERRORS = {
+    "insufficient_data": ("برای تحلیل قابل اتکا، ابتدا آمار معتبر و تازه دریافت کنید.", 409),
     "disabled": ("دستیار هوشمند در حال حاضر فعال نیست.", 503),
     "missing_input": ("توضیح کوتاهی درباره محصول یا متن فعلی وارد کنید.", 400),
     "quota": ("سهمیه روزانه هوش مصنوعی به پایان رسیده است.", 429),
@@ -40,6 +41,21 @@ def creative(request, campaign_id):
     try:
         result, cached = creative_variants(campaign.customer, campaign,
             request.POST.get("brief", ""), request.POST.get("current", ""))
+    except AiError as exc:
+        return fail(exc)
+    return JsonResponse({"ok": True, **result, "cached": cached})
+
+
+@never_cache
+@login_required
+@customer_required
+@require_POST
+def analysis(request, campaign_id):
+    campaign = get_customer_campaign(request.user.customer_profile, campaign_id)
+    if not available():
+        return fail(AiError("disabled"))
+    try:
+        result, cached = analyze_campaign(campaign.customer, campaign)
     except AiError as exc:
         return fail(exc)
     return JsonResponse({"ok": True, **result, "cached": cached})

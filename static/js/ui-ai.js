@@ -37,6 +37,21 @@
             });card.append(head,copy,apply);results.append(card);
           });
         }
+        if(root.dataset.tmAi==="analysis"&&typeof payload.summary==="string"&&Array.isArray(payload.actions)){
+          var summary=node("article","tm-ai-option tm-ai-summary");
+          summary.append(node("strong","","جمع‌بندی"),node("p","",payload.summary));
+          if(payload.as_of){
+            var date=new Date(payload.as_of);
+            if(!isNaN(date.getTime()))summary.append(node("small","tm-ai-hint","زمان آخرین آمار: "+date.toLocaleString("fa-IR",{timeZone:"Asia/Tehran"})));
+          }
+          results.append(summary);
+          var actions=node("div","tm-ai-actions");payload.actions.forEach(function(item,i){
+            if(!item||typeof item.title!=="string"||typeof item.body!=="string")return;
+            var row=node("article","tm-ai-option tm-ai-action"),number=node("span","tm-ai-action-number",(i+1).toLocaleString("fa-IR")),body=node("div","");
+            body.append(node("strong","",item.title),node("p","",item.body));row.append(number,body);actions.append(row);
+          });
+          results.append(actions);
+        }
         if(!results.childElementCount){status.textContent="پیشنهاد قابل استفاده‌ای دریافت نشد.";return;}
         results.hidden=false;status.textContent=payload.cached?"پیشنهاد ذخیره‌شده نمایش داده شد.":"پیشنهاد آماده است؛ قبل از استفاده آن را مرور کنید.";
       }catch(e){status.textContent="ارتباط با دستیار برقرار نشد. بدون دستیار ادامه دهید.";}

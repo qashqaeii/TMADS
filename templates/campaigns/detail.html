@@ -5,6 +5,7 @@
 {% block charts_head %}
 {% include "includes/charts_exec_scripts.html" %}
 {% endblock %}
+{% block extra_head %}{{ block.super }}{% if ai_analysis_available %}<link rel="stylesheet" href="{% static 'css/ui-ai.css' %}">{% endif %}{% endblock %}
 {% block content %}
 <div class="app-stack campaign-detail campaign-detail--luxe ui-campaign-detail">
   <nav class="ui-breadcrumb" aria-label="مسیر صفحه"><a href="{% url 'campaigns:list' %}">کمپین‌ها</a>{% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}<span aria-current="page">جزئیات کمپین</span></nav>
@@ -142,6 +143,7 @@
     </div>
 
     <div class="tab-panel" role="tabpanel" tabindex="0" id="campaign-panel-overview" aria-labelledby="campaign-tab-overview" x-show="tab === 'overview'" x-cloak>
+      {% if ai_analysis_available %}{% include "campaigns/includes/ai_analysis.html" %}{% endif %}
       {% if performance_recommendations %}
       <section class="ui-performance-advice" aria-label="راهنمای عملکرد کمپین">
         <header><span class="ui-target-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="lightbulb" size="md" %}</span><div><h2>پیشنهادهای مبتنی بر داده</h2><p>تحلیل قاعده‌محور بر پایه آمار دریافتی از تلگرام؛ بدون تغییر خودکار تبلیغ</p></div></header>
@@ -784,5 +786,6 @@
   </script>
   <script src="{% static 'js/targeting-board.js' %}"></script>
   <script defer src="{% static 'js/budget-hero-tip.js' %}"></script>
+  {% if ai_analysis_available %}<script defer src="{% static 'js/ui-ai.js' %}"></script>{% endif %}
 </div>
 {% endblock %}
