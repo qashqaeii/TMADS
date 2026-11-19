@@ -185,3 +185,20 @@ def execute_operation(operation_id, *, actor):
             op.save(update_fields=["status","note","updated_at"])
             _audit(op,actor,"uncertain")
         raise TelegramAdsError("نتیجه عملیات نیازمند تطبیق است. دوباره اجرا نکنید.") from exc
+
+
+@transaction.atomic
+def withdraw_operation(campaign_id, operation_id, *, actor):
+    """Withdraw only an unexecuted request; never release live or reserved funds."""
+    customer=getattr(actor,"customer_profile",None)
+    if not customer or customer.is_suspended:
+        raise PermissionDenied
+    campaign=Campaign.objects.select_for_update().get(pk=campaign_id,customer=customer)
+    op=RemoteAdOperation.objects.select_for_update().filter(pk=operation_id,advertisement__campaign=campaign).first()
+    if not op or op.status!=Status.PENDING:
+        raise ValueError("تنها درخواست در انتظار و متعلق به همین کمپین قابل انصراف است.")
+    op.status=Status.REJECTED
+    op.note="درخواست پیش از اجرا توسط مشتری پس گرفته شد."
+    op.save(update_fields=["status","note","updated_at"])
+    _audit(op,actor,"withdrawn")
+    return op

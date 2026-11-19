@@ -60,3 +60,16 @@ def test_customer_cannot_open_other_customer_ad(client,customer_user):
 def test_invalid_cpm(value):
     with pytest.raises(ValueError):
         parse_request("edit_cpm",value)
+
+
+@pytest.mark.django_db
+def test_withdraw_pending_request_never_calls_api(customer_user):
+    from apps.telegram_ads.services.manage_ad import withdraw_operation
+    campaign,ad=setup_ad(customer_user)
+    op=request_operation(campaign.pk,actor=customer_user,action="pause")
+    with patch("apps.telegram_ads.services.manage_ad.TelegramAdsClient") as api:
+        withdraw_operation(campaign.pk,op.pk,actor=customer_user)
+        assert request_operation(campaign.pk,actor=customer_user,action="resume").status=="pending"
+        api.assert_not_called()
+    op.refresh_from_db()
+    assert op.status=="rejected"

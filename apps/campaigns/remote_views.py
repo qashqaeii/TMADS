@@ -1,3 +1,4 @@
+import uuid
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
@@ -5,7 +6,7 @@ from django.views.decorators.http import require_http_methods, require_POST
 from apps.accounts.permissions import customer_required, staff_ops_required
 from apps.campaigns.ownership import get_customer_campaign
 from apps.campaigns.models import RemoteAdOperation
-from apps.telegram_ads.services.manage_ad import request_operation, execute_operation, reject_operation
+from apps.telegram_ads.services.manage_ad import request_operation, execute_operation, reject_operation, withdraw_operation
 from apps.telegram_ads.exceptions import TelegramAdsError
 from django.shortcuts import get_object_or_404
 
@@ -17,6 +18,10 @@ def remote_management(request, campaign_id):
     campaign=get_customer_campaign(request.user.customer_profile,campaign_id)
     if request.method=="POST":
         try:
+            if request.POST.get("action")=="withdraw":
+                withdraw_operation(campaign.pk,uuid.UUID(request.POST.get("operation_id","")),actor=request.user)
+                messages.success(request,"درخواست پیش از اجرا پس گرفته شد.")
+                return redirect("campaigns:remote_management",campaign_id=campaign.pk)
             if request.POST.get("action") in {"increase_budget","decrease_budget"}:
                 from apps.finance.budget_management import preview_budget
                 from apps.finance.exceptions import PricingError
@@ -47,8 +52,8 @@ def remote_management(request, campaign_id):
 @require_http_methods(["GET","POST"])
 def remote_operations(request):
     if request.method=="POST":
-        op=get_object_or_404(RemoteAdOperation,pk=request.POST.get("operation_id"))
         try:
+            op=get_object_or_404(RemoteAdOperation,pk=uuid.UUID(request.POST.get("operation_id","")))
             if request.POST.get("decision")=="execute":
                 execute_operation(op.pk,actor=request.user)
                 messages.success(request,"نتیجه عملیات از تلگرام تأیید شد.")

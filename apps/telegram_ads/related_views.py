@@ -1,3 +1,4 @@
+import uuid
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render,redirect,get_object_or_404
@@ -28,8 +29,8 @@ def customer_related_account(request):
 @require_http_methods(["GET","POST"])
 def ops_related_accounts(request):
     if request.method=="POST":
-        row=get_object_or_404(RelatedAccountRequest,pk=request.POST.get("id"))
         try:
+            row=get_object_or_404(RelatedAccountRequest,pk=uuid.UUID(request.POST.get("id","")))
             if request.POST.get("action")=="execute":
                 execute_account(row.pk,request.user)
                 messages.success(request,"هویت حساب ایجادشده از API تأیید شد.")
