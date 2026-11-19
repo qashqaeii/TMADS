@@ -216,16 +216,15 @@ def apply_studio_step(campaign: Campaign, step: int, data, files=None) -> None:
         creative.cta_label = (data.get("cta_label") or "").strip()
         upload = (files or {}).get("creative_media") if files else None
         if upload:
-            from apps.campaigns.media_validation import validate_ad_image, validate_ad_video
+            from apps.campaigns.media_validation import validate_creative_media
 
-            ctype = (getattr(upload, "content_type", "") or "").lower()
-            errs = (
-                validate_ad_image(upload)
-                if ctype.startswith("image") or not ctype.startswith("video")
-                else validate_ad_video(upload)
-            )
-            if not errs:
-                creative.media = upload
+            errs = validate_creative_media(upload)
+            if errs:
+                raise ValueError("؛ ".join(errs))
+            creative.media = upload
+        elif data.get("remove_creative_media") == "1":
+            # Do not delete a storage object which another cloned/legacy row might reference.
+            creative.media = ""
         creative.save()
         promote, _ = parse_promote_url((data.get("destination") or campaign.destination or "").strip())
         if promote:

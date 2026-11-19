@@ -104,3 +104,10 @@ required prior to production; no real request was made. Legacy pending requests 
 stored provider amount are blocked for manual verification, not reinterpreted. A conditional
 unique constraint rejects reuse of gateway authority; migration fails safely if legacy duplicates
 exist. Refund review and rejection now follow the same lock order as approval; filter before slice.
+
+## Private media and honest checkout
+Pillow decodes/validates full images; video uses bounded local ffprobe with no network protocol.
+Stored media is downloadable only via ownership-checked endpoint, even locally. Users can remove
+it. No selected media is silently omitted from a paid advert: submission and payment preflight
+block until real Telegram media upload support is verified. MP4/H.264 local checks are conservative,
+not proof of Telegram acceptance. Remote media upload remains a release blocker, not implemented.

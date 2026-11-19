@@ -192,6 +192,8 @@ def validate_submission_ready(campaign) -> StudioValidationResult:
         ad_settings=campaign.ad_settings or {},
         strict=True,
     )
+    if creative and creative.media:
+        result.errors.append("ارسال رسانه به تلگرام هنوز تأیید نشده است؛ برای ثبت سفارش، فایل محلی را حذف کنید.")
     if not campaign.destination:
         result.errors.append("مقصد تبلیغ الزامی است.")
     if campaign.budget_irr <= 0:

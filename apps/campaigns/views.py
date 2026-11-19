@@ -8,10 +8,10 @@ from django.contrib import messages
 from django.core.cache import cache
 from django.db import transaction
 from django.db.models import Q
-from django.http import HttpResponse
+from django.http import HttpResponse, FileResponse, Http404
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET, require_POST
@@ -330,10 +330,20 @@ def campaign_wizard(request, campaign_id=None):
             except PricingError as exc:
                 messages.error(request, str(exc))
             return redirect("campaigns:wizard", campaign_id=campaign.id)
-        strict_next = action == "next"
-        errors = validate_studio_step(campaign, step, request.POST, strict=strict_next)
-        if not errors:
-            errors = validate_step(campaign, step, request.POST)
+        strict_next = action in {"next", "pay"}
+        try:
+            errors = validate_studio_step(campaign, step, request.POST, strict=strict_next)
+        except (TypeError, ValueError, OverflowError):
+            errors = ["فرمت اطلاعات واردشده معتبر نیست."]
+        upload = request.FILES.get("creative_media")
+        if upload:
+            from apps.campaigns.media_validation import validate_creative_media
+            if step != 3 or campaign.target_type not in {"channels", "users"}:
+                errors.append("این نوع تبلیغ از فایل رسانه پشتیبانی نمی‌کند.")
+            elif request.POST.get("remove_creative_media") == "1":
+                errors.append("حذف فایل و بارگذاری فایل جدید را هم‌زمان انتخاب نکنید.")
+            else:
+                errors.extend(validate_creative_media(upload))
         if errors:
             for e in errors:
                 messages.error(request, e)
@@ -524,7 +534,9 @@ def campaign_autosave(request, campaign_id):
         return JsonResponse({"ok": False, "message": "؛ ".join(errors)}, status=400)
     try:
         with transaction.atomic():
-            apply_studio_step(campaign, step, request.POST)
+            data = request.POST.copy()
+            data.pop("remove_creative_media", None)
+            apply_studio_step(campaign, step, data)
     except (ValueError, TypeError, OverflowError):
         return JsonResponse({"ok": False, "message": "اطلاعات پیش‌نویس معتبر نیست."}, status=400)
     campaign.wizard_data = {**campaign.wizard_data, **studio_payload_from_post(request.POST)}
@@ -943,4 +955,30 @@ def campaign_export_csv(request, campaign_id):
                 row["spent_ton"],
             ]
         )
+    return response
+
+
+@login_required
+@require_GET
+def creative_media_download(request, campaign_id, creative_id):
+    user = request.user
+    if user.is_platform_manager:
+        campaign = get_object_or_404(Campaign, pk=campaign_id)
+    else:
+        customer = getattr(user, "customer_profile", None)
+        if not customer or customer.is_suspended:
+            raise Http404
+        campaign = get_customer_campaign(customer, campaign_id)
+    creative = get_object_or_404(AdCreative, pk=creative_id, campaign=campaign)
+    if not creative.media:
+        raise Http404
+    try:
+        handle = creative.media.open("rb")
+    except (FileNotFoundError, OSError):
+        raise Http404
+    from pathlib import Path
+    response = FileResponse(handle, as_attachment=True, filename=Path(creative.media.name).name,
+                            content_type="application/octet-stream")
+    response["Cache-Control"] = "private, no-store"
+    response["X-Content-Type-Options"] = "nosniff"
     return response

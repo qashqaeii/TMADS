@@ -31,6 +31,7 @@
     {% if creative %}
     <h3 class="section-title" style="margin-top:1rem;font-size:.88rem">محتوای تبلیغ</h3>
     <p style="margin:0;font-size:.88rem">{{ creative.ad_text|default:"—"|linebreaksbr }}</p>
+    {% if creative.media %}<a class="btn btn-ghost btn-sm" href="{% url 'campaigns:creative_media' campaign.id creative.id %}">دریافت رسانه پیش‌نویس</a>{% endif %}
     {% endif %}
     {% if policy_run %}
     <h3 class="section-title" style="margin-top:1rem;font-size:.88rem">بررسی قوانین تبلیغ</h3>

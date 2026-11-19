@@ -189,18 +189,27 @@
       <div class="template-pills">{% for t in creative_templates %}<button type="button" class="btn btn-ghost btn-sm" data-creative-template-text="{{ t.text }}" data-creative-template-cta="{{ t.cta_label }}">{{ t.title }}</button>{% endfor %}</div>
       <div class="field" id="field-ad_text"><label for="studio-control-12">متن تبلیغ (۱–۱۶۰ کاراکتر)</label><textarea id="studio-control-12" name="ad_text" rows="5" maxlength="160" data-ad-text-counter>{% if creative %}{{ creative.ad_text }}{% endif %}</textarea>
       <p class="muted" data-ad-text-count style="font-size:.8rem;margin:.25rem 0 0" aria-live="polite"></p></div>
-      <div class="field"><label for="studio-control-13">برچسب دکمه</label><input id="studio-control-13" name="cta_label" value="{% if creative %}{{ creative.cta_label }}{% endif %}"></div>
+      <div class="field"><label for="studio-control-13">برچسب پیشنهادی دکمه (فقط پیش‌نمایش)</label><input id="studio-control-13" name="cta_label" value="{% if creative %}{{ creative.cta_label }}{% endif %}"></div>
       {% else %}
       <p class="muted">تبلیغ جستجو متن اسپانسری جداگانه ندارد؛ عنوان و مقصد در پیش‌نمایش نشان داده می‌شوند.</p>
       {% endif %}
       <div class="field"><label for="studio-control-14">لینک مقصد</label><input id="studio-control-14" name="destination" value="{{ campaign.destination }}" dir="ltr"></div>
       <label class="choice-card studio-pro-only" style="margin-top:.5rem"><input type="checkbox" name="show_userpic" value="1" {% if campaign.ad_settings.show_userpic %}checked{% endif %}> نمایش تصویر ربات/کانال مقصد</label>
-      <div class="field studio-pro-only">
-        <label for="studio-control-15">تصویر یا ویدیو تبلیغ (آپلود محلی)</label>
-        <input id="studio-control-15" type="file" name="creative_media" accept="image/jpeg,image/png,image/webp,video/mp4">
-        <p class="muted" style="font-size:.78rem;margin:.35rem 0 0">فایل روی سرور ذخیره و اعتبارسنجی می‌شود؛ بارگذاری به تلگرام فقط پس از تأیید عملیات انجام می‌شود.</p>
-        {% if creative and creative.media %}<p class="muted" style="font-size:.8rem">فایل فعلی: {{ creative.media.name }}</p>{% endif %}
+      {% if campaign.target_type == 'channels' or campaign.target_type == 'users' or creative.media %}
+      <div class="field">
+        <label for="studio-control-15">رسانه پیش‌نویس (اختیاری)</label>
+        {% if campaign.target_type == 'channels' or campaign.target_type == 'users' %}
+        <input id="studio-control-15" type="file" name="creative_media" accept="image/jpeg,image/png,image/webp,video/mp4" aria-describedby="creative-media-help">
+        {% endif %}
+        <p id="creative-media-help" class="field-help">تصویر حداکثر ۵ مگابایت و ویدیو MP4/H.264 حداکثر ۲۰ مگابایت. ارسال رسانه هنوز تأیید نشده است؛ فایل فقط در پیش‌نویس می‌ماند و قبل از پرداخت باید حذف شود.</p>
+        {% if creative and creative.media %}
+        <div class="card-muted card-pad form-stack">
+          <a class="btn btn-ghost btn-sm" href="{% url 'campaigns:creative_media' campaign.id creative.id %}">دریافت رسانه ذخیره‌شده</a>
+          <label class="choice-card"><input type="checkbox" name="remove_creative_media" value="1"> حذف رسانه با ذخیره دستی یا ادامه</label>
+        </div>
+        {% endif %}
       </div>
+      {% endif %}
       <fieldset class="policy-declarations" style="margin-top:1rem;border:0;padding:0">
         <legend class="section-title" style="font-size:.88rem">تأیید آمادگی مقصد</legend>
         <label class="choice-card"><input type="checkbox" name="destination_rights_confirmed" value="1" {% if campaign.ad_settings.destination_rights_confirmed %}checked{% endif %}> حق قانونی تبلیغ این مقصد را دارم.</label>

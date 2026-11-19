@@ -12,6 +12,7 @@ urlpatterns = [
     path("<uuid:campaign_id>/wizard/", views.campaign_wizard, name="wizard"),
     path("<uuid:campaign_id>/delete/", views.campaign_delete, name="delete"),
     path("<uuid:campaign_id>/duplicate/", views.campaign_duplicate, name="duplicate"),
+    path("<uuid:campaign_id>/creative/<uuid:creative_id>/media/", views.creative_media_download, name="creative_media"),
     path("<uuid:campaign_id>/autosave/", views.campaign_autosave, name="autosave"),
     path("<uuid:campaign_id>/policy-preview/", views.campaign_policy_preview, name="policy_preview"),
     path("studio/catalog/countries/", views.studio_catalog_countries, name="catalog_countries"),
