@@ -340,6 +340,14 @@ table.data-table th { color: var(--muted); font-weight: 600; font-size: .85rem; 
     max-width: var(--app-content-max);
     margin-inline: auto;
   }
+  /* RTL اپ: محتوا به سمت دور از سایدبار (چپ صفحه)، نه وسط با gutter بزرگ */
+  body.is-app .app-content.container-wide .page-frame {
+    margin-inline-start: auto;
+    margin-inline-end: 0;
+  }
+  body.is-app .app-content.container-wide:has(.dash-home--premium) .page-frame {
+    margin-inline: auto;
+  }
 }
 
 .app-content.container-narrow {
@@ -1343,7 +1351,7 @@ svg.df-lucide-svg.lucide-svg--nav { width: 1.05rem; height: 1.05rem; display: bl
   font-size: .78rem;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 768px) {
   .campaign-table-desktop { display: none; }
   .campaign-cards-mobile { display: grid; }
 }
@@ -1400,15 +1408,14 @@ svg.df-lucide-svg.lucide-svg--nav { width: 1.05rem; height: 1.05rem; display: bl
 /* ── Premium sidebar ── */
 .sidebar--premium {
   padding: 0;
-  background:
-    radial-gradient(120% 80% at 100% 0%, rgba(42, 171, 238, 0.14) 0%, transparent 55%),
-    linear-gradient(180deg, #0c1319 0%, #0a1016 45%, #080d12 100%);
   border-inline-end: 1px solid rgba(255, 255, 255, 0.06);
   box-shadow: -16px 0 48px rgba(0, 0, 0, 0.22);
 }
 .sidebar-head {
   padding: 1.25rem 1.1rem 1rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.sidebar--premium .sidebar-head {
+  border-bottom: none;
 }
 .sidebar-brand-text {
   display: flex;
@@ -1462,9 +1469,11 @@ svg.df-lucide-svg.lucide-svg--nav { width: 1.05rem; height: 1.05rem; display: bl
 .sidebar-foot {
   margin-top: auto;
   padding: 0.85rem 0.9rem 1.1rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
   display: grid;
   gap: 0.65rem;
+}
+.sidebar--premium .sidebar-foot {
+  border-top: none;
 }
 .sidebar-wallet {
   padding: 0.85rem 0.8rem;

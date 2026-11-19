@@ -1,0 +1,93 @@
+{% load core_filters ton_display %}
+{% if performance_insights %}
+<section class="campaigns-insights campaigns-insights--premium motion-reveal" aria-labelledby="campaigns-insights-title">
+  <div class="campaigns-insights__accent" aria-hidden="true"></div>
+
+  <header class="campaigns-insights__masthead">
+    <div class="campaigns-insights__masthead-copy">
+      <p class="campaigns-insights__eyebrow">تحلیل عملکرد</p>
+      <h2 id="campaigns-insights-title" class="campaigns-insights__title">بهترین‌های شما</h2>
+    </div>
+    {% if performance_insights.champion or performance_insights.eligible_count %}
+    <dl class="campaigns-insights__context tabnums">
+      <div class="campaigns-insights__context-item">
+        <dt>مقایسه</dt>
+        <dd>{{ performance_insights.eligible_count|format_count }} کمپین</dd>
+      </div>
+      {% if performance_insights.portfolio_avg_ctr %}
+      <div class="campaigns-insights__context-item">
+        <dt>میانگین کلیک</dt>
+        <dd>{{ performance_insights.portfolio_avg_ctr|persian_digits }}٪</dd>
+      </div>
+      {% endif %}
+    </dl>
+    {% endif %}
+  </header>
+
+  {% if performance_insights.champion %}
+  <div class="campaigns-insights__body">
+    <article class="campaigns-insights__hero">
+      <div class="campaigns-insights__hero-top">
+        <span class="campaigns-insights__hero-mark" aria-hidden="true">{% include "includes/lucide_icon.html" with name="trophy" size="sm" %}</span>
+        <a class="campaigns-insights__hero-name" href="{% url 'campaigns:detail' performance_insights.champion.campaign_id %}">{{ performance_insights.champion.campaign_name }}</a>
+        <div class="campaigns-insights__hero-ctas">
+          <a class="campaigns-insights__cta campaigns-insights__cta--primary" href="{% url 'campaigns:detail' performance_insights.champion.campaign_id %}">مشاهده</a>
+          <a class="campaigns-insights__cta" href="{% url 'campaigns:duplicate' performance_insights.champion.campaign_id %}">مشابه</a>
+        </div>
+      </div>
+      <p class="campaigns-insights__hero-badge">{{ performance_insights.champion.lens_label }}</p>
+      <ul class="campaigns-insights__chips tabnums" aria-label="شاخص‌های کلیدی">
+        <li>{{ performance_insights.champion.impressions|format_count }} نمایش</li>
+        <li>{{ performance_insights.champion.ctr|persian_digits }}٪ کلیک</li>
+        {% if performance_insights.champion.actions %}
+        <li>{{ performance_insights.champion.conversion_rate|persian_digits }}٪ ورود</li>
+        {% endif %}
+      </ul>
+      {% if performance_insights.champion.reasons %}
+      <p class="campaigns-insights__hero-note">{{ performance_insights.champion.reasons.0 }}</p>
+      {% endif %}
+    </article>
+
+    {% if performance_insights.lens_winners|length > 1 %}
+    <div class="campaigns-insights__mosaic" role="list">
+      {% for pick in performance_insights.lens_winners %}
+      {% if pick.lens_key != "overall" or pick.campaign_id != performance_insights.champion.campaign_id %}
+      <a class="campaigns-insights__tile campaigns-insights__tile--{{ pick.lens_key }}" role="listitem" href="{% url 'campaigns:detail' pick.campaign_id %}">
+        <span class="campaigns-insights__tile-icon" aria-hidden="true">
+          {% if pick.lens_key == "reach" %}{% include "includes/lucide_icon.html" with name="eye" size="sm" %}
+          {% elif pick.lens_key == "engagement" %}{% include "includes/lucide_icon.html" with name="mouse-pointer-click" size="sm" %}
+          {% elif pick.lens_key == "conversion" %}{% include "includes/lucide_icon.html" with name="log-in" size="sm" %}
+          {% else %}{% include "includes/lucide_icon.html" with name="coins" size="sm" %}{% endif %}
+        </span>
+        <span class="campaigns-insights__tile-label">{{ pick.lens_label }}</span>
+        <span class="campaigns-insights__tile-name">{{ pick.campaign_name }}</span>
+        <span class="campaigns-insights__tile-metric tabnums">
+          {% if pick.lens_key == "reach" %}{{ pick.impressions|format_count }}
+          {% elif pick.lens_key == "engagement" %}{{ pick.ctr|persian_digits }}٪
+          {% elif pick.lens_key == "conversion" %}{{ pick.conversion_rate|persian_digits }}٪
+          {% elif pick.lens_key == "efficiency" %}{% ton_amount pick.cost_per_action hint=0 %}
+          {% else %}{{ pick.impressions|format_count }}{% endif %}
+        </span>
+      </a>
+      {% endif %}
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+
+  {% elif performance_insights.note %}
+  <p class="campaigns-insights__empty muted" role="status">{{ performance_insights.note }}</p>
+  {% endif %}
+
+  {% if filter_active %}
+  <p class="campaigns-insights__filter-hint muted">بر اساس فیلتر فعلی لیست</p>
+  {% endif %}
+
+  <details class="campaigns-insights__meta">
+    <summary class="campaigns-insights__meta-trigger">روش محاسبه</summary>
+    <p class="campaigns-insights__meta-body muted">
+      نمایش، کلیک، ورود و هزینهٔ هر ورود با هم سنجیده می‌شود. حداقل {{ 50|persian_digits }} نمایش برای هر کمپین لازم است.
+    </p>
+  </details>
+</section>
+{% endif %}

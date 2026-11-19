@@ -4,10 +4,16 @@
     <span class="campaigns-list-hero__rule" aria-hidden="true"></span>
     <p class="campaigns-list-hero__sub">مدیریت و پایش تبلیغات فعال</p>
   </div>
-  <div class="dash-header__actions">
-    <form method="post" action="{% url 'campaigns:refresh_stats' %}">{% csrf_token %}
-      <button type="submit" class="btn btn-ghost btn-sm btn-quiet">بروزرسانی آمار</button>
+  <div class="dash-header__actions campaigns-list-hero__actions">
+    <form method="post" action="{% url 'campaigns:refresh_stats' %}" class="campaigns-list-hero__form">{% csrf_token %}
+      <button type="submit" class="campaign-detail__action campaigns-hero__action campaigns-hero__action--refresh campaign-detail__action--refresh">
+        <span class="campaign-detail__action-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="refresh-cw" size="sm" %}</span>
+        <span class="campaign-detail__action-label">بروزرسانی</span>
+      </button>
     </form>
-    <a class="btn btn-primary btn-sm" href="{% url 'campaigns:wizard_new' %}">ساخت تبلیغ</a>
+    <a class="campaign-detail__action campaigns-hero__action campaigns-hero__action--create" href="{% url 'campaigns:wizard_new' %}">
+      <span class="campaign-detail__action-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="plus" size="sm" %}</span>
+      <span class="campaign-detail__action-label">ساخت تبلیغ</span>
+    </a>
   </div>
 </header>

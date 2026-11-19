@@ -93,7 +93,8 @@
         color: color || COLORS.muted,
         fontFamily: FA_FONT,
         formatter: formatCountAxis,
-        margin: 10,
+        margin: isLeft ? 10 : 8,
+        hideOverlap: true,
       },
     };
   }
@@ -144,6 +145,7 @@
         fontFamily: FA_FONT,
         formatter: formatPct,
         margin: 8,
+        hideOverlap: true,
       },
     };
   }
@@ -370,7 +372,10 @@
       ];
       if (showCtr && data.ctr && data.ctr.length) {
         const ctrAxis = axisCtr();
-        ctrAxis.offset = 0;
+        ctrAxis.offset = 48;
+        ctrAxis.name = "نرخ کلیک";
+        ctrAxis.nameTextStyle = { color: COLORS.ctr, fontFamily: FA_FONT, fontSize: 10 };
+        ctrAxis.axisLabel.margin = 6;
         yAxis.push(ctrAxis);
       }
     } else {
@@ -395,6 +400,10 @@
       gridDefaults.right = 2;
     } else if (analyticsMode) {
       gridDefaults.top = 40;
+      const hasCtrAxis = showCtr && data.ctr && data.ctr.length;
+      gridDefaults.left = 6;
+      gridDefaults.right = hasCtrAxis ? 64 : 44;
+      gridDefaults.bottom = data.dates.length > 28 ? 52 : 44;
     }
     const grid = baseGrid(Object.assign(gridDefaults, opts.grid || {}));
 

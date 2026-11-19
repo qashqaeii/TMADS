@@ -1,6 +1,7 @@
 """End-to-end dry-run journeys for four Telegram target types."""
 
 from decimal import Decimal
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -47,7 +48,13 @@ def test_journey_search(customer_user):
 
 
 @pytest.mark.django_db
-def test_journey_bots(customer_user):
+@patch("apps.telegram_ads.services.bot_eligibility.check_bot_eligibility")
+def test_journey_bots(mock_check, customer_user):
+    mock_check.return_value = MagicMock(
+        hard_block=False,
+        bot={"title": "My Bot"},
+        message_fa="ok",
+    )
     _, payload, dry = _dry_run(
         customer_user,
         target_type=Campaign.TargetType.BOTS,

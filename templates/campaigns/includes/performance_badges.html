@@ -1,0 +1,27 @@
+{% if performance_badges %}
+<aside class="campaign-performance-badges campaign-performance-badges--luxe motion-reveal" aria-labelledby="campaign-performance-badges-title">
+  <header class="campaign-performance-badges__board-head">
+    <h2 id="campaign-performance-badges-title" class="campaign-performance-badges__board-title">نسبت به بقیهٔ کمپین‌های شما</h2>
+    <p class="campaign-performance-badges__board-caption muted">در این شاخص‌ها بهتر از سایر کمپین‌ها عمل کرده</p>
+  </header>
+  <div class="campaign-performance-badges__grid" role="list">
+    {% for badge in performance_badges %}
+    <article class="campaign-performance-badges__card campaign-performance-badges__card--{{ badge.kind }}" role="listitem">
+      <span class="campaign-performance-badges__glyph" aria-hidden="true">
+        {% if badge.kind == "champion" %}{% include "includes/lucide_icon.html" with name="trophy" size="sm" %}
+        {% elif badge.kind == "reach" %}{% include "includes/lucide_icon.html" with name="eye" size="sm" %}
+        {% elif badge.kind == "engagement" %}{% include "includes/lucide_icon.html" with name="mouse-pointer-click" size="sm" %}
+        {% elif badge.kind == "conversion" %}{% include "includes/lucide_icon.html" with name="log-in" size="sm" %}
+        {% else %}{% include "includes/lucide_icon.html" with name="coins" size="sm" %}{% endif %}
+      </span>
+      <div class="campaign-performance-badges__card-body">
+        <h3 class="campaign-performance-badges__card-title">{{ badge.title }}</h3>
+        {% if badge.reasons %}
+        <p class="campaign-performance-badges__card-text">{{ badge.reasons.0 }}</p>
+        {% endif %}
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+</aside>
+{% endif %}

@@ -20,10 +20,21 @@ def normalize_username(value: str) -> str:
     if m:
         return f"@{m.group('name')}"
     if raw.startswith("@"):
-        return raw
+        return f"@{raw.lstrip('@')}"
     if re.fullmatch(r"[A-Za-z0-9_]{4,32}", raw):
         return f"@{raw}"
     return raw
+
+
+def parse_bot_peer_input(value: str) -> tuple[str | None, str | None]:
+    """Return ``(@username, api_peer)`` for getTargetBot or ``(None, None)`` if invalid.
+
+    ``api_peer`` is passed to telead as ``@username`` (official API format).
+    """
+    at = normalize_username(value)
+    if not at or not re.fullmatch(r"@[A-Za-z0-9_]{4,32}", at):
+        return None, None
+    return at, at
 
 
 def normalize_search_query(value: str) -> str:

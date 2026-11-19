@@ -3,7 +3,7 @@
 {% block page_title %}استودیو ساخت تبلیغ{% endblock %}
 {% block container_class %}container-wide{% endblock %}
 {% block content %}
-<div class="wizard-shell page-frame studio-shell">
+<div class="wizard-shell studio-shell">
   {% include "includes/dash_header.html" with title="استودیو ساخت تبلیغ" subtitle=campaign.name|default:"پیش‌نویس جدید" with_sub=1 %}
   <nav class="wizard-progress wizard-progress--exec" aria-label="مراحل">
     {% for key, label in steps %}
@@ -88,16 +88,18 @@
         <input type="hidden" name="search_queries_json" data-search-chip-hidden value="{{ search_queries_json|escape }}">
       </div>
       {% elif campaign.target_type == 'bots' %}
-      <div class="field" data-bot-selector>
+      <div class="field bot-target-studio" data-bot-selector>
         <label>ربات‌های هدف</label>
+        <p class="muted studio-hint studio-hint--sm">پس از وارد کردن نام کاربری، وضعیت ربات از API رسمی خوانده می‌شود.</p>
         <div class="catalog-row">
-          <input type="text" data-bot-input dir="ltr" placeholder="@mybot یا https://t.me/mybot" autocomplete="off">
-          <button type="button" class="btn btn-ghost btn-sm" data-bot-add>افزودن</button>
+          <input type="text" data-bot-input dir="ltr" placeholder="@mybot یا https://t.me/mybot" autocomplete="off" spellcheck="false">
+          <button type="button" class="btn btn-ghost btn-sm" data-bot-add disabled>افزودن</button>
         </div>
-        <p class="muted" data-bot-status style="font-size:.8rem;margin:.35rem 0 0" aria-live="polite"></p>
-        <ul class="chip-list" data-bot-chip-list></ul>
+        <div class="bot-target-preview" data-bot-preview hidden aria-live="polite"></div>
+        <ul class="bot-target-list" data-bot-chip-list role="list"></ul>
         <textarea name="bot_ids" hidden data-bot-hidden dir="ltr">{% if campaign.targeting %}{% for b in campaign.targeting.config.bot_ids %}{{ b }}
 {% endfor %}{% endif %}</textarea>
+        <input type="hidden" name="bot_eligibility_json" data-bot-eligibility-hidden value="{{ bot_eligibility_json|escape }}">
       </div>
       {% elif campaign.target_type == 'channels' %}
       <div class="field">

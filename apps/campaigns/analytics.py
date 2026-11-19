@@ -187,6 +187,49 @@ def funnel_from_metrics(metrics: dict) -> dict:
     }
 
 
+def budget_is_depleted(
+    *,
+    spent_percent: float | None,
+    remaining_ton: Decimal | None,
+) -> bool:
+    """True when allocation is exhausted (no meaningful remainder)."""
+    if remaining_ton is not None:
+        rem = remaining_ton if isinstance(remaining_ton, Decimal) else Decimal(str(remaining_ton))
+        if rem <= 0:
+            return True
+    if spent_percent is not None and spent_percent >= 99.95:
+        return True
+    return False
+
+
+def budget_consumption_tone(
+    *,
+    spent_percent: float | None,
+    remaining_ton: Decimal | None,
+) -> str:
+    """UI tone: normal | high | critical | depleted."""
+    if budget_is_depleted(spent_percent=spent_percent, remaining_ton=remaining_ton):
+        return "depleted"
+    if spent_percent is not None and spent_percent >= 92:
+        return "critical"
+    if spent_percent is not None and spent_percent >= 75:
+        return "high"
+    return "normal"
+
+
+def budget_status_chip(
+    *,
+    tone: str,
+    spent_percent: float | None,
+) -> tuple[bool, str | None]:
+    """Whether to show a status chip and its Persian label."""
+    if tone == "depleted":
+        return True, "تمام"
+    if tone == "critical" and spent_percent is not None and spent_percent >= 90:
+        return True, "نزدیک اتمام"
+    return False, None
+
+
 def budget_delivery_context(campaign: Campaign, metrics: dict) -> dict:
     ad = campaign.remote_ads.exclude(remote_ad_id="").order_by("-updated_at").first()
     raw = ad.remote_status_raw if ad and isinstance(ad.remote_status_raw, dict) else {}
@@ -199,11 +242,17 @@ def budget_delivery_context(campaign: Campaign, metrics: dict) -> dict:
         percent = float((spent / total_ton) * 100)
     daily_limit = raw.get("daily_budget_limit") or raw.get("daily_budget")
     daily_spent = raw.get("daily_spent_budget")
+    spent_percent = round(percent, 1) if percent is not None else None
+    tone = budget_consumption_tone(spent_percent=spent_percent, remaining_ton=remaining)
+    show_chip, status_label = budget_status_chip(tone=tone, spent_percent=spent_percent)
     return {
         "spent_ton": spent,
         "remaining_ton": remaining,
         "total_ton": total_ton,
-        "spent_percent": round(percent, 1) if percent is not None else None,
+        "spent_percent": spent_percent,
+        "consumption_tone": tone,
+        "show_status_chip": show_chip,
+        "status_label": status_label,
         "is_paused": bool(raw.get("is_paused")),
         "remote_status": ad.remote_status if ad else "",
         "daily_budget_limit": _decimal_or_none(daily_limit),

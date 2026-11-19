@@ -57,7 +57,13 @@ def test_search_target_builder_and_payload(customer_user):
 
 
 @pytest.mark.django_db
-def test_bot_target_requires_bots(customer_user):
+@patch("apps.telegram_ads.services.bot_eligibility.check_bot_eligibility")
+def test_bot_target_requires_bots(mock_check, customer_user):
+    mock_check.return_value = MagicMock(
+        hard_block=False,
+        bot={"title": "My Bot"},
+        message_fa="ok",
+    )
     campaign = Campaign.objects.create(
         customer=customer_user.customer_profile,
         target_type=Campaign.TargetType.BOTS,

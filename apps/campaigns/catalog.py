@@ -9,6 +9,7 @@ from django.core.cache import cache
 
 from apps.telegram_ads.client import TelegramAdsClient
 from apps.telegram_ads.exceptions import TelegramAdsError, TelegramAdsNotConfigured
+from apps.telegram_ads.services.bot_eligibility import BotEligibilityResult, check_bot_eligibility
 
 logger = logging.getLogger(__name__)
 
@@ -154,27 +155,31 @@ def search_locations(country_code: str, query: str, *, limit: int = 20) -> list[
 
 
 def resolve_bot(username: str) -> dict[str, Any]:
-    username = (username or "").strip().lstrip("@")
-    if not username:
-        return {"ok": False, "error": "invalid"}
     try:
-        client = TelegramAdsClient()
-        data = client.get_target_bot(username)
-        return {"ok": True, "bot": data}
-    except (TelegramAdsError, TelegramAdsNotConfigured) as exc:
-        return {"ok": False, "error": str(exc), "username": username, "pending": True}
-    except Exception as exc:
-        logger.exception("resolve_bot")
-        return {"ok": False, "error": "unavailable", "username": username}
+        result: BotEligibilityResult = check_bot_eligibility(username)
+        return result.to_json()
+    except Exception:
+        logger.exception("resolve_bot programming error")
+        return {
+            "ok": False,
+            "query": (username or "").strip(),
+            "eligibility": "api_unavailable",
+            "message_fa": "بررسی ربات در حال حاضر امکان‌پذیر نیست.",
+            "hard_block": False,
+            "verified": False,
+            "error": "internal",
+        }
 
 
 def resolve_channel(username: str) -> dict[str, Any]:
+    from apps.telegram_ads.client import TelegramAdsClient
+
     username = (username or "").strip().lstrip("@")
     if not username:
         return {"ok": False, "error": "invalid"}
     try:
         client = TelegramAdsClient()
-        data = client.get_target_channel(username)
+        data = client.resolve_target_channel(f"@{username}" if not username.startswith("@") else username)
         return {"ok": True, "channel": data}
     except (TelegramAdsError, TelegramAdsNotConfigured) as exc:
         return {"ok": False, "error": str(exc), "username": username, "pending": True}

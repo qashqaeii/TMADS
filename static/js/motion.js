@@ -53,6 +53,11 @@
     ".campaign-kpi-board",
     ".campaigns-filter--luxe",
     ".campaigns-table-board--luxe",
+    ".campaigns-list-hero-shell",
+    ".campaigns-list-hero",
+    ".campaigns-empty--luxe",
+    ".campaign-portfolio-disclosure--luxe",
+    ".campaign-detail-panel",
     ".campaign-trend-card",
     ".campaign-analytics-trend",
     ".campaign-analytics-funnel",
@@ -83,6 +88,9 @@
 
     for (var i = 0; i < nodes.length; i++) {
       var el = nodes[i];
+      if (el.closest(".wizard-form") && el.classList.contains("card") && !el.classList.contains("wizard-form")) {
+        continue;
+      }
       if (!el.classList.contains("motion-reveal")) {
         el.classList.add("motion-reveal");
       }

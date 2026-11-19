@@ -1,5 +1,5 @@
 {% load ton_display core_filters %}
-<section class="campaign-detail__budget-band budget-meter budget-meter--exec budget-meter--inline{% if slim %} budget-meter--luxe-slim budget-meter--luxe-ring{% endif %}{% if hero %} budget-meter--hero-card{% endif %}{% if budget.spent_percent >= 92 %} budget-meter--critical{% elif budget.spent_percent >= 75 %} budget-meter--high{% endif %}" aria-label="مصرف بودجه تبلیغ">
+<section class="campaign-detail__budget-band budget-meter budget-meter--exec budget-meter--inline{% if slim %} budget-meter--luxe-slim budget-meter--luxe-ring{% endif %}{% if hero %} budget-meter--hero-card{% endif %}{% if budget.consumption_tone == "depleted" %} budget-meter--depleted{% elif budget.consumption_tone == "critical" %} budget-meter--critical{% elif budget.consumption_tone == "high" %} budget-meter--high{% endif %}" aria-label="مصرف بودجه تبلیغ">
   {% if slim and hero %}
   <div class="budget-hero-card budget-hero-card--compact">
     <div class="budget-hero-card__ring-host" tabindex="0" data-tip-skip aria-describedby="budget-hero-tip">
@@ -17,8 +17,8 @@
           <span class="budget-ring__pct tabnums" dir="ltr">{{ budget.spent_percent|floatformat:1|persian_digits }}٪</span>
         </div>
       </div>
-      {% if budget.spent_percent >= 90 %}
-      <span class="budget-hero-card__warn" role="status">نزدیک اتمام</span>
+      {% if budget.show_status_chip and budget.status_label %}
+      <span class="budget-hero-card__warn{% if budget.consumption_tone == 'depleted' %} budget-hero-card__warn--depleted{% else %} budget-hero-card__warn--near{% endif %}" role="status">{{ budget.status_label }}</span>
       {% endif %}
       <aside id="budget-hero-tip" class="budget-hero-card__ledger budget-hero-card__popover budget-hero-tip ui-tip-surface" role="tooltip">
         <header class="budget-hero-tip__head">
@@ -33,7 +33,7 @@
             <dt>مصرف‌شده</dt>
             <dd>{% ton_amount budget.spent_ton exchange_rate_id=order_exchange_rate_id hint=0 inline_equiv=1 %}</dd>
           </div>
-          <div class="budget-hero-card__cell budget-hero-card__cell--remain">
+          <div class="budget-hero-card__cell budget-hero-card__cell--remain{% if budget.consumption_tone == 'depleted' %} budget-hero-card__cell--remain-depleted{% endif %}">
             <dt>مانده</dt>
             <dd>{% ton_amount budget.remaining_ton exchange_rate_id=order_exchange_rate_id hint=0 inline_equiv=1 %}</dd>
           </div>
@@ -68,14 +68,16 @@
     <div class="budget-ring-board__main">
       <div class="budget-ring-board__head">
         <span class="budget-meter__title">مصرف بودجه</span>
-        {% if budget.spent_percent >= 90 %}<span class="budget-meter__chip">نزدیک اتمام</span>{% endif %}
+        {% if budget.show_status_chip and budget.status_label %}
+        <span class="budget-meter__chip{% if budget.consumption_tone == 'depleted' %} budget-meter__chip--depleted{% elif budget.consumption_tone == 'critical' %} budget-meter__chip--near{% endif %}">{{ budget.status_label }}</span>
+        {% endif %}
       </div>
       <dl class="budget-ring-board__ledger">
         <div class="budget-ring-board__row">
           <dt>مصرف‌شده</dt>
           <dd>{% ton_amount budget.spent_ton exchange_rate_id=order_exchange_rate_id %}</dd>
         </div>
-        <div class="budget-ring-board__row budget-ring-board__row--remain">
+        <div class="budget-ring-board__row budget-ring-board__row--remain{% if budget.consumption_tone == 'depleted' %} budget-ring-board__row--remain-depleted{% endif %}">
           <dt>باقی‌مانده</dt>
           <dd>{% ton_amount budget.remaining_ton exchange_rate_id=order_exchange_rate_id %}</dd>
         </div>
@@ -93,7 +95,9 @@
   <div class="budget-meter__top budget-meter__top--inline">
     <div class="budget-meter__lead">
       <span class="budget-meter__title">مصرف بودجه</span>
-      {% if budget.spent_percent >= 90 %}<span class="budget-meter__chip">نزدیک اتمام</span>{% endif %}
+      {% if budget.show_status_chip and budget.status_label %}
+      <span class="budget-meter__chip{% if budget.consumption_tone == 'depleted' %} budget-meter__chip--depleted{% elif budget.consumption_tone == 'critical' %} budget-meter__chip--near{% endif %}">{{ budget.status_label }}</span>
+      {% endif %}
     </div>
     <span class="budget-meter__pct tabnums" dir="ltr">{{ budget.spent_percent|floatformat:1|persian_digits }}٪</span>
   </div>
@@ -105,7 +109,7 @@
       <dt>مصرف‌شده</dt>
       <dd>{% ton_amount budget.spent_ton exchange_rate_id=order_exchange_rate_id %}</dd>
     </div>
-    <div class="budget-meter__stat budget-meter__stat--remain">
+    <div class="budget-meter__stat budget-meter__stat--remain{% if budget.consumption_tone == 'depleted' %} budget-meter__stat--remain-depleted{% endif %}">
       <dt>باقی‌مانده</dt>
       <dd>{% ton_amount budget.remaining_ton exchange_rate_id=order_exchange_rate_id %}</dd>
     </div>

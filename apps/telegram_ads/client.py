@@ -7,7 +7,13 @@ from typing import Any
 
 from django.conf import settings
 
-from .exceptions import TelegramAdsError, TelegramAdsNotConfigured, TelegramAdsWriteDisabled
+from .exceptions import (
+    TelegramAdsApiError,
+    TelegramAdsError,
+    TelegramAdsNotConfigured,
+    TelegramAdsTransportError,
+    TelegramAdsWriteDisabled,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -92,6 +98,22 @@ class TelegramAdsClient:
             except (TelegramAdsNotConfigured, TelegramAdsWriteDisabled, TelegramAdsError):
                 raise
             except Exception as exc:
+                try:
+                    from telead.errors import APIError, TransportError
+
+                    if isinstance(exc, APIError):
+                        logger.info("Telegram Ads API %s error: %s", operation, exc)
+                        raise TelegramAdsApiError(
+                            exc.code,
+                            description=exc.description,
+                            method=exc.method,
+                            retryable=getattr(exc, "retryable", False),
+                        ) from exc
+                    if isinstance(exc, TransportError):
+                        logger.warning("Telegram Ads API %s transport failure", operation, exc_info=True)
+                        raise TelegramAdsTransportError(_humanize_api_error(exc)) from exc
+                except ImportError:
+                    pass
                 logger.warning("Telegram Ads API %s failed: %s", operation, exc, exc_info=True)
                 raise TelegramAdsError(_humanize_api_error(exc)) from exc
 

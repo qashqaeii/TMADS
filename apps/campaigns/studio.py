@@ -104,10 +104,22 @@ def parse_targeting_payload(data, target_type: str) -> dict[str, Any]:
         raw_area = data.get("bot_ids")
         if raw_area and not bots:
             bots = [ln.strip() for ln in str(raw_area).splitlines() if ln.strip()]
+        if len(bots) == 1 and "\n" in bots[0]:
+            bots = [ln.strip() for ln in bots[0].splitlines() if ln.strip()]
         single = (data.get("bot_input") or "").strip()
         if single:
             bots.append(normalize_username(single))
         cfg["bot_ids"] = [normalize_username(b) for b in bots if b]
+        raw_checks = (data.get("bot_eligibility_json") or "").strip()
+        if raw_checks:
+            try:
+                import json as _json
+
+                parsed = _json.loads(raw_checks)
+                if isinstance(parsed, dict):
+                    cfg["bot_peer_checks"] = parsed
+            except (TypeError, ValueError):
+                pass
 
     elif target_type == "channels":
         cfg["channel_mode"] = (data.get("channel_mode") or "language").strip()

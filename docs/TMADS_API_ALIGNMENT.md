@@ -35,7 +35,7 @@
 | getTargetLanguagesList | `get_target_languages` |
 | getTargetTopicsList | `get_target_topics` |
 | getTargetCountriesList | `get_target_countries` |
-| getTargetBot | `resolve_target_bot` |
+| getTargetBot | `resolve_target_bot` — `BOT_TOO_SMALL` → eligibility failure (read-only); see `docs/BOT_TARGET_ELIGIBILITY.md` |
 
 ## دستورات عملیاتی
 

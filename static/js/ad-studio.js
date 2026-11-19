@@ -339,6 +339,279 @@
     sync();
   }
 
+  function initBotTargetingSelector(root, resolveUrl) {
+    var input = root.querySelector("[data-bot-input]");
+    var addBtn = root.querySelector("[data-bot-add]");
+    var list = root.querySelector("[data-bot-chip-list]");
+    var hidden = root.querySelector("[data-bot-hidden]");
+    var hiddenJson = root.querySelector("[data-bot-eligibility-hidden]");
+    var preview = root.querySelector("[data-bot-preview]");
+    if (!input || !list || !hidden) return;
+
+    var items = [];
+    var checks = {};
+    var lastResolve = null;
+    var inflight = null;
+
+    try {
+      checks = JSON.parse(hiddenJson && hiddenJson.value ? hiddenJson.value : "{}") || {};
+    } catch (e) {
+      checks = {};
+    }
+
+    function normalize(raw) {
+      raw = (raw || "").trim();
+      if (!raw) return "";
+      if (raw.indexOf("t.me/") >= 0) {
+        var m = raw.match(/t\.me\/([A-Za-z0-9_]{4,32})/i);
+        if (m) return "@" + m[1];
+      }
+      if (raw.charAt(0) !== "@") raw = "@" + raw.replace(/^@+/, "");
+      return raw;
+    }
+
+    function eligibilityClass(state) {
+      if (state === "eligible") return "bot-target-card--eligible";
+      if (state === "insufficient_audience") return "bot-target-card--blocked";
+      if (state === "invalid_bot") return "bot-target-card--invalid";
+      return "bot-target-card--pending";
+    }
+
+    function syncHidden() {
+      hidden.value = items
+        .map(function (it) {
+          return it.username;
+        })
+        .join("\n");
+      var map = {};
+      items.forEach(function (it) {
+        map[it.username] = {
+          eligibility: it.eligibility,
+          message_fa: it.message_fa,
+          hard_block: it.hard_block,
+          verified: it.verified,
+          bot: it.bot || {},
+        };
+      });
+      if (hiddenJson) hiddenJson.value = JSON.stringify(map);
+    }
+
+    function renderPreview(payload) {
+      if (!preview) return;
+      if (!payload) {
+        preview.hidden = true;
+        preview.innerHTML = "";
+        if (addBtn) addBtn.disabled = true;
+        return;
+      }
+      preview.hidden = false;
+      var bot = payload.bot || {};
+      var title = bot.title || payload.username || "";
+      var user = bot.username || (payload.username || "").replace(/^@/, "");
+      var img =
+        bot.photo_url
+          ? '<img class="bot-target-preview__avatar" src="' + bot.photo_url + '" alt="" loading="lazy">'
+          : '<span class="bot-target-preview__avatar bot-target-preview__avatar--empty" aria-hidden="true">🤖</span>';
+      var state = payload.eligibility || "unknown";
+      preview.className = "bot-target-preview " + eligibilityClass(state);
+      preview.innerHTML =
+        img +
+        '<div class="bot-target-preview__body">' +
+        '<strong class="bot-target-preview__title" dir="auto">' +
+        title +
+        "</strong>" +
+        '<span class="bot-target-preview__user" dir="ltr">@' +
+        user +
+        "</span>" +
+        '<p class="bot-target-preview__status">' +
+        (payload.message_fa || "") +
+        "</p>" +
+        "</div>";
+      if (addBtn) {
+        addBtn.disabled =
+          payload.hard_block || state === "insufficient_audience" || state === "invalid_bot";
+      }
+    }
+
+    function renderList() {
+      list.innerHTML = "";
+      items.forEach(function (it, idx) {
+        var li = document.createElement("li");
+        li.className = "bot-target-card " + eligibilityClass(it.eligibility);
+        var bot = it.bot || {};
+        var img = bot.photo_url
+          ? '<img class="bot-target-card__avatar" src="' + bot.photo_url + '" alt="" loading="lazy">'
+          : '<span class="bot-target-card__avatar bot-target-card__avatar--empty" aria-hidden="true">🤖</span>';
+        li.innerHTML =
+          img +
+          '<div class="bot-target-card__body">' +
+          '<strong dir="auto">' +
+          (bot.title || it.username) +
+          "</strong>" +
+          '<span class="bot-target-card__user" dir="ltr">' +
+          it.username +
+          "</span>" +
+          '<p class="bot-target-card__status">' +
+          (it.message_fa || "") +
+          "</p>" +
+          "</div>";
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "bot-target-card__remove";
+        btn.setAttribute("aria-label", "حذف ربات");
+        btn.textContent = "×";
+        btn.addEventListener("click", function () {
+          items.splice(idx, 1);
+          renderList();
+          syncHidden();
+          dispatchInput(root);
+        });
+        li.appendChild(btn);
+        list.appendChild(li);
+      });
+    }
+
+    function applyResolve(payload, query) {
+      if (!payload || normalize(input.value) !== query) return;
+      lastResolve = { query: query, payload: payload };
+      renderPreview(payload);
+    }
+
+    var resolveDebounced = debounce(function () {
+      var v = normalize(input.value);
+      if (!v) {
+        lastResolve = null;
+        renderPreview(null);
+        return;
+      }
+      var existing = items.some(function (it) {
+        return it.username.toLowerCase() === v.toLowerCase();
+      });
+      if (existing) {
+        renderPreview({
+          eligibility: "invalid_bot",
+          message_fa: "این ربات قبلاً اضافه شده است.",
+          hard_block: true,
+          username: v,
+        });
+        return;
+      }
+      if (!resolveUrl) return;
+      if (inflight && inflight.abort) inflight.abort();
+      var ctrl = typeof AbortController !== "undefined" ? new AbortController() : null;
+      inflight = ctrl;
+      fetch(resolveUrl + "?username=" + encodeURIComponent(v), {
+        credentials: "same-origin",
+        signal: ctrl ? ctrl.signal : undefined,
+      })
+        .then(function (r) {
+          return r.json();
+        })
+        .then(function (j) {
+          applyResolve(j, v);
+        })
+        .catch(function () {
+          if (normalize(input.value) === v) {
+            renderPreview({
+              ok: false,
+              username: v,
+              eligibility: "api_unavailable",
+              message_fa: "بررسی ربات در حال حاضر امکان‌پذیر نیست.",
+              hard_block: false,
+              verified: false,
+            });
+          }
+        });
+    }, 700);
+
+    input.addEventListener("input", resolveDebounced);
+
+    function addCurrent() {
+      var v = normalize(input.value);
+      if (!v) return;
+      if (
+        items.some(function (it) {
+          return it.username.toLowerCase() === v.toLowerCase();
+        })
+      ) {
+        return;
+      }
+      var payload =
+        lastResolve && lastResolve.query.toLowerCase() === v.toLowerCase() ? lastResolve.payload : null;
+      if (!payload || !payload.eligibility) {
+        return;
+      }
+      if (payload.hard_block || payload.eligibility === "insufficient_audience") {
+        return;
+      }
+      items.push({
+        username: v,
+        eligibility: payload.eligibility,
+        message_fa: payload.message_fa,
+        hard_block: !!payload.hard_block,
+        verified: !!payload.verified,
+        bot: payload.bot || {},
+      });
+      input.value = "";
+      lastResolve = null;
+      renderPreview(null);
+      renderList();
+      syncHidden();
+      dispatchInput(root);
+    }
+
+    if (addBtn) addBtn.addEventListener("click", addCurrent);
+    input.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        if (addBtn && !addBtn.disabled) addCurrent();
+      }
+    });
+
+    var seeds = String(hidden.value || "")
+      .split(/\n/)
+      .map(function (s) {
+        return normalize(s.trim());
+      })
+      .filter(Boolean);
+    seeds.forEach(function (uname) {
+      var saved = checks[uname] || checks[uname.toLowerCase()] || {};
+      items.push({
+        username: uname,
+        eligibility: saved.eligibility || "unknown",
+        message_fa: saved.message_fa || "ربات شناسایی شد؛ واجد شرایط بودن آن هنوز تأیید نشده است.",
+        hard_block: !!saved.hard_block,
+        verified: !!saved.verified,
+        bot: saved.bot || {},
+      });
+    });
+    renderList();
+    syncHidden();
+
+    items.forEach(function (it, idx) {
+      if (it.eligibility === "eligible" && it.verified) return;
+      if (!resolveUrl) return;
+      fetch(resolveUrl + "?username=" + encodeURIComponent(it.username), { credentials: "same-origin" })
+        .then(function (r) {
+          return r.json();
+        })
+        .then(function (j) {
+          if (!j || !j.username) return;
+          items[idx] = {
+            username: normalize(j.username || it.username),
+            eligibility: j.eligibility || it.eligibility,
+            message_fa: j.message_fa || it.message_fa,
+            hard_block: !!j.hard_block,
+            verified: !!j.verified,
+            bot: j.bot || it.bot,
+          };
+          renderList();
+          syncHidden();
+        })
+        .catch(function () {});
+    });
+  }
+
   function initScheduleEditor(root) {
     if (!root) return;
     var enabled = root.querySelector("[data-schedule-enabled]");
@@ -540,14 +813,7 @@
     document.querySelectorAll("[data-multiselect]").forEach(initMultiselect);
     document.querySelectorAll("[data-schedule-editor]").forEach(initScheduleEditor);
     document.querySelectorAll("[data-bot-selector]").forEach(function (el) {
-      initLineChips(el, {
-        inputSel: "[data-bot-input]",
-        addSel: "[data-bot-add]",
-        listSel: "[data-bot-chip-list]",
-        hiddenSel: "[data-bot-hidden]",
-        statusSel: "[data-bot-status]",
-        resolveUrl: form.getAttribute("data-resolve-bot"),
-      });
+      initBotTargetingSelector(el, form.getAttribute("data-resolve-bot"));
     });
     document.querySelectorAll("[data-channel-selector]").forEach(function (el) {
       initLineChips(el, {

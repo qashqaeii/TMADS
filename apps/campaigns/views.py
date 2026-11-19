@@ -39,6 +39,10 @@ from .metrics import (
     optimize_campaign_list_queryset,
     sort_campaign_rows,
 )
+from .performance_insights import (
+    build_portfolio_performance_insights,
+    insight_badges_for_campaign,
+)
 from .creative_templates import CREATIVE_TEMPLATES
 from .deletion import can_delete_draft_campaign, delete_draft_campaign
 from .models import AdCreative, Campaign, CampaignStatisticsSnapshot, CampaignTargeting, CampaignStatusHistory, TelegramAdvertisement
@@ -92,6 +96,7 @@ def campaign_list(request):
         rows = sort_campaign_rows(rows, sort)
 
     kpis = aggregate_portfolio_kpis(rows)
+    performance_insights = build_portfolio_performance_insights(rows)
     portfolio_chart = portfolio_timeseries(request.user.customer_profile, days=30)
     paginator = Paginator(rows, 20)
     page_obj = paginator.get_page(request.GET.get("page"))
@@ -103,6 +108,7 @@ def campaign_list(request):
             "page_obj": page_obj,
             "campaign_rows": page_obj.object_list,
             "kpis": kpis,
+            "performance_insights": performance_insights,
             "portfolio_chart_json": json.dumps(portfolio_chart, ensure_ascii=False),
             "has_portfolio_chart": bool(portfolio_chart.get("dates")),
             "sort": sort,
@@ -189,12 +195,20 @@ def campaign_detail(request, campaign_id):
     has_chart = bool(chart.get("dates"))
     order_exchange_rate_id = order.exchange_rate_id if order else None
     ton_irr_per_ton, _ = resolve_ton_display_rate(exchange_rate_id=order_exchange_rate_id)
+    portfolio_rows = build_campaign_list_rows(
+        optimize_campaign_list_queryset(
+            Campaign.objects.filter(customer=request.user.customer_profile),
+        ),
+    )
+    performance_insights = build_portfolio_performance_insights(portfolio_rows)
+    performance_badges = insight_badges_for_campaign(performance_insights, campaign.id)
     return render(
         request,
         "campaigns/detail.html",
         {
             "campaign": campaign,
             "metrics": metrics,
+            "performance_badges": performance_badges,
             "has_chart": has_chart,
             "chart_has_signal": chart_has_signal(chart),
             "chart_json": json.dumps(chart, ensure_ascii=False),
@@ -437,6 +451,10 @@ def campaign_wizard(request, campaign_id=None):
         "impression_frequency_choices": [1, 2, 3, 4],
         "search_queries_json": json.dumps(
             (getattr(getattr(campaign, "targeting", None), "config", {}) or {}).get("search_queries") or [],
+            ensure_ascii=False,
+        ),
+        "bot_eligibility_json": json.dumps(
+            (getattr(getattr(campaign, "targeting", None), "config", {}) or {}).get("bot_peer_checks") or {},
             ensure_ascii=False,
         ),
         "dry_run_json": json.dumps(dry_run.get("payload") if isinstance(dry_run, dict) and dry_run.get("payload") else {}, ensure_ascii=False),
@@ -731,11 +749,36 @@ def studio_catalog_locations(request):
     return JsonResponse({"ok": True, "items": items})
 
 
+_BOT_RESOLVE_LIMIT = 40
+_BOT_RESOLVE_WINDOW = 60
+
+
+def _bot_resolve_rate_limited(user_id: int) -> bool:
+    key = f"tmads:rate:bot_resolve:{user_id}"
+    try:
+        count = cache.incr(key)
+    except ValueError:
+        cache.set(key, 1, _BOT_RESOLVE_WINDOW)
+        count = 1
+    return count > _BOT_RESOLVE_LIMIT
+
+
 @login_required
 @customer_required
 @require_GET
 def studio_catalog_resolve_bot(request):
-    username = request.GET.get("username") or ""
+    if _bot_resolve_rate_limited(request.user.pk):
+        return JsonResponse(
+            {
+                "ok": False,
+                "eligibility": "api_unavailable",
+                "message_fa": "تعداد درخواست بررسی زیاد است؛ چند لحظه صبر کنید.",
+                "hard_block": False,
+                "verified": False,
+            },
+            status=429,
+        )
+    username = (request.GET.get("username") or request.GET.get("q") or "").strip()
     return JsonResponse(resolve_bot(username))
 
 

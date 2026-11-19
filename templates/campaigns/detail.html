@@ -7,60 +7,52 @@
 {% endblock %}
 {% block content %}
 <div class="app-stack campaign-detail campaign-detail--luxe">
-  <article class="campaign-detail__brief campaign-detail__hero campaign-detail__hero--exec campaign-detail__hero--luxe" aria-label="خلاصه کمپین">
-    <div class="campaign-detail__hero-bar">
-      <nav class="campaign-detail__crumb" aria-label="مسیر">
-        <a class="campaign-detail__back" href="{% url 'campaigns:list' %}">
-          {% include "includes/lucide_icon.html" with name="chevron-right" size="sm" %}
-          <span>کمپین‌ها</span>
+  <article class="campaign-detail__brief campaign-detail__hero campaign-detail__hero--exec campaign-detail__hero--luxe campaign-detail__hero--ref campaign-detail__hero--minimal" aria-label="خلاصه کمپین">
+    <header class="campaign-detail__hero-toolbar campaign-detail__toolbar campaign-detail__toolbar--luxe campaign-detail__toolbar--ref campaign-detail__toolbar--minimal" aria-label="عملیات کمپین">
+      <div class="campaign-detail__toolbar-track" role="group" aria-label="میانبرهای عملیاتی">
+        {% if campaign.status == 'active' %}
+        <a class="campaign-detail__action campaign-detail__action--primary campaign-detail__toolbar-item" href="{% url 'support:create' %}?campaign={{ campaign.id }}">
+          <span class="campaign-detail__action-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="pause" size="sm" %}</span>
+          <span class="campaign-detail__action-label">توقف کمپین</span>
         </a>
-      </nav>
-      <div class="campaign-detail__toolbar campaign-detail__toolbar--compact campaign-detail__toolbar--luxe" aria-label="عملیات کمپین">
-        <div class="campaign-detail__toolbar-track" role="group" aria-label="میانبرهای عملیاتی">
-          <form method="post" action="{% url 'campaigns:refresh_stats' %}" class="campaign-detail__actions-form campaign-detail__toolbar-item">{% csrf_token %}
-            <input type="hidden" name="campaign_id" value="{{ campaign.id }}">
-            <button type="submit" class="campaign-detail__action campaign-detail__action--refresh">
-              <span class="campaign-detail__action-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="refresh-cw" size="sm" %}</span>
-              <span class="campaign-detail__action-label">بروزرسانی</span>
-            </button>
-          </form>
-          <a class="campaign-detail__action campaign-detail__action--support campaign-detail__toolbar-item" href="{% url 'support:create' %}?campaign={{ campaign.id }}">
-            <span class="campaign-detail__action-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="headphones" size="sm" %}</span>
-            <span class="campaign-detail__action-label">پشتیبانی</span>
-          </a>
-          <span class="campaign-detail__toolbar-sep" aria-hidden="true"></span>
-          {% include "includes/campaign_actions_menu.html" %}
-        </div>
+        {% endif %}
+        <a class="campaign-detail__action campaign-detail__toolbar-item" href="{% url 'campaigns:wizard' campaign.id %}">
+          <span class="campaign-detail__action-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="pencil" size="sm" %}</span>
+          <span class="campaign-detail__action-label">ویرایش</span>
+        </a>
+        <a class="campaign-detail__action campaign-detail__action--support campaign-detail__toolbar-item" href="{% url 'support:create' %}?campaign={{ campaign.id }}">
+          <span class="campaign-detail__action-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="headphones" size="sm" %}</span>
+          <span class="campaign-detail__action-label">پشتیبانی</span>
+        </a>
+        <span class="campaign-detail__toolbar-sep" aria-hidden="true"></span>
+        {% include "includes/campaign_actions_menu.html" %}
       </div>
-    </div>
+      <form method="post" action="{% url 'campaigns:refresh_stats' %}" class="campaign-detail__actions-form campaign-detail__toolbar-aux">{% csrf_token %}
+        <input type="hidden" name="campaign_id" value="{{ campaign.id }}">
+        <button type="submit" class="campaign-detail__action campaign-detail__action--refresh" title="بروزرسانی آمار">
+          <span class="campaign-detail__action-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="refresh-cw" size="sm" %}</span>
+          <span class="campaign-detail__action-label">بروزرسانی</span>
+        </button>
+      </form>
+    </header>
 
-    <div class="campaign-detail__hero-body">
-      <header class="campaign-detail__masthead campaign-detail__masthead--luxe">
+    <div class="campaign-detail__hero-body campaign-detail__hero-body--ref campaign-detail__hero-body--minimal">
+      <header class="campaign-detail__masthead campaign-detail__masthead--luxe campaign-detail__masthead--minimal">
         <div class="campaign-detail__title-row">
-          {% for step in lifecycle_steps %}
-          {% if step.state == 'current' %}
-          <span
-            class="campaign-detail__stage status status--pill status--compact {{ campaign.status|campaign_status_class }}{% if step.is_terminal %} campaign-detail__stage--terminal{% endif %}"
-            role="status"
-            title="{{ campaign.get_status_display }}"
-          >
-            <span class="campaign-detail__stage-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name=step.icon size="sm" %}</span>
-            <span class="campaign-detail__stage-label">{{ step.label }}</span>
-          </span>
-          {% endif %}
-          {% endfor %}
           <h1 class="campaign-detail__title">{{ campaign.name|default:"بدون نام" }}</h1>
+          <span class="status status--pill status--compact {{ campaign.status|campaign_status_class }}" role="status">{{ campaign.get_status_display }}</span>
         </div>
-        {% if campaign.placement or campaign.destination or last_sync or budget.is_paused or metrics.stats_stale %}
         <div class="campaign-detail__masthead-foot">
-          {% if campaign.placement or campaign.destination or last_sync %}
           <p class="campaign-detail__meta-bar">
-            <span class="campaign-detail__meta-primary">
-              {% if campaign.placement %}<span class="campaign-detail__chip">{{ campaign.get_placement_display }}</span>{% endif %}
-              {% if campaign.placement and campaign.destination %}<span class="campaign-detail__meta-sep" aria-hidden="true">·</span>{% endif %}
-              {% if campaign.destination %}
-              <a class="campaign-detail__dest" href="{{ campaign.destination }}" target="_blank" rel="noopener noreferrer" dir="ltr" title="{{ campaign.destination }}">{{ campaign.destination|shorten_url:42 }}</a>
-              {% endif %}
+            {% if campaign.destination %}
+            <a class="campaign-detail__dest" href="{{ campaign.destination }}" target="_blank" rel="noopener noreferrer" dir="ltr" title="{{ campaign.destination }}">
+              {% include "includes/lucide_icon.html" with name="link-2" size="sm" %}
+              <span>{{ campaign.destination|shorten_url:42 }}</span>
+            </a>
+            {% endif %}
+            <span class="campaign-detail__meta-date">
+              {% include "includes/lucide_icon.html" with name="calendar" size="sm" %}
+              <time class="tabnums" datetime="{{ campaign.created_at|date:'c' }}">{{ campaign.created_at|jalali_datetime }}</time>
             </span>
             {% if last_sync %}
             <span class="campaign-detail__sync-compact" title="آخرین بروزرسانی آمار">
@@ -69,35 +61,57 @@
             </span>
             {% endif %}
           </p>
-          {% endif %}
-          {% if budget.is_paused or metrics.stats_stale %}
-          <p class="campaign-detail__alerts campaign-detail__alerts--inline" role="status">
-            {% if budget.is_paused %}<span class="campaign-detail__alert">متوقف در تلگرام</span>{% endif %}
+          {% if campaign.placement or budget.is_paused or metrics.stats_stale %}
+          <p class="campaign-detail__alerts campaign-detail__alerts--inline campaign-detail__alerts--minimal" role="status">
+            {% if campaign.placement %}<span class="campaign-detail__chip campaign-detail__chip--quiet">{{ campaign.get_placement_display }}</span>{% endif %}
+            {% if budget.is_paused %}<span class="campaign-detail__alert campaign-detail__alert--muted">متوقف در تلگرام</span>{% endif %}
             {% if metrics.stats_stale %}<span class="campaign-detail__alert campaign-detail__alert--muted">آمار قدیمی</span>{% endif %}
           </p>
           {% endif %}
         </div>
-        {% endif %}
       </header>
-
       {% if budget.has_remote and budget.spent_percent is not None %}
-      <aside class="campaign-detail__hero-budget" aria-label="بودجه تبلیغ">
+      <aside class="campaign-detail__hero-budget campaign-detail__hero-budget--ref campaign-detail__hero-budget--minimal" aria-label="بودجه تبلیغ">
         {% include "includes/campaign_budget_band.html" with slim=1 hero=1 %}
+        <p class="campaign-detail__budget-caption muted{% if budget.consumption_tone == 'depleted' %} campaign-detail__budget-caption--depleted{% endif %}">
+          <span class="campaign-detail__budget-caption-label">مانده</span>
+          <span class="campaign-detail__budget-caption-value">{% ton_amount budget.remaining_ton exchange_rate_id=order_exchange_rate_id hint=0 %}</span>
+        </p>
       </aside>
       {% endif %}
     </div>
   </article>
 
-  {% include "includes/campaign_metrics_strip.html" %}
+  {% include "includes/campaign_metrics_strip.html" with kpi_ribbon_mode="ref" %}
+
+  {% include "campaigns/includes/performance_badges.html" %}
 
   <div class="detail-tabs campaign-detail__tabs" x-data="{ tab: 'overview' }">
-    <div class="tab-bar tab-bar--exec" role="tablist" aria-label="بخش‌های کمپین">
-      <button type="button" role="tab" id="campaign-tab-overview" aria-controls="campaign-panel-overview" :aria-selected="tab === 'overview'" :tabindex="tab === 'overview' ? 0 : -1" :class="{ 'is-active': tab === 'overview' }" @click="tab = 'overview'; $nextTick(() => { window.tmadsRevealIn && window.tmadsRevealIn(document.getElementById('campaign-panel-overview')); window.dispatchEvent(new Event('tmads-charts-resize')); })">نمای کلی</button>
-      <button type="button" role="tab" id="campaign-tab-analytics" aria-controls="campaign-panel-analytics" :aria-selected="tab === 'analytics'" :tabindex="tab === 'analytics' ? 0 : -1" :class="{ 'is-active': tab === 'analytics' }" @click="tab = 'analytics'; $nextTick(() => { window.tmadsRevealIn && window.tmadsRevealIn(document.getElementById('campaign-panel-analytics')); window.dispatchEvent(new Event('tmads-charts-resize')); })">تحلیل</button>
-      <button type="button" role="tab" id="campaign-tab-creative" aria-controls="campaign-panel-creative" :aria-selected="tab === 'creative'" :tabindex="tab === 'creative' ? 0 : -1" :class="{ 'is-active': tab === 'creative' }" @click="tab = 'creative'; $nextTick(() => { window.tmadsRevealIn && window.tmadsRevealIn(document.getElementById('campaign-panel-creative')); })">محتوا</button>
-      <button type="button" role="tab" id="campaign-tab-targeting" aria-controls="campaign-panel-targeting" :aria-selected="tab === 'targeting'" :tabindex="tab === 'targeting' ? 0 : -1" :class="{ 'is-active': tab === 'targeting' }" @click="tab = 'targeting'; $nextTick(() => { window.tmadsRevealIn && window.tmadsRevealIn(document.getElementById('campaign-panel-targeting')); })">هدف‌گیری</button>
-      <button type="button" role="tab" id="campaign-tab-finance" aria-controls="campaign-panel-finance" :aria-selected="tab === 'finance'" :tabindex="tab === 'finance' ? 0 : -1" :class="{ 'is-active': tab === 'finance' }" @click="tab = 'finance'; $nextTick(() => { window.tmadsRevealIn && window.tmadsRevealIn(document.getElementById('campaign-panel-finance')); })">بودجه</button>
-      <button type="button" role="tab" id="campaign-tab-history" aria-controls="campaign-panel-history" :aria-selected="tab === 'history'" :tabindex="tab === 'history' ? 0 : -1" :class="{ 'is-active': tab === 'history' }" @click="tab = 'history'; $nextTick(() => { window.tmadsRevealIn && window.tmadsRevealIn(document.getElementById('campaign-panel-history')); })">تاریخچه</button>
+    <div class="tab-bar tab-bar--exec tab-bar--ref" role="tablist" aria-label="بخش‌های کمپین">
+      <button type="button" role="tab" id="campaign-tab-overview" aria-controls="campaign-panel-overview" :aria-selected="tab === 'overview'" :tabindex="tab === 'overview' ? 0 : -1" :class="{ 'is-active': tab === 'overview' }" @click="tab = 'overview'; $nextTick(() => { window.tmadsRevealIn && window.tmadsRevealIn(document.getElementById('campaign-panel-overview')); window.dispatchEvent(new Event('tmads-charts-resize')); })">
+        <span class="campaign-detail-tab__icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="layout-grid" size="sm" %}</span>
+        <span class="campaign-detail-tab__label">نمای کلی</span>
+      </button>
+      <button type="button" role="tab" id="campaign-tab-analytics" aria-controls="campaign-panel-analytics" :aria-selected="tab === 'analytics'" :tabindex="tab === 'analytics' ? 0 : -1" :class="{ 'is-active': tab === 'analytics' }" @click="tab = 'analytics'; $nextTick(() => { window.tmadsRevealIn && window.tmadsRevealIn(document.getElementById('campaign-panel-analytics')); window.dispatchEvent(new Event('tmads-charts-resize')); })">
+        <span class="campaign-detail-tab__icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="line-chart" size="sm" %}</span>
+        <span class="campaign-detail-tab__label">تحلیل</span>
+      </button>
+      <button type="button" role="tab" id="campaign-tab-creative" aria-controls="campaign-panel-creative" :aria-selected="tab === 'creative'" :tabindex="tab === 'creative' ? 0 : -1" :class="{ 'is-active': tab === 'creative' }" @click="tab = 'creative'; $nextTick(() => { window.tmadsRevealIn && window.tmadsRevealIn(document.getElementById('campaign-panel-creative')); })">
+        <span class="campaign-detail-tab__icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="megaphone" size="sm" %}</span>
+        <span class="campaign-detail-tab__label">محتوا</span>
+      </button>
+      <button type="button" role="tab" id="campaign-tab-targeting" aria-controls="campaign-panel-targeting" :aria-selected="tab === 'targeting'" :tabindex="tab === 'targeting' ? 0 : -1" :class="{ 'is-active': tab === 'targeting' }" @click="tab = 'targeting'; $nextTick(() => { window.tmadsRevealIn && window.tmadsRevealIn(document.getElementById('campaign-panel-targeting')); })">
+        <span class="campaign-detail-tab__icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="crosshair" size="sm" %}</span>
+        <span class="campaign-detail-tab__label">هدف‌گیری</span>
+      </button>
+      <button type="button" role="tab" id="campaign-tab-finance" aria-controls="campaign-panel-finance" :aria-selected="tab === 'finance'" :tabindex="tab === 'finance' ? 0 : -1" :class="{ 'is-active': tab === 'finance' }" @click="tab = 'finance'; $nextTick(() => { window.tmadsRevealIn && window.tmadsRevealIn(document.getElementById('campaign-panel-finance')); })">
+        <span class="campaign-detail-tab__icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="wallet" size="sm" %}</span>
+        <span class="campaign-detail-tab__label">بودجه</span>
+      </button>
+      <button type="button" role="tab" id="campaign-tab-history" aria-controls="campaign-panel-history" :aria-selected="tab === 'history'" :tabindex="tab === 'history' ? 0 : -1" :class="{ 'is-active': tab === 'history' }" @click="tab = 'history'; $nextTick(() => { window.tmadsRevealIn && window.tmadsRevealIn(document.getElementById('campaign-panel-history')); })">
+        <span class="campaign-detail-tab__icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="history" size="sm" %}</span>
+        <span class="campaign-detail-tab__label">تاریخچه</span>
+      </button>
     </div>
 
     <div class="tab-panel" role="tabpanel" id="campaign-panel-overview" aria-labelledby="campaign-tab-overview" x-show="tab === 'overview'" x-cloak>
@@ -114,14 +128,14 @@
               <span class="campaign-overview-metrics__value tabnums">{% if metrics.clicks %}{{ metrics.conversion_rate|persian_digits }}٪{% else %}—{% endif %}</span>
             </li>
             <li class="campaign-overview-metrics__item">
-              <span class="campaign-overview-metrics__icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="badge-dollar-sign" size="sm" %}</span>
-              <span class="campaign-overview-metrics__label">هزینه هر ورود</span>
-              <span class="campaign-overview-metrics__value">{% ton_amount metrics.cost_per_action exchange_rate_id=order_exchange_rate_id hint=0 %}</span>
-            </li>
-            <li class="campaign-overview-metrics__item">
               <span class="campaign-overview-metrics__icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="gauge" size="sm" %}</span>
               <span class="campaign-overview-metrics__label">هزینهٔ هزار نمایش</span>
               <span class="campaign-overview-metrics__value">{% ton_amount metrics.cpm exchange_rate_id=order_exchange_rate_id hint=0 %}</span>
+            </li>
+            <li class="campaign-overview-metrics__item">
+              <span class="campaign-overview-metrics__icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="badge-dollar-sign" size="sm" %}</span>
+              <span class="campaign-overview-metrics__label">هزینه هر ورود</span>
+              <span class="campaign-overview-metrics__value">{% ton_amount metrics.cost_per_action exchange_rate_id=order_exchange_rate_id hint=0 %}</span>
             </li>
             <li class="campaign-overview-metrics__item">
               <span class="campaign-overview-metrics__icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="wallet" size="sm" %}</span>
@@ -130,7 +144,12 @@
             </li>
           </ul>
         </section>
-        <section class="info-module info-module--lift campaign-overview-card">
+        <section class="info-module info-module--lift campaign-overview-card campaign-overview-card--connection">
+          <div class="campaign-overview-card__brand-deco" aria-hidden="true">
+            <span class="campaign-overview-card__brand-glow"></span>
+            <span class="campaign-overview-card__brand-icon">{% include "includes/lucide_icon.html" with name="send" size="kpi" %}</span>
+          </div>
+          <div class="campaign-overview-card__main">
           <header class="campaign-overview-card__head">
             <span class="campaign-overview-card__glyph" aria-hidden="true">{% include "includes/lucide_icon.html" with name="link-2" size="sm" %}</span>
             <h2 class="campaign-overview-card__title">اتصال تبلیغ</h2>
@@ -176,6 +195,7 @@
           {% empty %}
           <p class="campaign-overview-empty muted">پس از تأیید و اتصال به تلگرام، جزئیات اتصال اینجا نمایش داده می‌شود.</p>
           {% endfor %}
+          </div>
         </section>
       </div>
       {% if has_chart %}
@@ -184,7 +204,7 @@
           <div class="campaign-trend-card__lead">
             <span class="campaign-trend-card__glyph" aria-hidden="true">{% include "includes/lucide_icon.html" with name="line-chart" size="sm" %}</span>
             <div class="campaign-trend-card__titles">
-              <h2 id="campaign-trend-title" class="campaign-trend-card__title">روند عملکرد</h2>
+              <h2 id="campaign-trend-title" class="campaign-trend-card__title">روند کمپین</h2>
               <p class="campaign-trend-card__caption muted" data-chart-range-caption>۳۰ روز اخیر</p>
             </div>
           </div>
@@ -383,9 +403,14 @@
           </div>
         </header>
         {% if creative %}
-        {% if creative.ad_text or creative.title %}
+        {% if creative.ad_text or creative.title or creative.media %}
         <div class="campaign-creative-luxe">
           <div class="campaign-creative-luxe__preview" aria-label="پیش‌نمایش">
+            {% if creative.media %}
+            <figure class="campaign-creative-luxe__media">
+              <img src="{{ creative.media.url }}" alt="رسانهٔ تبلیغ" loading="lazy" decoding="async">
+            </figure>
+            {% endif %}
             <div class="campaign-creative-luxe__frame">
               <div class="tg-preview tg-preview--detail tg-preview--premium campaign-creative-luxe__bubble">
                 <div class="bubble">
@@ -425,7 +450,7 @@
         <div class="campaign-detail-panel__empty">
           <span class="campaign-detail-panel__empty-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="file-text" size="kpi" %}</span>
           <p class="campaign-detail-panel__empty-title">محتوای تبلیغ تکمیل نشده</p>
-          <p class="campaign-detail-panel__empty-text muted">متن، عنوان و دکمه را در ویزارد ثبت کنید یا از تلگرام import کنید.</p>
+          <p class="campaign-detail-panel__empty-text muted">متن، عنوان یا رسانه را در ویزارد ثبت کنید.</p>
           <a class="campaign-detail__action campaign-detail-panel__empty-btn" href="{% url 'campaigns:wizard' campaign.id %}">تکمیل در ویزارد</a>
         </div>
         {% endif %}
