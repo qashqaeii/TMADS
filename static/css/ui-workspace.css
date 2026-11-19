@@ -123,3 +123,24 @@
 
 .ui-account-report-tabs { display:flex;gap:8px;flex-wrap:wrap; }.ui-report-fields { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px; }
 @media(max-width:520px){.ui-report-fields{grid-template-columns:minmax(0,1fr)}.ui-account-report-tabs{flex-wrap:nowrap;overflow:auto;padding:4px}.ui-account-report-tabs .btn{flex:none}}
+
+/* Telegram remote management and read-only intraday surfaces. */
+.ui-remote {gap:18px}
+.ui-remote-grid {display:grid;grid-template-columns:minmax(0,1.5fr) minmax(240px,1fr);gap:16px;align-items:start}
+.ui-remote-grid>.card {display:grid;gap:18px}
+.ui-remote-notice {display:flex;gap:9px;padding:12px;border-radius:10px;background:#edf6fb;color:var(--ui-action);border:1px solid #c9e3f1}
+.ui-remote-notice p {margin:0;font-size:.85rem;line-height:1.85;color:var(--ui-ink)}
+.ui-remote-empty {padding:24px;color:var(--ui-muted);font-size:.88rem;margin:0}
+.ui-intraday-ranges {display:flex;gap:8px;flex-wrap:wrap}
+.ui-intraday-summary {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.ui-intraday-summary>.card {display:grid;gap:9px}
+.ui-intraday-summary span {font-size:.84rem;color:var(--ui-muted)}
+.ui-intraday-summary strong {font-size:clamp(1.3rem,3vw,1.9rem);color:var(--ui-ink)}
+.ui-final .ui-remote .table-card {padding:0;overflow:hidden}
+.ui-final .ui-remote .table-card .dash-panel__head {padding:14px 16px}
+.ui-final .ui-remote .table-scroll {overflow:auto}
+.ui-final .ui-remote .data-table {min-width:550px;font-size:.85rem}
+.ui-final .ui-remote .data-table :is(th,td) {padding:12px 14px}
+.ui-final .ui-remote .data-table th {background:var(--ui-soft);color:var(--ui-muted)}
+@media(max-width:850px){.ui-remote-grid{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:500px){.ui-intraday-summary{grid-template-columns:minmax(0,1fr)}}
