@@ -1,0 +1,98 @@
+/* TMADS final UI contract: shared controls, surfaces, feedback and dialog.
+   Loaded after legacy executive styles; page-specific layouts live in ui-pages.css.
+   Keep the existing Executive Blue identity and use these tokens for new work. */
+:root {
+  --ui-action: #126fa9;
+  --ui-action-hover: #095e93;
+  --ui-ink: #18283b;
+  --ui-muted: #526479;
+  --ui-border: #dce5ee;
+  --ui-panel: #fff;
+  --ui-canvas: #f5f7fa;
+  --ui-soft: #f3f6fa;
+  --ui-focus: #187bb8;
+  --ui-danger: #b42341;
+  --ui-danger-soft: #fff1f3;
+  --ui-success: #126c54;
+  --ui-success-soft: #e8f5ef;
+  --ui-warning: #895710;
+  --ui-warning-soft: #fff6e5;
+  --ui-radius: 12px;
+  --ui-control-radius: 9px;
+  --ui-control: 42px;
+  --ui-shadow: 0 2px 6px rgb(21 41 64 / .035);
+  --ui-overlay-shadow: 0 20px 70px rgb(16 29 48 / .16);
+  --ui-motion: 150ms ease;
+  --brand-action: var(--ui-action);
+  --brand-hover: var(--ui-action-hover);
+  --text-heading: var(--ui-ink);
+  --text-secondary: var(--ui-muted);
+  --text-muted: var(--ui-muted);
+  --border-default: var(--ui-border);
+}
+.ui-final { color:var(--ui-ink); }
+.ui-final :where(button,input,select,textarea,summary) { font-family:inherit; }
+.ui-final :is(.btn,.topbar-action,.campaigns-filter__btn,.campaigns-table__link-btn,.campaign-detail__action,.ui-icon-button) {
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  min-height:var(--ui-control); padding:8px 14px; border:1px solid transparent;
+  border-radius:var(--ui-control-radius); font-size:.875rem; font-weight:650;
+  line-height:1.45; letter-spacing:normal; text-decoration:none; cursor:pointer;
+  box-shadow:none; transform:none; transition:background var(--ui-motion),color var(--ui-motion),border-color var(--ui-motion);
+}
+.ui-final :is(.btn,.topbar-action,.campaigns-filter__btn,.campaigns-table__link-btn,.campaign-detail__action):not(:disabled):hover { transform:none; box-shadow:none; }
+.ui-final :is(.btn-primary,.topbar-action--primary,.campaigns-filter__btn--apply,.campaigns-table__link-btn--primary,.campaign-detail__action--primary) { background:var(--ui-action); border-color:var(--ui-action); color:#fff; }
+.ui-final :is(.btn-primary,.topbar-action--primary,.campaigns-filter__btn--apply,.campaigns-table__link-btn--primary,.campaign-detail__action--primary):not(:disabled):hover { background:var(--ui-action-hover);border-color:var(--ui-action-hover);color:#fff; }
+.ui-final :is(.btn-ghost,.btn-quiet,.campaigns-filter__btn--clear,.campaigns-table__link-btn:not(.campaigns-table__link-btn--primary),.campaign-detail__action:not(.campaign-detail__action--primary),.ui-icon-button) { background:var(--ui-panel);border-color:var(--ui-border);color:var(--ui-ink); }
+.ui-final :is(.btn-ghost,.btn-quiet,.campaigns-filter__btn--clear,.campaigns-table__link-btn:not(.campaigns-table__link-btn--primary),.campaign-detail__action:not(.campaign-detail__action--primary),.ui-icon-button):not(:disabled):hover { background:var(--ui-soft);border-color:#b4c8da;color:var(--ui-action-hover); }
+.ui-final .btn-danger { background:var(--ui-danger);border-color:var(--ui-danger);color:#fff; }
+.ui-final .btn-danger:not(:disabled):hover { background:#8e1730;border-color:#8e1730;color:#fff; }
+.ui-final .btn-danger-soft { background:var(--ui-danger-soft);border-color:#f0cad3;color:var(--ui-danger); }
+.ui-final .btn-danger-soft:not(:disabled):hover { background:#fbe2e8;border-color:#d99aa9;color:var(--ui-danger); }
+.ui-final :is(.btn-sm,.campaigns-table__link-btn) { min-height:36px;padding:6px 11px;font-size:.8125rem; }
+.ui-final .btn-lg { min-height:48px;padding:10px 20px; }
+.ui-final :is(button,.btn,input,select,textarea,summary)[disabled],.ui-final [aria-disabled="true"] { opacity:.55;cursor:not-allowed;transform:none;box-shadow:none; }
+.ui-final :is(a,button,input,select,textarea,summary,[tabindex]):focus-visible { outline:2px solid var(--ui-focus);outline-offset:3px; }
+.ui-final :is(.field,.catalog-row,.filter-exec) :is(input:not([type=checkbox]):not([type=radio]):not([type=hidden]):not([type=file]),select,textarea) {
+  min-height:var(--ui-control);max-width:100%;min-width:0;border:1px solid #cbd8e5;border-radius:var(--ui-control-radius);background:#fff;color:var(--ui-ink);
+  padding:9px 12px;font-size:.9rem;box-shadow:none;line-height:1.6;
+}
+.ui-final .field textarea:not([hidden]) { min-height:100px;resize:vertical; }
+.ui-final :is(.field,.catalog-row,.filter-exec) :is(input,select,textarea):focus-visible { border-color:var(--ui-focus);outline-offset:1px; }
+.ui-final .field :is(input,textarea)::placeholder { color:var(--ui-muted);opacity:.85; }
+.ui-final .field :is(input,select,textarea)[aria-invalid=true] { border-color:var(--ui-danger); }
+.ui-final .field > label:not(.choice-card),.ui-final .filter-exec__label { font-size:.85rem;font-weight:650;color:var(--ui-ink);margin-block-end:6px; }
+.ui-final :is(.field-help,.form-error) { font-size:.8125rem;line-height:1.8; }
+.ui-final .form-error { color:var(--ui-danger); }
+.ui-final :is(.card,.table-card,.filter-exec-shell) { border-radius:var(--ui-radius);box-shadow:var(--ui-shadow); }
+.ui-final .card:not(.card-muted):hover { transform:none;box-shadow:var(--ui-shadow); }
+.ui-final .status { border-radius:7px;font-weight:650;line-height:1.5;padding:4px 8px;white-space:normal; }
+.ui-final .status-active { background:var(--ui-success-soft);color:var(--ui-success); }
+.ui-final .status-warn { background:var(--ui-warning-soft);color:var(--ui-warning); }
+.ui-final .status-danger { background:var(--ui-danger-soft);color:var(--ui-danger); }
+.ui-final .status-info { background:#e9f3fb;color:#155e92; }
+.ui-final :is(.exec-menu__panel,.row-actions__menu,.topbar-account-menu) { border:1px solid var(--ui-border);border-radius:var(--ui-radius);box-shadow:var(--ui-overlay-shadow);padding:5px;background:var(--ui-panel); }
+.ui-final :is(.exec-menu__item,.topbar-account-menu__item) { border-radius:7px;min-height:38px;font-size:.85rem; }
+.ui-final .ui-icon-button { width:38px;height:38px;min-height:38px;padding:0;flex:none; }
+.ui-final .ui-dialog { width:min(440px,calc(100vw - 32px));max-height:calc(100dvh - 32px);margin:auto;padding:0;border:1px solid var(--ui-border);border-radius:18px;color:var(--ui-ink);background:#fff;box-shadow:var(--ui-overlay-shadow);overflow:auto; }
+.ui-final .ui-dialog::backdrop { background:rgb(16 29 48 / .56);backdrop-filter:blur(3px); }
+.ui-dialog__inner { padding:24px;display:grid;gap:13px; }
+.ui-dialog__header,.ui-dialog__actions { display:flex;align-items:center;justify-content:space-between;gap:10px; }
+.ui-dialog__symbol { display:grid;place-items:center;width:44px;height:44px;border-radius:12px;background:var(--ui-danger-soft);color:var(--ui-danger); }
+.ui-dialog h2 { margin:0;font-size:1.2rem;line-height:1.5; }
+.ui-dialog p { margin:0;color:var(--ui-muted);line-height:1.85;overflow-wrap:anywhere; }
+.ui-dialog__actions { justify-content:flex-end;margin-block-start:12px; }
+.ui-final .toast-stack { max-width:min(420px,calc(100vw - 24px)); }
+.ui-final .toast-stack .ui-notice { display:flex;align-items:center;gap:10px;min-width:0;padding:12px;border:1px solid var(--ui-border);border-inline-start:3px solid var(--ui-action);border-radius:var(--ui-radius);background:#fff;color:var(--ui-ink);box-shadow:var(--ui-overlay-shadow);font-size:.875rem;line-height:1.75; }
+.ui-final .ui-notice.toast-error { border-inline-start-color:var(--ui-danger); }
+.ui-final .ui-notice.toast-success { border-inline-start-color:var(--ui-success); }
+.ui-notice__text { flex:1;min-width:0;overflow-wrap:anywhere; }
+.ui-notice__icon { flex:none;color:var(--ui-muted); }
+.ui-final [hidden] { display:none !important; }
+@media(max-width:600px) {
+  .ui-final :is(.btn,.campaigns-filter__btn,.campaign-detail__action,.ui-icon-button) { min-height:44px; }
+  .ui-dialog__inner { padding:20px; }
+  .ui-dialog__actions > .btn { flex:1; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .ui-final :is(.btn,.topbar-action,.campaign-detail__action,.ui-dialog,.ui-notice) { transition:none;animation:none; }
+}

@@ -10,7 +10,7 @@
     </form>
     <a class="exec-menu__item" href="{% url 'campaigns:export_csv' campaign.id %}">خروجی CSV</a>
     {% if can_delete_draft %}
-    <form method="post" action="{% url 'campaigns:delete' campaign.id %}" class="exec-menu__item exec-menu__item--danger" onsubmit="return confirm('این پیش‌نویس برای همیشه حذف شود؟');">
+    <form method="post" action="{% url 'campaigns:delete' campaign.id %}" class="exec-menu__item exec-menu__item--danger" data-confirm-title="حذف پیش‌نویس" data-confirm-message="این پیش‌نویس برای همیشه حذف می‌شود و قابل بازیابی نیست." data-confirm-label="حذف پیش‌نویس" onsubmit="return window.tmadsConfirmReady || confirm('این پیش‌نویس برای همیشه حذف شود؟');">
       {% csrf_token %}
       <button type="submit">حذف پیش‌نویس</button>
     </form>

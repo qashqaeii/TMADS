@@ -3,7 +3,7 @@
   method="post"
   action="{% url 'campaigns:delete' campaign.id %}"
   class="campaign-delete-form"
-  onsubmit="return confirm('این پیش‌نویس برای همیشه حذف شود؟');"
+  data-confirm-title="حذف پیش‌نویس" data-confirm-message="این پیش‌نویس برای همیشه حذف می‌شود و قابل بازیابی نیست." data-confirm-label="حذف پیش‌نویس" onsubmit="return window.tmadsConfirmReady || confirm('این پیش‌نویس برای همیشه حذف شود؟');"
 >
   {% csrf_token %}
   <button type="submit" class="btn btn-ghost btn-sm btn-danger-soft" title="حذف پیش‌نویس">حذف پیش‌نویس</button>

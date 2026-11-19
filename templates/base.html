@@ -8,26 +8,46 @@
   <title>{% block title %}{{ PRODUCT_NAME }}{% endblock %}</title>
   <link rel="stylesheet" href="{% static 'css/app.css' %}">
   <link rel="stylesheet" href="{% static 'css/design-executive.css' %}">
+  <link rel="stylesheet" href="{% static 'css/ui-foundation.css' %}">
   <script src="https://unpkg.com/htmx.org@2.0.4"></script>
   <script defer src="https://unpkg.com/alpinejs@3.14.8/dist/cdn.min.js"></script>
   <script defer src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
   <script defer src="{% static 'js/lucide-mount.js' %}"></script>
   <script defer src="{% static 'js/motion.js' %}"></script>
   <script defer src="{% static 'js/navigation.js' %}"></script>
+  <script defer src="{% static 'js/ui-foundation.js' %}"></script>
   <script defer src="{% static 'js/tmads-tooltips.js' %}"></script>
   {% block extra_head %}{% endblock %}
   {% block charts_head %}{% endblock %}
 </head>
-<body class="app-body {% block body_class %}{% endblock %}">
+<body class="app-body ui-final {% block body_class %}{% endblock %}">
   <a class="skip-link" href="#main-content">رفتن به محتوای اصلی</a>
   {% block body %}{% endblock %}
   {% if messages %}
   <div class="toast-stack" aria-live="polite">
     {% for message in messages %}
-    <div class="toast toast-{{ message.tags }}">{{ message }}</div>
+    <div class="toast ui-notice toast-{{ message.tags }}" role="{% if 'error' in message.tags %}alert{% else %}status{% endif %}">
+      <span class="ui-notice__icon" aria-hidden="true">{% if 'error' in message.tags %}{% include "includes/lucide_icon.html" with name="alert-circle" size="sm" %}{% elif 'success' in message.tags %}{% include "includes/lucide_icon.html" with name="check-circle" size="sm" %}{% else %}{% include "includes/lucide_icon.html" with name="info" size="sm" %}{% endif %}</span>
+      <span class="ui-notice__text">{{ message }}</span>
+      <button class="ui-icon-button ui-notice__close" type="button" data-dismiss-notice aria-label="بستن پیام" hidden>{% include "includes/lucide_icon.html" with name="x" size="sm" %}</button>
+    </div>
     {% endfor %}
   </div>
   {% endif %}
+  <dialog class="ui-dialog" id="ui-confirmation" aria-labelledby="ui-confirm-title" aria-describedby="ui-confirm-description">
+    <form method="dialog" class="ui-dialog__inner">
+      <header class="ui-dialog__header">
+        <span class="ui-dialog__symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="alert-triangle" size="md" %}</span>
+        <button type="submit" value="cancel" class="ui-icon-button" aria-label="بستن">{% include "includes/lucide_icon.html" with name="x" size="sm" %}</button>
+      </header>
+      <h2 id="ui-confirm-title">تأیید عملیات</h2>
+      <p id="ui-confirm-description"></p>
+      <footer class="ui-dialog__actions">
+        <button type="submit" value="cancel" class="btn btn-ghost" autofocus>انصراف</button>
+        <button type="submit" value="confirm" class="btn btn-danger" data-confirm-action>تأیید</button>
+      </footer>
+    </form>
+  </dialog>
 </body>
 </html>
 
