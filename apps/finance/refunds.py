@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from django.db import transaction
+from django.db.models import Exists, OuterRef
 
 from apps.campaigns.models import Campaign, CampaignStatusHistory
 from apps.core.models import AuditLog
@@ -19,10 +20,12 @@ REFUNDABLE_CAMPAIGN_STATUSES = {
 
 
 def eligible_orders_for_refund(customer):
-    return AdvertisingOrder.objects.filter(
-        customer=customer,
-        status=AdvertisingOrder.Status.PAID,
-    ).order_by("-created_at")
+    eligible_campaigns = Campaign.objects.filter(pk=OuterRef("campaign_id"), customer=customer,
+        status__in=REFUNDABLE_CAMPAIGN_STATUSES).exclude(remote_ads__remote_ad_id__gt="")
+    open_requests = RefundRequest.objects.filter(order_id=OuterRef("pk"),
+        status__in=[RefundRequest.Status.OPEN, RefundRequest.Status.REVIEW, RefundRequest.Status.APPROVED])
+    return AdvertisingOrder.objects.filter(customer=customer, status=AdvertisingOrder.Status.PAID).filter(
+        Exists(eligible_campaigns), ~Exists(open_requests)).order_by("-created_at")
 
 
 @transaction.atomic
@@ -37,7 +40,7 @@ def create_refund_request(*, customer, order: AdvertisingOrder, reason: str) -> 
         raise ValueError("این کمپین در وضعیت فعال/ارسال‌شده قابل بازپرداخت خودکار نیست.")
     if outstanding_order_reservation(ensure_wallet(customer), order.id) != order.total_irr or order.total_irr <= 0:
         raise ValueError("رزرو مالی سفارش نیازمند تطبیق است.")
-    if RefundRequest.objects.filter(order=order, status__in=[RefundRequest.Status.OPEN, RefundRequest.Status.REVIEW]).exists():
+    if RefundRequest.objects.filter(order=order, status__in=[RefundRequest.Status.OPEN, RefundRequest.Status.REVIEW, RefundRequest.Status.APPROVED]).exists():
         raise ValueError("درخواست بازپرداخت باز برای این سفارش وجود دارد.")
 
     return RefundRequest.objects.create(
@@ -101,7 +104,11 @@ def approve_refund(refund: RefundRequest, *, actor) -> RefundRequest:
     return refund
 
 
+@transaction.atomic
 def reject_refund(refund: RefundRequest, *, actor, note: str = "") -> RefundRequest:
+    Campaign.objects.select_for_update().get(id=refund.order.campaign_id, customer=refund.customer)
+    AdvertisingOrder.objects.select_for_update().get(pk=refund.order_id, customer=refund.customer)
+    refund.refresh_from_db()
     if refund.status not in {RefundRequest.Status.OPEN, RefundRequest.Status.REVIEW}:
         raise ValueError("درخواست در وضعیت قابل رد نیست.")
     refund.status = RefundRequest.Status.REJECTED
@@ -119,4 +126,17 @@ def reject_refund(refund: RefundRequest, *, actor, note: str = "") -> RefundRequ
         note or "با تیم پشتیبانی در ارتباط باشید.",
         level="warning",
     )
+    return refund
+
+
+@transaction.atomic
+def mark_refund_in_review(refund: RefundRequest, *, actor):
+    Campaign.objects.select_for_update().get(id=refund.order.campaign_id, customer=refund.customer)
+    AdvertisingOrder.objects.select_for_update().get(pk=refund.order_id, customer=refund.customer)
+    refund.refresh_from_db()
+    if refund.status != RefundRequest.Status.OPEN:
+        raise ValueError("فقط درخواست باز قابل انتقال به بررسی است.")
+    refund.status = RefundRequest.Status.REVIEW
+    refund.save(update_fields=["status", "updated_at"])
+    AuditLog.objects.create(actor=actor, action="refund.review", entity_type="refund", entity_id=refund.pk)
     return refund

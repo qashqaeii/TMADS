@@ -95,3 +95,12 @@ ad views spend. New quotes explicitly return the temporary rate buffer after ver
 allocation. Old quotes without these terms, incomplete histories, or missing create
 receipts remain locked for manual reconciliation. Remote sync no longer overwrites
 pending submission/reconciliation. Runtime and browser verification remain pending.
+
+## Payment provider and refund integrity
+Request and verify now use the same explicitly declared IRR amount; see third-party
+v4 implementations https://github.com/common-repository/zarinpal-woocommerce-payment-gateway/blob/main/class-wc-gateway-zarinpal.php
+and https://github.com/jnjal/zarinpal-js. Official/live provider verification remains
+required prior to production; no real request was made. Legacy pending requests without
+stored provider amount are blocked for manual verification, not reinterpreted. A conditional
+unique constraint rejects reuse of gateway authority; migration fails safely if legacy duplicates
+exist. Refund review and rejection now follow the same lock order as approval; filter before slice.

@@ -120,10 +120,13 @@ class Payment(TenantOwnedModel):
     gateway = models.CharField(max_length=32, default="fake")
     status = models.CharField(max_length=16, choices=Status.choices, default=Status.CREATED)
     provider_reference = models.CharField(max_length=128, blank=True)
+    provider_amount_irr = models.BigIntegerField(null=True, blank=True)
     idempotency_key = models.CharField(max_length=128, unique=True)
 
     class Meta:
         ordering = ["-created_at"]
+        constraints = [models.UniqueConstraint(fields=["gateway", "provider_reference"],
+            condition=~models.Q(provider_reference=""), name="unique_payment_gateway_reference")]
 
 
 class PaymentVerification(UUIDModel, TimeStampedModel):

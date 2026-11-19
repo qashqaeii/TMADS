@@ -10,7 +10,7 @@ from apps.accounts.permissions import staff_ops_required
 from apps.campaigns.models import Campaign, CampaignStatusHistory, TelegramAdvertisement
 from apps.core.models import AuditLog
 from apps.finance.models import AdvertisingOrder, ExchangeRate, RefundRequest, Wallet
-from apps.finance.refunds import approve_refund, reject_refund
+from apps.finance.refunds import approve_refund, reject_refund, mark_refund_in_review
 from apps.notifications.services import notify_customer
 from apps.telegram_ads.client import TelegramAdsClient
 from apps.telegram_ads.exceptions import TelegramAdsError
@@ -271,13 +271,11 @@ def audit_logs(request):
 @login_required
 @staff_ops_required
 def refunds_ops(request):
-    refunds = (
-        RefundRequest.objects.select_related("customer", "order")
-        .order_by("-created_at")[:80]
-    )
+    refunds = RefundRequest.objects.select_related("customer", "order").order_by("-created_at")
     status = request.GET.get("status", "")
     if status:
         refunds = refunds.filter(status=status)
+    refunds = refunds[:80]
 
     if request.method == "POST":
         refund_id = request.POST.get("refund_id")
@@ -291,8 +289,7 @@ def refunds_ops(request):
                 reject_refund(refund, actor=request.user, note=request.POST.get("note", "").strip())
                 messages.warning(request, "درخواست بازپرداخت رد شد.")
             elif action == "review":
-                refund.status = RefundRequest.Status.REVIEW
-                refund.save(update_fields=["status", "updated_at"])
+                mark_refund_in_review(refund, actor=request.user)
                 messages.info(request, "در حال بررسی علامت‌گذاری شد.")
         except ValueError as exc:
             messages.error(request, str(exc))

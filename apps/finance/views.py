@@ -3,7 +3,7 @@ import uuid
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db import transaction
+from django.db import IntegrityError, transaction
 from django.views.decorators.http import require_GET
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -45,6 +45,9 @@ def topup_view(request):
         except ValueError:
             amount_toman = 0
         amount_irr = amount_toman * 10
+        if amount_irr > 9223372036854775807:
+            messages.error(request, "مبلغ شارژ از محدوده مجاز بیشتر است.")
+            return redirect("finance:topup")
         if amount_irr < 10000:
             messages.error(request, "حداقل مبلغ شارژ ۱٬۰۰۰ تومان است.")
             return redirect("finance:topup")
@@ -54,6 +57,7 @@ def topup_view(request):
             order=None,
             amount_irr=amount_irr,
             gateway=_gateway_name(),
+            provider_amount_irr=amount_irr if _gateway_name() == "zarinpal" else None,
             provider_reference="",
             idempotency_key=str(uuid.uuid4()),
         )
@@ -66,7 +70,7 @@ def topup_view(request):
             callback_url=callback_url,
             description=f"topup-{payment.id}",
         )
-        if not result.success:
+        if not result.success or not result.provider_reference:
             payment.status = Payment.Status.FAILED
             payment.save(update_fields=["status", "updated_at"])
             messages.error(request, "درگاه پرداخت در دسترس نیست یا پیکربندی نشده است.")
@@ -74,7 +78,13 @@ def topup_view(request):
 
         payment.provider_reference = result.provider_reference
         payment.status = Payment.Status.REDIRECTED
-        payment.save(update_fields=["provider_reference", "status", "updated_at"])
+        try:
+            with transaction.atomic():
+                payment.save(update_fields=["provider_reference", "status", "updated_at"])
+        except IntegrityError:
+            Payment.objects.filter(pk=payment.pk).update(status=Payment.Status.FAILED)
+            messages.error(request, "شناسه تکراری درگاه؛ پرداخت متوقف شد. با پشتیبانی تماس بگیرید.")
+            return redirect("finance:topup")
 
         redirect_url = (result.raw or {}).get("redirect_url")
         if redirect_url:
@@ -120,11 +130,18 @@ def topup_callback(request, payment_id):
         messages.warning(request, "پرداخت تکمیل نشده؛ در صورت پرداخت از پشتیبانی پیگیری کنید.")
         return redirect("finance:wallet")
 
+    # Old pending payments were created without an explicit currency contract.
+    # Do not reinterpret them with the new Rial adapter.
+    if payment.provider_amount_irr != payment.amount_irr:
+        messages.error(request, "مبلغ این پرداخت قدیمی نیازمند بررسی پشتیبانی است.")
+        return redirect("finance:wallet")
     gateway = get_payment_gateway(payment.gateway)
-    result = gateway.verify_payment(provider_reference=payment.provider_reference, amount_irr=payment.amount_irr)
+    result = gateway.verify_payment(provider_reference=payment.provider_reference, amount_irr=payment.provider_amount_irr)
     PaymentVerification.objects.create(
         payment=payment, success=result.success,
-        raw_payload={"provider_reference_matched": True},
+        raw_payload={"provider_reference_matched": result.provider_reference == payment.provider_reference,
+                     "amount_irr": payment.provider_amount_irr,
+                     "code": ((result.raw or {}).get("response") or {}).get("data", {}).get("code")},
     )
     if result.success and result.provider_reference == payment.provider_reference:
         complete_topup_payment(payment)
