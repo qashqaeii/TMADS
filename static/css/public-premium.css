@@ -162,3 +162,29 @@
 .pp-legal-page .pp-note{max-width:850px;margin:18px auto 0;display:block}
 .pp-legal-page .ui-editorial-notice{border-radius:12px}
 
+
+
+/* Account entry and recovery use a consistent restrained form shell. */
+.ui-final.public-premium .ui-auth-screen{min-height:0;padding-block:clamp(26px,5vw,65px);background:radial-gradient(ellipse at 50% 0%,#eaf4fc,transparent 65%)}
+.ui-final.public-premium .pp-auth-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.8fr);width:min(100%,940px);margin-inline:auto;gap:18px;align-items:stretch}
+.ui-final.public-premium .pp-auth-layout .ui-auth-card{width:100%;max-width:none;padding:clamp(22px,4vw,40px);border-radius:22px;background:#fff;border-color:var(--pp-line)}
+.public-premium .pp-auth-aside{display:grid;align-content:center;gap:16px;padding:clamp(24px,4vw,38px);background:#163b5a;color:#fff;border-radius:22px;position:relative;isolation:isolate;overflow:hidden}
+.public-premium .pp-auth-aside::before{content:"";position:absolute;z-index:-1;width:240px;height:240px;border:1px solid rgb(255 255 255 / .13);border-radius:50%;inset-inline-end:-80px;inset-block-end:-90px;box-shadow:0 0 0 30px rgb(255 255 255 / .035),0 0 0 60px rgb(255 255 255 / .025)}
+.public-premium .pp-auth-aside>span{font-size:.82rem;color:#c1dff3;font-weight:650}
+.public-premium .pp-auth-aside h2{font-size:clamp(1.35rem,2.5vw,1.85rem);line-height:1.55;margin:0}
+.public-premium .pp-auth-aside p{line-height:1.9;color:#d9e8f2;margin:0}
+.public-premium .pp-auth-aside ul{list-style:none;display:grid;gap:12px;padding:0;margin:0}
+.public-premium .pp-auth-aside li{display:flex;align-items:center;gap:9px;color:#e6f1f8;font-size:.92rem}
+.public-premium .pp-auth-aside a{color:#fff;min-height:44px;display:inline-flex;align-items:center;text-decoration:underline;text-underline-offset:4px}
+.ui-final.public-premium .ui-auth-card .field input:not([type=checkbox]):not([type=radio]){min-height:48px;border-radius:11px;background:#f9fbfd;transition:background-color .2s,border-color .2s,box-shadow .2s}
+.ui-final.public-premium .ui-auth-card .field input:focus{background:#fff;border-color:#6fa9cf;box-shadow:0 0 0 3px #e2f0fa}
+.ui-final.public-premium .ui-auth-card .auth-links{border-top:0;padding-top:0}
+.ui-final.public-premium .ui-auth-card .pp-auth-context{border-top:1px solid var(--pp-line);padding-top:14px}
+.public-premium .pp-password-row{position:relative}
+.public-premium .pp-password-row input{padding-inline-end:82px}
+.public-premium .pp-password-toggle{position:absolute;inset-inline-end:5px;top:50%;transform:translateY(-50%);min-height:40px;min-width:64px;border:0;border-radius:8px;background:var(--pp-soft);color:var(--pp-blue);font:inherit;font-size:.83rem;cursor:pointer}
+.public-premium .pp-password-toggle[hidden]{display:none}
+.ui-final.public-premium .pp-auth-recovery .ui-auth-card{max-width:480px;border-radius:22px;padding:clamp(24px,4vw,38px)}
+.public-premium .pp-auth-back{display:inline-flex;gap:6px;min-height:44px;align-items:center;color:var(--pp-blue);font-size:.9rem;justify-content:center}
+@media(max-width:760px){.ui-final.public-premium .pp-auth-layout{grid-template-columns:minmax(0,1fr);max-width:460px}.public-premium .pp-auth-aside{padding:24px}.public-premium .pp-auth-aside h2{font-size:1.25rem}}
+
