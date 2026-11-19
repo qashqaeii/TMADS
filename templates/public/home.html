@@ -5,9 +5,9 @@
 <section class="container ui-landing-hero">
   <div class="ui-landing-copy">
     <span class="ui-landing-kicker"><span aria-hidden="true"></span> پلتفرم مدیریت تبلیغات تلگرام</span>
-    <h1>تبلیغات تلگرام،<br><em>با دیدی روشن‌تر.</em></h1>
-    <p>کمپین‌های خود را طراحی کنید، مخاطبان را انتخاب کنید، هزینه‌ها را پیش از پرداخت ببینید و عملکرد را در یک داشبورد فارسی دنبال کنید.</p>
-    <div class="ui-landing-actions">{% if user.is_authenticated %}<a class="btn btn-primary btn-lg" href="{% url 'dashboard:home' %}">ورود به داشبورد {% include "includes/lucide_icon.html" with name="arrow-left" size="btn" %}</a>{% else %}<a class="btn btn-primary btn-lg" href="{% url 'accounts:register' %}">ایجاد حساب {% include "includes/lucide_icon.html" with name="arrow-left" size="btn" %}</a>{% endif %}<a class="btn btn-ghost btn-lg" href="{% url 'public:how_it_works' %}">نحوه کار</a></div>
+    <h1>تبلیغات تلگرام،<br><em>هدفمند و قابل اندازه‌گیری.</em></h1>
+    <p>با تی‌ام‌ادز، کمپین‌های Telegram Ads را از یک داشبورد فارسی طراحی کنید؛ مخاطب مناسب را انتخاب کنید، بودجه و کارمزد را پیش از ثبت سفارش ببینید و پس از انتشار، نتیجه تبلیغات را بسنجید.</p>
+    <div class="ui-landing-actions">{% if user.is_authenticated %}<a class="btn btn-primary btn-lg" href="{% url 'dashboard:home' %}">ورود به داشبورد {% include "includes/lucide_icon.html" with name="arrow-left" size="btn" %}</a>{% else %}<a class="btn btn-primary btn-lg" href="{% url 'accounts:register' %}">ساخت اولین کمپین {% include "includes/lucide_icon.html" with name="arrow-left" size="btn" %}</a>{% endif %}<a class="btn btn-ghost btn-lg" href="{% url 'public:how_it_works' %}">آشنایی با تبلیغات تلگرام</a></div>
     <div class="ui-landing-proof"><span>{% include "includes/lucide_icon.html" with name="check-circle" size="sm" %} پیش‌فاکتور شفاف</span><span>{% include "includes/lucide_icon.html" with name="check-circle" size="sm" %} گزارش یکپارچه</span><span>{% include "includes/lucide_icon.html" with name="check-circle" size="sm" %} بررسی قبل از ارسال</span></div>
   </div>
   <div class="ui-product-visual" aria-label="نمای شماتیک پنل مدیریت با اطلاعات نمونه">
@@ -29,7 +29,7 @@
   </div>
 </section>
 <section class="container ui-landing-section">
-  <header class="ui-landing-section-head"><div><p>هدف‌گیری</p><h2>از جستجو تا ربات‌ها</h2></div><a href="{% url 'public:features' %}">همه امکانات {% include "includes/lucide_icon.html" with name="arrow-left" size="sm" %}</a></header>
+  <header class="ui-landing-section-head"><div><p>هدف‌گیری</p><h2>تبلیغ در تلگرام؛ متناسب با مخاطب شما</h2></div><a href="{% url 'public:features' %}">همه امکانات {% include "includes/lucide_icon.html" with name="arrow-left" size="sm" %}</a></header>
   <div class="ui-landing-targets">
     <article><span class="ui-target-symbol">{% include "includes/lucide_icon.html" with name="search" size="md" %}</span><h3>جستجو</h3><p>عبارت‌های جستجوی منتخب</p></article>
     <article><span class="ui-target-symbol">{% include "includes/lucide_icon.html" with name="bot" size="md" %}</span><h3>ربات‌ها</h3><p>ربات‌های هدف واجد شرایط</p></article>
@@ -39,8 +39,40 @@
   <p class="ui-landing-note">امکان ارسال و جایگاه‌های قابل استفاده به شرایط حساب، تأییدهای لازم و قابلیت‌های تلگرام وابسته است.</p>
 </section>
 <section class="container ui-landing-section ui-landing-process">
-  <header class="ui-landing-section-head"><div><p>مسیر کار</p><h2>از پیش‌نویس تا بررسی نتیجه</h2></div></header>
+  <header class="ui-landing-section-head"><div><p>مسیر کار</p><h2>چگونه تبلیغات تلگرام را شروع کنیم؟</h2></div></header>
   <div class="ui-landing-steps"><article><span>۰۱</span><h3>طراحی کمپین</h3><p>هدف، متن، مقصد و بودجه را مشخص کنید.</p></article><article><span>۰۲</span><h3>بررسی سفارش</h3><p>پیش‌فاکتور و قوانین را مرور کنید.</p></article><article><span>۰۳</span><h3>پایش عملکرد</h3><p>پس از انتشار و همگام‌سازی، شاخص‌های تبلیغ را ببینید.</p></article></div>
+</section>
+<section class="container ui-landing-section" aria-labelledby="why-tmads">
+  <header class="ui-landing-section-head"><div><p>Telegram Ads چیست؟</p><h2 id="why-tmads">تبلیغات رسمی تلگرام، با مدیریت فارسی</h2></div></header>
+  <article class="card card-pad legal-prose ui-public-reading">
+    <p>در پلتفرم تبلیغاتی تلگرام، پیام‌های اسپانسری در جایگاه‌های واجد شرایط به مخاطبان نمایش داده می‌شوند. برخلاف خرید مستقیم یک پست تبلیغاتی از مدیر کانال، در Telegram Ads می‌توانید بودجه، هدف‌گیری و نرخ پیشنهاد نمایش (CPM) را مشخص کنید و نتیجه را با آمار تبلیغ بررسی کنید.</p>
+    <p>تی‌ام‌ادز برای کسب‌وکارهای فارسی‌زبان طراحی شده تا مراحل برنامه‌ریزی، آماده‌سازی سفارش و مدیریت کمپین در یک محیط یکپارچه انجام شود. امکان انتشار به قابلیت‌های حساب و تأییدهای لازم وابسته است.</p>
+    <p><a href="{% url 'public:how_it_works' %}">راهنمای کامل شروع تبلیغات در تلگرام</a> · <a href="{% url 'public:pricing' %}">نحوه محاسبه هزینه تبلیغات تلگرام</a></p>
+  </article>
+</section>
+<section class="container ui-landing-section">
+  <header class="ui-landing-section-head"><div><p>برای چه کسانی؟</p><h2>از رشد کانال تا معرفی محصول</h2></div></header>
+  <div class="feature-grid ui-public-feature-grid">
+    <article class="feature-card"><h3>مدیران کانال و تولیدکنندگان محتوا</h3><p>برای معرفی کانال به مخاطبان مرتبط، مقصد تبلیغ و پیام خود را مشخص کنید و رفتار کاربران را در گزارش پیگیری کنید.</p></article>
+    <article class="feature-card"><h3>سازندگان ربات و مینی‌اپ</h3><p>کاربران مناسب را به ربات یا مینی‌اپ هدایت کنید و هدف کمپین را بر اساس امکانات قابل استفاده انتخاب کنید.</p></article>
+    <article class="feature-card"><h3>کسب‌وکارها و تیم‌های بازاریابی</h3><p>برای معرفی محصول یا خدمات، بودجه کمپین را برنامه‌ریزی کنید و نتایج را در کنار هزینه‌ها ارزیابی کنید.</p></article>
+  </div>
+</section>
+<section class="container ui-landing-section">
+  <header class="ui-landing-section-head"><div><p>مزیت‌های محصول</p><h2>قبل از هزینه، تصمیم بگیرید؛ بعد از انتشار، بسنجید.</h2></div><a href="{% url 'public:features' %}">مشاهده امکانات</a></header>
+  <div class="feature-grid ui-public-feature-grid">
+    <article class="feature-card"><h3>بودجه شفاف</h3><p>مبلغ سفارش، نرخ تبدیل و کارمزد را در پیش‌فاکتور مرور کنید؛ بودجه پیشنهادی با هزینه واقعی نمایش یکسان نیست.</p></article>
+    <article class="feature-card"><h3>هدف‌گیری بر اساس کمپین</h3><p>گزینه‌های قابل استفاده به نوع تبلیغ و قابلیت حساب وابسته‌اند. پیش از سفارش، هدف و محدودیت‌ها را بررسی کنید.</p></article>
+    <article class="feature-card"><h3>گزارش قابل پیگیری</h3><p>از نمایش و هزینه تا سایر شاخص‌های در دسترس، داده‌های همگام‌شده را برای ارزیابی کمپین به کار بگیرید.</p></article>
+  </div>
+</section>
+<section class="container ui-landing-section">
+  <header class="ui-landing-section-head"><div><p>پرسش‌های پیش از شروع</p><h2>هرآنچه برای تصمیم‌گیری نیاز دارید</h2></div><a href="{% url 'public:faq' %}">همه سوالات</a></header>
+  <div class="faq-list faq-list--exec ui-public-faq">
+    <details class="faq-item faq-item--exec"><summary>هزینه تبلیغات در تلگرام چقدر است؟</summary><p>هزینه به بودجه، نرخ پیشنهاد نمایش، نرخ تبدیل و کارمزد وابسته است. پیش از ثبت سفارش مبلغ را در <a href="{% url 'public:pricing' %}">راهنمای تعرفه</a> بررسی کنید.</p></details>
+    <details class="faq-item faq-item--exec"><summary>آیا جذب عضو یا فروش تضمین می‌شود؟</summary><p>خیر؛ نتیجه به محتوا، هدف‌گیری، رقابت و مقصد تبلیغ وابسته است. گزارش‌ها برای سنجش عملکرد ارائه می‌شوند، نه تضمین نتیجه.</p></details>
+    <details class="faq-item faq-item--exec"><summary>آیا ساخت پیش‌نویس به معنی انتشار تبلیغ است؟</summary><p>خیر. پیش‌نویس صرفاً آماده‌سازی است؛ سفارش، بررسی محتوا و ارسال مراحل جداگانه‌اند.</p></details>
+  </div>
   <div class="ui-landing-end"><div><h2>اولین پیش‌نویس خود را بسازید.</h2><p>صدور سفارش و ارسال وابسته به وضعیت سرویس و بررسی‌های لازم است.</p></div>{% if user.is_authenticated %}<a class="btn btn-primary btn-lg" href="{% url 'campaigns:wizard_new' %}">ساخت پیش‌نویس</a>{% else %}<a class="btn btn-primary btn-lg" href="{% url 'accounts:register' %}">ایجاد حساب</a>{% endif %}</div>
 </section>
 </div>
