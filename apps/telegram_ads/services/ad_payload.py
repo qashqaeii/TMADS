@@ -115,10 +115,12 @@ def build_create_ad_payload(
         payload["button"] = settings["button"]
     if settings.get("conversion_event_id"):
         payload["conversion_event_id"] = settings["conversion_event_id"]
-    if settings.get("photo_id"):
-        payload["photo_id"] = settings["photo_id"]
-    if settings.get("video_id"):
-        payload["video_id"] = settings["video_id"]
+    from apps.telegram_ads.services.media import media_receipt
+    if creative and creative.media:
+        receipt = media_receipt(campaign)
+        if not receipt:
+            raise ValueError("شناسه رسانه معتبر نیست.")
+        payload[receipt["field"]] = receipt["media_id"]
 
     schedule = build_schedule(settings)
     if schedule:

@@ -198,8 +198,12 @@ def validate_submission_ready(campaign) -> StudioValidationResult:
         ad_settings=campaign.ad_settings or {},
         strict=True,
     )
+    from apps.telegram_ads.services.media import media_receipt
     if creative and creative.media:
-        result.errors.append("ارسال رسانه به تلگرام هنوز تأیید نشده است؛ برای ثبت سفارش، فایل محلی را حذف کنید.")
+        if not media_receipt(campaign):
+            result.errors.append("شناسه معتبر رسانه از تلگرام دریافت نشده است؛ قبل از پرداخت فایل را منتقل یا حذف کنید.")
+    elif (campaign.ad_settings or {}).get("photo_id") or (campaign.ad_settings or {}).get("video_id"):
+        result.errors.append("شناسه رسانه قدیمی قابل تأیید نیست؛ فایل جدید ثبت کنید.")
     if not campaign.destination:
         result.errors.append("مقصد تبلیغ الزامی است.")
     if campaign.budget_irr <= 0:

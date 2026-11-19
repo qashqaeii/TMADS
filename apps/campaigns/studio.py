@@ -214,9 +214,9 @@ def apply_studio_step(campaign: Campaign, step: int, data, files=None) -> None:
         creative.cta_label = (data.get("cta_label") or "").strip()
         upload = (files or {}).get("creative_media") if files else None
         if upload:
-            from apps.campaigns.media_validation import validate_creative_media
+            from apps.campaigns.media_validation import validate_telegram_creative_media
 
-            errs = validate_creative_media(upload)
+            errs = validate_telegram_creative_media(upload)
             if errs:
                 raise ValueError("؛ ".join(errs))
             creative.media = upload

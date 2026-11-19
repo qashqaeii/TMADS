@@ -224,3 +224,12 @@ class TelegramAdsClient:
                 client.get_target_locations_list(country_code=country_code, query=query, limit=limit)
             ),
         )
+
+
+    def upload_creative_media(self, file, *, filename: str, is_video: bool):
+        if not (settings.TELEGRAM_ADS_WRITE_ENABLED and settings.TELEGRAM_ADS_PAID_SUBMISSION_ENABLED
+                and getattr(settings, "TELEGRAM_ADS_MEDIA_UPLOAD_ENABLED", False)):
+            raise TelegramAdsWriteDisabled("Media upload is disabled")
+        if is_video:
+            return self._run("upload_ad_video", lambda client: _model_to_dict(client.upload_ad_video(file, filename=filename)))
+        return self._run("upload_ad_photo", lambda client: _model_to_dict(client.upload_ad_photo(file, filename=filename)))

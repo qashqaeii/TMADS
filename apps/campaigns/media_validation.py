@@ -79,11 +79,13 @@ def validate_ad_video(upload: UploadedFile) -> list[str]:
         videos = [x for x in streams if x.get("codec_type") == "video"]
         duration = float(fmt.get("duration") or 0)
         if ("mp4" not in str(fmt.get("format_name", "")).split(",")
-                or not 0 < duration <= 3600 or len(videos) != 1
+                or not 3 <= duration <= 60 or len(videos) != 1
                 or videos[0].get("codec_name") != "h264"
+                or int(videos[0].get("width", 0)) < 640
+                or int(videos[0].get("width", 0)) * 9 != int(videos[0].get("height", 0)) * 16
                 or not 0 < int(videos[0].get("width", 0)) * int(videos[0].get("height", 0)) <= MAX_IMAGE_PIXELS
                 or any(x.get("codec_type") not in {"video", "audio"} for x in streams)):
-            return ["ویدیو باید MP4 سالم با کدک H.264 و ابعاد معتبر باشد."]
+            return ["ویدیو باید MP4/H.264، نسبت ۱۶:۹، عرض حداقل ۶۴۰ پیکسل و مدت ۳ تا ۶۰ ثانیه داشته باشد."]
     except (OSError, subprocess.SubprocessError, ValueError, TypeError, KeyError):
         return ["فایل ویدیو سالم یا قابل بررسی نیست."]
     finally:
@@ -98,3 +100,24 @@ def validate_creative_media(upload):
     if suffix in ALLOWED_VIDEO_EXT:
         return validate_ad_video(upload)
     return validate_ad_image(upload)
+
+
+def validate_telegram_creative_media(upload):
+    """Exact advertised API dimensions and formats, over the local safety checks."""
+    errors = validate_creative_media(upload)
+    if errors or not upload:
+        return errors
+    if Path(upload.name or "").suffix.lower() == ".mp4":
+        return []
+    if Path(upload.name or "").suffix.lower() not in {".jpg", ".jpeg", ".png"}:
+        return ["تلگرام برای تبلیغ تصویری فقط JPEG و PNG می‌پذیرد."]
+    try:
+        upload.seek(0)
+        with Image.open(upload) as img:
+            if img.width < 640 or img.width * 9 != img.height * 16:
+                return ["تصویر تبلیغ باید نسبت ۱۶:۹ و عرض حداقل ۶۴۰ پیکسل داشته باشد."]
+    except (OSError, ValueError):
+        return ["تصویر قابل بررسی نیست."]
+    finally:
+        upload.seek(0)
+    return []

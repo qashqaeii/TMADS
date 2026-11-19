@@ -337,6 +337,17 @@ def campaign_wizard(request, campaign_id=None):
         if not _draft_revision_matches(campaign, request.POST):
             messages.error(request, "نسخه یا مرحله پیش‌نویس تغییر کرده است؛ صفحه جدید را بررسی کنید.")
             return redirect("campaigns:wizard", campaign_id=campaign.id)
+        if action == "verify_media" and step == 3:
+            from apps.telegram_ads.services.media import upload_saved_media
+            from apps.telegram_ads.exceptions import TelegramAdsError
+            try:
+                if request.FILES or request.POST.get("remove_creative_media") == "1":
+                    raise ValueError("ابتدا فایل را ذخیره کنید؛ سپس فایل ذخیره‌شده را منتقل کنید.")
+                upload_saved_media(campaign, actor=request.user)
+                messages.success(request, "شناسه رسانه از تلگرام دریافت شد؛ انتشار هنوز انجام نشده است.")
+            except (ValueError, TelegramAdsError):
+                messages.error(request, "انتقال رسانه انجام نشد یا هنوز فعال نیست. فایل محلی حفظ شده است.")
+            return redirect("campaigns:wizard", campaign_id=campaign.id)
         if action == "refresh_quote" and step == max_step:
             try:
                 _create_quote(campaign)
@@ -351,13 +362,13 @@ def campaign_wizard(request, campaign_id=None):
             errors = ["فرمت اطلاعات واردشده معتبر نیست."]
         upload = request.FILES.get("creative_media")
         if upload:
-            from apps.campaigns.media_validation import validate_creative_media
+            from apps.campaigns.media_validation import validate_telegram_creative_media
             if step != 3 or campaign.target_type not in {"channels", "users"}:
                 errors.append("این نوع تبلیغ از فایل رسانه پشتیبانی نمی‌کند.")
             elif request.POST.get("remove_creative_media") == "1":
                 errors.append("حذف فایل و بارگذاری فایل جدید را هم‌زمان انتخاب نکنید.")
             else:
-                errors.extend(validate_creative_media(upload))
+                errors.extend(validate_telegram_creative_media(upload))
         if errors:
             for e in errors:
                 messages.error(request, e)
@@ -484,8 +495,11 @@ def campaign_wizard(request, campaign_id=None):
     if studio_mode not in ("simple", "professional"):
         studio_mode = "simple"
 
+    from apps.telegram_ads.services.media import media_receipt, media_upload_enabled
     ctx = {
         "campaign": campaign,
+        "media_uploaded": bool(media_receipt(campaign)),
+        "media_upload_enabled": media_upload_enabled(),
         "step": step,
         "steps": STUDIO_STEPS,
         "target_placement_choices": placement_choices_for_target(campaign.target_type or "channels"),
