@@ -33,3 +33,22 @@ def test_sync_ad_statistics_stores_period_rows(monkeypatch):
     assert snap.raw.get("kind") == "period"
 
     assert snap.raw["spent_verified"] is True
+
+
+@pytest.mark.django_db
+def test_remote_sync_preserves_unknown_status_and_financial_lock():
+    from apps.telegram_ads.services.sync import _sync_campaign_from_remote
+    from apps.finance.models import AdvertisingOrder
+    user = User.objects.create_user(username="sync-safe", password="x")
+    campaign = Campaign.objects.create(customer=user.customer_profile, name="T", status=Campaign.Status.ACTIVE)
+    ad = TelegramAdvertisement.objects.create(campaign=campaign, remote_ad_id="47", remote_status_raw={"status": "unknown"})
+    _sync_campaign_from_remote(ad)
+    campaign.refresh_from_db()
+    assert campaign.status == Campaign.Status.ACTIVE
+    campaign.status = Campaign.Status.RECONCILIATION
+    campaign.save(update_fields=["status"])
+    ad.remote_status_raw={"status": "active", "title": "changed"}
+    _sync_campaign_from_remote(ad)
+    campaign.refresh_from_db()
+    assert campaign.status == Campaign.Status.RECONCILIATION
+    assert campaign.name == "T"

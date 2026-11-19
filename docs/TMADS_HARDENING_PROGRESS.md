@@ -129,3 +129,6 @@ Lifetime data is restricted to the ad object; video opens are not views, zero is
 
 ## Campaign actions and support boundaries
 Only POST duplicates a campaign; copied drafts exclude previous policy acceptance and remote eligibility state. Locked/linked campaigns no longer show a misleading editable action. Unsafe destination schemes are not clickable. Customer refresh is scoped to their ads and throttled. Support links validate tenant ownership, stop is explicitly a request, ticket fields and terminal status are validated. Linked drafts and records with financial history are protected from deletion. Legacy wizard step mapping fixed. Runtime verification pending.
+
+## Read-only sync and import safeguards
+Status sync locks the campaign before applying remote fields and never overwrites financial locks or terminal local exceptions. Unknown status does not become a false pause; imported and exceptional workflows do not fabricate prior lifecycle milestones. Repeat import preserves protected orders and projects; default-named but nonempty drafts are not pruned. Allocation verification compares remote destination to the locked campaign, not mutable sync metadata. Runtime verification pending.

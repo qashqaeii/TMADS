@@ -108,7 +108,7 @@ def settle_confirmed_allocation(campaign_id, *, actor):
     client = TelegramAdsClient()
     remote = client.get_ad(ad.remote_ad_id)
     if (str(remote.get("ad_id")) != ad.remote_ad_id or remote.get("currency") != "TON"
-            or remote.get("promote_url") != ad.promotion_url):
+            or remote.get("promote_url") != campaign.destination):
         raise ValueError("هویت یا ارز تبلیغ با سند ایجاد آن یکسان نیست.")
     evidence = _verify_transfer(client.get_ad_transactions(ad.remote_ad_id, limit=100),
                                 amount=order.ton_allocation, claimed_at=claim.created_at)

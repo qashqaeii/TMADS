@@ -458,6 +458,19 @@ _LIFECYCLE: list[tuple[str, str, set[str], str]] = [
 
 def campaign_lifecycle(campaign: Campaign) -> list[dict[str, Any]]:
     status = campaign.status
+    # Imported remote ads have no observed local payment/review history.
+    if (campaign.wizard_data or {}).get("imported"):
+        return [{
+            "label": campaign.get_status_display(), "key": "remote", "icon": "radio",
+            "index": 0, "state": "current", "is_terminal": False,
+        }]
+    # An exception does not prove all earlier workflow steps took place.
+    if status in {Campaign.Status.RECONCILIATION, Campaign.Status.REJECTED,
+                  Campaign.Status.CANCELLED, Campaign.Status.FAILED}:
+        return [{
+            "label": campaign.get_status_display(), "key": "exception", "icon": "flag",
+            "index": 0, "state": "current", "is_terminal": False,
+        }]
     matched_idx = 0
     for idx, (_label, _key, statuses, _icon) in enumerate(_LIFECYCLE):
         if status in statuses:

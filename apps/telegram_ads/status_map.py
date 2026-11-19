@@ -11,6 +11,6 @@ def map_remote_status_to_campaign(item: dict) -> str:
         "on_hold": Campaign.Status.PAUSED,
         "declined": Campaign.Status.REJECTED,
         "in_review": Campaign.Status.AWAITING_TELEGRAM,
-        "ready_for_review": Campaign.Status.PENDING_REVIEW,
+        "ready_for_review": Campaign.Status.AWAITING_TELEGRAM,
     }
-    return mapping.get(remote, Campaign.Status.ACTIVE if remote == "active" else Campaign.Status.PAUSED)
+    return mapping.get(remote, Campaign.Status.AWAITING_TELEGRAM)

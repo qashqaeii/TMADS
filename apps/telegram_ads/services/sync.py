@@ -5,6 +5,7 @@ from datetime import date, datetime, timedelta, timezone as dt_timezone
 from decimal import Decimal
 
 from django.utils import timezone
+from django.db import transaction
 
 from apps.campaigns.metrics import _decimal, _int
 from apps.campaigns.models import Campaign, CampaignStatisticsSnapshot, CampaignTargeting, TelegramAdvertisement
@@ -13,6 +14,7 @@ from apps.telegram_ads.constants import API_TO_TMADS_PLACEMENT, STATS_INTERVAL_D
 from apps.telegram_ads.exceptions import TelegramAdsError
 from apps.telegram_ads.models import APIRequestLog
 from apps.telegram_ads.status_map import map_remote_status_to_campaign
+from apps.finance.models import AdvertisingOrder
 
 logger = logging.getLogger(__name__)
 
@@ -93,34 +95,45 @@ def _apply_remote_ad_payload(ad: TelegramAdvertisement, item: dict) -> None:
         ad.promotion_url = str(promotion)
 
 
+def has_financial_lock(campaign: Campaign) -> bool:
+    if campaign.status in {Campaign.Status.SUBMITTING, Campaign.Status.RECONCILIATION}:
+        return True
+    return AdvertisingOrder.objects.filter(campaign_id=campaign.pk).exclude(
+        status__in=[AdvertisingOrder.Status.COMPLETED, AdvertisingOrder.Status.CANCELLED, AdvertisingOrder.Status.FAILED],
+    ).exists()
+
+
+@transaction.atomic
 def _sync_campaign_from_remote(ad: TelegramAdvertisement, *, include_target: bool = False) -> None:
-    campaign = ad.campaign
-    if not campaign:
+    # Settlement, import and submission all acquire the campaign lock first.
+    campaign = Campaign.objects.select_for_update().filter(pk=ad.campaign_id).first()
+    if campaign is None or has_financial_lock(campaign):
+        return
+    if campaign.status in {Campaign.Status.CANCELLED, Campaign.Status.FAILED}:
         return
     item = ad.remote_status_raw if isinstance(ad.remote_status_raw, dict) else {}
-    title = (item.get("title") or "").strip()
+    title = str(item.get("title") or "").strip()
     if title:
-        campaign.name = title
-    destination = (item.get("promote_url") or item.get("promotion_url") or "").strip()
+        campaign.name = title[:200]
+    destination = str(item.get("promote_url") or item.get("promotion_url") or "").strip()
     if destination:
-        campaign.destination = destination
+        campaign.destination = destination[:500]
     api_pl = item.get("placement")
     if api_pl:
-        campaign.placement = API_TO_TMADS_PLACEMENT.get(str(api_pl), str(api_pl))
-    cpm = item.get("cpm")
-    if cpm is not None:
-        try:
-            campaign.cpm_bid = Decimal(str(cpm))
-        except Exception:
-            pass
-    # Remote display status must not undo a local submission/reconciliation lock.
-    from apps.finance.models import AdvertisingOrder
-    pending = AdvertisingOrder.objects.filter(campaign_id=campaign.pk, status=AdvertisingOrder.Status.SUBMITTING).exists()
-    if pending or campaign.status in {Campaign.Status.SUBMITTING, Campaign.Status.RECONCILIATION}:
-        return
-    campaign.status = map_remote_status_to_campaign(item)
-    update_fields = ["name", "destination", "placement", "status", "cpm_bid", "updated_at"]
-    campaign.save(update_fields=update_fields)
+        campaign.placement = API_TO_TMADS_PLACEMENT.get(str(api_pl), str(api_pl))[:32]
+    cpm = _decimal(item.get("cpm")) if item.get("currency") == "TON" else None
+    if cpm is not None and cpm < Decimal("100000000"):
+        campaign.cpm_bid = cpm
+    previous = campaign.status
+    if str(item.get("status") or "").lower() in {
+        "active", "stopped", "on_hold", "declined", "in_review", "ready_for_review",
+    }:
+        campaign.status = map_remote_status_to_campaign(item)
+    campaign.save(update_fields=["name", "destination", "placement", "status", "cpm_bid", "updated_at"])
+    if previous != campaign.status:
+        from apps.campaigns.models import CampaignStatusHistory
+        CampaignStatusHistory.objects.create(campaign=campaign, from_status=previous,
+            to_status=campaign.status, note="وضعیت دریافت‌شده از تلگرام")
 
     if include_target:
         target = item.get("target")
@@ -130,11 +143,10 @@ def _sync_campaign_from_remote(ad: TelegramAdvertisement, *, include_target: boo
                 defaults={"config": {"api_target": target, "synced_at": timezone.now().isoformat()}},
             )
         creative = campaign.creatives.first()
-        ad_text = (item.get("text") or "").strip()
+        ad_text = str(item.get("text") or "").strip()
         if ad_text:
             if not creative:
                 from apps.campaigns.models import AdCreative
-
                 creative = AdCreative(campaign=campaign)
             creative.ad_text = ad_text
             creative.title = creative.title or title[:200]

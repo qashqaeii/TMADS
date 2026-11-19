@@ -48,3 +48,11 @@ def test_import_creates_hyper_tunnel_campaign(monkeypatch):
     assert camp.destination == "https://t.me/HyperTunnelbot"
     assert camp.objective == Campaign.Objective.BOT
     assert TelegramAdvertisement.objects.filter(remote_ad_id="99").exists()
+
+
+@pytest.mark.django_db
+def test_prune_preserves_draft_content():
+    user = User.objects.create_user(username="prune-safe", password="x")
+    campaign = Campaign.objects.create(customer=user.customer_profile, name="کمپین جدید", destination="https://t.me/example")
+    assert prune_empty_draft_campaigns(user.customer_profile) == 0
+    assert Campaign.objects.filter(pk=campaign.pk).exists()

@@ -17,7 +17,9 @@ from apps.campaigns.models import (
     TelegramAdvertisement,
 )
 from apps.telegram_ads.client import TelegramAdsClient
-from apps.telegram_ads.services.sync import log_api_request, sync_ad_statistics_for
+from apps.telegram_ads.services.sync import has_financial_lock, log_api_request, sync_ad_statistics_for
+from apps.campaigns.deletion import delete_draft_campaign
+from apps.campaigns.metrics import _decimal
 
 logger = logging.getLogger(__name__)
 
@@ -98,12 +100,13 @@ def import_remote_campaigns_for_customer(
     created = updated = skipped = 0
     for item in items:
         rid = _remote_id(item)
-        if not rid:
+        if not rid.isascii() or not rid.isdigit() or len(rid) > 64 or int(rid) <= 0:
             skipped += 1
             continue
 
-        title = (item.get("title") or "").strip() or f"Ad {rid}"
-        destination = (item.get("promote_url") or item.get("promotion_url") or default_destination).strip()
+        title = (str(item.get("title") or "").strip() or f"Ad {rid}")[:200]
+        # Never infer a missing promotion destination from the project name.
+        destination = str(item.get("promote_url") or item.get("promotion_url") or "").strip()[:500]
         status = map_remote_status_to_campaign(item)
         placement = _map_placement(item.get("placement"))
         objective = _infer_objective(item)
@@ -113,10 +116,13 @@ def import_remote_campaigns_for_customer(
         with transaction.atomic():
             remote = TelegramAdvertisement.objects.filter(remote_ad_id=rid).select_related("campaign").first()
             if remote:
-                campaign = remote.campaign
+                campaign = Campaign.objects.select_for_update().get(pk=remote.campaign_id)
                 if campaign.customer_id != customer.id:
                     skipped += 1
                     logger.warning("remote ad %s belongs to another customer; skipped", rid)
+                    continue
+                if has_financial_lock(campaign) or campaign.status in {Campaign.Status.CANCELLED, Campaign.Status.FAILED}:
+                    skipped += 1
                     continue
                 updated += 1
             else:
@@ -127,8 +133,8 @@ def import_remote_campaigns_for_customer(
                     status=status,
                     objective=objective,
                     destination=destination,
-                    placement=placement or Campaign.Placement.SEARCH,
-                    wizard_step=8,
+                    placement=placement,
+                    wizard_step=5,
                     wizard_data={"imported": True},
                 )
                 remote = TelegramAdvertisement.objects.create(campaign=campaign, remote_ad_id=rid)
@@ -140,12 +146,12 @@ def import_remote_campaigns_for_customer(
             campaign.destination = destination
             if placement:
                 campaign.placement = placement
-            if cpm is not None:
-                try:
-                    campaign.cpm_bid = Decimal(str(cpm))
-                except Exception:
-                    pass
-            campaign.project = project
+            cpm_ton = _decimal(cpm) if item.get("currency") == "TON" else None
+            if cpm_ton is not None and cpm_ton < Decimal("100000000"):
+                campaign.cpm_bid = cpm_ton
+            # A repeat import must not reassign an existing project.
+            if not campaign.project_id:
+                campaign.project = project
             campaign.save()
 
             remote.remote_status = str(item.get("status") or "")
@@ -180,14 +186,30 @@ def import_remote_campaigns_for_customer(
 
 
 def prune_empty_draft_campaigns(customer: CustomerProfile) -> int:
-    """Remove wizard drafts with no Telegram link (local test data)."""
+    """Delete only genuinely untouched local drafts, not names that look empty."""
+    from apps.finance.models import AdvertisingOrder
+
     ids_with_remote = TelegramAdvertisement.objects.filter(
         campaign__customer=customer,
     ).exclude(remote_ad_id="").values_list("campaign_id", flat=True)
+    ids_with_order = AdvertisingOrder.objects.filter(customer=customer).values_list("campaign_id", flat=True)
     qs = Campaign.objects.filter(
         customer=customer,
         status=Campaign.Status.DRAFT,
         name__in=["", "کمپین جدید"],
-    ).exclude(id__in=ids_with_remote)
-    count, _ = qs.delete()
-    return count
+        destination="", budget_irr=0, draft_revision=0, draft_saved_at__isnull=True,
+        wizard_step=1, wizard_data={}, ad_settings={}, creatives__isnull=True,
+        targeting__isnull=True,
+    ).exclude(id__in=ids_with_remote).exclude(id__in=ids_with_order)
+    deleted = 0
+    for campaign in qs.distinct().iterator():
+        with transaction.atomic():
+            current = Campaign.objects.select_for_update().filter(pk=campaign.pk).first()
+            if current is None or not qs.filter(pk=current.pk).exists():
+                continue
+            try:
+                delete_draft_campaign(current)
+                deleted += 1
+            except ValueError:
+                continue
+    return deleted
