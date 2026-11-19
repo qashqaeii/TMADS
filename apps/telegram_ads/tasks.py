@@ -20,6 +20,12 @@ def task_sync_remote_ads(self):
 
 
 @shared_task
+def task_emit_budget_alerts():
+    from apps.notifications.budget_alerts import send_budget_alerts
+    return send_budget_alerts()
+
+
+@shared_task
 def task_sync_active_ad_stats():
     count = 0
     for ad in TelegramAdvertisement.objects.exclude(remote_ad_id="").select_related("campaign"):

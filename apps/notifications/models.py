@@ -11,6 +11,12 @@ class Notification(UUIDModel, TimeStampedModel):
     level = models.CharField(max_length=16, default="info")
     is_read = models.BooleanField(default=False)
     related_campaign_id = models.UUIDField(null=True, blank=True)
+    event_key = models.CharField(max_length=160, blank=True, default="", db_index=True)
 
     class Meta:
         ordering = ["-created_at"]
+        constraints = [models.UniqueConstraint(
+            fields=["customer", "event_key"],
+            condition=~models.Q(event_key=""),
+            name="one_notification_per_customer_event",
+        )]

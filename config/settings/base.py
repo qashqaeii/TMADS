@@ -138,6 +138,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "apps.telegram_ads.tasks.task_sync_active_ad_stats",
         "schedule": 3600.0,
     },
+    "budget-alerts-hourly": {
+        "task": "apps.telegram_ads.tasks.task_emit_budget_alerts",
+        "schedule": 3600.0,
+    },
     "sync-remote-ads-list-daily": {
         "task": "apps.telegram_ads.tasks.task_sync_remote_ads",
         "schedule": 86400.0,
