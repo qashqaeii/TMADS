@@ -135,3 +135,29 @@ def test_reset_requires_unused_audience_and_explicit_phrase(customer_user):
         op.refresh_from_db()
         assert op.state=="completed"
         verified.return_value.reset_unused_audience.assert_called_once()
+
+
+
+@pytest.mark.django_db
+def test_pixel_event_optional_auto_created_omission_is_manual(customer_user):
+    from apps.telegram_ads.services.customer_assets import manage_pixel_event, issue_nonce
+    row=RelatedAccountRequest.objects.create(
+        customer=customer_user.customer_profile, status="provisioned",
+        title="Example", consent_at=timezone.now(), main_account_id="main",
+        remote_account_id="child",
+    )
+    with patch("apps.telegram_ads.services.customer_assets.enabled", return_value=True), patch(
+        "apps.telegram_ads.services.customer_assets.verified_client"
+    ) as verified:
+        verified.return_value.get_pixel_events_by_ids.return_value=[
+            {"event_id":"evt42","ads_count":0},
+        ]
+        verified.return_value.change_pixel_event.return_value={
+            "event_id":"evt42","title":"Lead",
+        }
+        op=manage_pixel_event(customer_user, {
+            "event_id":"evt42", "title":"Lead", "action":"rename",
+            "consent":"on", "nonce":issue_nonce(row),
+        })
+        op.refresh_from_db()
+        assert op.state=="completed"

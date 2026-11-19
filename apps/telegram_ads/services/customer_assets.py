@@ -241,8 +241,10 @@ def manage_pixel_event(actor, data):
         if not isinstance(events, list) or len(events) != 1:
             raise ValueError("رویداد در حساب اختصاصی تأیید نشد.")
         event = events[0]
+        # Telegram documents auto_created as optional and only True for
+        # platform-created events. Missing means the event is not automatic.
         if (not isinstance(event, dict) or event.get("event_id") != event_id
-                or event.get("auto_created") is not False):
+                or event.get("auto_created", False) is not False):
             raise ValueError("ویرایش رویداد خودکار یا تأییدنشده مجاز نیست.")
         if action == "delete" and (type(event.get("ads_count")) is not int or event["ads_count"] != 0):
             raise ValueError("رویداد در تبلیغ استفاده می‌شود یا تعداد تبلیغات آن مشخص نیست.")
