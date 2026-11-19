@@ -20,7 +20,7 @@
     <button type="button" class="btn btn-ghost btn-sm" data-schedule-preset="evening">عصرها (۱۸–۲۲)</button>
     <button type="button" class="btn btn-ghost btn-sm" data-schedule-preset="clear">پاک کردن</button>
   </div>
-  <div class="schedule-grid-wrap" data-schedule-grid-wrap {% if not schedule_enabled %}hidden{% endif %}>
+  <div class="schedule-grid-wrap" tabindex="0" role="region" aria-label="جدول ساعت‌ها؛ برای پیمایش افقی از صفحه‌کلید یا لمس استفاده کنید" data-schedule-grid-wrap {% if not schedule_enabled %}hidden{% endif %}>
     <table class="schedule-grid" role="grid" aria-label="برنامه هفتگی">
       <thead>
         <tr>

@@ -1,14 +1,9 @@
 {% load core_filters %}
 {% if policy_run %}
 <section class="policy-panel card card-pad card-muted" aria-live="polite">
-  <h3 class="section-title" style="font-size:.92rem;margin:0 0 .65rem">بررسی قوانین تبلیغ</h3>
+  <h3 class="section-title ui-policy-title">{% include "includes/lucide_icon.html" with name="shield-check" size="md" %} بررسی قوانین تبلیغ</h3>
   {% with counts=policy_run.counts %}
-  <p class="muted" style="font-size:.8rem;margin:0 0 .65rem">
-    نسخهٔ قوانین: <span dir="ltr">{{ policy_run.policy_version_code }}</span>
-    · مسدود: {{ counts.blocked|default:0 }}
-    · بررسی: {{ counts.review_required|default:0 }}
-    · هشدار: {{ counts.warning|default:0 }}
-  </p>
+  <div class="ui-policy-counts"><span class="status status-danger">مسدود: {{ counts.blocked|default:0 }}</span><span class="status status-warn">بررسی: {{ counts.review_required|default:0 }}</span><span class="status status-info">هشدار: {{ counts.warning|default:0 }}</span></div><p class="field-help">نسخه قوانین: <bdi>{{ policy_run.policy_version_code }}</bdi></p>
   {% endwith %}
   <ul class="policy-findings">
     {% for f in policy_run.findings %}
@@ -24,8 +19,8 @@
   </ul>
   <p style="margin:.65rem 0 0;font-size:.78rem;display:flex;flex-wrap:wrap;gap:.75rem;align-items:center">
     <a href="{% url 'policies:ad_policies' %}">راهنمای کامل قوانین</a>
-    <button type="button" class="btn btn-ghost btn-sm" data-policy-refresh>بررسی مجدد قوانین</button>
-    <span class="muted" data-policy-refresh-status aria-live="polite"></span>
+    {% if step %}<button type="button" class="btn btn-ghost btn-sm" data-policy-refresh>بررسی مجدد قوانین</button>
+    <span class="muted" data-policy-refresh-status aria-live="polite"></span>{% endif %}
   </p>
 </section>
 {% endif %}

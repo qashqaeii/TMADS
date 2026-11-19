@@ -3,11 +3,11 @@
 {% block page_title %}استودیو ساخت تبلیغ{% endblock %}
 {% block container_class %}container-wide{% endblock %}
 {% block content %}
-<div class="wizard-shell studio-shell">
+<div class="wizard-shell studio-shell ui-studio">
   {% include "includes/dash_header.html" with title="استودیو ساخت تبلیغ" subtitle=campaign.name|default:"پیش‌نویس جدید" with_sub=1 %}
   <nav class="wizard-progress wizard-progress--exec" aria-label="مراحل">
     {% for key, label in steps %}
-      <span {% if forloop.counter == step %}aria-current="step"{% endif %} class="wizard-step {% if forloop.counter == step %}is-active{% elif forloop.counter < step %}is-complete{% endif %}">{{ forloop.counter }}. {{ label }}</span>
+      <span {% if forloop.counter == step %}aria-current="step"{% endif %} class="wizard-step {% if forloop.counter == step %}is-active{% elif forloop.counter < step %}is-complete{% endif %}"><span class="ui-step-number">{% if forloop.counter < step %}{% include "includes/lucide_icon.html" with name="check" size="sm" %}{% else %}{{ forloop.counter|persian_digits }}{% endif %}</span><span class="ui-step-label">{{ label }}</span></span>
     {% endfor %}
   </nav>
   <div class="studio-layout">
@@ -22,6 +22,7 @@
       <input type="hidden" name="draft_revision" value="{{ campaign.draft_revision }}">
       <input type="hidden" name="studio_step" value="{{ step }}">
 
+      <div class="ui-studio-form-head"><span class="ui-step-kicker">مرحله {{ step|persian_digits }} از {{ steps|length|persian_digits }}</span><a class="ui-preview-link" href="#studio-preview-panel">پیش‌نمایش {% include "includes/lucide_icon.html" with name="arrow-down" size="sm" %}</a></div>
       <fieldset class="studio-mode-toggle" aria-label="حالت ساخت تبلیغ">
         <legend class="sr-only">حالت ساخت</legend>
         <label class="choice-card {% if studio_mode == 'simple' %}is-selected{% endif %}">
@@ -43,7 +44,7 @@
         {% for value, label in target_type_choices %}
         <label class="target-card choice-card">
           <input type="radio" name="target_type" value="{{ value }}" {% if campaign.target_type == value %}checked{% endif %}>
-          <strong>{{ label }}</strong>
+          <span class="ui-target-symbol" aria-hidden="true">{% if value == 'search' %}{% include "includes/lucide_icon.html" with name="search" size="md" %}{% elif value == 'bots' %}{% include "includes/lucide_icon.html" with name="bot" size="md" %}{% elif value == 'users' %}{% include "includes/lucide_icon.html" with name="users" size="md" %}{% else %}{% include "includes/lucide_icon.html" with name="megaphone" size="md" %}{% endif %}</span><strong>{{ label }}</strong>
           <p class="muted" style="margin:.35rem 0 0;font-size:.85rem">
             {% if value == 'search' %}نمایش در نتایج جستجوی تلگرام{% elif value == 'bots' %}بنر داخل ربات‌های مشخص{% elif value == 'users' %}کاربران بر اساس کشور، علاقه و جایگاه{% else %}کانال‌ها بر اساس زبان، موضوع یا نام{% endif %}
           </p>
@@ -314,7 +315,7 @@
         <div class="finance-line"><span>کارمزد</span><strong class="tabnums">{{ quote_totals.service_fee_irr|irr_to_toman|format_irr }} تومان</strong></div>
         {% if quote_totals.risk_buffer_irr %}<div class="finance-line"><span>ذخیره موقت ریسک نرخ</span><strong class="tabnums">{{ quote_totals.risk_buffer_irr|irr_to_toman|format_irr }} تومان</strong></div><p class="muted studio-hint">ذخیره موقت، پس از تأیید تخصیص اعتبار در تلگرام به کیف پول شما بازمی‌گردد.</p>{% endif %}
         <div class="finance-line"><span>اعتبار خریداری‌شده</span><strong dir="ltr">{{ quote_totals.ton_allocation }} TON</strong></div>
-        <div class="finance-line"><span>مبلغ قابل پرداخت</span><strong class="tabnums">{{ quote_totals.total_irr|irr_to_toman|format_irr }} تومان</strong></div>
+        <div class="finance-line ui-quote-total"><span>مبلغ قابل پرداخت</span><strong class="tabnums">{{ quote_totals.total_irr|irr_to_toman|format_irr }} تومان</strong></div>
         <p class="muted studio-hint">اعتبار پیش‌فاکتور تا {{ quote.expires_at|jalali_datetime }} است.</p>
       </article>
       {% else %}
@@ -324,13 +325,12 @@
         <button name="action" value="refresh_quote" type="submit" formnovalidate class="btn btn-primary">دریافت پیش‌فاکتور جدید</button>
       </article>
       {% endif %}
-      {% if wallet %}<p class="muted studio-hint">موجودی کیف پول: <strong class="tabnums">{{ wallet.available_irr|irr_to_toman|format_irr }} تومان</strong></p>{% endif %}
+      {% if wallet %}<div class="ui-studio-wallet"><span>موجودی قابل استفاده</span><strong class="tabnums">{{ wallet.available_irr|irr_to_toman|format_irr }} تومان</strong><a class="btn btn-ghost btn-sm" href="{% url 'finance:topup' %}">شارژ کیف پول</a></div>{% if quote_ready and wallet.available_irr < quote_totals.total_irr %}<p class="ui-studio-warning" role="status">موجودی برای پرداخت این پیش‌فاکتور کافی نیست؛ ابتدا کیف پول را شارژ کنید.</p>{% endif %}{% endif %}
       {% include "campaigns/includes/policy_panel.html" %}
-      <label class="choice-card" style="margin-top:1rem" id="field-terms"><input type="checkbox" name="terms_accepted" value="1" required>
-        <a href="{% url 'public:terms' %}" target="_blank" rel="noopener">شرایط TMADS</a>،
-        <a href="{% url 'policies:ad_policies' %}" target="_blank" rel="noopener">راهنمای تبلیغ تلگرام</a>
-        و مسئولیت بررسی نهایی تلگرام را می‌پذیرم.
-      </label>
+      <div class="ui-terms-panel" id="field-terms">
+        <label class="choice-card"><input type="checkbox" name="terms_accepted" value="1" required aria-describedby="ui-terms-links"> شرایط استفاده و مسئولیت بررسی نهایی تلگرام را می‌پذیرم.</label>
+        <p id="ui-terms-links"><a href="{% url 'public:terms' %}" target="_blank" rel="noopener">شرایط TMADS</a> · <a href="{% url 'policies:ad_policies' %}" target="_blank" rel="noopener">راهنمای تبلیغ تلگرام</a></p>
+      </div>
       <p class="muted" style="font-size:.8rem">ذخیره پیش‌نویس هیچ تبلیغی در تلگرام ایجاد نمی‌کند. پذیرش TMADS به معنی قرارداد مستقیم با تلگرام نیست.</p>
       {% if dry_run_preview and dry_run_preview.ok %}
       <details class="field" style="margin-top:1rem">
@@ -340,6 +340,7 @@
       {% endif %}
       {% endif %}
 
+      <div class="ui-studio-footer">
       <p id="draft-save-status" class="muted studio-draft-status" aria-live="polite">
         {% if campaign.draft_saved_at %}آخرین ذخیره: {{ campaign.draft_saved_at|timesince }} پیش{% else %}آماده ذخیره خودکار{% endif %}
       </p>
@@ -354,9 +355,11 @@
           <button class="btn btn-primary" name="action" value="next" type="submit">بعدی</button>
         {% endif %}
       </div>
+      </div>
     </form>
     {% include "campaigns/includes/studio_preview.html" %}
   </div>
 </div>
 <script src="{% static 'js/ad-studio.js' %}"></script>
+<script defer src="{% static 'js/ui-studio.js' %}"></script>
 {% endblock %}
