@@ -1,0 +1,5 @@
+<ol class="pay-rail" aria-label="مراحل شارژ کیف پول">
+  <li {% if stage == 1 %}aria-current="step"{% elif stage > 1 %}class="is-done"{% endif %}><span class="pay-step-number">{% if stage > 1 %}{% include "includes/lucide_icon.html" with name="check" size="sm" %}{% else %}۱{% endif %}</span><div><strong>انتخاب مبلغ</strong><small>آماده‌سازی</small></div></li>
+  <li {% if stage == 2 %}aria-current="step"{% elif stage == 3 and verified %}class="is-done"{% endif %}><span class="pay-step-number">{% if stage == 3 and verified %}{% include "includes/lucide_icon.html" with name="check" size="sm" %}{% else %}۲{% endif %}</span><div><strong>پرداخت بانکی</strong><small>درگاه پرداخت</small></div></li>
+  <li {% if stage == 3 %}aria-current="step"{% endif %}><span class="pay-step-number">۳</span><div><strong>نتیجه و رسید</strong><small>وضعیت نهایی</small></div></li>
+</ol>
