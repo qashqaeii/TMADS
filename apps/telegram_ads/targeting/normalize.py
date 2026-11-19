@@ -89,3 +89,18 @@ def parse_promote_url(value: str) -> tuple[str, list[str]]:
     if parsed.scheme not in {"http", "https", "tg"}:
         errors.append("فقط لینک https یا tg:// پذیرفته می‌شود.")
     return url, errors
+
+
+def safe_destination_link(value: str) -> str:
+    """Return a safe browser link or empty text for untrusted/invalid input."""
+    raw = str(value or "").strip()
+    if not raw or len(raw) > 500 or any(ord(c) < 33 or c == "\\" for c in raw):
+        return ""
+    try:
+        parsed = urlparse(raw)
+        if parsed.scheme not in {"https", "http"} or not parsed.hostname or parsed.username or parsed.password:
+            return ""
+        _ = parsed.port  # reject malformed ports
+        return raw
+    except ValueError:
+        return ""

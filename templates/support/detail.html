@@ -28,10 +28,14 @@
     <p class="muted">پیامی نیست.</p>
     {% endfor %}
   </div>
+  {% if ticket.status == "closed" or ticket.status == "resolved" %}
+  <p class="muted">این گفتگو پایان یافته است. <a href="{% url 'support:create' %}">ثبت درخواست جدید</a></p>
+  {% else %}
   <form method="post" class="chat-compose">{% csrf_token %}
-    <div class="field"><label for="ticket-reply">پاسخ شما</label><textarea id="ticket-reply" name="body" rows="4" required placeholder="پیام شما…"></textarea></div>
+    <div class="field"><label for="ticket-reply">پاسخ شما</label><textarea id="ticket-reply" name="body" rows="4" maxlength="5000" required placeholder="پیام شما…"></textarea></div>
     <button class="btn btn-primary btn-sm" type="submit">ارسال پاسخ</button>
   </form>
+  {% endif %}
 </section>
 </div>
 {% endblock %}

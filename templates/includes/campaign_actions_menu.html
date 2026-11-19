@@ -4,8 +4,10 @@
     <span class="campaign-detail__action-label">بیشتر</span>
   </summary>
   <div class="exec-menu__panel">
-    <a class="exec-menu__item" href="{% url 'campaigns:wizard' campaign.id %}">ویرایش ویزارد</a>
-    <a class="exec-menu__item" href="{% url 'campaigns:duplicate' campaign.id %}">تکثیر کمپین</a>
+    {% if can_edit_campaign %}<a class="exec-menu__item" href="{% url 'campaigns:wizard' campaign.id %}">ویرایش ویزارد</a>{% endif %}
+    <form method="post" action="{% url 'campaigns:duplicate' campaign.id %}" class="exec-menu__item">
+      {% csrf_token %}<button type="submit">کپی به پیش‌نویس جدید</button>
+    </form>
     <a class="exec-menu__item" href="{% url 'campaigns:export_csv' campaign.id %}">خروجی CSV</a>
     {% if can_delete_draft %}
     <form method="post" action="{% url 'campaigns:delete' campaign.id %}" class="exec-menu__item exec-menu__item--danger" onsubmit="return confirm('این پیش‌نویس برای همیشه حذف شود؟');">

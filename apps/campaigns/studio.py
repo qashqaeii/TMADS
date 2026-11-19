@@ -49,8 +49,8 @@ def migrate_campaign_to_studio(campaign: Campaign) -> None:
     wd = campaign.wizard_data or {}
     target = campaign.target_type or wd.get("target_type") or _infer_target_from_legacy(campaign)
     campaign.target_type = target
-    campaign.wizard_version = 2
     campaign.wizard_step = ensure_studio_step(campaign)
+    campaign.wizard_version = 2
     if not campaign.placement:
         campaign.placement = default_placement_for_target(target)
     elif campaign.placement in PLACEMENT_ALIASES:

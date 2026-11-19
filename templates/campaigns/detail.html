@@ -11,15 +11,17 @@
     <header class="campaign-detail__hero-toolbar campaign-detail__toolbar campaign-detail__toolbar--luxe campaign-detail__toolbar--ref campaign-detail__toolbar--minimal" aria-label="عملیات کمپین">
       <div class="campaign-detail__toolbar-track" role="group" aria-label="میانبرهای عملیاتی">
         {% if campaign.status == 'active' %}
-        <a class="campaign-detail__action campaign-detail__action--primary campaign-detail__toolbar-item" href="{% url 'support:create' %}?campaign={{ campaign.id }}">
+        <a class="campaign-detail__action campaign-detail__action--primary campaign-detail__toolbar-item" href="{% url 'support:create' %}?campaign={{ campaign.id }}&amp;intent=pause">
           <span class="campaign-detail__action-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="pause" size="sm" %}</span>
-          <span class="campaign-detail__action-label">توقف کمپین</span>
+          <span class="campaign-detail__action-label">درخواست توقف</span>
         </a>
         {% endif %}
+        {% if can_edit_campaign %}
         <a class="campaign-detail__action campaign-detail__toolbar-item" href="{% url 'campaigns:wizard' campaign.id %}">
           <span class="campaign-detail__action-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="pencil" size="sm" %}</span>
           <span class="campaign-detail__action-label">ویرایش</span>
         </a>
+        {% endif %}
         <a class="campaign-detail__action campaign-detail__action--support campaign-detail__toolbar-item" href="{% url 'support:create' %}?campaign={{ campaign.id }}">
           <span class="campaign-detail__action-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="headphones" size="sm" %}</span>
           <span class="campaign-detail__action-label">پشتیبانی</span>
@@ -27,6 +29,7 @@
         <span class="campaign-detail__toolbar-sep" aria-hidden="true"></span>
         {% include "includes/campaign_actions_menu.html" %}
       </div>
+      {% if budget.has_remote %}
       <form method="post" action="{% url 'campaigns:refresh_stats' %}" class="campaign-detail__actions-form campaign-detail__toolbar-aux">{% csrf_token %}
         <input type="hidden" name="campaign_id" value="{{ campaign.id }}">
         <button type="submit" class="campaign-detail__action campaign-detail__action--refresh" title="بروزرسانی آمار">
@@ -34,6 +37,7 @@
           <span class="campaign-detail__action-label">بروزرسانی</span>
         </button>
       </form>
+      {% endif %}
     </header>
 
     <div class="campaign-detail__hero-body campaign-detail__hero-body--ref campaign-detail__hero-body--minimal">
@@ -44,11 +48,13 @@
         </div>
         <div class="campaign-detail__masthead-foot">
           <p class="campaign-detail__meta-bar">
-            {% if campaign.destination %}
-            <a class="campaign-detail__dest" href="{{ campaign.destination }}" target="_blank" rel="noopener noreferrer" dir="ltr" title="{{ campaign.destination }}">
+            {% if destination_link %}
+            <a class="campaign-detail__dest" href="{{ destination_link }}" target="_blank" rel="noopener noreferrer" dir="ltr" title="{{ campaign.destination }}">
               {% include "includes/lucide_icon.html" with name="link-2" size="sm" %}
               <span>{{ campaign.destination|shorten_url:42 }}</span>
             </a>
+            {% elif campaign.destination %}
+            <span class="campaign-detail__dest" dir="ltr">{{ campaign.destination|shorten_url:42 }}</span>
             {% endif %}
             <span class="campaign-detail__meta-date">
               {% include "includes/lucide_icon.html" with name="calendar" size="sm" %}
@@ -236,7 +242,7 @@
         <div class="campaign-trend-card__empty">
           <span class="campaign-trend-card__empty-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="chart-column" size="kpi" %}</span>
           <p class="campaign-trend-card__empty-title">روند روزانه هنوز ذخیره نشده</p>
-          <p class="campaign-trend-card__empty-text muted">آمار کلی از تلگرام موجود است. برای پر شدن نمودار، آمار را بروزرسانی کنید.</p>
+          <p class="campaign-trend-card__empty-text muted">پس از اتصال تبلیغ، روند روزانه از تلگرام دریافت می‌شود.</p>
           <form method="post" action="{% url 'campaigns:refresh_stats' %}" class="campaign-trend-card__empty-form">{% csrf_token %}
             <input type="hidden" name="campaign_id" value="{{ campaign.id }}">
             <button type="submit" class="campaign-detail__action campaign-trend-card__empty-btn">بروزرسانی آمار</button>
@@ -308,7 +314,7 @@
           <div class="campaign-analytics-trend__empty">
             <span class="campaign-analytics-trend__empty-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="line-chart" size="kpi" %}</span>
             <p class="campaign-analytics-trend__empty-title">روند روزانه ذخیره نشده</p>
-            <p class="campaign-analytics-trend__empty-text muted">آمار کلی موجود است؛ برای پر شدن نمودار از بروزرسانی استفاده کنید.</p>
+            <p class="campaign-analytics-trend__empty-text muted">پس از دریافت آمار روزانه، نمودار نمایش داده می‌شود.</p>
             <form method="post" action="{% url 'campaigns:refresh_stats' %}" class="campaign-analytics-trend__empty-form">{% csrf_token %}
               <input type="hidden" name="campaign_id" value="{{ campaign.id }}">
               <button type="submit" class="campaign-detail__action campaign-analytics-trend__empty-btn">بروزرسانی آمار</button>
@@ -443,7 +449,7 @@
               <span>{{ campaign.destination|shorten_url:40 }}</span>
             </p>
             {% endif %}
-            <a class="campaign-detail-panel__cta" href="{% url 'campaigns:wizard' campaign.id %}">ویرایش در ویزارد</a>
+            {% if can_edit_campaign %}<a class="campaign-detail-panel__cta" href="{% url 'campaigns:wizard' campaign.id %}">ویرایش در ویزارد</a>{% endif %}
           </aside>
         </div>
         {% else %}
@@ -451,7 +457,7 @@
           <span class="campaign-detail-panel__empty-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="file-text" size="kpi" %}</span>
           <p class="campaign-detail-panel__empty-title">محتوای تبلیغ تکمیل نشده</p>
           <p class="campaign-detail-panel__empty-text muted">متن، عنوان یا رسانه را در ویزارد ثبت کنید.</p>
-          <a class="campaign-detail__action campaign-detail-panel__empty-btn" href="{% url 'campaigns:wizard' campaign.id %}">تکمیل در ویزارد</a>
+          {% if can_edit_campaign %}<a class="campaign-detail__action campaign-detail-panel__empty-btn" href="{% url 'campaigns:wizard' campaign.id %}">تکمیل در ویزارد</a>{% endif %}
         </div>
         {% endif %}
         {% else %}
@@ -459,7 +465,7 @@
           <span class="campaign-detail-panel__empty-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="file-text" size="kpi" %}</span>
           <p class="campaign-detail-panel__empty-title">محتوای تبلیغ ثبت نشده</p>
           <p class="campaign-detail-panel__empty-text muted">متن، عنوان و دکمه را در ویزارد ثبت کنید یا از تلگرام import کنید.</p>
-          <a class="campaign-detail__action campaign-detail-panel__empty-btn" href="{% url 'campaigns:wizard' campaign.id %}">تکمیل در ویزارد</a>
+          {% if can_edit_campaign %}<a class="campaign-detail__action campaign-detail-panel__empty-btn" href="{% url 'campaigns:wizard' campaign.id %}">تکمیل در ویزارد</a>{% endif %}
         </div>
         {% endif %}
       </section>
@@ -485,7 +491,7 @@
           <span class="campaign-detail-panel__empty-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="users" size="kpi" %}</span>
           <p class="campaign-detail-panel__empty-title">هدف‌گیری ثبت نشده</p>
           <p class="campaign-detail-panel__empty-text muted">در ویزارد تنظیم کنید یا پس از اتصال به تلگرام import شود.</p>
-          <a class="campaign-detail__action campaign-detail-panel__empty-btn" href="{% url 'campaigns:wizard' campaign.id %}">تنظیم در ویزارد</a>
+          {% if can_edit_campaign %}<a class="campaign-detail__action campaign-detail-panel__empty-btn" href="{% url 'campaigns:wizard' campaign.id %}">تنظیم در ویزارد</a>{% endif %}
         </div>
         {% endif %}
       </section>

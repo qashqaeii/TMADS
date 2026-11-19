@@ -132,7 +132,6 @@ def campaign_refresh_stats(request):
     from apps.telegram_ads.services.sync import (
         stats_sync_days,
         sync_ad_statistics_for,
-        sync_remote_advertisements_readonly,
     )
 
     customer = request.user.customer_profile
@@ -148,10 +147,9 @@ def campaign_refresh_stats(request):
             return redirect("campaigns:detail", campaign_id=campaign.id)
         return redirect("campaigns:list")
 
-    try:
-        sync_remote_advertisements_readonly()
-    except TelegramAdsError as exc:
-        messages.error(request, str(exc))
+    # A customer may only refresh their own linked ads, not the central account.
+    if not cache.add(f"campaign-refresh:{customer.pk}", True, timeout=60):
+        messages.info(request, "درخواست بروزرسانی اخیر ثبت شده است؛ لطفاً یک دقیقه صبر کنید.")
         if campaign:
             return redirect("campaigns:detail", campaign_id=campaign.id)
         return redirect("campaigns:list")
@@ -185,6 +183,8 @@ def campaign_detail(request, campaign_id):
         campaign_id,
     )
     metrics = aggregate_campaign_metrics(campaign)
+    from apps.telegram_ads.targeting.normalize import safe_destination_link
+    destination_link = safe_destination_link(campaign.destination)
     chart = campaign_chart_payload(campaign, limit=None)
     order = AdvertisingOrder.objects.filter(campaign_id=campaign.id).first()
     creative = campaign.creatives.first()
@@ -211,6 +211,8 @@ def campaign_detail(request, campaign_id):
         {
             "campaign": campaign,
             "metrics": metrics,
+            "can_edit_campaign": _campaign_editable(campaign),
+            "destination_link": destination_link,
             "performance_badges": performance_badges,
             "has_chart": has_chart,
             "chart_has_signal": chart_has_signal(chart),
@@ -260,12 +262,14 @@ def campaign_delete(request, campaign_id):
 
 @login_required
 @customer_required
+@require_POST
+@transaction.atomic
 def campaign_duplicate(request, campaign_id):
     original = get_customer_campaign(request.user.customer_profile, campaign_id)
     clone = Campaign.objects.create(
         customer=original.customer,
         project=original.project,
-        name=f"{original.name or 'کمپین'} (کپی)",
+        name=f"{(original.name or 'کمپین')[:194]} (کپی)",
         status=Campaign.Status.DRAFT,
         objective=original.objective,
         destination=original.destination,
@@ -273,15 +277,23 @@ def campaign_duplicate(request, campaign_id):
         target_type=original.target_type,
         wizard_version=2,
         wizard_step=1,
-        wizard_data=copy.deepcopy(original.wizard_data),
-        ad_settings=copy.deepcopy(original.ad_settings or {}),
+        wizard_data={"studio_mode": (original.wizard_data or {}).get("studio_mode", "simple")},
+        # New drafts require independent policy acceptance and eligibility checks.
+        ad_settings={key: copy.deepcopy(value) for key, value in (original.ad_settings or {}).items()
+                     if key in {"impression_frequency", "show_userpic", "additional_info"}},
         budget_irr=original.budget_irr,
+        daily_cap_irr=original.daily_cap_irr,
+        cpm_bid=original.cpm_bid,
     )
     if hasattr(original, "targeting") and original.targeting:
-        CampaignTargeting.objects.create(
-            campaign=clone,
-            config=copy.deepcopy(original.targeting.config),
-        )
+        config = copy.deepcopy(original.targeting.config or {})
+        config.pop("bot_peer_checks", None)
+        # Imported API targeting is not necessarily a valid editable studio payload.
+        config.pop("api_target", None)
+        config.pop("synced_at", None)
+        config.pop("source", None)
+        if config:
+            CampaignTargeting.objects.create(campaign=clone, config=config)
     for cr in original.creatives.all():
         AdCreative.objects.create(
             campaign=clone,

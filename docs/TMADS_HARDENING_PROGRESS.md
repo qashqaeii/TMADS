@@ -126,3 +126,6 @@ Actual browser QA is still pending.
 
 ## Analytics correctness and missing-data UX
 Lifetime data is restricted to the ad object; video opens are not views, zero is an observed value, daily snapshots are not lifetime fallback. Per-metric availability, weighted CTR from comparable rows, and explicit TON currency for lifetime spend prevent fabricated numbers. Dashboard and list show missing values distinctly and disclose coverage; period aggregations share corrected parsing. Known foreign-currency daily spend is excluded. Historical unlabeled period amounts and visual/browser verification still need an isolated data audit. Sort changes reset the page. Regression tests updated to the bundled API contract; execution pending.
+
+## Campaign actions and support boundaries
+Only POST duplicates a campaign; copied drafts exclude previous policy acceptance and remote eligibility state. Locked/linked campaigns no longer show a misleading editable action. Unsafe destination schemes are not clickable. Customer refresh is scoped to their ads and throttled. Support links validate tenant ownership, stop is explicitly a request, ticket fields and terminal status are validated. Linked drafts and records with financial history are protected from deletion. Legacy wizard step mapping fixed. Runtime verification pending.
