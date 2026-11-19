@@ -1,5 +1,7 @@
 {% extends "base.html" %}
-{% block body_class %}is-public{% endblock %}
+{% load static %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/public-premium.css' %}"><script defer src="{% static 'js/public-premium.js' %}"></script>{% endblock %}
+{% block body_class %}is-public public-premium{% block public_page_class %}{% endblock %}{% endblock %}
 {% block body %}
 <header class="site-header site-header--exec ui-public-header">
   <div
@@ -124,14 +126,14 @@
       <p class="footer-tagline muted">تی‌ام‌ادز؛ محیط فارسی طراحی کمپین، برنامه‌ریزی بودجه و گزارش تبلیغات تلگرام.</p>
     </div>
     <div class="footer-col">
-      <h3>محصول</h3>
+      <h2>محصول</h2>
       <a href="{% url 'public:features' %}">امکانات</a>
       <a href="{% url 'public:how_it_works' %}">نحوه کار</a>
       <a href="{% url 'public:pricing' %}">تعرفه</a>
       <a href="{% url 'public:faq' %}">سوالات</a>
     </div>
     <div class="footer-col">
-      <h3>حقوقی و تماس</h3>
+      <h2>حقوقی و تماس</h2>
       <a href="{% url 'public:terms' %}">شرایط</a>
       <a href="{% url 'public:privacy' %}">حریم خصوصی</a>
       <a href="{% url 'public:refund' %}">بازپرداخت</a>
@@ -140,7 +142,7 @@
       <a href="{% url 'public:contact' %}" {% if request.resolver_match.namespace == 'public' and request.resolver_match.url_name == 'contact' %}aria-current="page"{% endif %}>تماس</a>
     </div>
   </div>
-  <div class="container ui-footer-bottom"><span>© {{ PRODUCT_NAME }}</span><span>استفاده از خدمات تابع شرایط و مجوزهای تبلیغاتی تلگرام است.</span></div>
+  <div class="container ui-footer-bottom"><span>© {{ PRODUCT_NAME }}</span><span>استفاده از خدمات تابع شرایط و مجوزهای تبلیغاتی تلگرام است.</span><a href="#main-content" class="pp-top-link">بازگشت به محتوای اصلی ↑</a></div>
 </footer>
 {% endblock %}
 
