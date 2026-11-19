@@ -82,7 +82,6 @@ def test_uncertain_operation_reconciles_only_when_remote_matches(customer_user):
     from apps.telegram_ads.services.manage_ad import reconcile_operation_readonly
     from apps.accounts.models import User
     from unittest.mock import patch
-    from django.contrib.auth.models import PermissionDenied
 
     campaign, ad = setup_ad(customer_user)
     op = RemoteAdOperation.objects.create(
