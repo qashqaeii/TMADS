@@ -4,13 +4,14 @@
 <section class="auth-screen ui-auth-screen">
   <div class="auth-card auth-card--exec ui-auth-card">
     <span class="ui-auth-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="user-plus" size="md" %}</span>
-    <h1>ایجاد حساب</h1>
-    <p class="muted">حساب خود را بسازید و مدیریت تبلیغات را شروع کنید.</p>
+    <h1>ثبت‌نام در تی‌ام‌ادز</h1>
+    <p class="muted">برای طراحی اولین کمپین تبلیغات تلگرام، حساب کاربری ایجاد کنید. ساخت حساب به معنی پرداخت یا انتشار تبلیغ نیست.</p>
     <form method="post" class="form-stack">
       {% csrf_token %}
       {% if form.non_field_errors %}<div class="form-error" role="alert">{{ form.non_field_errors }}</div>{% endif %}
       {% for field in form %}{% include "includes/auth_field.html" with field=field %}{% endfor %}
-      <button class="btn btn-primary btn-lg" type="submit">ثبت‌نام</button>
+      <p class="auth-links">پیش از ثبت‌نام، <a href="{% url 'public:terms' %}">شرایط استفاده</a> و <a href="{% url 'public:privacy' %}">حریم خصوصی</a> را مطالعه کنید.</p>
+      <button class="btn btn-primary btn-lg" type="submit">ایجاد حساب</button>
       <p class="auth-links">قبلاً عضو شده‌اید؟ <a href="{% url 'accounts:login' %}">ورود</a></p>
     </form>
   </div>

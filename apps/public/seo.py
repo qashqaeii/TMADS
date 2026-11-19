@@ -20,6 +20,8 @@ PAGES = {
     "refund": ("سیاست بازپرداخت تی‌ام‌ادز", "شرایط درخواست بازپرداخت و بررسی وضعیت مالی سفارش تبلیغات تلگرام."),
     "content_policy": ("قوانین محتوای تبلیغات تلگرام", "ضوابط محتوای تبلیغاتی تی‌ام‌ادز و الزامات بررسی تبلیغ قبل از ارسال."),
 }
+# Legal documents are still drafts; keep them accessible without promoting indexing.
+LEGAL_DRAFTS = {"terms", "privacy", "refund", "content_policy"}
 AUTH = {
     "login": ("ورود به تی‌ام‌ادز", "ورود به حساب برای مدیریت کمپین‌ها، کیف پول و گزارش‌های تبلیغات تلگرام."),
     "register": ("ثبت‌نام در تی‌ام‌ادز", "ایجاد حساب کاربری برای طراحی و مدیریت کمپین‌های تبلیغات تلگرام."),
@@ -35,6 +37,9 @@ def public_origin():
                 or parsed.password or parsed.path not in ("", "/")
                 or parsed.query or parsed.fragment or parsed.hostname in ("localhost", "127.0.0.1", "::1")):
             return ""
+        if any(ch.isspace() for ch in parsed.netloc) or "\\" in parsed.netloc:
+            return ""
+        _ = parsed.port  # Reject malformed ports.
         return urlunsplit((parsed.scheme, parsed.netloc, "", "", ""))
     except ValueError:
         return ""
@@ -51,8 +56,10 @@ def metadata(request):
     seo = {"robots": "noindex, follow", "canonical": "", "title": "", "description": ""}
     if namespace == "public" and name in PAGES:
         seo["title"], seo["description"] = PAGES[name]
-        if index_enabled():
-            seo.update(robots="index, follow", canonical=public_origin() + reverse("public:" + name))
+        if settings.APP_ENV == "PRODUCTION" and name not in LEGAL_DRAFTS:
+            seo["robots"] = "index, follow"
+            if public_origin():
+                seo["canonical"] = public_origin() + reverse("public:" + name)
     elif namespace == "accounts" and name in AUTH:
         seo["title"], seo["description"] = AUTH[name]
     if seo["title"]:
@@ -72,6 +79,8 @@ def sitemap_xml(request):
         return HttpResponseNotFound("Public sitemap is not configured.", content_type="text/plain")
     root = ET.Element("urlset", xmlns="http://www.sitemaps.org/schemas/sitemap/0.9")
     for name in PAGES:
+        if name in LEGAL_DRAFTS:
+            continue
         url = ET.SubElement(root, "url")
         ET.SubElement(url, "loc").text = public_origin() + reverse("public:" + name)
     return HttpResponse(ET.tostring(root, encoding="utf-8", xml_declaration=True), content_type="application/xml")

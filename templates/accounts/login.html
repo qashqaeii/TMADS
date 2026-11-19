@@ -4,8 +4,8 @@
 <section class="auth-screen ui-auth-screen">
   <div class="auth-card auth-card--exec ui-auth-card">
     <span class="ui-auth-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="log-in" size="md" %}</span>
-    <h1>ورود به حساب</h1>
-    <p class="muted">به داشبورد کمپین و کیف پول دسترسی پیدا کنید.</p>
+    <h1>ورود به حساب تی‌ام‌ادز</h1>
+    <p class="muted">کمپین‌های تبلیغات تلگرام، وضعیت سفارش، کیف پول و گزارش‌ها را در داشبورد خود مدیریت کنید.</p>
     <form method="post" class="form-stack">
       {% csrf_token %}
       {% if form.non_field_errors %}<div class="form-error" role="alert">{{ form.non_field_errors }}</div>{% endif %}
@@ -20,7 +20,8 @@
         {% if form.password.errors %}<div class="form-error" role="alert">{{ form.password.errors }}</div>{% endif %}
       </div>
       <button class="btn btn-primary btn-lg" type="submit">ورود</button>
-      <p class="auth-links">حساب ندارید؟ <a href="{% url 'accounts:register' %}">ثبت‌نام</a> · <a href="{% url 'accounts:password_reset' %}">فراموشی رمز</a></p>
+      <p class="auth-links">حساب ندارید؟ <a href="{% url 'accounts:register' %}">ثبت‌نام</a> · <a href="{% url 'accounts:password_reset' %}">فراموشی رمز عبور</a></p>
+      <p class="auth-links">پرسشی دارید؟ <a href="{% url 'public:contact' %}">راهنمای پشتیبانی</a></p>
     </form>
   </div>
 </section>
