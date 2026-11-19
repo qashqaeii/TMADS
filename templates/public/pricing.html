@@ -1,13 +1,14 @@
 {% extends "public_base.html" %}
 {% block title %}تعرفه — {{ PRODUCT_NAME }}{% endblock %}
+{% block public_page_class %} pp-pricing{% endblock %}
 {% block content %}
 {% include "includes/public_hero.html" with title="هزینه و تعرفه تبلیغات تلگرام" subtitle="بودجه، نرخ تبدیل و کارمزد سفارش را قبل از پرداخت بشناسید" show_subtitle=1 compact=1 %}
 <section class="section public-section container">
-  <div class="pricing-shell ui-public-pricing">
+  <nav class="pp-section-nav" aria-label="بخش‌های صفحه"><a href="#pricing-model">مدل قیمت</a><a href="#pricing-cpm">محاسبه CPM</a><a href="#budget-decisions">انتخاب بودجه</a></nav><div id="pricing-model" class="pricing-shell ui-public-pricing" data-pp-reveal>
     <article class="pricing-card--exec">
       <span class="ui-target-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="wallet" size="md" %}</span><p class="ui-price-kicker">مدل قیمت‌گذاری</p>
       <h2 class="price-tag">کارمزد درصدی</h2>
-      <p class="muted" style="margin:.35rem 0 0;font-size:.88rem">بر بودجه خالص تبلیغ — قابل تنظیم در عملیات</p>
+      <p class="muted pp-price-sub">بر بودجه خالص تبلیغ — قابل تنظیم در عملیات</p>
       <ul>
         <li>پیش‌فاکتور با نرخ گرام</li>
         <li>رزرو از کیف پول ریالی</li>
@@ -17,9 +18,9 @@
       {% if user.is_authenticated %}<a class="btn btn-primary btn-lg" href="{% url 'campaigns:wizard_new' %}">ساخت کمپین</a>{% else %}<a class="btn btn-primary btn-lg" href="{% url 'accounts:register' %}">ایجاد حساب</a>{% endif %}
     </article><aside class="ui-public-pricing-guide"><h2>مبلغ سفارش چگونه تعیین می‌شود؟</h2><dl><div><dt>بودجه تبلیغ</dt><dd>اعتبار درخواستی برای کمپین</dd></div><div><dt>کارمزد پلتفرم</dt><dd>طبق تنظیمات و پیش‌فاکتور</dd></div><div><dt>نرخ تبدیل</dt><dd>نرخ معتبر و ضوابط سفارش</dd></div></dl><p>مبلغ پیش‌فاکتور و مدت اعتبار آن قبل از پرداخت در استودیو نمایش داده می‌شود؛ نرخ و مبلغ پس از انقضای پیش‌فاکتور ممکن است تغییر کنند.</p></aside>
   </div>
-  <section class="ui-landing-section"><header class="ui-landing-section-head"><div><p>هزینه تبلیغات چگونه محاسبه می‌شود؟</p><h2>از CPM تا مبلغ قابل پرداخت</h2></div></header>
+  <section id="pricing-cpm" class="ui-landing-section"><header class="ui-landing-section-head"><div><p>هزینه تبلیغات چگونه محاسبه می‌شود؟</p><h2>از CPM تا مبلغ قابل پرداخت</h2></div></header>
   <article class="card card-pad legal-prose ui-public-reading">
-    <h3>CPM در Telegram Ads یعنی چه؟</h3><p>CPM نرخ پیشنهادی به ازای هزار نمایش تبلیغ است. به صورت نمونه، اگر نرخ ۰٫۵ واحد ارز تبلیغاتی باشد و ۱۰ هزار نمایش با همان نرخ محاسبه شود، هزینه نظری ۵ واحد است. این مثال صرفاً آموزشی است؛ رقابت، محدودیت و وضعیت کمپین بر نتیجه اثر دارند.</p>
+    <h3>CPM در Telegram Ads یعنی چه؟</h3><div class="pp-formula" aria-label="فرمول تقریبی هزینه"><span>هزینه نظری</span><b> = </b><span>تعداد نمایش ÷ ۱۰۰۰</span><b> × </b><span>CPM</span></div><p>CPM نرخ پیشنهادی به ازای هزار نمایش تبلیغ است. به صورت نمونه، اگر نرخ ۰٫۵ واحد ارز تبلیغاتی باشد و ۱۰ هزار نمایش با همان نرخ محاسبه شود، هزینه نظری ۵ واحد است. این مثال صرفاً آموزشی است؛ رقابت، محدودیت و وضعیت کمپین بر نتیجه اثر دارند.</p>
     <h3>بودجه و کارمزد چه تفاوتی دارند؟</h3><p>بودجه برای اعتبار تبلیغاتی در نظر گرفته می‌شود و کارمزد مربوط به خدمات پلتفرم است. پیش‌فاکتور ممکن است ذخیره موقت ریسک نرخ نیز داشته باشد که طبق شرایط سفارش پس از تخصیص تأییدشده بررسی می‌شود.</p>
     <h3>آیا قیمت ثابت یا حداقل نمایش تضمینی وجود دارد؟</h3><p>نرخ و شرایط هر نوع تبلیغ به قابلیت حساب و شرایط بازار وابسته است. عدد ثابت یا تعداد نمایش و عضو تضمین نمی‌کنیم؛ مبلغ معتبر را در پیش‌فاکتور خود بررسی کنید.</p>
     <p><a href="{% url 'public:refund' %}">شرایط بازپرداخت</a> · <a href="{% url 'public:faq' %}">سوالات مالی رایج</a> · <a href="{% url 'public:how_it_works' %}">شروع ساخت کمپین</a></p>

@@ -101,3 +101,17 @@
 .pp-how-it-works .pp-guide-action{justify-content:flex-start}
 @media(max-width:600px){.ui-final.pp-how-it-works .pp-journey .step-card{min-height:0;border-inline-start:3px solid #8ab8d8}}
 
+
+
+.ui-final.pp-pricing .ui-public-pricing{max-width:none;align-items:stretch;gap:18px;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr)}
+.ui-final.pp-pricing .ui-public-pricing .pricing-card--exec{background:linear-gradient(145deg,#fff,#edf6fc);border:1px solid #c2d9eb;padding:clamp(22px,3.5vw,36px);border-radius:22px;display:grid;gap:14px;align-content:start;text-align:start}
+.pp-pricing .pp-price-sub{margin:0;font-size:.9rem}
+.ui-final.pp-pricing .ui-public-pricing .price-tag{font-size:clamp(1.75rem,3vw,2.35rem)}
+.pp-pricing .pricing-card--exec ul{padding-inline-start:20px;color:var(--pp-muted)}
+.pp-pricing .ui-public-pricing-guide{border-radius:22px;padding:clamp(22px,3.5vw,36px);display:grid;align-content:start;gap:12px}
+.pp-pricing .ui-public-pricing-guide dl>div{padding-block:14px}
+.pp-pricing .pp-formula{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px 12px;padding:18px;background:var(--pp-soft);border-radius:14px;color:var(--pp-ink);font-weight:650;font-size:.95rem;margin-block:12px}
+.pp-pricing .pp-formula b{color:var(--pp-blue)}
+.ui-final.pp-pricing .ui-public-reading{max-width:none}
+@media(max-width:810px){.ui-final.pp-pricing .ui-public-pricing{grid-template-columns:minmax(0,1fr)}}
+
