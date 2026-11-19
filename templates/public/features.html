@@ -1,16 +1,24 @@
 {% extends "public_base.html" %}
 {% block title %}امکانات — {{ PRODUCT_NAME }}{% endblock %}
 {% block content %}
-{% include "includes/public_hero.html" with title="امکانات" subtitle="از ساخت پیش‌نویس تا پیگیری نتیجهٔ کمپین" show_subtitle=1 compact=1 %}
+{% include "includes/public_hero.html" with title="امکانات پنل تبلیغات تلگرام" subtitle="ابزارهای طراحی، مدیریت و ارزیابی کمپین در یک داشبورد فارسی" show_subtitle=1 compact=1 %}
 <section class="section public-section container">
   <div class="feature-grid ui-public-feature-grid">
-    <article class="feature-card"><span class="feature-card__icon ui-target-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="layers" size="md" %}</span><h2>ویزارد کمپین</h2><p class="muted">هدف، مقصد، جایگاه، محتوا، بودجه و پرداخت.</p></article>
-    <article class="feature-card"><span class="feature-card__icon ui-target-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="wallet" size="md" %}</span><h2>کیف پول ریالی</h2><p class="muted">شارژ، رزرو بودجه و پیش‌فاکتور شفاف.</p></article>
-    <article class="feature-card"><span class="feature-card__icon ui-target-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="line-chart" size="md" %}</span><h2>گزارش همگام‌شده</h2><p class="muted">نمودار روزانه و KPI با همگام‌سازی API.</p></article>
-    <article class="feature-card"><span class="feature-card__icon ui-target-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="clipboard-check" size="md" %}</span><h2>عملیات داخلی</h2><p class="muted">تأیید کمپین، نرخ ارز و ممیزی.</p></article>
-    <article class="feature-card"><span class="feature-card__icon ui-target-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="bell" size="md" %}</span><h2>اعلان‌ها</h2><p class="muted">رویدادهای پرداخت و وضعیت کمپین.</p></article>
-    <article class="feature-card"><span class="feature-card__icon ui-target-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="headphones" size="md" %}</span><h2>پشتیبانی</h2><p class="muted">تیکت با پیگیری وضعیت.</p></article>
+    <article class="feature-card"><span class="feature-card__icon ui-target-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="layers" size="md" %}</span><h2>استودیو ساخت کمپین</h2><p class="muted">هدف تبلیغ، مقصد، جایگاه، متن، گزینه‌های هدف‌گیری و بودجه را مرحله‌به‌مرحله تنظیم کنید. پیش‌نویس را قبل از سفارش مرور کنید.</p></article>
+    <article class="feature-card"><span class="feature-card__icon ui-target-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="wallet" size="md" %}</span><h2>کیف پول ریالی</h2><p class="muted">شارژ کیف پول در صورت فعال بودن درگاه، مشاهده پیش‌فاکتور، رزرو مبلغ سفارش و پیگیری تراکنش‌ها در یک بخش مالی.</p></article>
+    <article class="feature-card"><span class="feature-card__icon ui-target-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="line-chart" size="md" %}</span><h2>گزارش همگام‌شده</h2><p class="muted">شاخص‌های در دسترس از API، نمودارهای دوره‌ای و گزارش عملکرد؛ اطلاعات ناموجود به‌معنای صفر نیست.</p></article>
+    <article class="feature-card"><span class="feature-card__icon ui-target-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="clipboard-check" size="md" %}</span><h2>عملیات داخلی</h2><p class="muted">درخواست‌های انتشار و تغییرات کمپین قبل از اجرا بررسی می‌شوند؛ وضعیت هر درخواست قابل پیگیری است.</p></article>
+    <article class="feature-card"><span class="feature-card__icon ui-target-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="bell" size="md" %}</span><h2>اعلان‌ها</h2><p class="muted">اعلان وضعیت سفارش، تغییرات کمپین و هشدار مانده بودجه بر اساس داده معتبر و تنظیمات شما.</p></article>
+    <article class="feature-card"><span class="feature-card__icon ui-target-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="headphones" size="md" %}</span><h2>پشتیبانی</h2><p class="muted">سوالات مربوط به بودجه، خطا و وضعیت تبلیغ را از مسیر تیکت ثبت و پیگیری کنید.</p></article>
   </div>
+  <section class="ui-landing-section"><header class="ui-landing-section-head"><div><p>ابزارهای پیشرفته</p><h2>هدف‌گیری مخاطب و مدیریت عملکرد</h2></div></header>
+  <div class="feature-grid ui-public-feature-grid">
+    <article class="feature-card"><h3>انتخاب مخاطب</h3><p>بر اساس موقعیت، زبان، موضوع، کانال یا ربات، متناسب با نوع کمپین و قابلیت‌های تأییدشده.</p></article>
+    <article class="feature-card"><h3>مدیریت تبلیغ فعال</h3><p>درخواست توقف، ادامه و تغییر تنظیمات با بررسی اپراتور؛ افزایش یا کاهش بودجه فعلاً مسیر بررسی مالی دارد.</p></article>
+    <article class="feature-card"><h3>مخاطبان اختصاصی و پیکسل</h3><p>ابزارهای حساب تبلیغاتی اختصاصی برای مدیریت منابع مخاطب و رویداد؛ استفاده عملی منوط به مجوز و قابلیت حساب است.</p></article>
+    <article class="feature-card"><h3>تحلیل و گزارش</h3><p>مقایسه دوره‌ها، بررسی هزینه و نمایش و مشاهده گزارش‌های جزئی در صورت وجود داده معتبر.</p></article>
+  </div><p class="ui-landing-note">دسترسی عملی به امکانات پیشرفته تابع وضعیت سرویس، حساب و قوانین تلگرام است.</p>
+  <p><a href="{% url 'public:how_it_works' %}">نحوه ساخت کمپین</a> · <a href="{% url 'public:pricing' %}">مدل قیمت‌گذاری و تعرفه</a></p></section>
   <div class="ui-landing-end ui-public-end">
     <div><h2>اولین کمپین خود را طراحی کنید.</h2><p>با یک پیش‌نویس شروع کنید و قبل از پرداخت، جزئیات را بررسی کنید.</p></div>
     {% if user.is_authenticated %}<a class="btn btn-primary btn-lg" href="{% url 'campaigns:wizard_new' %}">ساخت کمپین</a>{% else %}<a class="btn btn-primary btn-lg" href="{% url 'accounts:register' %}">ایجاد حساب</a>{% endif %}
