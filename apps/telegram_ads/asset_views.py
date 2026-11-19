@@ -5,7 +5,7 @@ from django.views.decorators.http import require_http_methods, require_POST
 from django.views.decorators.cache import never_cache
 from apps.accounts.permissions import customer_required
 from apps.telegram_ads.exceptions import TelegramAdsError
-from apps.telegram_ads.services.customer_assets import owned_account, verified_client, enabled, issue_nonce, create_asset, change_audience_contacts, EVENT_TYPES
+from apps.telegram_ads.services.customer_assets import owned_account, verified_client, enabled, issue_nonce, create_asset, change_audience_contacts, delete_unused_audience, EVENT_TYPES
 
 @login_required
 @customer_required
@@ -58,4 +58,18 @@ def customer_audience_update(request):
         messages.success(request, "درخواست تغییر مخاطبان توسط API تأیید شد؛ اندازه گروه ممکن است تخمینی باشد.")
     except (ValueError, TelegramAdsError):
         messages.error(request, "تغییر مخاطبان انجام نشد یا نتیجه آن نیازمند تطبیق است؛ بدون بررسی دوباره ارسال نکنید.")
+    return redirect("accounts:advertiser_assets")
+
+
+
+@login_required
+@customer_required
+@never_cache
+@require_POST
+def customer_audience_delete(request):
+    try:
+        delete_unused_audience(request.user, request.POST)
+        messages.success(request, "حذف گروه مخاطبان توسط API تأیید شد.")
+    except (ValueError, TelegramAdsError):
+        messages.error(request, "حذف تأیید نشد یا نتیجه نامطمئن است. گروهِ دارای تبلیغ فعال حذف نمی‌شود.")
     return redirect("accounts:advertiser_assets")

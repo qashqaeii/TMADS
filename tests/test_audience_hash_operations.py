@@ -50,3 +50,30 @@ def test_successful_audience_edit_persists_only_metadata(customer_user):
         assert op.state == "completed"
         assert secret_hash not in str(op.__dict__)
         verified.return_value.edit_audience_hashes.assert_called_once()
+
+
+
+@pytest.mark.django_db
+def test_audience_delete_requires_explicit_zero_ads_count(customer_user):
+    from apps.telegram_ads.services.customer_assets import delete_unused_audience, issue_nonce
+    row=RelatedAccountRequest.objects.create(customer=customer_user.customer_profile,
+        status="provisioned", title="Example", consent_at=timezone.now(),
+        main_account_id="main", remote_account_id="child")
+    with patch("apps.telegram_ads.services.customer_assets.enabled", return_value=True), patch(
+        "apps.telegram_ads.services.customer_assets.verified_client"
+    ) as verified:
+        for record in [{"audience_id":42}, {"audience_id":42,"ads_count":1}]:
+            verified.return_value.get_audiences_by_ids.return_value=[record]
+            with pytest.raises(ValueError):
+                delete_unused_audience(customer_user, {
+                    "audience_id":"42", "nonce":issue_nonce(row), "consent":"on",
+                })
+        verified.return_value.delete_unused_audience.assert_not_called()
+        verified.return_value.get_audiences_by_ids.return_value=[{"audience_id":42,"ads_count":0}]
+        verified.return_value.delete_unused_audience.return_value=True
+        result=delete_unused_audience(customer_user, {
+            "audience_id":"42", "nonce":issue_nonce(row), "consent":"on",
+        })
+        result.refresh_from_db()
+        assert result.state=="completed"
+        verified.return_value.delete_unused_audience.assert_called_once()

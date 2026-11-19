@@ -149,3 +149,53 @@ def change_audience_contacts(actor, data):
     except Exception:
         AccountAssetOperation.objects.filter(pk=op.pk).update(state="uncertain")
         raise TelegramAdsError("نتیجه تغییر مخاطبان نامشخص است؛ درخواست را تکرار نکنید.") from None
+
+
+
+def delete_unused_audience(actor, data):
+    """Remove only an unreferenced audience after verifying its account and ad count.
+
+    Never accept a client-supplied ads_count. The claim is durable before any
+    remote mutation; ambiguous outcomes never trigger an automatic retry.
+    """
+    row = owned_account(actor)
+    if not row or not enabled() or data.get("consent") != "on":
+        raise ValueError("مجوز مدیریت حساب و تأیید حذف لازم است.")
+    try:
+        audience_id = int(data.get("audience_id") or "")
+        nonce = signing.loads(data.get("nonce", ""), salt=SALT, max_age=900)
+        op_id = uuid.UUID(nonce["operation"])
+        if nonce["account"] != str(row.pk) or not 0 < audience_id < 2147483648:
+            raise ValueError
+    except (ValueError, TypeError, KeyError, signing.BadSignature):
+        raise ValueError("شناسه یا اعتبار فرم حذف نامعتبر است.") from None
+
+    with transaction.atomic():
+        row = RelatedAccountRequest.objects.select_for_update().get(pk=row.pk, customer=actor.customer_profile)
+        if row.status != RelatedAccountRequest.Status.PROVISIONED or row.customer.is_suspended:
+            raise PermissionDenied
+        if (AccountAssetOperation.objects.filter(pk=op_id).exists() or
+                row.asset_operations.filter(state__in=["executing", "uncertain"]).exists()):
+            raise ValueError("یک عملیات قبلی در جریان است یا نیازمند تطبیق است.")
+        client = verified_client(row)
+        records = client.get_audiences_by_ids([audience_id], account_id=row.remote_account_id)
+        if not isinstance(records, list) or len(records) != 1:
+            raise ValueError("گروه متعلق به این حساب تأیید نشد.")
+        source = records[0]
+        if not isinstance(source, dict) or str(source.get("audience_id")) != str(audience_id):
+            raise ValueError("شناسه گروه با حساب اختصاصی مطابقت ندارد.")
+        # An absent ads_count is unknown, not zero.
+        if type(source.get("ads_count")) is not int or source["ads_count"] != 0:
+            raise ValueError("گروه مورد استفاده تبلیغات است یا تعداد تبلیغات آن تأیید نشده است.")
+        operation = AccountAssetOperation.objects.create(
+            pk=op_id, account=row, action="audience_delete", remote_id=str(audience_id),
+        )
+
+    try:
+        if client.delete_unused_audience(account_id=row.remote_account_id, audience_id=audience_id) is not True:
+            raise ValueError("حذف گروه از API تأیید نشد.")
+        AccountAssetOperation.objects.filter(pk=operation.pk).update(state="completed")
+        return operation
+    except Exception:
+        AccountAssetOperation.objects.filter(pk=operation.pk).update(state="uncertain")
+        raise TelegramAdsError("نتیجه حذف گروه نامطمئن است؛ دوباره تلاش نکنید و درخواست بررسی دهید.") from None

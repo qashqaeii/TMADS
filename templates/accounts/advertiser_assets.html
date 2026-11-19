@@ -40,6 +40,19 @@
   {% else %}<p class="ui-studio-warning">مدیریت اعضای مخاطبان تا فعال‌شدن مجوز API و حساب اختصاصی غیرفعال است.</p>{% endif %}
 </section>
 {% endif %}
+{% if section == 'audiences' %}
+<section class="card card-pad form-stack ui-audience-delete">
+  <div class="ui-form-intro"><span class="ui-target-symbol">{% include "includes/lucide_icon.html" with name="trash-2" size="md" %}</span><div><h2>حذف گروه استفاده‌نشده</h2><p>فقط گروهی قابل حذف است که API تلگرام تعداد تبلیغات متصل به آن را صراحتاً صفر گزارش کند.</p></div></div>
+  {% if enabled and not unresolved %}
+  <form method="post" action="{% url 'accounts:audience_delete' %}" class="form-stack">{% csrf_token %}
+    <input type="hidden" name="nonce" value="{{ nonce }}">
+    <div class="field"><label for="delete-audience-id">شناسه گروه مخاطبان</label><input id="delete-audience-id" name="audience_id" type="text" inputmode="numeric" pattern="[0-9]+" maxlength="10" autocomplete="off" required></div>
+    <label class="choice-card"><input name="consent" type="checkbox" required> متوجه هستم حذف گروه قابل بازگشت نیست و تنها پس از کنترل API انجام می‌شود.</label>
+    <button class="btn btn-danger-soft" type="submit" data-confirm-title="حذف گروه مخاطبان" data-confirm-message="این عملیات باعث حذف دائمی گروه در تلگرام می‌شود. تنها در صورت نبود تبلیغ مرتبط و با مجوز فعال اجرا خواهد شد." data-confirm-label="حذف گروه">درخواست حذف گروه</button>
+  </form>
+  {% else %}<p class="ui-studio-warning">حذف گروه تا تعیین تکلیف عملیات قبلی و فعال بودن مجوز متوقف است.</p>{% endif %}
+</section>
+{% endif %}
 <section class="card card-pad form-stack"><h2 class="section-title">تاریخچه عملیات منابع</h2>{% for op in operations %}<div class="finance-line"><span>{{ op.action }} · {{ op.created_at|date:"Y-m-d H:i" }}</span><span class="status {% if op.state == 'completed' %}status-active{% else %}status-warn{% endif %}">{% if op.state == 'completed' %}شناسه دریافت شد{% else %}نیازمند بررسی{% endif %}</span></div>{% empty %}<p class="muted">هنوز عملیاتی ثبت نشده است.</p>{% endfor %}</section>
 {% endif %}
 </div>

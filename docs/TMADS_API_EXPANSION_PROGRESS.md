@@ -48,3 +48,5 @@ Resolve any failures and perform UI QA before real deployment. Keep real API cre
 - SHA-256-only audience add/remove management is implemented behind dedicated-account consent and customer asset write gates. It transmits explicit 64-digit hashes only; no phone numbers or hashes are retained in the database. Ambiguous writes remain unresolved and cannot be retried without reconciliation. Live verification required.
 
 - Pre-payment creative photo/video uploads now persist an explicit uncertain claim before network I/O and use a standalone endpoint outside the wizard atomic block. Ambiguous upload outcomes cannot be automatically retried. Existing media-ownership and paid-submission gates remain unchanged.
+
+- Safe audience deletion is gated by explicit ownership, confirmed ads_count == 0, durable idempotent claim and two-stage UX confirmation. Unknown ads_count blocks deletion. API writes remain disabled by default.
