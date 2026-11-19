@@ -57,3 +57,30 @@ def test_no_synthetic_alert_when_balance_missing(customer_user):
         remote_status_raw={"currency": "TON", "spent_budget": "99"},
     )
     assert send_budget_alerts() == 0
+
+
+
+@pytest.mark.django_db
+def test_budget_alert_optout_and_customer_setting(client, customer_user):
+    from django.urls import reverse
+    campaign = Campaign.objects.create(
+        customer=customer_user.customer_profile, name="Alert choices",
+        status=Campaign.Status.ACTIVE,
+    )
+    ad = TelegramAdvertisement.objects.create(
+        campaign=campaign, remote_ad_id="993",
+        remote_status_raw={"currency":"TON","spent_budget":"9","remaining_budget":"1"},
+    )
+    client.force_login(customer_user)
+    url = reverse("campaigns:budget_alert_settings",args=[campaign.pk])
+    assert client.post(url,{"threshold":"0"}).status_code==302
+    campaign.refresh_from_db()
+    assert campaign.ad_settings["budget_alert_threshold"] == 0
+    assert assess_low_budget(ad) is None
+    assert client.post(url,{"threshold":"15"}).status_code==302
+    campaign.refresh_from_db()
+    assert campaign.ad_settings["budget_alert_threshold"] == 0
+    assert client.post(url,{"threshold":"20"}).status_code==302
+    campaign.refresh_from_db()
+    assert campaign.ad_settings["budget_alert_threshold"] == 20
+    assert assess_low_budget(ad) is not None

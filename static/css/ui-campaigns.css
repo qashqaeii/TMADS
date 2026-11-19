@@ -100,3 +100,12 @@
 .ui-remote-history time { margin-inline-start:auto;color:var(--ui-muted);font-size:.8rem; }
 .ui-remote-history p { flex-basis:100%;margin:0;color:var(--ui-muted);font-size:.85rem; }
 @media(max-width:700px) { .ui-remote-grid { grid-template-columns:minmax(0,1fr); } }
+
+/* Compact customer-controlled, read-only budget alert preferences. */
+.ui-final .ui-budget-alert-card {display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:14px 16px;background:#fff;border:1px solid var(--ui-border);border-radius:var(--ui-radius)}
+.ui-budget-alert-card__lead {display:flex;align-items:center;gap:10px;min-width:0;flex:1}
+.ui-budget-alert-card__lead h2 {margin:0;font-size:.92rem;line-height:1.6}
+.ui-budget-alert-card__lead p {margin:3px 0 0;color:var(--ui-muted);font-size:.78rem;line-height:1.7}
+.ui-budget-alert-card__form {display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.ui-final .ui-budget-alert-card__form select {min-height:38px;border:1px solid var(--ui-border);border-radius:8px;background:#fff;color:var(--ui-ink);font-family:inherit;font-size:.85rem;padding:7px 11px}
+@media(max-width:600px){.ui-budget-alert-card__form,.ui-budget-alert-card__form select {width:100%}.ui-budget-alert-card__form button {flex:1}}

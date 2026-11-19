@@ -33,6 +33,12 @@ def assess_low_budget(ad, *, now=None):
         return None
     if not ad.updated_at or ad.updated_at > now + timedelta(minutes=2) or now - ad.updated_at > timedelta(hours=6):
         return None
+    preferences = ad.campaign.ad_settings or {}
+    selected = preferences.get("budget_alert_threshold", 20)
+    if type(selected) is not int or selected not in (0, 5, 10, 20):
+        selected = 20
+    if selected == 0:
+        return None
     raw = ad.remote_status_raw
     balance = _balance(raw)
     if balance is None:
@@ -41,8 +47,8 @@ def assess_low_budget(ad, *, now=None):
     percentage = remaining * Decimal("100") / (spent + remaining)
     if percentage <= 5:
         threshold, severity = 5, "warning"
-    elif percentage <= 20:
-        threshold, severity = 20, "info"
+    elif percentage <= selected:
+        threshold, severity = selected, "info"
     else:
         return None
     return {

@@ -1075,3 +1075,35 @@ def upload_ad_media_draft(request, campaign_id):
     except ValueError:
         messages.error(request, "انتقال یا تأیید رسانه انجام نشد؛ درخواست نامطمئن را بدون تطبیق تکرار نکنید.")
     return redirect("campaigns:wizard", campaign_id=campaign.pk)
+
+
+
+@login_required
+@customer_required
+@require_POST
+@transaction.atomic
+def campaign_budget_alert_settings(request, campaign_id):
+    """Customer-owned in-app notification preference only, no Telegram write."""
+    campaign = get_customer_campaign(request.user.customer_profile, campaign_id)
+    campaign = Campaign.objects.select_for_update().get(pk=campaign.pk, customer=request.user.customer_profile)
+    if not campaign.remote_ads.exclude(remote_ad_id="").exists():
+        messages.error(request, "این کمپین هنوز تبلیغ متصل ندارد.")
+        return redirect("campaigns:detail", campaign_id=campaign.pk)
+    try:
+        threshold = int(request.POST.get("threshold", ""))
+    except (TypeError, ValueError):
+        threshold = -1
+    if threshold not in (0, 5, 10, 20):
+        messages.error(request, "سطح هشدار انتخاب‌شده معتبر نیست.")
+        return redirect("campaigns:detail", campaign_id=campaign.pk)
+    settings = dict(campaign.ad_settings or {})
+    settings["budget_alert_threshold"] = threshold
+    campaign.ad_settings = settings
+    campaign.save(update_fields=["ad_settings", "updated_at"])
+    AuditLog.objects.create(
+        actor=request.user, action="campaign.budget_alert_preferences",
+        entity_type="campaign", entity_id=campaign.pk,
+        new_state={"budget_alert_threshold": threshold},
+    )
+    messages.success(request, "ترجیحات هشدار بودجه ذخیره شد؛ هیچ بودجه‌ای تغییر نکرد.")
+    return redirect("campaigns:detail", campaign_id=campaign.pk)

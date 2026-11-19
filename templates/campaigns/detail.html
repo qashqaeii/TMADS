@@ -91,6 +91,24 @@
     </header>
   </article>
 
+  {% if budget.has_remote %}
+  <section class="ui-budget-alert-card" aria-label="تنظیم هشدار بودجه">
+    <div class="ui-budget-alert-card__lead">
+      <span class="ui-target-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="bell-ring" size="md" %}</span>
+      <div><h2>هشدار باقی‌مانده بودجه</h2><p>براساس مانده واقعی تلگرام؛ فقط اعلان داخل پنل و بدون تغییر خودکار هزینه</p></div>
+    </div>
+    <form method="post" action="{% url 'campaigns:budget_alert_settings' campaign.id %}" class="ui-budget-alert-card__form">{% csrf_token %}
+      <label class="sr-only" for="budget-alert-threshold">حد هشدار بودجه</label>
+      <select id="budget-alert-threshold" name="threshold">
+        <option value="20" {% if campaign.ad_settings.budget_alert_threshold == 20 or campaign.ad_settings.budget_alert_threshold == None %}selected{% endif %}>۲۰٪ مانده</option>
+        <option value="10" {% if campaign.ad_settings.budget_alert_threshold == 10 %}selected{% endif %}>۱۰٪ مانده</option>
+        <option value="5" {% if campaign.ad_settings.budget_alert_threshold == 5 %}selected{% endif %}>۵٪ مانده</option>
+        <option value="0" {% if campaign.ad_settings.budget_alert_threshold == 0 %}selected{% endif %}>خاموش</option>
+      </select>
+      <button class="btn btn-ghost btn-sm" type="submit">ذخیره</button>
+    </form>
+  </section>
+  {% endif %}
   {% include "includes/campaign_metrics_strip.html" with kpi_ribbon_mode="ref" %}
 
   {% include "campaigns/includes/performance_badges.html" %}

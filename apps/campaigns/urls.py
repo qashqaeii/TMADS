@@ -11,6 +11,7 @@ urlpatterns = [
     path("<uuid:campaign_id>/", views.campaign_detail, name="detail"),
     path("<uuid:campaign_id>/intraday/", intraday_views.campaign_intraday, name="intraday"),
     path("<uuid:campaign_id>/manage/", remote_views.remote_management, name="remote_management"),
+    path("<uuid:campaign_id>/alerts/budget/", views.campaign_budget_alert_settings, name="budget_alert_settings"),
     path("<uuid:campaign_id>/wizard/", views.campaign_wizard, name="wizard"),
     path("<uuid:campaign_id>/website-photo/upload/", views.upload_website_photo_draft, name="upload_website_photo"),
     path("<uuid:campaign_id>/ad-media/upload/", views.upload_ad_media_draft, name="upload_ad_media"),
