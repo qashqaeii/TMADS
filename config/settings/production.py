@@ -44,6 +44,10 @@ if TELEGRAM_ADS_PAID_SUBMISSION_ENABLED and not TELEGRAM_ADS_WRITE_ENABLED:
     MISSING_PRODUCTION_SECRETS.append("TELEGRAM_ADS_PAID_SUBMISSION_ENABLED")
 if TELEGRAM_ADS_WRITE_ENABLED and not TELEGRAM_ADS_API_TOKEN:
     MISSING_PRODUCTION_SECRETS.append("TELEGRAM_ADS_API_TOKEN")
+if SMS_ENABLED and (SMS_PROVIDER != "faraz" or not FARAZSMS_API_KEY.strip()
+        or not FARAZSMS_LINE_NUMBER.strip() or not FARAZSMS_PATTERNS["verify_mobile"].strip()
+        or not FARAZSMS_OTP_ATTR.strip()):
+    MISSING_PRODUCTION_SECRETS.append("SMS (Faraz credentials and verification pattern required)")
 if MISSING_PRODUCTION_SECRETS:
     raise ImproperlyConfigured(
         "Missing or invalid production configuration: "

@@ -77,10 +77,14 @@ def review_campaign(campaign_id, *, actor, decision, reason="", internal_reason=
     previous = campaign.status
     campaign.status = Campaign.Status.READY_FOR_SUBMISSION if decision == "approve" else Campaign.Status.REJECTED
     campaign.save(update_fields=["status", "updated_at"])
-    CampaignStatusHistory.objects.create(
+    history = CampaignStatusHistory.objects.create(
         campaign=campaign, from_status=previous, to_status=campaign.status, note=reason,
     )
     notify_customer(campaign.customer,
         "کمپین تأیید شد" if decision == "approve" else "کمپین رد شد",
         reason, level="success" if decision == "approve" else "danger", related_campaign_id=campaign.id)
+    if previous != campaign.status:
+        from apps.notifications.sms import enqueue_sms
+        enqueue_sms(campaign.customer, "campaign_status", f"campaign-review:{history.pk}",
+                    {"status": "تأیید اولیه" if decision == "approve" else "رد شده"})
     return campaign

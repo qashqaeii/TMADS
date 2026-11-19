@@ -59,6 +59,11 @@ def release_checks():
     )
     add("payment", "اتصال تولیدی درگاه پرداخت", payment,
         "تأیید اعتبار تنظیمات فقط شرط اولیه است؛ تراکنش‌های آزمایشی واقعی جداگانه باید تأیید شوند.")
+    from apps.notifications.faraz import configured
+    add("sms_config", "تنظیمات پیامک فراز", bool(settings.SMS_PROVIDER == "faraz" and all(
+        configured(purpose) for purpose in settings.FARAZSMS_PATTERNS)),
+        "کلید، خطوط و پترن‌های مستقل بررسی می‌شوند؛ ارسال واقعی نیازمند آزمون است.")
+    add("sms_live", "آزمون ارسال و دریافت پیامک", False, "تحویل پیامک و عملکرد صف باید در محیط واقعی آزموده شود.", pending=True)
     token = bool(settings.TELEGRAM_ADS_API_TOKEN)
     add("telegram_token", "توکن API تبلیغات", token,
         "صرفاً وجود توکن بررسی می‌شود؛ مقدار، بخشی از آن یا شناسه قابل بازیابی نمایش داده نمی‌شود.")

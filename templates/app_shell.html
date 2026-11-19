@@ -81,6 +81,7 @@
             <span class="nav-icon">{% include "includes/nav_icon.html" with icon="rate" %}</span>
             <span class="nav-label">نرخ گرام</span>
           </a>
+          <a href="{% url 'operations:sms' %}" class="sidebar-link {% if '/ops/sms/' in request.path %}active{% endif %}"{% if '/ops/sms/' in request.path %} aria-current="page"{% endif %}><span class="nav-icon">{% include "includes/lucide_icon.html" with name="message-square" size="sm" %}</span><span class="nav-label">مدیریت پیامک</span></a>
           <a href="{% url 'operations:api_status' %}" class="sidebar-link {% if '/ops/api-status' in request.path %}active{% endif %}"{% if '/ops/api-status' in request.path %} aria-current="page"{% endif %}>
             <span class="nav-icon">{% include "includes/nav_icon.html" with icon="api" %}</span>
             <span class="nav-label">وضعیت API</span>
