@@ -77,3 +77,36 @@ def test_audience_delete_requires_explicit_zero_ads_count(customer_user):
         result.refresh_from_db()
         assert result.state=="completed"
         verified.return_value.delete_unused_audience.assert_called_once()
+
+
+
+@pytest.mark.django_db
+def test_pixel_event_is_not_deleted_if_unknown_or_used(customer_user):
+    from apps.telegram_ads.services.customer_assets import manage_pixel_event, issue_nonce
+    row=RelatedAccountRequest.objects.create(customer=customer_user.customer_profile,
+        status="provisioned", title="Example", consent_at=timezone.now(),
+        main_account_id="main", remote_account_id="child")
+    with patch("apps.telegram_ads.services.customer_assets.enabled", return_value=True), patch(
+        "apps.telegram_ads.services.customer_assets.verified_client"
+    ) as verified:
+        for value in [
+            {"event_id":"ev1","auto_created":True,"ads_count":0},
+            {"event_id":"ev1","auto_created":False},
+            {"event_id":"ev1","auto_created":False,"ads_count":2},
+        ]:
+            verified.return_value.get_pixel_events_by_ids.return_value=[value]
+            with pytest.raises(ValueError):
+                manage_pixel_event(customer_user,{
+                    "event_id":"ev1","action":"delete","nonce":issue_nonce(row),"consent":"on",
+                })
+        verified.return_value.change_pixel_event.assert_not_called()
+        verified.return_value.get_pixel_events_by_ids.return_value=[{
+            "event_id":"ev1","auto_created":False,"ads_count":0,
+        }]
+        verified.return_value.change_pixel_event.return_value=True
+        op=manage_pixel_event(customer_user,{
+            "event_id":"ev1","action":"delete","nonce":issue_nonce(row),"consent":"on",
+        })
+        op.refresh_from_db()
+        assert op.state=="completed"
+        verified.return_value.change_pixel_event.assert_called_once()

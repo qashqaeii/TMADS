@@ -53,6 +53,27 @@
   {% else %}<p class="ui-studio-warning">حذف گروه تا تعیین تکلیف عملیات قبلی و فعال بودن مجوز متوقف است.</p>{% endif %}
 </section>
 {% endif %}
+{% if section == 'events' %}
+<section class="card card-pad form-stack ui-event-management">
+  <div class="ui-form-intro"><span class="ui-target-symbol">{% include "includes/lucide_icon.html" with name="target" size="md" %}</span><div><h2>مدیریت رویدادهای تبدیل</h2><p>رویداد خودکار قابل تغییر نیست. حذف تنها برای رویداد دستی بدون تبلیغ مرتبط مجاز است.</p></div></div>
+  {% if enabled and not unresolved %}
+  <form method="post" action="{% url 'accounts:pixel_event_manage' %}" class="form-stack">{% csrf_token %}
+    <input type="hidden" name="nonce" value="{{ nonce }}">
+    <div class="field"><label for="pixel-event-id">شناسه رویداد از تلگرام</label><input id="pixel-event-id" name="event_id" required maxlength="256" dir="ltr" autocomplete="off"></div>
+    <div class="field"><label for="pixel-event-operation">عملیات</label><select id="pixel-event-operation" name="action" data-pixel-action><option value="rename">تغییر عنوان</option><option value="delete">حذف رویداد استفاده‌نشده</option></select></div>
+    <div class="field" data-pixel-title-wrap><label for="pixel-new-title">عنوان جدید</label><input id="pixel-new-title" name="title" maxlength="64" required dir="auto"></div>
+    <label class="choice-card"><input type="checkbox" name="consent" required> تغییر رویداد در حساب اختصاصی خودم را تأیید می‌کنم.</label>
+    <button class="btn btn-primary" type="submit" data-confirm-title="مدیریت رویداد" data-confirm-message="این عملیات پس از بررسی وضعیت رویداد در حساب اختصاصی به تلگرام فرستاده می‌شود؛ اگر نتیجه نامطمئن باشد تکرار خودکار انجام نمی‌شود." data-confirm-label="ثبت تغییر" data-confirm-tone="primary">ثبت تغییر رویداد</button>
+  </form>
+  {% else %}<p class="ui-studio-warning">مدیریت رویداد تا تأیید مجوز یا تعیین تکلیف عملیات نامطمئن غیرفعال است.</p>{% endif %}
+</section>
+<script>
+(function(){var s=document.querySelector("[data-pixel-action]"), w=document.querySelector("[data-pixel-title-wrap]");
+if(!s||!w)return;var i=w.querySelector("input");
+function update(){var rename=s.value==="rename";w.hidden=!rename;i.required=rename;i.disabled=!rename;}
+s.addEventListener("change",update);update();})();
+</script>
+{% endif %}
 <section class="card card-pad form-stack"><h2 class="section-title">تاریخچه عملیات منابع</h2>{% for op in operations %}<div class="finance-line"><span>{{ op.action }} · {{ op.created_at|date:"Y-m-d H:i" }}</span><span class="status {% if op.state == 'completed' %}status-active{% else %}status-warn{% endif %}">{% if op.state == 'completed' %}شناسه دریافت شد{% else %}نیازمند بررسی{% endif %}</span></div>{% empty %}<p class="muted">هنوز عملیاتی ثبت نشده است.</p>{% endfor %}</section>
 {% endif %}
 </div>

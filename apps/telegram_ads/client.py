@@ -311,6 +311,25 @@ class TelegramAdsClient:
                 audience_id, account_id=account_id, **{field: hashes},
             )))
 
+    def get_pixel_events_by_ids(self, ids, *, account_id):
+        return self._run("pixel_events_by_ids",
+            lambda c: [_model_to_dict(item) for item in c.get_pixel_events_by_id(ids, account_id=account_id)])
+
+    def change_pixel_event(self, *, account_id, event_id, action, title=None):
+        if not account_id or not (settings.TELEGRAM_ADS_WRITE_ENABLED
+                and settings.TELEGRAM_ADS_PAID_SUBMISSION_ENABLED
+                and getattr(settings, "TELEGRAM_ADS_CUSTOMER_ASSETS_ENABLED", False)):
+            raise TelegramAdsWriteDisabled("Pixel event management is disabled")
+        if action == "rename":
+            if not title or not 1 <= len(title.encode("utf-8")) <= 64:
+                raise ValueError("Invalid pixel event title")
+            return self._run("pixel_event_rename",
+                lambda c: _model_to_dict(c.edit_pixel_event(event_id, title, account_id=account_id)))
+        if action == "delete":
+            return self._run("pixel_event_delete",
+                lambda c: bool(c.delete_pixel_event(event_id, account_id=account_id)))
+        raise ValueError("Unknown pixel event action")
+
     def get_pixel_info(self, *, account_id=None):
         return self._run("pixel_info", lambda c: _model_to_dict(c.get_pixel(account_id=account_id)))
 

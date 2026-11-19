@@ -50,3 +50,5 @@ Resolve any failures and perform UI QA before real deployment. Keep real API cre
 - Pre-payment creative photo/video uploads now persist an explicit uncertain claim before network I/O and use a standalone endpoint outside the wizard atomic block. Ambiguous upload outcomes cannot be automatically retried. Existing media-ownership and paid-submission gates remain unchanged.
 
 - Safe audience deletion is gated by explicit ownership, confirmed ads_count == 0, durable idempotent claim and two-stage UX confirmation. Unknown ads_count blocks deletion. API writes remain disabled by default.
+
+- Account-bound pixel event rename/delete added with read-only identity/auto_created/ads_count checks; delete only when explicitly zero ads and not auto-created. Unknown execution state never replays automatically. Separate related-account write gates remain default OFF.

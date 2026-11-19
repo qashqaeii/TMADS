@@ -199,3 +199,69 @@ def delete_unused_audience(actor, data):
     except Exception:
         AccountAssetOperation.objects.filter(pk=operation.pk).update(state="uncertain")
         raise TelegramAdsError("نتیجه حذف گروه نامطمئن است؛ دوباره تلاش نکنید و درخواست بررسی دهید.") from None
+
+
+
+def manage_pixel_event(actor, data):
+    """Verify event identity in the user's account; prevent unsafe deletion.
+
+    The new event title is never written to operation logs on an uncertain
+    response, and the event is never silently recreated or deleted twice.
+    """
+    row = owned_account(actor)
+    if not row or not enabled() or data.get("consent") != "on":
+        raise ValueError("مجوز حساب و تأیید مدیریت رویداد لازم است.")
+    action = data.get("action")
+    if action not in {"rename", "delete"}:
+        raise ValueError("اقدام رویداد معتبر نیست.")
+    event_id = str(data.get("event_id") or "").strip()
+    title = str(data.get("title") or "").strip()
+    if not event_id or len(event_id) > 256 or any(ord(char) < 33 for char in event_id):
+        raise ValueError("شناسه رویداد معتبر نیست.")
+    if action == "rename" and (not 1 <= len(title.encode("utf-8")) <= 64):
+        raise ValueError("عنوان رویداد باید بین ۱ تا ۶۴ بایت باشد.")
+    try:
+        nonce = signing.loads(data.get("nonce", ""), salt=SALT, max_age=900)
+        operation_id = uuid.UUID(nonce["operation"])
+        if nonce["account"] != str(row.pk):
+            raise ValueError
+    except (signing.BadSignature, ValueError, TypeError, KeyError):
+        raise ValueError("فرم منقضی یا نامعتبر است.") from None
+
+    with transaction.atomic():
+        row = RelatedAccountRequest.objects.select_for_update().get(
+            pk=row.pk, customer=actor.customer_profile)
+        if row.status != RelatedAccountRequest.Status.PROVISIONED or row.customer.is_suspended:
+            raise PermissionDenied
+        if (AccountAssetOperation.objects.filter(pk=operation_id).exists() or
+                row.asset_operations.filter(state__in=["executing", "uncertain"]).exists()):
+            raise ValueError("یک عملیات دیگر در جریان یا نیازمند تطبیق است.")
+        client = verified_client(row)
+        events = client.get_pixel_events_by_ids([event_id], account_id=row.remote_account_id)
+        if not isinstance(events, list) or len(events) != 1:
+            raise ValueError("رویداد در حساب اختصاصی تأیید نشد.")
+        event = events[0]
+        if (not isinstance(event, dict) or event.get("event_id") != event_id
+                or event.get("auto_created") is not False):
+            raise ValueError("ویرایش رویداد خودکار یا تأییدنشده مجاز نیست.")
+        if action == "delete" and (type(event.get("ads_count")) is not int or event["ads_count"] != 0):
+            raise ValueError("رویداد در تبلیغ استفاده می‌شود یا تعداد تبلیغات آن مشخص نیست.")
+        operation = AccountAssetOperation.objects.create(
+            pk=operation_id, account=row, action="event_" + action, remote_id=event_id,
+        )
+    try:
+        outcome = client.change_pixel_event(
+            account_id=row.remote_account_id, event_id=event_id, action=action,
+            title=title if action == "rename" else None,
+        )
+        if action == "rename":
+            verified = isinstance(outcome, dict) and outcome.get("event_id") == event_id and outcome.get("title") == title
+        else:
+            verified = outcome is True
+        if not verified:
+            raise ValueError("تغییر رویداد از API تأیید نشد.")
+        AccountAssetOperation.objects.filter(pk=operation.pk).update(state="completed")
+        return operation
+    except Exception:
+        AccountAssetOperation.objects.filter(pk=operation.pk).update(state="uncertain")
+        raise TelegramAdsError("نتیجه تغییر رویداد نامطمئن است؛ عملیات را تکرار نکنید.") from None
