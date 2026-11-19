@@ -33,13 +33,15 @@
       var input = search.querySelector('input');
       var count = search.querySelector('[data-pp-faq-count]');
       var cards = Array.from(root.querySelectorAll('.ui-faq-layout .ui-public-faq details'));
-      var normalize = function(value) { return value.normalize('NFKC').toLowerCase().replace(/ي/g,'ی').replace(/ك/g,'ک').replace(/[\\u200c\\u200d]/g,' ').replace(/\\s+/g,' ').trim(); };
+      var normalize = function(value) { return value.normalize('NFKC').toLowerCase().replace(/ي/g,'ی').replace(/ك/g,'ک').replace(/[\u200c\u200d]/g,' ').replace(/\s+/g,' ').trim(); };
       search.hidden = false;
       function filter() {
         var q = normalize(input.value);
+        var tokens = q.split(' ').filter(Boolean);
         var visible = 0;
         cards.forEach(function(card) {
-          var found = !q || normalize(card.textContent).indexOf(q) !== -1;
+          var haystack = normalize(card.textContent);
+          var found = tokens.every(function(token){return haystack.indexOf(token) !== -1;});
           card.hidden = !found;
           if (found) visible++;
         });

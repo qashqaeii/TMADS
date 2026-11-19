@@ -1,7 +1,7 @@
 /* Public-only premium system: progressive enhancement, no layout shifts. */
 .public-premium{--pp-ink:#13283d;--pp-muted:#4c6074;--pp-line:#dce5ed;--pp-blue:#146ca8;--pp-soft:#edf5fb;--pp-paper:#fff;--pp-radius:20px;--pp-ease:cubic-bezier(.2,.8,.2,1);--pp-shadow:0 16px 42px rgb(23 53 79 / .075);color:var(--pp-ink)}
 .ui-final.public-premium .site-main--public{padding-block-end:clamp(40px,6vw,82px)}
-.public-premium .container{width:min(100% - 40px,1120px);max-width:1120px;margin-inline:auto}
+.public-premium .container{width:min(calc(100% - 40px),1120px);max-width:1120px;margin-inline:auto}
 .public-premium .site-main--public :is(section,article,div)[id]{scroll-margin-top:100px}
 .ui-final.public-premium .ui-public-header{background:rgb(255 255 255 / .94);border-bottom:1px solid var(--pp-line);backdrop-filter:blur(14px)}
 .ui-final.public-premium .ui-public-header .nav-links--desktop a{position:relative;border-radius:9px;transition:color .2s,background-color .2s}
@@ -194,3 +194,18 @@
 .pp-register .ui-auth-card .form-stack{gap:16px}
 .pp-register .ui-auth-card .field-help{font-size:.8rem;line-height:1.8;color:var(--pp-muted)}
 
+
+/* Final edge cases: preserve full navigation and no horizontal scrolling. */
+@media(min-width:901px) and (max-width:1120px){
+ .ui-final.public-premium .ui-public-header .public-nav-bar{gap:6px}
+ .ui-final.public-premium .ui-public-header .nav-links--desktop{gap:0}
+ .ui-final.public-premium .ui-public-header .nav-links--desktop a{padding-inline:5px;font-size:.78rem}
+ .ui-final.public-premium .ui-public-header .nav-actions--desktop{gap:4px}
+ .ui-final.public-premium .ui-public-header .nav-actions--desktop .btn{padding-inline:9px;white-space:nowrap;font-size:.78rem}
+}
+.ui-final.public-premium .ui-auth-card .pp-auth-context{font-size:.85rem;line-height:1.9}
+.public-premium .pp-auth-context a{color:var(--pp-blue);text-decoration:underline;text-underline-offset:3px}
+.ui-final.public-premium .pp-auth-recovery .ui-auth-card>.btn{width:100%}
+.public-premium .pp-auth-recovery .auth-state-icon{background:#e9f5ee;color:#277552}
+.public-premium .pp-auth-recovery .form-error{line-height:1.8}
+@media(max-width:420px){.pp-home .ui-product-title{flex-wrap:wrap}.pp-home .ui-product-metrics article{padding:8px 4px}.pp-pricing .pp-formula{justify-content:flex-start}}

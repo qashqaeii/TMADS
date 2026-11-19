@@ -1,0 +1,3 @@
+# Public premium polish
+Public-only CSS and progressive-enhancement JS. All seven marketing pages, four legal routes (shared template), and all six account entry/recovery templates use the common shell. Page-specific commits preserve SEO and existing form actions. Motion uses opacity/transform, observes content once, and respects reduced-motion. FAQ search works locally; without JS all answers remain visible via native details. Password visibility is a local UI action only.
+Regression tests cover render, hashed assets, page classes, anchors and critical interaction markup. Browser E2E, visual review at 360/390/768/1024/1440 widths, contrast auditing and Core Web Vitals remain required before claiming visual sign-off. No payment or Telegram writes.
