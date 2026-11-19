@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import uuid
 from datetime import datetime
 from decimal import Decimal
 from typing import Any
@@ -11,6 +10,7 @@ from django.utils import timezone
 
 from apps.campaigns.models import Campaign
 from apps.finance.services import ton_allocation_for_budget
+from apps.finance.models import AdvertisingOrder
 from apps.telegram_ads.constants import TMADS_TO_API_PLACEMENT
 from apps.telegram_ads.targeting.builders import build_input_target
 from apps.telegram_ads.targeting.compatibility import resolve_api_placement
@@ -42,15 +42,19 @@ def build_schedule(ad_settings: dict[str, Any]) -> dict[str, Any] | InputAdSched
     return None
 
 
-def campaign_initial_budget_ton(campaign: Campaign) -> float:
-    """Convert customer IRR budget to operator-account TON/Gram (approx)."""
+def campaign_initial_budget_ton(campaign: Campaign, order: AdvertisingOrder | None = None) -> float:
+    """Paid allocations are immutable; unpaid diagnostics are estimates only."""
+    if order is not None:
+        return float(order.ton_allocation)
     if campaign.budget_irr <= 0:
         return 0.0
     ton = ton_allocation_for_budget(campaign.budget_irr)
     return float(ton) if ton else 0.0
 
 
-def campaign_daily_budget_limit_ton(campaign: Campaign) -> float:
+def campaign_daily_budget_limit_ton(campaign: Campaign, order: AdvertisingOrder | None = None) -> float:
+    if order is not None:
+        return float(Decimal(order.quote.payload["daily_limit_ton"]))
     if campaign.daily_cap_irr <= 0:
         return 0.0
     ton = ton_allocation_for_budget(campaign.daily_cap_irr)
@@ -62,6 +66,7 @@ def build_create_ad_payload(
     *,
     include_initial_budget: bool = True,
     idempotency_key: str | None = None,
+    order: AdvertisingOrder | None = None,
 ) -> dict[str, Any]:
     validation = validate_submission_ready(campaign)
     if not validation.ok:
@@ -89,7 +94,7 @@ def build_create_ad_payload(
         "placement": placement,
         "target": serialize(target),
         "return_target": True,
-        "idempotency_key": idempotency_key or f"tmads-create-{campaign.id}-{uuid.uuid4()}",
+        "idempotency_key": idempotency_key or f"tmads-create-{campaign.id}",
     }
     if text:
         payload["text"] = text.strip()
@@ -129,12 +134,12 @@ def build_create_ad_payload(
     if settings.get("remote_initial_status") == "on_hold" or settings.get("is_paused"):
         payload["is_paused"] = True
 
-    daily_ton = campaign_daily_budget_limit_ton(campaign)
+    daily_ton = campaign_daily_budget_limit_ton(campaign, order)
     if daily_ton > 0:
         payload["daily_budget_limit"] = daily_ton
 
     if include_initial_budget:
-        initial = campaign_initial_budget_ton(campaign)
+        initial = campaign_initial_budget_ton(campaign, order)
         if initial > 0:
             payload["initial_budget"] = initial
 

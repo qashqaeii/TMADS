@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import timedelta
-from decimal import Decimal, ROUND_CEILING
+from decimal import Decimal, ROUND_CEILING, ROUND_DOWN
 
 from django.conf import settings
 from django.utils import timezone
@@ -34,11 +34,17 @@ def build_campaign_quote(advertising_budget_irr: int) -> dict:
     snapshot = manual or get_pricing_snapshot(require_fresh=True)
 
     base_rate = snapshot.best_ask_irr
-    est_ton = ton_from_advertising_budget(advertising_budget_irr, base_rate)
+    if not base_rate.is_finite() or base_rate <= 0:
+        raise PricingError("نرخ معتبر در دسترس نیست.")
+    # Match the documented TON budget precision before locking the purchase.
+    est_ton = (Decimal(advertising_budget_irr) / base_rate).quantize(Decimal('0.01'), rounding=ROUND_DOWN)
     if est_ton <= 0:
         raise PricingError("محاسبه TON نامعتبر است.")
 
-    rate_info = effective_rate_for_ton(est_ton, snapshot=snapshot)
+    rate_info = (
+        {"rate_type": "manual", "effective_rate_irr": base_rate}
+        if manual else effective_rate_for_ton(est_ton, snapshot=snapshot)
+    )
     effective_rate = rate_info["effective_rate_irr"]
     if rate_info.get("liquidity_limited"):
         raise InsufficientLiquidityError("عمق بازار یا نرخ قطعی در دسترس نیست؛ دوباره تلاش کنید.")
@@ -56,9 +62,7 @@ def build_campaign_quote(advertising_budget_irr: int) -> dict:
     risk_buffer = advertising_cost * buffer_percent // 100
     total = advertising_cost + service_fee + risk_buffer
 
-    ton_allocation = (Decimal(advertising_cost) / effective_rate).quantize(
-        Decimal("0.000000001"), rounding=ROUND_CEILING
-    )
+    ton_allocation = est_ton
 
     expires_at = timezone.now() + timedelta(seconds=settings.QUOTE_VALIDITY_SECONDS)
 

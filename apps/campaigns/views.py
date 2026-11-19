@@ -2,7 +2,7 @@ import copy
 import csv
 import json
 import uuid
-from decimal import Decimal
+from decimal import Decimal, ROUND_DOWN
 
 from django.contrib import messages
 from django.core.cache import cache
@@ -672,8 +672,16 @@ def _create_quote(campaign: Campaign) -> None:
     totals = build_campaign_quote(campaign.budget_irr)
     if totals.get("quote_status") != "locked":
         raise PricingError("نرخ معتبر برای ساخت پیش‌فاکتور در دسترس نیست.")
+    daily_ton = (Decimal(campaign.daily_cap_irr) / Decimal(totals["effective_rate_irr"])).quantize(
+        Decimal("0.01"), rounding=ROUND_DOWN,
+    )
+    if (campaign.daily_cap_irr < 0 or campaign.daily_cap_irr > campaign.budget_irr
+            or daily_ton > Decimal(totals["ton_allocation"])
+            or (campaign.daily_cap_irr and daily_ton <= 0)):
+        raise PricingError("سقف روزانه باید معتبر و حداکثر برابر بودجه تبلیغ باشد.")
     totals = {
         **totals,
+        "daily_limit_ton": str(daily_ton),
         "quote_nonce": uuid.uuid4().hex,
         "requested_budget_irr": campaign.budget_irr,
         "requested_daily_cap_irr": campaign.daily_cap_irr,

@@ -50,6 +50,10 @@ def nobitex_pricing_stub(db, monkeypatch):
         "apps.finance.services.ton_exchange_rate.effective_rate_for_ton",
         _effective_rate_for_ton,
     )
+    monkeypatch.setattr(
+        "apps.finance.services.campaign_pricing.effective_rate_for_ton",
+        _effective_rate_for_ton,
+    )
 
 
 @pytest.fixture
