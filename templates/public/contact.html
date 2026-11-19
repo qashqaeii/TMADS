@@ -1,11 +1,11 @@
 {% extends "public_base.html" %}
 {% block title %}تماس — {{ PRODUCT_NAME }}{% endblock %}
 {% block content %}
-{% include "includes/public_hero.html" with title="تماس" subtitle="برای پیگیری درخواست‌ها و دریافت راهنمایی" show_subtitle=1 compact=1 %}
+{% include "includes/public_hero.html" with title="تماس با ما و پشتیبانی" subtitle="برای راهنمایی قبل از تبلیغ و پیگیری سفارش، از مسیرهای زیر شروع کنید" show_subtitle=1 compact=1 %}
 <section class="section public-section container">
   <article class="contact-card contact-card--exec ui-public-contact">
     <span class="ui-target-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="headphones" size="md" %}</span><h2>پشتیبانی مشتریان</h2>
-    <p class="muted">پس از ورود، از بخش پشتیبانی تیکت ثبت کنید.</p>
+    <p class="muted">برای سوالات مربوط به سفارش، کیف پول، وضعیت تبلیغ یا خطاهای سامانه، پس از ورود تیکت ثبت کنید. شماره سفارش یا نام کمپین و توضیح مسئله به بررسی سریع‌تر کمک می‌کند. رمز عبور و توکن API را در تیکت ارسال نکنید.</p>
     {% if user.is_authenticated %}
     <a class="btn btn-primary" href="{% url 'support:create' %}">ثبت تیکت</a>
     {% else %}
@@ -15,5 +15,12 @@
     </div>
     {% endif %}
   </article>
+  <section class="ui-landing-section"><header class="ui-landing-section-head"><div><p>راهنمای سریع</p><h2>پاسخ مناسب را پیدا کنید</h2></div></header>
+    <div class="feature-grid ui-public-feature-grid">
+      <article class="feature-card"><h3>پیش از ساخت کمپین</h3><p>مراحل، هدف‌گیری و شرایط ارسال را مرور کنید.</p><a href="{% url 'public:how_it_works' %}">راهنمای تبلیغات تلگرام</a></article>
+      <article class="feature-card"><h3>سوال مالی و تعرفه</h3><p>مدل قیمت‌گذاری، بودجه و کارمزد را بررسی کنید.</p><a href="{% url 'public:pricing' %}">مشاهده تعرفه</a></article>
+      <article class="feature-card"><h3>سوالات و خطاهای رایج</h3><p>پاسخ پرسش‌های پرتکرار را قبل از ثبت درخواست بخوانید.</p><a href="{% url 'public:faq' %}">سوالات متداول</a></article>
+    </div>
+  </section>
 </section>
 {% endblock %}
