@@ -129,6 +129,69 @@ def _payload(op, remote):
     return op.request_payload
 
 
+def operation_matches_remote(op, remote):
+    """Match an uncertain write to a real read-only Ad record; never infer success."""
+    if not isinstance(remote, dict):
+        return False
+    action = op.action
+    if action in (Action.INCREASE_BUDGET, Action.DECREASE_BUDGET):
+        return False  # Budget requires independent financial and transfer evidence.
+    if action == Action.REVIEW:
+        return remote.get("status") in {"in_review", "active", "on_hold", "declined"}
+    if action in (Action.PAUSE, Action.RESUME):
+        state = str(remote.get("status") or "").lower()
+        if action == Action.PAUSE:
+            return remote.get("is_paused") is True or state in {"stopped", "on_hold"}
+        return state == "active" and remote.get("is_paused") is not True
+    if action in (Action.EDIT_CPM, Action.EDIT_DAILY_LIMIT):
+        if remote.get("currency") != "TON":
+            return False
+        field = "cpm" if action == Action.EDIT_CPM else "daily_budget_limit"
+        try:
+            observed = Decimal(str(remote[field]))
+            expected = Decimal(str(op.request_payload[field]))
+            return observed.is_finite() and expected.is_finite() and observed == expected
+        except (KeyError, InvalidOperation, TypeError, ValueError):
+            return False
+    if action == Action.EDIT_TITLE:
+        return isinstance(remote.get("title"), str) and remote["title"] == op.request_payload.get("title")
+    return False
+
+
+def reconcile_operation_readonly(operation_id, *, actor):
+    """Confirm an uncertain operation using getAd only; no write or money movement.
+
+    A mismatch, missing field or API error leaves the operation in uncertain
+    state. Never retry the underlying mutation.
+    """
+    _manager(actor)
+    op = RemoteAdOperation.objects.select_related("advertisement__campaign").get(pk=operation_id)
+    if op.status != Status.UNCERTAIN:
+        raise ValueError("فقط عملیات نیازمند تطبیق قابل بررسی است.")
+    ad = op.advertisement
+    if not ad.remote_ad_id.isdigit() or len(ad.remote_ad_id) > 20:
+        raise ValueError("شناسه تبلیغ برای بررسی معتبر نیست.")
+    remote = _checked_remote(TelegramAdsClient(), ad)
+    if not operation_matches_remote(op, remote):
+        raise ValueError("انجام عملیات در تلگرام تأیید نشد؛ وضعیت نامطمئن حفظ شد.")
+    with transaction.atomic():
+        campaign = Campaign.objects.select_for_update().get(pk=ad.campaign_id)
+        op = RemoteAdOperation.objects.select_for_update().get(pk=operation_id, advertisement=ad)
+        if op.status != Status.UNCERTAIN:
+            raise ValueError("وضعیت عملیات در حین بررسی تغییر کرد.")
+        ad = TelegramAdvertisement.objects.select_for_update().get(pk=ad.pk)
+        _apply_remote_ad_payload(ad, remote)
+        ad.save(update_fields=["remote_status", "remote_status_raw", "placement", "promotion_url", "updated_at"])
+        _sync_campaign_from_remote(ad)
+        op.status = Status.COMPLETED
+        op.note = "انجام عملیات از طریق استعلام خواندنی تلگرام تأیید شد."
+        op.result_payload = {"ad_id": ad.remote_ad_id, "status": remote.get("status"), "confirmed": True, "reconciled_readonly": True}
+        op.save(update_fields=["status", "note", "result_payload", "updated_at"])
+        _audit(op, actor, "reconciled")
+        notify_customer(campaign.customer, "نتیجه درخواست تبلیغ تأیید شد", op.get_action_display(), related_campaign_id=campaign.pk)
+    return op
+
+
 def execute_operation(operation_id, *, actor):
     """Claim before I/O; once a write is attempted, ambiguity blocks retries."""
     _manager(actor)
@@ -152,16 +215,7 @@ def execute_operation(operation_id, *, actor):
         else:
             client.edit_advertisement(ad.remote_ad_id,payload)
         confirmed = _checked_remote(client,ad)
-        if op.action == Action.REVIEW:
-            valid=confirmed.get("status") in {"in_review","active","on_hold","declined"}
-        elif op.action in (Action.PAUSE,Action.RESUME):
-            paused = confirmed.get("is_paused") is True or confirmed.get("status") == "on_hold"
-            valid = paused if op.action == Action.PAUSE else not paused and confirmed.get("status") == "active"
-        elif op.action in (Action.EDIT_CPM,Action.EDIT_DAILY_LIMIT):
-            field = next(iter(payload))
-            valid = Decimal(str(confirmed.get(field, 0 if field == "daily_budget_limit" else None))) == Decimal(str(payload[field]))
-        else:
-            valid = confirmed.get("title") == payload.get("title")
+        valid = operation_matches_remote(op, confirmed)
         if not valid:
             raise ValueError("نتیجه عملیات هنوز تأیید نشده است.")
         with transaction.atomic():

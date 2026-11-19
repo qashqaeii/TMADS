@@ -6,7 +6,7 @@ from django.views.decorators.http import require_http_methods, require_POST
 from apps.accounts.permissions import customer_required, staff_ops_required
 from apps.campaigns.ownership import get_customer_campaign
 from apps.campaigns.models import RemoteAdOperation
-from apps.telegram_ads.services.manage_ad import request_operation, execute_operation, reject_operation, withdraw_operation
+from apps.telegram_ads.services.manage_ad import request_operation, execute_operation, reject_operation, withdraw_operation, reconcile_operation_readonly
 from apps.telegram_ads.exceptions import TelegramAdsError
 from django.shortcuts import get_object_or_404
 
@@ -60,6 +60,9 @@ def remote_operations(request):
             elif request.POST.get("decision")=="reject":
                 reject_operation(op.pk,actor=request.user,reason=request.POST.get("reason",""))
                 messages.success(request,"تصمیم ثبت شد.")
+            elif request.POST.get("decision")=="reconcile":
+                reconcile_operation_readonly(op.pk, actor=request.user)
+                messages.success(request,"انجام عملیات از طریق استعلام تلگرام تأیید شد.")
             else:
                 raise ValueError("تصمیم معتبر نیست.")
         except (ValueError,TelegramAdsError) as exc:

@@ -73,3 +73,43 @@ def test_withdraw_pending_request_never_calls_api(customer_user):
         api.assert_not_called()
     op.refresh_from_db()
     assert op.status=="rejected"
+
+
+
+@pytest.mark.django_db
+def test_uncertain_operation_reconciles_only_when_remote_matches(customer_user):
+    from apps.campaigns.models import RemoteAdOperation
+    from apps.telegram_ads.services.manage_ad import reconcile_operation_readonly
+    from apps.accounts.models import User
+    from unittest.mock import patch
+    from django.contrib.auth.models import PermissionDenied
+
+    campaign, ad = setup_ad(customer_user)
+    op = RemoteAdOperation.objects.create(
+        advertisement=ad, action=RemoteAdOperation.Action.EDIT_CPM,
+        status=RemoteAdOperation.Status.UNCERTAIN,
+        request_payload={"cpm": "1.25"},
+    )
+    staff = User.objects.create_user(username="ops-check-remote", password="sample",
+        role=User.Role.ADMIN)
+    with patch("apps.telegram_ads.services.manage_ad.TelegramAdsClient") as api:
+        api.return_value.get_ad.return_value = {"ad_id": int(ad.remote_ad_id), "currency": "TON", "cpm": "1.20", "status": "active"}
+        with pytest.raises(ValueError):
+            reconcile_operation_readonly(op.pk, actor=staff)
+        op.refresh_from_db()
+        assert op.status == RemoteAdOperation.Status.UNCERTAIN
+        api.return_value.get_ad.return_value["cpm"] = "1.25"
+        result = reconcile_operation_readonly(op.pk, actor=staff)
+        assert result.status == RemoteAdOperation.Status.COMPLETED
+        api.return_value.edit_ad.assert_not_called()
+        api.return_value.submit_ad_for_review.assert_not_called()
+
+
+@pytest.mark.django_db
+def test_uncertain_operation_never_reconciles_money(customer_user):
+    from apps.campaigns.models import RemoteAdOperation
+    from apps.telegram_ads.services.manage_ad import operation_matches_remote
+    campaign, ad = setup_ad(customer_user)
+    op = RemoteAdOperation(advertisement=ad, action=RemoteAdOperation.Action.INCREASE_BUDGET,
+        status=RemoteAdOperation.Status.UNCERTAIN, request_payload={"amount_ton": "2.00"})
+    assert not operation_matches_remote(op, {"ad_id": int(ad.remote_ad_id), "remaining_budget": "2.00"})

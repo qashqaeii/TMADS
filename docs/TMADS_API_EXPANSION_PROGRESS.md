@@ -15,6 +15,7 @@ Base: 30f86d3. API reference: docs/Telegramads-API-INFORMATION.md and official h
 | 590817c | Customer-scoped audience/pixel/event inventory and gated creation of empty groups and conversion resources |
 | 73f2422 | Customer five-minute stats page, documented event types, escaped pixel snippet, regression tests |
 | a0eb992 | Withdrawal of pending requests and malformed ID validation |
+| (this batch) | Read-only reconciliation for uncertain remote edits; never retries or adjusts funds |
 
 ## Still required for complete delivery
 
