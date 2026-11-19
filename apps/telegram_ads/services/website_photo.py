@@ -60,49 +60,53 @@ def website_photo_receipt(campaign):
     return photo_id
 
 
-@transaction.atomic
 def upload_saved_website_photo(campaign, *, actor):
-    campaign = Campaign.objects.select_for_update().get(pk=campaign.pk)
+    """Persist a durable uncertain claim BEFORE external I/O; do not auto-retry."""
     profile = getattr(actor, "customer_profile", None)
-    if not profile or profile.is_suspended or profile.pk != campaign.customer_id:
+    if not profile or profile.is_suspended:
         raise PermissionDenied
-    from apps.campaigns.views import _campaign_editable
-    if not _campaign_editable(campaign) or not website_photo_enabled():
-        raise ValueError("بارگذاری تصویر وب‌سایت در این حساب مجاز نیست.")
-    if not (campaign.ad_settings or {}).get("destination_rights_confirmed"):
-        raise ValueError("حق استفاده از مقصد و تصویر را ابتدا تأیید و ذخیره کنید.")
-    creative = campaign.creatives.first()
-    sig = _signature(campaign, creative)
-    if not sig:
-        raise ValueError("تصویر وب‌سایت ذخیره نشده یا نامعتبر است.")
-    if website_photo_receipt(campaign):
-        return website_photo_receipt(campaign)
+    with transaction.atomic():
+        campaign = Campaign.objects.select_for_update().get(pk=campaign.pk, customer=profile)
+        from apps.campaigns.views import _campaign_editable
+        if not _campaign_editable(campaign) or not website_photo_enabled():
+            raise ValueError("بارگذاری تصویر وب‌سایت در این حساب مجاز نیست.")
+        if not (campaign.ad_settings or {}).get("destination_rights_confirmed"):
+            raise ValueError("حق استفاده از مقصد و تصویر را ابتدا تأیید و ذخیره کنید.")
+        creative = campaign.creatives.first()
+        sig = _signature(campaign, creative)
+        if not sig:
+            raise ValueError("تصویر وب‌سایت ذخیره نشده یا نامعتبر است.")
+        if website_photo_receipt(campaign):
+            return website_photo_receipt(campaign)
+        if APIRequestLog.objects.filter(
+            operation="website_photo_upload", meta__campaign_id=str(campaign.pk),
+            meta__state="uncertain",
+        ).exists():
+            raise ValueError("نتیجه انتقال قبلی نامطمئن است؛ تطبیق لازم است.")
+        with creative.website_photo.open("rb") as file:
+            errors = validate_website_photo(file)
+            if errors:
+                raise ValueError("؛ ".join(errors))
+        claim = APIRequestLog.objects.create(
+            operation="website_photo_upload", success=False,
+            meta={**sig, "state": "uncertain"},
+        )
 
-    unresolved = APIRequestLog.objects.filter(
-        operation="website_photo_upload", meta__campaign_id=str(campaign.pk),
-        meta__state="uncertain",
-    ).exists()
-    if unresolved:
-        raise ValueError("نتیجه انتقال قبلی نامطمئن است؛ قبل از درخواست مجدد تطبیق لازم است.")
-
-    claim = APIRequestLog.objects.create(
-        operation="website_photo_upload", success=False,
-        meta={**sig, "state": "uncertain"},
-    )
-    # Claim is committed by the caller's transaction before any actual write
-    # only when the surrounding request has no larger transaction.
+    # The claim has committed. A timeout cannot erase the evidence or permit
+    # another upload by the same campaign without explicit reconciliation.
     try:
         with creative.website_photo.open("rb") as file:
-            if validate_website_photo(file):
-                raise ValueError("ساختار فایل ذخیره‌شده با قرارداد API سازگار نیست.")
-            file.seek(0)
-            response = TelegramAdsClient().upload_website_photo(file, filename="site" + Path(creative.website_photo.name).suffix.lower())
-        photo_id = response.get("photo_id")
+            response = TelegramAdsClient().upload_website_photo(
+                file, filename="site" + Path(creative.website_photo.name).suffix.lower(),
+            )
+        photo_id = response.get("photo_id") if isinstance(response, dict) else None
         if not isinstance(photo_id, str) or not 0 < len(photo_id) <= 256:
-            raise ValueError("شناسه تصویر از تلگرام دریافت نشد.")
-        claim.success = True
-        claim.meta = {**sig, "photo_id": photo_id, "state": "completed"}
-        claim.save(update_fields=["success", "meta", "updated_at"])
+            raise ValueError("شناسه عکس معتبر نیست.")
+        APIRequestLog.objects.filter(pk=claim.pk).update(
+            success=True, meta={**sig, "photo_id": photo_id, "state": "completed"},
+        )
         return photo_id
     except Exception as exc:
-        raise TelegramAdsError("نتیجه بارگذاری تصویر وب‌سایت نیازمند بررسی است. برای جلوگیری از تکرار، مجدداً ارسال نکنید.") from exc
+        raise TelegramAdsError(
+            "نتیجه بارگذاری تصویر وب‌سایت نامطمئن است؛ ارسال مجدد تا تطبیق ممنوع است."
+        ) from exc

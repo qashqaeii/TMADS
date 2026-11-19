@@ -337,17 +337,6 @@ def campaign_wizard(request, campaign_id=None):
         if not _draft_revision_matches(campaign, request.POST):
             messages.error(request, "نسخه یا مرحله پیش‌نویس تغییر کرده است؛ صفحه جدید را بررسی کنید.")
             return redirect("campaigns:wizard", campaign_id=campaign.id)
-        if action == "verify_website_photo" and step == 3:
-            from apps.telegram_ads.services.website_photo import upload_saved_website_photo
-            from apps.telegram_ads.exceptions import TelegramAdsError
-            try:
-                if request.FILES or request.POST.get("remove_website_photo") == "1":
-                    raise ValueError("ابتدا تصویر را ذخیره کنید و سپس آن را انتقال دهید.")
-                upload_saved_website_photo(campaign, actor=request.user)
-                messages.success(request, "شناسه تصویر وب‌سایت تأیید شد. تبلیغ منتشر نشده است.")
-            except (ValueError, TelegramAdsError):
-                messages.error(request, "انتقال تصویر انجام نشد یا نتیجه آن نیازمند بررسی است.")
-            return redirect("campaigns:wizard", campaign_id=campaign.id)
         if action == "verify_media" and step == 3:
             from apps.telegram_ads.services.media import upload_saved_media
             from apps.telegram_ads.exceptions import TelegramAdsError
@@ -1048,3 +1037,26 @@ def creative_media_download(request, campaign_id, creative_id):
     response["Cache-Control"] = "private, no-store"
     response["X-Content-Type-Options"] = "nosniff"
     return response
+
+
+@login_required
+@customer_required
+@require_POST
+def upload_website_photo_draft(request, campaign_id):
+    """Explicit pre-payment media upload; outside the wizard's DB transaction."""
+    campaign = get_customer_campaign(request.user.customer_profile, campaign_id)
+    if ensure_studio_step(campaign) != 3 or not _campaign_editable(campaign):
+        messages.error(request, "برای انتقال تصویر به مرحله محتوای پیش‌نویس بروید.")
+        return redirect("campaigns:detail", campaign_id=campaign.id)
+    if (request.FILES or request.POST.get("remove_website_photo") == "1"
+            or not _draft_revision_matches(campaign, request.POST)):
+        messages.error(request, "ابتدا تصویر را ذخیره کنید و نسخه صفحه را تازه کنید.")
+        return redirect("campaigns:wizard", campaign_id=campaign.id)
+    from apps.telegram_ads.services.website_photo import upload_saved_website_photo
+    from apps.telegram_ads.exceptions import TelegramAdsError
+    try:
+        upload_saved_website_photo(campaign, actor=request.user)
+        messages.success(request, "شناسه تصویر وب‌سایت از تلگرام دریافت شد؛ تبلیغ هنوز منتشر نشده است.")
+    except (ValueError, TelegramAdsError):
+        messages.error(request, "انتقال یا تأیید تصویر ممکن نشد؛ در صورت نتیجه نامطمئن، ارسال دوباره مسدود است.")
+    return redirect("campaigns:wizard", campaign_id=campaign.id)

@@ -37,3 +37,24 @@ def test_website_upload_is_off_by_default_and_creates_no_api_calls(customer_user
             upload_saved_website_photo(campaign, actor=customer_user)
         api.assert_not_called()
     assert website_photo_receipt(campaign) is None
+
+
+@pytest.mark.django_db
+def test_uncertain_website_photo_upload_never_repeats(customer_user, settings, tmp_path, monkeypatch):
+    from apps.telegram_ads.models import APIRequestLog
+    settings.MEDIA_ROOT = str(tmp_path)
+    settings.TELEGRAM_ADS_API_TOKEN = "isolated-test-placeholder"
+    campaign = Campaign.objects.create(customer=customer_user.customer_profile,
+        destination="https://example.com", name="Site",
+        ad_settings={"destination_rights_confirmed": True})
+    AdCreative.objects.create(campaign=campaign, website_photo=photo())
+    with patch("apps.telegram_ads.services.website_photo.website_photo_enabled", return_value=True), patch(
+        "apps.telegram_ads.services.website_photo.TelegramAdsClient"
+    ) as client:
+        client.return_value.upload_website_photo.side_effect = TimeoutError("isolated timeout")
+        with pytest.raises(TelegramAdsError):
+            upload_saved_website_photo(campaign, actor=customer_user)
+        assert APIRequestLog.objects.filter(operation="website_photo_upload", meta__state="uncertain").exists()
+        with pytest.raises(ValueError):
+            upload_saved_website_photo(campaign, actor=customer_user)
+        client.return_value.upload_website_photo.assert_called_once()

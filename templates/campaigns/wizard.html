@@ -224,7 +224,7 @@
         {% if creative and creative.website_photo %}
           <div class="ui-studio-wallet"><span>فایل تصویر وب‌سایت ذخیره شده است.</span>
             {% if website_photo_uploaded %}<span class="status status-active">شناسه معتبر دریافت شد</span>
-            {% elif website_photo_enabled %}<button class="btn btn-ghost btn-sm" type="submit" name="action" value="verify_website_photo" formnovalidate data-confirm-title="انتقال تصویر وب‌سایت" data-confirm-message="فقط تصویر ذخیره‌شده به تلگرام منتقل می‌شود. هیچ بودجه‌ای اختصاص داده نمی‌شود." data-confirm-label="انتقال تصویر" data-confirm-tone="primary">انتقال تصویر به تلگرام</button>
+            {% elif website_photo_enabled %}<button class="btn btn-ghost btn-sm" type="submit" name="action" value="verify_website_photo" formaction="{% url 'campaigns:upload_website_photo' campaign.id %}" formnovalidate data-confirm-title="انتقال تصویر وب‌سایت" data-confirm-message="فقط تصویر ذخیره‌شده به تلگرام منتقل می‌شود. هیچ بودجه‌ای اختصاص داده نمی‌شود." data-confirm-label="انتقال تصویر" data-confirm-tone="primary">انتقال تصویر به تلگرام</button>
             {% else %}<span class="status status-warn">انتقال در این حساب فعال نیست</span>{% endif %}
           </div>
           <label class="choice-card"><input type="checkbox" name="remove_website_photo" value="1"> حذف فایل ذخیره‌شده در پیش‌نویس</label>
