@@ -188,3 +188,9 @@
 .public-premium .pp-auth-back{display:inline-flex;gap:6px;min-height:44px;align-items:center;color:var(--pp-blue);font-size:.9rem;justify-content:center}
 @media(max-width:760px){.ui-final.public-premium .pp-auth-layout{grid-template-columns:minmax(0,1fr);max-width:460px}.public-premium .pp-auth-aside{padding:24px}.public-premium .pp-auth-aside h2{font-size:1.25rem}}
 
+
+
+.pp-register .pp-register-terms{background:#f1f6fa;border:1px solid var(--pp-line);border-radius:10px;padding:12px!important;text-align:start!important;font-size:.82rem}
+.pp-register .ui-auth-card .form-stack{gap:16px}
+.pp-register .ui-auth-card .field-help{font-size:.8rem;line-height:1.8;color:var(--pp-muted)}
+
