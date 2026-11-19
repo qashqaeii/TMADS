@@ -3,6 +3,7 @@
 {% block content %}
 {% include "includes/public_hero.html" with title=title compact=1 %}
 <section class="section public-section container">
+  <nav class="ui-legal-nav ui-section-tabs" aria-label="صفحات حقوقی"><a href="{% url 'public:terms' %}" {% if request.resolver_match.url_name == 'terms' %}aria-current="page"{% endif %}>شرایط استفاده</a><a href="{% url 'public:privacy' %}" {% if request.resolver_match.url_name == 'privacy' %}aria-current="page"{% endif %}>حریم خصوصی</a><a href="{% url 'public:refund' %}" {% if request.resolver_match.url_name == 'refund' %}aria-current="page"{% endif %}>بازپرداخت</a><a href="{% url 'public:content_policy' %}" {% if request.resolver_match.url_name == 'content_policy' %}aria-current="page"{% endif %}>سیاست محتوا</a></nav>
   <article aria-label="{{ title }}" class="card card-pad legal-prose legal-md ui-public-reading">
     {% if body_text %}
       {{ body_text|linebreaksbr }}

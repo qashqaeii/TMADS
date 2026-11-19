@@ -5,7 +5,7 @@
 <section class="container ui-landing-hero">
   <div class="ui-landing-copy">
     <span class="ui-landing-kicker"><span aria-hidden="true"></span> پلتفرم مدیریت تبلیغات تلگرام</span>
-    <h1>تبلیغات تلگرام،<br><em>با کنترل بیشتر.</em></h1>
+    <h1>تبلیغات تلگرام،<br><em>با دیدی روشن‌تر.</em></h1>
     <p>کمپین‌های خود را طراحی کنید، مخاطبان را انتخاب کنید، هزینه‌ها را پیش از پرداخت ببینید و عملکرد را در یک داشبورد فارسی دنبال کنید.</p>
     <div class="ui-landing-actions">{% if user.is_authenticated %}<a class="btn btn-primary btn-lg" href="{% url 'dashboard:home' %}">ورود به داشبورد {% include "includes/lucide_icon.html" with name="arrow-left" size="btn" %}</a>{% else %}<a class="btn btn-primary btn-lg" href="{% url 'accounts:register' %}">ایجاد حساب {% include "includes/lucide_icon.html" with name="arrow-left" size="btn" %}</a>{% endif %}<a class="btn btn-ghost btn-lg" href="{% url 'public:how_it_works' %}">نحوه کار</a></div>
     <div class="ui-landing-proof"><span>{% include "includes/lucide_icon.html" with name="check-circle" size="sm" %} پیش‌فاکتور شفاف</span><span>{% include "includes/lucide_icon.html" with name="check-circle" size="sm" %} گزارش یکپارچه</span><span>{% include "includes/lucide_icon.html" with name="check-circle" size="sm" %} بررسی قبل از ارسال</span></div>
@@ -18,6 +18,7 @@
         <div class="ui-product-window__main">
           <div class="ui-product-title"><div><strong>نمای کلی تبلیغات</strong><small>شاخص‌های نمونه</small></div><span class="ui-product-mock-action">کمپین جدید +</span></div>
           <div class="ui-product-metrics"><article><small>نمایش</small><strong>۱۶۸٬۴۱۶</strong></article><article><small>کلیک</small><strong>۵٬۱۰۹</strong></article><article><small>نرخ کلیک</small><strong>۳٫۰۳٪</strong></article></div>
+          <div class="ui-product-chart" aria-hidden="true"><div><span>روند نمایش</span><small>نمای نمونه</small></div><svg viewBox="0 0 300 90" fill="none" focusable="false"><path d="M0 22H300M0 45H300M0 68H300" stroke="#dce6ef" stroke-dasharray="3 5"/><path d="M0 78C24 75 33 52 53 57S85 72 104 43 137 61 158 37 184 58 206 25 240 45 260 19 283 23 300 7V90H0Z" fill="#e6f1fa"/><path d="M0 78C24 75 33 52 53 57S85 72 104 43 137 61 158 37 184 58 206 25 240 45 260 19 283 23 300 7" stroke="#146ca8" stroke-width="3" stroke-linecap="round"/></svg></div>
           <div class="ui-product-workflow"><span class="ui-product-feature-icon">{% include "includes/lucide_icon.html" with name="crosshair" size="md" %}</span><div><strong>انتخاب مخاطب</strong><small>هدف‌گیری پیش از ارسال</small></div><span class="ui-product-chip">پیش‌نویس</span></div>
           <div class="ui-product-workflow"><span class="ui-product-feature-icon">{% include "includes/lucide_icon.html" with name="wallet" size="md" %}</span><div><strong>بررسی بودجه</strong><small>اعتبار و کارمزد تفکیک‌شده</small></div>{% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}</div>
           <div class="ui-product-workflow"><span class="ui-product-feature-icon">{% include "includes/lucide_icon.html" with name="line-chart" size="md" %}</span><div><strong>تحلیل عملکرد</strong><small>گزارش داده‌های همگام‌شده</small></div>{% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}</div>
@@ -40,7 +41,7 @@
 <section class="container ui-landing-section ui-landing-process">
   <header class="ui-landing-section-head"><div><p>مسیر کار</p><h2>از پیش‌نویس تا بررسی نتیجه</h2></div></header>
   <div class="ui-landing-steps"><article><span>۰۱</span><h3>طراحی کمپین</h3><p>هدف، متن، مقصد و بودجه را مشخص کنید.</p></article><article><span>۰۲</span><h3>بررسی سفارش</h3><p>پیش‌فاکتور و قوانین را مرور کنید.</p></article><article><span>۰۳</span><h3>پایش عملکرد</h3><p>پس از انتشار و همگام‌سازی، شاخص‌های تبلیغ را ببینید.</p></article></div>
-  <div class="ui-landing-end"><div><h2>اولین پیش‌نویس خود را بسازید.</h2><p>صدور سفارش و ارسال وابسته به وضعیت سرویس و بررسی‌های لازم است.</p></div><a class="btn btn-primary btn-lg" href="{% url 'accounts:register' %}">شروع ساخت حساب</a></div>
+  <div class="ui-landing-end"><div><h2>اولین پیش‌نویس خود را بسازید.</h2><p>صدور سفارش و ارسال وابسته به وضعیت سرویس و بررسی‌های لازم است.</p></div>{% if user.is_authenticated %}<a class="btn btn-primary btn-lg" href="{% url 'campaigns:wizard_new' %}">ساخت پیش‌نویس</a>{% else %}<a class="btn btn-primary btn-lg" href="{% url 'accounts:register' %}">ایجاد حساب</a>{% endif %}</div>
 </section>
 </div>
 {% endblock %}

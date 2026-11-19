@@ -9,7 +9,7 @@
     {% if user.is_authenticated %}
     <a class="btn btn-primary" href="{% url 'support:create' %}">ثبت تیکت</a>
     {% else %}
-    <div class="hero-actions" style="margin-top:.75rem">
+    <div class="hero-actions ui-contact-actions">
       <a class="btn btn-primary" href="{% url 'accounts:login' %}">ورود و ثبت درخواست</a>
       <a class="btn btn-ghost" href="{% url 'public:faq' %}">سوالات متداول</a>
     </div>

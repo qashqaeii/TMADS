@@ -17,7 +17,7 @@
         <a href="{% url 'public:features' %}">امکانات</a>
         <a href="{% url 'public:how_it_works' %}">نحوه کار</a>
         <a href="{% url 'public:pricing' %}">تعرفه</a>
-        <a href="{% url 'public:faq' %}">سوالات</a>
+        <a href="{% url 'public:faq' %}">سؤالات متداول</a>
         <a href="{% url 'public:about' %}">درباره</a>
       </div>
       <div class="nav-actions nav-actions--desktop">
@@ -137,7 +137,7 @@
       <a href="{% url 'public:contact' %}">تماس</a>
     </div>
   </div>
-  <p class="container footer-legal muted">© {{ PRODUCT_NAME }}</p>
+  <div class="container ui-footer-bottom"><span>© {{ PRODUCT_NAME }}</span><span>استفاده از خدمات تابع شرایط و مجوزهای تبلیغاتی تلگرام است.</span></div>
 </footer>
 {% endblock %}
 

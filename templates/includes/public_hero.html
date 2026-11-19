@@ -1,5 +1,6 @@
 <section class="public-hero ui-public-heading {% if compact %}public-hero--compact{% endif %}">
   <div class="container public-hero__inner">
+    <nav class="ui-public-crumb" aria-label="مسیر صفحه"><a href="{% url 'public:home' %}">صفحه اصلی</a>{% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}<span aria-current="page">{{ title }}</span></nav>
     {% if eyebrow %}<p class="public-hero__eyebrow">{{ eyebrow }}</p>{% endif %}
     <h1 class="public-hero__title">{{ title }}</h1>
     {% if subtitle and show_subtitle %}<p class="public-hero__subtitle">{{ subtitle }}</p>{% endif %}

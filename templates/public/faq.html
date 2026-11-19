@@ -3,11 +3,11 @@
 {% block content %}
 {% include "includes/public_hero.html" with title="سوالات متداول" subtitle="پاسخ پرسش‌های رایج پیش از شروع" show_subtitle=1 compact=1 %}
 <section class="section public-section container">
-  <div class="faq-list faq-list--exec ui-public-faq" role="region" aria-label="پرسش‌ها و پاسخ‌ها">
+  <div class="ui-faq-layout"><div class="faq-list faq-list--exec ui-public-faq" role="region" aria-label="پرسش‌ها و پاسخ‌ها">
     <details class="faq-item faq-item--exec"><summary>آیا به حساب Telegram Ads نیاز دارم؟</summary><p>مدل محصول برای مدیریت از حساب مرکزی طراحی شده است؛ ارسال منوط به مجوزها و شرایط حساب است.</p></details>
     <details class="faq-item faq-item--exec"><summary>آیا نمایش تضمینی است؟</summary><p>خیر. اعداد گزارش از API واقعی خوانده می‌شوند.</p></details>
     <details class="faq-item faq-item--exec"><summary>پرداخت چگونه است؟</summary><p>مدل پرداخت بر پایه کیف پول ریالی و پیش‌فاکتور است. امکان پرداخت واقعی به وضعیت سرویس مالی وابسته است.</p></details>
     <details class="faq-item faq-item--exec"><summary>چه جایگاه‌هایی پشتیبانی می‌شود؟</summary><p>بر اساس قابلیت حساب مرکزی (جستجو، بنر ربات و …).</p></details>
-  </div>
+  </div><aside class="card card-pad ui-faq-help"><span class="ui-target-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="headphones" size="md" %}</span><h2>سؤال دیگری دارید؟</h2><p>از طریق بخش پشتیبانی، درخواست خود را پیگیری کنید.</p><a class="btn btn-ghost" href="{% url 'public:contact' %}">ارتباط با پشتیبانی</a></aside></div>
 </section>
 {% endblock %}

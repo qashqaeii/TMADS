@@ -38,3 +38,10 @@
 .ui-related-ads-table th {background:var(--ui-soft);font-weight:650;color:var(--ui-muted)}
 .ui-related-ads-table :is(th,td) {padding:12px 14px}
 .ui-related-ads-table td small {display:block;margin-top:5px;color:var(--ui-muted);overflow-wrap:anywhere;line-height:1.7}
+
+/* Account entry inherits the same editorial surface without decorative overload. */
+.ui-final .ui-auth-screen { background:radial-gradient(ellipse at 50% 0%,#eaf3fb,transparent 65%);min-height: min(76vh,820px); }
+.ui-final .ui-auth-card { border-radius:20px;box-shadow:0 12px 48px rgb(16 29 48 / .06); }
+.ui-final .ui-auth-card .form-stack { gap:18px; }
+.ui-final .ui-auth-card .auth-links { border-top:1px solid var(--ui-border);padding-top:14px; }
+.ui-final .ui-auth-card .field > label { color:var(--ui-ink); }

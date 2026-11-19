@@ -11,10 +11,9 @@
     <article class="feature-card"><span class="feature-card__icon ui-target-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="bell" size="md" %}</span><h2>اعلان‌ها</h2><p class="muted">رویدادهای پرداخت و وضعیت کمپین.</p></article>
     <article class="feature-card"><span class="feature-card__icon ui-target-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="headphones" size="md" %}</span><h2>پشتیبانی</h2><p class="muted">تیکت با پیگیری وضعیت.</p></article>
   </div>
-  <div class="cta-band" style="margin-top:2rem">
-    <h2>آماده شروع هستید؟</h2>
-    <p>ثبت‌نام و ساخت اولین پیش‌نویس کمپین.</p>
-    <a class="btn btn-primary btn-lg" href="{% url 'accounts:register' %}">شروع رایگان</a>
+  <div class="ui-landing-end ui-public-end">
+    <div><h2>اولین کمپین خود را طراحی کنید.</h2><p>با یک پیش‌نویس شروع کنید و قبل از پرداخت، جزئیات را بررسی کنید.</p></div>
+    {% if user.is_authenticated %}<a class="btn btn-primary btn-lg" href="{% url 'campaigns:wizard_new' %}">ساخت کمپین</a>{% else %}<a class="btn btn-primary btn-lg" href="{% url 'accounts:register' %}">ایجاد حساب</a>{% endif %}
   </div>
 </section>
 {% endblock %}
