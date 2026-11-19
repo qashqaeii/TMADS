@@ -2,12 +2,13 @@
 {% block page_title %}پروفایل{% endblock %}
 {% block container_class %}container-wide{% endblock %}
 {% block content %}
-<div class="app-stack">
+<div class="app-stack ui-account-page">
 {% include "includes/dash_header.html" with eyebrow="حساب" title="پروفایل" %}
+<section class="ui-profile-summary" aria-label="حساب شما"><span class="ui-profile-avatar" aria-hidden="true">{{ user.get_username|slice:":1" }}</span><div><h2>{{ user.get_full_name|default:user.get_username }}</h2><p class="muted">{{ user.get_role_display }}</p></div><span class="ui-profile-handle" dir="ltr">{{ user.get_username }}</span></section>
 <div class="panel-grid panel-2 account-settings">
   <form method="post" class="card card--lift card-pad form-stack">
     {% csrf_token %}
-    <h2 class="section-title">اطلاعات نمایشی</h2>
+    <div class="ui-form-intro"><span class="ui-target-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="user" size="md" %}</span><div><h2>اطلاعات نمایشی</h2><p>نام و مشخصات کسب‌وکار در پنل</p></div></div>
     <div class="field"><label for="profile-display-name">نام نمایشی</label><input id="profile-display-name" autocomplete="name" name="display_name" value="{{ profile.display_name }}"></div>
     <div class="field"><label for="profile-company">نام کسب‌وکار</label><input id="profile-company" autocomplete="organization" name="company_name" value="{{ profile.company_name }}"></div>
     <div class="field"><label for="profile-email">ایمیل</label><input id="profile-email" dir="ltr" value="{{ user.email }}" disabled></div>
@@ -15,9 +16,10 @@
     <button class="btn btn-primary" type="submit">ذخیره</button>
   </form>
   <section class="card card--lift card-pad form-stack">
-    <h2 class="section-title">تغییر رمز عبور</h2>
+    <div class="ui-form-intro"><span class="ui-target-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="shield-check" size="md" %}</span><div><h2>امنیت حساب</h2><p>تغییر رمز عبور</p></div></div>
     <p class="section-description">برای امنیت حساب، رمزی انتخاب کنید که در سرویس دیگری استفاده نمی‌کنید.</p>
     <form method="post" class="form-stack">{% csrf_token %}<input type="hidden" name="action" value="password">
+      {% if password_form.non_field_errors %}<div class="form-error" role="alert">{{ password_form.non_field_errors }}</div>{% endif %}
       {% for field in password_form %}
       {% include "includes/auth_field.html" with field=field %}
       {% endfor %}

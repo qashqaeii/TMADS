@@ -1,0 +1,25 @@
+/* Accounts: compact entrance, consistent validation and profile identity. */
+.ui-final .ui-auth-screen { min-height: min(72vh,760px);display:grid;place-items:center;padding:clamp(24px,5vw,60px) 16px;background:transparent; }
+.ui-final .ui-auth-card { width:min(100%,450px);max-width:none;padding:clamp(22px,4vw,34px);border:1px solid var(--ui-border);border-radius:18px;box-shadow:0 12px 44px rgb(16 29 48 / .06);background:#fff;display:grid;gap:14px; }
+.ui-final .ui-auth-card h1 { font-size:clamp(1.35rem,2.5vw,1.65rem);line-height:1.5;letter-spacing:normal;font-weight:750;margin:0;color:var(--ui-ink); }
+.ui-final .ui-auth-card > p { font-size:.86rem;line-height:1.9;color:var(--ui-muted);margin:0; }
+.ui-auth-symbol,.ui-final .ui-auth-card .auth-state-icon { width:50px;height:50px;display:grid;place-items:center;border-radius:13px;background:#e9f3fb;color:var(--ui-action);margin:0; }
+.ui-final .ui-auth-card .form-stack { gap:15px; }
+.ui-final .ui-auth-card .form-stack > .btn { width:100%; }
+.ui-final .ui-auth-card .auth-links { margin:0;text-align:center;line-height:1.9;font-size:.85rem; }
+.ui-final .ui-auth-card .auth-links a { color:var(--ui-action);font-weight:650; }
+.ui-final .ui-auth-card .field :is(input,textarea) { width:100%; }
+.ui-final .ui-auth-card .form-error { padding:10px 12px;border:1px solid #edc7cf;background:var(--ui-danger-soft);border-radius:8px; }
+.ui-password-wrap { position:relative;display:flex;align-items:center; }
+.ui-final .ui-password-wrap input { width:100%;padding-inline-end:86px; }
+.ui-password-toggle { position:absolute;inset-inline-end:6px;display:inline-flex;align-items:center;justify-content:center;border:0;background:transparent;color:var(--ui-action);font:inherit;font-size:.76rem;font-weight:650;min-height:34px;padding:4px 9px;border-radius:6px;cursor:pointer; }
+.ui-password-toggle[aria-pressed=true] { background:#eaf4fb; }
+.ui-profile-summary { display:flex;align-items:center;gap:14px;padding:20px;border:1px solid var(--ui-border);border-radius:var(--ui-radius);background:#fff;min-width:0; }
+.ui-profile-avatar { display:grid;place-items:center;width:58px;height:58px;background:#e8f3fb;color:var(--ui-action);font-size:1.35rem;font-weight:750;border-radius:14px;flex:none; }
+.ui-profile-summary h2 { margin:0;font-size:1.1rem;font-weight:750;overflow-wrap:anywhere; }
+.ui-profile-summary p { margin:4px 0 0;font-size:.82rem; }
+.ui-profile-handle { margin-inline-start:auto;color:var(--ui-muted);font-size:.82rem;overflow-wrap:anywhere; }
+.ui-final .ui-account-page .account-settings { align-items:start;gap:16px; }
+.ui-final .ui-account-page .account-settings .card { padding:20px;gap:16px; }
+@media(max-width:800px) { .ui-final .ui-account-page .account-settings { grid-template-columns:minmax(0,1fr); } }
+@media(max-width:480px) { .ui-final .ui-auth-card { padding:20px; }.ui-profile-summary { flex-wrap:wrap;padding:14px; }.ui-profile-handle { margin:0; } }
