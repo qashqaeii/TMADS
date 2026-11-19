@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "apps.support",
     "apps.operations",
     "apps.policies",
+    "apps.ai",
 ]
 
 MIDDLEWARE = [
@@ -189,6 +190,13 @@ FARAZSMS_PATTERNS = {
     "campaign_status": env("FARAZSMS_PATTERN_CAMPAIGN_STATUS", default=""),
 }
 FARAZSMS_OTP_ATTR = env("FARAZSMS_OTP_ATTR", default="code")
+# Opt-in AI; one economical model, no automatic generation.
+ARVAN_AI_ENABLED = env.bool("ARVAN_AI_ENABLED", default=False)
+ARVAN_AI_BASE_URL = env("ARVAN_AI_BASE_URL", default="")
+ARVAN_AI_API_KEY = env("ARVAN_AI_API_KEY", default="")
+ARVAN_AI_MODEL = "Gemini-2.5-Flash-lite"
+ARVAN_AI_USER_DAILY_LIMIT = env.int("ARVAN_AI_USER_DAILY_LIMIT", default=10)
+ARVAN_AI_GLOBAL_DAILY_LIMIT = env.int("ARVAN_AI_GLOBAL_DAILY_LIMIT", default=200)
 # Payments
 PAYMENT_GATEWAY = env("PAYMENT_GATEWAY", default="fake")
 PAYMENT_FAKE_ENABLED = env("PAYMENT_FAKE_ENABLED")
