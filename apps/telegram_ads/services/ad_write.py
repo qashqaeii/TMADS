@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import logging
-import uuid
 from enum import Enum
 from typing import Any
 
@@ -11,7 +10,7 @@ from django.conf import settings
 
 from apps.campaigns.models import Campaign, CampaignStatusHistory, TelegramAdvertisement
 from apps.telegram_ads.client import TelegramAdsClient
-from apps.telegram_ads.exceptions import TelegramAdsWriteDisabled
+from apps.telegram_ads.exceptions import TelegramAdsError, TelegramAdsWriteDisabled
 from apps.telegram_ads.models import APIRequestLog
 from apps.telegram_ads.services.ad_payload import build_create_ad_payload, redact_payload_for_display
 from apps.telegram_ads.targeting.validators import validate_submission_ready
@@ -62,10 +61,22 @@ def execute_create_ad(
     if not dry.get("ok"):
         raise ValueError("; ".join(dry.get("errors") or ["نامعتبر"]))
 
+    order = None
+    if mode == ExecutionMode.LIVE:
+        if not settings.TELEGRAM_ADS_WRITE_ENABLED or not settings.TELEGRAM_ADS_PAID_SUBMISSION_ENABLED:
+            raise TelegramAdsWriteDisabled("ارسال زنده غیرفعال است.")
+        from apps.policies.services.preflight import assert_submission_ready
+        from apps.telegram_ads.services.submission_guard import require_submission_order
+        assert_submission_ready(campaign)
+        order = require_submission_order(campaign, claimed=True)
+    stable_key = f"tmads-create-{campaign.id}"
+    if mode == ExecutionMode.LIVE and idempotency_key not in (None, stable_key):
+        raise ValueError("کلید ایجاد تبلیغ باید ثابت باشد.")
     payload = build_create_ad_payload(
         campaign,
         include_initial_budget=True,
-        idempotency_key=idempotency_key or f"tmads-{campaign.id}-{uuid.uuid4()}",
+        idempotency_key=idempotency_key or stable_key,
+        order=order,
     )
 
     if mode == ExecutionMode.DRY_RUN:
@@ -102,6 +113,8 @@ def execute_create_ad(
         raise
 
     remote_id = str(result.get("ad_id") or result.get("id") or "")
+    if not remote_id.isdigit() or int(remote_id) <= 0:
+        raise TelegramAdsError("تلگرام شناسه معتبر تبلیغ برنگرداند؛ تطبیق الزامی است.")
     ad, _ = TelegramAdvertisement.objects.get_or_create(campaign=campaign)
     ad.remote_ad_id = remote_id
     ad.remote_status = str(result.get("status") or "")

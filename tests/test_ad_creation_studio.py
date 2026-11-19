@@ -148,32 +148,19 @@ def test_wizard_autosave_and_draft(client, customer_user):
 
 
 @pytest.mark.django_db
-def test_execute_create_ad_mocked_live(customer_user, settings):
+def test_execute_create_ad_rejects_unpaid_live(customer_user, settings):
     settings.TELEGRAM_ADS_WRITE_ENABLED = True
     settings.TELEGRAM_ADS_PAID_SUBMISSION_ENABLED = True
     campaign = Campaign.objects.create(
-        customer=customer_user.customer_profile,
-        target_type=Campaign.TargetType.BOTS,
-        placement="bot_banner",
-        destination="https://t.me/bot",
-        name="Live mock",
-        budget_irr=1_000_000,
-        cpm_bid=Decimal("1"),
-        wizard_version=2,
+        customer=customer_user.customer_profile, target_type="search",
+        placement="search_result", destination="https://t.me/test", name="Live mock",
+        budget_irr=1_000_000, ad_settings={"terms_accepted": True},
     )
-    from apps.campaigns.models import AdCreative
-
-    AdCreative.objects.create(campaign=campaign, ad_text="txt")
-    CampaignTargeting.objects.create(campaign=campaign, config={"bot_ids": ["@b"]})
-    campaign.ad_settings = {"terms_accepted": True}
-    campaign.save()
-
-    with patch("apps.telegram_ads.services.ad_write.TelegramAdsClient") as ClientCls:
-        instance = ClientCls.return_value
-        instance.create_advertisement.return_value = {"ad_id": 99, "status": "on_hold"}
-        out = execute_create_ad(campaign, mode=ExecutionMode.LIVE)
-        assert out["remote_ad_id"] == "99"
-        instance.create_advertisement.assert_called_once()
+    CampaignTargeting.objects.create(campaign=campaign, config={"search_queries": ["test"]})
+    with patch("apps.policies.services.preflight.assert_submission_ready"), patch("apps.telegram_ads.services.ad_write.TelegramAdsClient") as client:
+        with pytest.raises(ValueError):
+            execute_create_ad(campaign, mode=ExecutionMode.LIVE)
+        client.assert_not_called()
 
 
 @pytest.mark.django_db

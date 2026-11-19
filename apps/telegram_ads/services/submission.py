@@ -1,52 +1,77 @@
 from __future__ import annotations
 
 import logging
+from decimal import Decimal, InvalidOperation
 
 from django.conf import settings
+from django.db import transaction
 
 from apps.campaigns.models import Campaign, CampaignStatusHistory, TelegramAdvertisement
-from apps.telegram_ads.exceptions import TelegramAdsWriteDisabled
+from apps.finance.models import AdvertisingOrder
+from apps.telegram_ads.client import TelegramAdsClient
+from apps.telegram_ads.exceptions import TelegramAdsError, TelegramAdsWriteDisabled
 from apps.telegram_ads.services.ad_write import ExecutionMode, execute_create_ad
+from apps.telegram_ads.services.submission_guard import require_submission_order
 
 logger = logging.getLogger(__name__)
 
 
-def submit_campaign_to_telegram(campaign: Campaign) -> TelegramAdvertisement:
-    """Submit approved campaign. Write gated by settings; never silent in production."""
+def _claim_submission(campaign_id):
     from apps.policies.services.preflight import assert_submission_ready
 
-    assert_submission_ready(campaign)
-    if not settings.TELEGRAM_ADS_WRITE_ENABLED:
-        raise TelegramAdsWriteDisabled("TELEGRAM_ADS_WRITE_ENABLED is false")
-    if not settings.TELEGRAM_ADS_PAID_SUBMISSION_ENABLED:
-        raise TelegramAdsWriteDisabled("TELEGRAM_ADS_PAID_SUBMISSION_ENABLED is false")
+    with transaction.atomic():
+        campaign = Campaign.objects.select_for_update().get(pk=campaign_id)
+        order = require_submission_order(campaign, lock=True)
+        assert_submission_ready(campaign)
+        account = TelegramAdsClient().get_account()
+        try:
+            remaining = Decimal(str(account["remaining_budget"]))
+            if account.get("currency") != "TON" or not remaining.is_finite() or remaining < order.ton_allocation:
+                raise ValueError("ارز یا موجودی حساب مرکزی برای سفارش معتبر نیست.")
+        except (InvalidOperation, TypeError, KeyError):
+            raise ValueError("موجودی حساب مرکزی قابل تأیید نیست.") from None
+        campaign.status = Campaign.Status.SUBMITTING
+        campaign.save(update_fields=["status", "updated_at"])
+        order.status = AdvertisingOrder.Status.SUBMITTING
+        order.save(update_fields=["status", "updated_at"])
+        CampaignStatusHistory.objects.create(
+            campaign=campaign, from_status=Campaign.Status.READY_FOR_SUBMISSION,
+            to_status=campaign.status, note="ارسال در جریان؛ کلید یکتای ثابت",
+        )
+        return campaign, order.id
 
-    from apps.campaigns.studio import migrate_campaign_to_studio
 
-    migrate_campaign_to_studio(campaign)
-    creative = campaign.creatives.first()
-    if campaign.target_type != "search" and (not creative or not (creative.ad_text or "").strip()):
-        raise ValueError("متن تبلیغ کامل نیست.")
-    if not campaign.destination:
-        raise ValueError("مقصد تنظیم نشده است.")
-    if not campaign.placement and campaign.target_type != "search":
-        raise ValueError("جایگاه نمایش انتخاب نشده است.")
-
-    campaign.status = Campaign.Status.SUBMITTING
-    campaign.save(update_fields=["status", "updated_at"])
-
+def submit_campaign_to_telegram(campaign: Campaign) -> TelegramAdvertisement:
+    """Claim before external I/O; ambiguous outcomes must be reconciled, never blindly retried."""
+    if not settings.TELEGRAM_ADS_WRITE_ENABLED or not settings.TELEGRAM_ADS_PAID_SUBMISSION_ENABLED:
+        raise TelegramAdsWriteDisabled("ارسال زنده غیرفعال است.")
+    campaign, order_id = _claim_submission(campaign.pk)
     try:
         execute_create_ad(campaign, mode=ExecutionMode.LIVE)
-    except Exception:
-        campaign.status = Campaign.Status.FAILED
-        campaign.save(update_fields=["status", "updated_at"])
-        raise
-
-    campaign.status = Campaign.Status.AWAITING_TELEGRAM
-    campaign.save(update_fields=["status", "updated_at"])
-    CampaignStatusHistory.objects.create(
-        campaign=campaign,
-        to_status=campaign.status,
-        note="ارسال به Telegram Ads",
-    )
-    return TelegramAdvertisement.objects.filter(campaign=campaign).first()
+        with transaction.atomic():
+            current = Campaign.objects.select_for_update().get(pk=campaign.pk)
+            order = AdvertisingOrder.objects.select_for_update().get(pk=order_id)
+            ad = TelegramAdvertisement.objects.get(campaign=current)
+            if not ad.remote_ad_id:
+                raise TelegramAdsError("شناسه تبلیغ برای تطبیق موجود نیست.")
+            current.status = Campaign.Status.AWAITING_TELEGRAM
+            current.save(update_fields=["status", "updated_at"])
+            # Keep the reservation until a separately verified settlement is recorded.
+            order.status = AdvertisingOrder.Status.SUBMITTING
+            order.save(update_fields=["status", "updated_at"])
+            CampaignStatusHistory.objects.create(
+                campaign=current, from_status=Campaign.Status.SUBMITTING,
+                to_status=current.status, note="شناسه تبلیغ از تلگرام دریافت شد؛ تسویه مالی در انتظار تطبیق",
+            )
+            return ad
+    except Exception as exc:
+        logger.warning("submission requires reconciliation for campaign=%s (%s)", campaign.pk, type(exc).__name__)
+        with transaction.atomic():
+            current = Campaign.objects.select_for_update().get(pk=campaign.pk)
+            current.status = Campaign.Status.RECONCILIATION
+            current.save(update_fields=["status", "updated_at"])
+            CampaignStatusHistory.objects.create(
+                campaign=current, from_status=Campaign.Status.SUBMITTING,
+                to_status=current.status, note="نتیجه ارسال نامطمئن؛ ارسال مجدد ممنوع تا تطبیق",
+            )
+        raise TelegramAdsError("نتیجه ارسال نیازمند تطبیق است. برای جلوگیری از ایجاد تبلیغ تکراری، دوباره ارسال نکنید.") from exc
