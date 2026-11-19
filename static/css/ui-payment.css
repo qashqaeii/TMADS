@@ -85,3 +85,35 @@
 .pay-flow .pay-receipt dl>div{align-items:center;gap:6px 12px}
 .pay-flow .pay-receipt dd{font-variant-numeric:tabular-nums;text-align:end;overflow-wrap:anywhere}
 @media(max-width:760px){.pay-flow .pay-result-grid{grid-template-columns:minmax(0,1fr)}.pay-flow .pay-result-card,.pay-flow .pay-receipt{border-radius:18px}.pay-flow .pay-status-visual{width:96px;height:96px}.pay-flow .pay-status-visual::after{inset:9px}}
+
+/* Receipt states and content-width-aware layout (accounts for dashboard sidebar). */
+.pay-flow{container-name:payment;container-type:inline-size}
+.pay-flow .pay-result-card--success .pay-amount{background:#f2faf5;border-color:#d6eade}
+.pay-flow .pay-result-card--pending .pay-amount{background:#fffcf5;border-color:#f0e4c8}
+.pay-flow .pay-result-card--failed .pay-amount{background:#faf8f8;border-color:#eee3e4}
+.pay-flow .pay-result-card--success .pay-status-visual{animation:pay-check-in .48s var(--pay-ease) both}
+@keyframes pay-check-in{from{transform:scale(.9);opacity:.7}to{transform:scale(1);opacity:1}}
+.pay-flow .pay-recheck-form,.pay-flow .pay-wide-action{width:100%;margin:0}
+.pay-flow .pay-receipt dl>div.pay-reference-row{display:grid;grid-template-columns:minmax(0,1fr);gap:6px}
+.pay-flow .pay-reference-row dd{display:flex;align-items:center;justify-content:space-between;gap:8px;text-align:start;min-width:0}
+.pay-flow .pay-reference-row bdi{min-width:0;overflow-wrap:anywhere;word-break:break-word;user-select:text}
+.pay-flow .pay-copy{display:grid;place-items:center;width:44px;height:44px;padding:0;flex:none;border:1px solid var(--pay-line);border-radius:10px;background:#fff;color:#146ca8;cursor:pointer}
+.pay-flow .pay-copy:hover{background:#edf5fb}
+.pay-flow .pay-copy-status{font-size:.82rem;color:#4e6478;margin:0;line-height:1.8}
+.pay-flow .pay-copy-status[hidden]{display:none}
+.pay-flow .pay-amount strong,.pay-flow .pay-balance strong{min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere}
+.pay-flow .pay-amount strong bdi,.pay-flow .pay-balance strong bdi{overflow-wrap:anywhere}
+.pay-flow .pay-receipt time{white-space:normal}
+.pay-flow .pay-main-action,.pay-flow .pay-secondary{white-space:normal;text-align:center}
+@container payment (max-width:740px){
+ .pay-flow .pay-checkout-grid,.pay-flow .pay-result-grid{grid-template-columns:minmax(0,1fr)}
+ .pay-flow .pay-result-card,.pay-flow .pay-receipt,.pay-flow .pay-checkout-form,.pay-flow .pay-summary-card{padding:clamp(16px,4cqi,26px);border-radius:18px}
+ .pay-flow .pay-rail{gap:5px;padding:12px 9px}.pay-flow .pay-rail li{flex-direction:column;text-align:center;gap:5px}.pay-flow .pay-rail li:not(:last-child)::after,.pay-flow .pay-rail small{display:none}.pay-flow .pay-rail strong{font-size:.75rem}
+}
+@container payment (max-width:380px){
+ .pay-flow .pay-rail strong{font-size:.68rem}.pay-flow .pay-rail li .pay-step-number{width:28px;height:28px}.pay-flow .pay-input-wrap{padding-inline:10px}
+ .pay-flow .ui-quick-amounts{gap:5px}.pay-flow .ui-quick-amounts .btn{padding-inline:3px;font-size:.75rem}
+ .pay-flow .pay-amount strong,.pay-flow .pay-balance strong{font-size:1.5rem}.pay-flow .ui-topup-total{flex-wrap:wrap}
+ .pay-flow .pay-receipt dl>div{gap:5px}.pay-flow .pay-receipt dt,.pay-flow .pay-receipt dd{font-size:.8rem}
+}
+@media(prefers-reduced-motion:reduce){.pay-flow .pay-status-visual,.pay-flow .pay-result-card{animation:none!important}}

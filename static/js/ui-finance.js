@@ -1,6 +1,32 @@
 (function () {
   "use strict";
   function boot() {
+    var status=document.querySelector("[data-pay-copy-status]");
+    if (status && navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
+      document.querySelectorAll("[data-pay-copy]").forEach(function(button){
+        var target=document.getElementById(button.dataset.payCopy);
+        if(!target)return;
+        button.hidden=false;
+        button.addEventListener("click",function(){
+          navigator.clipboard.writeText(target.textContent.trim()).then(function(){
+            status.hidden=false;status.textContent="شناسه کپی شد.";
+          }).catch(function(){
+            status.hidden=false;status.textContent="کپی خودکار ممکن نیست؛ شناسه را انتخاب و کپی کنید.";
+          });
+        });
+      });
+    }
+    var recheck=document.querySelector("[data-pay-recheck]");
+    if(recheck){
+      var checkButton=recheck.querySelector("button[type=submit]"),checkLabel=recheck.querySelector("[data-pay-submit-label]");
+      recheck.addEventListener("submit",function(event){
+        if(checkButton.disabled){event.preventDefault();return;}
+        checkButton.disabled=true;checkLabel.textContent="در حال بررسی…";
+      });
+      window.addEventListener("pageshow",function(event){
+        if(event.persisted){checkButton.disabled=false;checkLabel.textContent="بررسی مجدد وضعیت";}
+      });
+    }
     var form=document.querySelector("[data-topup-form]");
     if (!form) return;
     var input=form.querySelector("#topup-amount"), row=form.querySelector("[data-quick-amounts]"), total=form.querySelector("[data-topup-total]");
