@@ -1,10 +1,13 @@
 """Public search metadata and a host-independent sitemap."""
+import json
+
 from urllib.parse import urlsplit, urlunsplit
 from xml.etree import ElementTree as ET
 
 from django.conf import settings
 from django.http import HttpResponse, HttpResponseNotFound
 from django.urls import reverse
+from django.utils.safestring import mark_safe
 
 
 PAGES = {
@@ -49,6 +52,37 @@ def index_enabled():
     return settings.APP_ENV == "PRODUCTION" and bool(public_origin())
 
 
+BREADCRUMB_NAMES = {
+    "features": "امکانات پنل تبلیغات تلگرام",
+    "how_it_works": "آموزش تبلیغات تلگرام",
+    "pricing": "هزینه و تعرفه تبلیغات تلگرام",
+    "faq": "سوالات متداول تبلیغات تلگرام",
+    "about": "درباره ما",
+    "contact": "تماس با ما و پشتیبانی",
+}
+
+
+def structured_data(name, canonical):
+    """Only public, canonical pages receive factual schema; escape script delimiters."""
+    if not canonical:
+        return ""
+    origin = public_origin()
+    site_id = origin + "/#website"
+    graph = []
+    if name == "home":
+        graph.append({"@type": "WebSite", "@id": site_id, "url": canonical,
+                      "name": settings.PRODUCT_NAME, "alternateName": "TMADS", "inLanguage": "fa"})
+    elif name in BREADCRUMB_NAMES:
+        graph.append({"@type": "BreadcrumbList", "itemListElement": [
+            {"@type": "ListItem", "position": 1, "name": "صفحه اصلی", "item": origin + reverse("public:home")},
+            {"@type": "ListItem", "position": 2, "name": BREADCRUMB_NAMES[name], "item": canonical},
+        ]})
+    if not graph:
+        return ""
+    payload = json.dumps({"@context": "https://schema.org", "@graph": graph}, ensure_ascii=False)
+    return mark_safe(payload.replace("&", "\\u0026").replace("<", "\\u003c").replace(">", "\\u003e"))
+
+
 def metadata(request):
     match = getattr(request, "resolver_match", None)
     namespace = getattr(match, "namespace", "")
@@ -64,6 +98,7 @@ def metadata(request):
         seo["title"], seo["description"] = AUTH[name]
     if seo["title"]:
         seo["title"] = seo["title"] + " | " + settings.PRODUCT_NAME if name != "about" and name != "contact" and namespace != "accounts" and name not in ("terms", "privacy", "refund") else seo["title"]
+    seo["structured_data"] = structured_data(name, seo["canonical"])
     return {"seo": seo}
 
 

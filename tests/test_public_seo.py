@@ -93,3 +93,39 @@ def test_staging_noindex_and_missing_origin_no_guessed_canonical(client, setting
     assert page.meta["robots"] == ["index, follow"]
     assert not page.canonical
     assert client.get(reverse("public:sitemap")).status_code == 404
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("name,section_id", [
+    ("home", "telegram-ads-guide"), ("features", "advertiser-toolkit"),
+    ("how_it_works", "campaign-playbook"), ("pricing", "budget-decisions"),
+    ("faq", "faq-deeper"), ("about", "product-principles"), ("contact", "support-guide"),
+])
+def test_public_editorial_content_and_structured_data(client, settings, name, section_id):
+    import json
+    import re
+
+    settings.APP_ENV = "PRODUCTION"
+    settings.PUBLIC_SITE_URL = "https://example.test"
+    response = client.get(reverse("public:" + name))
+    assert response.status_code == 200
+    html = response.content.decode()
+    assert f'id="{section_id}"' in html
+    assert 'aria-label="مطالعه بیشتر"' in html
+    match = re.search(r'<script type="application/ld\+json">(.*?)</script>', html, re.S)
+    assert match
+    data = json.loads(match.group(1))
+    graph = data["@graph"]
+    assert graph[0]["@type"] == ("WebSite" if name == "home" else "BreadcrumbList")
+    if name != "home":
+        assert graph[0]["itemListElement"][-1]["item"] == "https://example.test" + reverse("public:" + name)
+
+
+@pytest.mark.django_db
+def test_schema_is_not_published_for_drafts_or_staging(client, settings):
+    settings.PUBLIC_SITE_URL = "https://example.test"
+    settings.APP_ENV = "PRODUCTION"
+    assert b'application/ld+json' not in client.get(reverse("public:terms")).content
+    assert b'application/ld+json' not in client.get(reverse("accounts:login")).content
+    settings.APP_ENV = "STAGING"
+    assert b'application/ld+json' not in client.get(reverse("public:home")).content

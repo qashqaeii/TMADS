@@ -23,4 +23,13 @@
     </div>
   </section>
 </section>
+<section id="support-guide" class="ui-editorial container" aria-labelledby="support-guide-heading">
+  <header class="ui-editorial-head"><p class="ui-editorial-kicker">راهنمای پشتیبانی</p><h2 id="support-guide-heading">درخواست خود را با اطلاعات درست ثبت کنید</h2><p>برای بررسی دقیق‌تر، ابتدا دسته مسئله و اطلاعات مرتبط را آماده کنید. مسیر پشتیبانی از داخل حساب برای پیگیری درخواست‌های اختصاصی طراحی شده است.</p></header>
+  <div class="ui-editorial-grid">
+    <article class="ui-editorial-item"><h3>سوال درباره شروع یا شرایط تبلیغ</h3><p>اگر هنوز سفارش نداده‌اید، نوع مقصد، هدف و سوال مشخص خود را بنویسید. ابتدا <a href="{% url 'public:how_it_works' %}">راهنمای شروع</a> و <a href="{% url 'public:faq' %}">سوالات متداول</a> را مرور کنید.</p></article>
+    <article class="ui-editorial-item"><h3>مشکل سفارش، پرداخت یا کیف پول</h3><p>شناسه سفارش یا تراکنش، مبلغ، زمان تقریبی و وضعیت نمایش داده‌شده را آماده کنید. اطلاعات محرمانه بانکی، رمز عبور، کلید API و کد یک‌بارمصرف را در پیام نفرستید.</p></article>
+    <article class="ui-editorial-item"><h3>گزارش خطای فنی یا مشکل نمایش</h3><p>نام صفحه، فعالیتی که پیش از خطا انجام دادید، متن خطا و در صورت امکان تصویر بدون اطلاعات حساس را ارسال کنید؛ نوع دستگاه و مرورگر هم می‌تواند به بازتولید خطا کمک کند.</p></article>
+  </div>
+  <nav class="ui-editorial-links" aria-label="مطالعه بیشتر"><strong>مطالعه بیشتر</strong><a href="{% url 'public:faq' %}">مرکز پاسخ‌ها</a><a href="{% url 'public:pricing' %}">تعرفه و پیش‌فاکتور</a><a href="{% url 'public:about' %}">درباره تی‌ام‌ادز</a></nav>
+</section>
 {% endblock %}

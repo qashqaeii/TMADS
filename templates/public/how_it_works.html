@@ -20,4 +20,15 @@
   </article>
   <div class="ui-public-center-action">{% if user.is_authenticated %}<a class="btn btn-primary" href="{% url 'campaigns:wizard_new' %}">ساخت کمپین</a>{% else %}<a class="btn btn-primary" href="{% url 'accounts:register' %}">ایجاد حساب</a>{% endif %}</div>
 </section>
+<section id="campaign-playbook" class="ui-editorial container" aria-labelledby="campaign-playbook-heading">
+  <header class="ui-editorial-head"><p class="ui-editorial-kicker">راهنمای عملی</p><h2 id="campaign-playbook-heading">چک‌لیست ساخت یک کمپین قابل ارزیابی</h2><p>این راهنما برای اولین تجربه و همچنین بازبینی کمپین‌های بعدی کاربرد دارد. پیش از پرداخت، ورودی‌های اصلی و معیار موفقیت را ثبت کنید.</p></header>
+  <div class="ui-editorial-grid">
+    <article class="ui-editorial-item"><h3>۱. هدف و معیار موفقیت را تعیین کنید</h3><p>هدف می‌تواند معرفی برند، بازدید از مقصد یا جذب کاربر مرتبط باشد. برای هر هدف یک معیار اصلی انتخاب کنید. اگر داده تبدیل یا عضویت قابل دسترس نیست، درباره نتیجه نهایی از روی نمایش یا کلیک به‌تنهایی قضاوت نکنید.</p></article>
+    <article class="ui-editorial-item"><h3>۲. مقصد و پیام را آماده کنید</h3><p>کانال، ربات یا مقصد واجد شرایط را از دید مخاطب بررسی کنید. متن کوتاه، طبیعی و مشخص بنویسید و از ادعای غیرقابل اثبات، وعده گمراه‌کننده و مقصد نامرتبط دوری کنید. <a href="https://ads.telegram.org/guidelines" rel="noopener">ضوابط رسمی Telegram Ads</a> مرجع بررسی محتوای تبلیغ است.</p></article>
+    <article class="ui-editorial-item"><h3>۳. پیشنهاد نمایش و بودجه را بررسی کنید</h3><p>بودجه کلی را از CPM تفکیک کنید. پیش‌فاکتور مبلغ، کارمزد و نرخ معتبر را نشان می‌دهد. قبل از ثبت سفارش مطمئن شوید توان پرداخت و ریسک یک آزمون محدود را دارید. <a href="{% url 'public:pricing' %}">نحوه محاسبه هزینه</a> را مرور کنید.</p></article>
+    <article class="ui-editorial-item"><h3>۴. وضعیت سفارش را دنبال کنید</h3><p>ذخیره پیش‌نویس، رزرو وجه، بررسی داخلی، ارسال و تأیید تلگرام مراحل متفاوت‌اند. اگر وضعیت نیازمند اصلاح یا بررسی است، با استفاده از اطلاعات سفارش و مسیر پشتیبانی آن را پیگیری کنید؛ از ارسال چندباره درخواست مشابه بدون بررسی خودداری کنید.</p></article>
+    <article class="ui-editorial-item"><h3>۵. نتایج را به تصمیم تبدیل کنید</h3><p>پس از جمع‌آوری داده، بازه‌های هم‌اندازه را مقایسه کنید و برای تغییر پیام، مخاطب یا پیشنهاد قیمت دلیل مشخص داشته باشید. اگر داده کافی نیست، قبل از نتیجه‌گیری وضعیت همگام‌سازی و امکان اندازه‌گیری را بررسی کنید.</p></article>
+  </div>
+  <nav class="ui-editorial-links" aria-label="مطالعه بیشتر"><strong>مطالعه بیشتر</strong><a href="{% url 'public:features' %}">ابزارهای ساخت تبلیغ</a><a href="{% url 'public:faq' %}">پرسش‌های انتشار</a><a href="{% url 'public:contact' %}">پشتیبانی کمپین</a></nav>
+</section>
 {% endblock %}

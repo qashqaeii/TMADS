@@ -14,11 +14,12 @@
         <span>{{ PRODUCT_NAME }}</span>
       </a>
       <div class="nav-links nav-links--desktop">
-        <a href="{% url 'public:features' %}">امکانات</a>
-        <a href="{% url 'public:how_it_works' %}">نحوه کار</a>
-        <a href="{% url 'public:pricing' %}">تعرفه</a>
-        <a href="{% url 'public:faq' %}">سؤالات متداول</a>
-        <a href="{% url 'public:about' %}">درباره</a>
+        <a href="{% url 'public:features' %}" {% if request.resolver_match.namespace == 'public' and request.resolver_match.url_name == 'features' %}aria-current="page"{% endif %}>امکانات</a>
+        <a href="{% url 'public:how_it_works' %}" {% if request.resolver_match.namespace == 'public' and request.resolver_match.url_name == 'how_it_works' %}aria-current="page"{% endif %}>نحوه کار</a>
+        <a href="{% url 'public:pricing' %}" {% if request.resolver_match.namespace == 'public' and request.resolver_match.url_name == 'pricing' %}aria-current="page"{% endif %}>تعرفه</a>
+        <a href="{% url 'public:faq' %}" {% if request.resolver_match.namespace == 'public' and request.resolver_match.url_name == 'faq' %}aria-current="page"{% endif %}>سؤالات متداول</a>
+        <a href="{% url 'public:about' %}" {% if request.resolver_match.namespace == 'public' and request.resolver_match.url_name == 'about' %}aria-current="page"{% endif %}>درباره</a>
+        <a href="{% url 'public:contact' %}" {% if request.resolver_match.namespace == 'public' and request.resolver_match.url_name == 'contact' %}aria-current="page"{% endif %}>تماس</a>
       </div>
       <div class="nav-actions nav-actions--desktop">
         {% if user.is_authenticated %}
@@ -78,28 +79,28 @@
       </header>
 
       <nav class="public-nav-sheet__links" aria-label="صفحات">
-        <a href="{% url 'public:home' %}" class="public-nav-sheet__link" @click="open = false">
+        <a href="{% url 'public:home' %}" class="public-nav-sheet__link" {% if request.resolver_match.namespace == 'public' and request.resolver_match.url_name == 'home' %}aria-current="page"{% endif %} @click="open = false">
           <span class="public-nav-sheet__label">صفحه اصلی</span>
         </a>
-        <a href="{% url 'public:features' %}" class="public-nav-sheet__link" @click="open = false">
+        <a href="{% url 'public:features' %}" class="public-nav-sheet__link" {% if request.resolver_match.namespace == 'public' and request.resolver_match.url_name == 'features' %}aria-current="page"{% endif %} @click="open = false">
           <span class="public-nav-sheet__label">امکانات</span>
           <span class="public-nav-sheet__hint">ویزارد، کیف پول، گزارش</span>
         </a>
-        <a href="{% url 'public:how_it_works' %}" class="public-nav-sheet__link" @click="open = false">
+        <a href="{% url 'public:how_it_works' %}" class="public-nav-sheet__link" {% if request.resolver_match.namespace == 'public' and request.resolver_match.url_name == 'how_it_works' %}aria-current="page"{% endif %} @click="open = false">
           <span class="public-nav-sheet__label">نحوه کار</span>
           <span class="public-nav-sheet__hint">از ایده تا انتشار</span>
         </a>
-        <a href="{% url 'public:pricing' %}" class="public-nav-sheet__link" @click="open = false">
+        <a href="{% url 'public:pricing' %}" class="public-nav-sheet__link" {% if request.resolver_match.namespace == 'public' and request.resolver_match.url_name == 'pricing' %}aria-current="page"{% endif %} @click="open = false">
           <span class="public-nav-sheet__label">تعرفه</span>
           <span class="public-nav-sheet__hint">کارمزد شفاف</span>
         </a>
-        <a href="{% url 'public:faq' %}" class="public-nav-sheet__link" @click="open = false">
+        <a href="{% url 'public:faq' %}" class="public-nav-sheet__link" {% if request.resolver_match.namespace == 'public' and request.resolver_match.url_name == 'faq' %}aria-current="page"{% endif %} @click="open = false">
           <span class="public-nav-sheet__label">سوالات</span>
         </a>
-        <a href="{% url 'public:about' %}" class="public-nav-sheet__link" @click="open = false">
+        <a href="{% url 'public:about' %}" class="public-nav-sheet__link" {% if request.resolver_match.namespace == 'public' and request.resolver_match.url_name == 'about' %}aria-current="page"{% endif %} @click="open = false">
           <span class="public-nav-sheet__label">درباره</span>
         </a>
-        <a href="{% url 'public:contact' %}" class="public-nav-sheet__link" @click="open = false">
+        <a href="{% url 'public:contact' %}" class="public-nav-sheet__link" {% if request.resolver_match.namespace == 'public' and request.resolver_match.url_name == 'contact' %}aria-current="page"{% endif %} @click="open = false">
           <span class="public-nav-sheet__label">تماس</span>
         </a>
       </nav>
@@ -136,7 +137,7 @@
       <a href="{% url 'public:refund' %}">بازپرداخت</a>
       <a href="{% url 'public:content_policy' %}">سیاست محتوا</a>
       <a href="{% url 'public:about' %}">درباره ما</a>
-      <a href="{% url 'public:contact' %}">تماس</a>
+      <a href="{% url 'public:contact' %}" {% if request.resolver_match.namespace == 'public' and request.resolver_match.url_name == 'contact' %}aria-current="page"{% endif %}>تماس</a>
     </div>
   </div>
   <div class="container ui-footer-bottom"><span>© {{ PRODUCT_NAME }}</span><span>استفاده از خدمات تابع شرایط و مجوزهای تبلیغاتی تلگرام است.</span></div>

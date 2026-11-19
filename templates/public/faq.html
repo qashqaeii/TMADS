@@ -22,4 +22,14 @@
     <details class="faq-item faq-item--exec"><summary>چگونه شروع کنم؟</summary><p>با ایجاد حساب و ساخت پیش‌نویس، بدون اینکه آن را به معنی ثبت سفارش یا انتشار تلقی کنید. <a href="{% url 'public:how_it_works' %}">راهنمای قدم‌به‌قدم</a>.</p></details>
   </div><aside class="card card-pad ui-faq-help"><span class="ui-target-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="headphones" size="md" %}</span><h2>سؤال دیگری دارید؟</h2><p>از طریق بخش پشتیبانی، درخواست خود را پیگیری کنید.</p><a class="btn btn-ghost" href="{% url 'public:contact' %}">ارتباط با پشتیبانی</a></aside></div>
 </section>
+<section id="faq-deeper" class="ui-editorial container" aria-labelledby="faq-deeper-heading">
+  <header class="ui-editorial-head"><p class="ui-editorial-kicker">پرسش‌های تکمیلی</p><h2 id="faq-deeper-heading">مشکلات رایج و تصمیم‌های قبل از سفارش</h2><p>اگر هنوز درباره ثبت سفارش مطمئن نیستید، این پرسش‌ها به شما کمک می‌کنند مسئله را از مسیر درست دنبال کنید.</p></header>
+  <div class="ui-editorial-grid">
+    <article class="ui-editorial-item"><h3>چرا CPM کمتر همیشه به معنی نتیجه بهتر نیست؟</h3><p>رقابت، شانس نمایش و ارتباط مخاطب با پیام اهمیت دارند. نرخ کمتر ممکن است فرصت نمایش را محدود کند؛ کیفیت نتیجه را با شاخص متناسب با هدف و داده معتبر ارزیابی کنید.</p></article>
+    <article class="ui-editorial-item"><h3>چرا آمار داشبورد با گزارش دیگری متفاوت است؟</h3><p>زمان همگام‌سازی، بازه زمانی، تعریف شاخص و منبع داده را بررسی کنید. داده‌های دیررس یا ناموجود را نباید به‌معنی صفر یا اختلاف قطعی تلقی کرد.</p></article>
+    <article class="ui-editorial-item"><h3>اگر مبلغ پیش‌فاکتور تغییر کرد چه کنم؟</h3><p>اعتبار زمانی پیش‌فاکتور و نرخ تبدیل را بررسی کنید. پیش از پرداخت، مبلغ جدید و اجزای آن را مرور کنید و در صورت ابهام با پشتیبانی ارتباط بگیرید.</p></article>
+    <article class="ui-editorial-item"><h3>آیا می‌توان از تبلیغ برای هر کانال یا وب‌سایتی استفاده کرد؟</h3><p>خیر. مقصد و محتوا باید با قوانین تلگرام و قابلیت حساب سازگار باشند. پیش از هزینه مسیر مقصد و شرایط جایگاه را بررسی کنید.</p></article>
+  </div>
+  <nav class="ui-editorial-links" aria-label="مطالعه بیشتر"><strong>مطالعه بیشتر</strong><a href="{% url 'public:pricing' %}">جزئیات هزینه</a><a href="{% url 'public:how_it_works' %}">مراحل انتشار</a><a href="{% url 'public:contact' %}">ثبت درخواست پشتیبانی</a></nav>
+</section>
 {% endblock %}

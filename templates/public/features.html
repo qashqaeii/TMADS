@@ -24,4 +24,14 @@
     {% if user.is_authenticated %}<a class="btn btn-primary btn-lg" href="{% url 'campaigns:wizard_new' %}">ساخت کمپین</a>{% else %}<a class="btn btn-primary btn-lg" href="{% url 'accounts:register' %}">ایجاد حساب</a>{% endif %}
   </div>
 </section>
+<section id="advertiser-toolkit" class="ui-editorial container" aria-labelledby="advertiser-toolkit-heading">
+  <header class="ui-editorial-head"><p class="ui-editorial-kicker">جعبه ابزار تبلیغ‌دهنده</p><h2 id="advertiser-toolkit-heading">مدیریت حرفه‌ای کمپین، از برنامه‌ریزی تا تحلیل</h2><p>هر ابزار برای یک تصمیم مشخص طراحی شده است. پیش‌نویس‌ها، وضعیت سفارش، داده‌های تبلیغ و گردش مالی را جداگانه بررسی کنید تا اشتباه در تصمیم‌گیری کمتر شود.</p></header>
+  <div class="ui-editorial-grid">
+    <article class="ui-editorial-item"><h3>استودیو و کنترل پیش از ارسال</h3><p>نوع کمپین را با توجه به هدف انتخاب کنید، مقصد و متن را وارد کنید و گزینه‌های مجاز هدف‌گیری را مرور کنید. پیش از سفارش، اطلاعات را بازبینی کنید؛ ذخیره پیش‌نویس هیچ تضمینی درباره امکان انتشار ایجاد نمی‌کند.</p></article>
+    <article class="ui-editorial-item"><h3>هدف‌گیری و آزمون پیام تبلیغ</h3><p>برای مقایسه پیام‌ها، هدف و مخاطب مشابه در نظر بگیرید و فقط یک متغیر را تغییر دهید. گزینه‌های زبان، موضوع، کانال، موقعیت یا سایر منابع به نوع و مجوز حساب وابسته‌اند. از هدف‌گیری بیش از حد محدود بدون داده کافی خودداری کنید.</p></article>
+    <article class="ui-editorial-item"><h3>داشبورد، شاخص‌ها و گزارش‌های دوره‌ای</h3><p>نمایش و هزینه را برای بازه مشابه مقایسه کنید. اگر کلیک یا اقدام مقصد در داده همگام‌شده قابل مشاهده باشد، نسبت آن را به هزینه بسنجید. داده ناموجود را صفر فرض نکنید و زمان آخرین همگام‌سازی را در ارزیابی لحاظ کنید.</p></article>
+    <article class="ui-editorial-item"><h3>کنترل هزینه، تغییرات و منابع اختصاصی</h3><p>کیف پول و پیش‌فاکتور به شما کمک می‌کنند تفاوت اعتبار قابل استفاده و مبلغ رزروشده را دنبال کنید. درخواست تغییر بودجه یا وضعیت تبلیغ فرایند بررسی دارد. پیکسل، مخاطبان اختصاصی و سایر ابزارهای پیشرفته تنها در صورت فعال بودن قابلیت و داشتن مجوز قابل استفاده عملی هستند.</p></article>
+  </div>
+  <nav class="ui-editorial-links" aria-label="مطالعه بیشتر"><strong>مطالعه بیشتر</strong><a href="{% url 'public:how_it_works' %}">مراحل طراحی کمپین</a><a href="{% url 'public:pricing' %}">شفافیت مالی و هزینه‌ها</a><a href="{% url 'public:faq' %}">محدودیت‌ها و سوالات رایج</a></nav>
+</section>
 {% endblock %}
