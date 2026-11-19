@@ -107,6 +107,21 @@ def _validate_target_config(target_type: str, config: dict[str, Any], *, strict:
     return result
 
 
+def validate_audience_step(*, target_type: str, placement: str, config: dict[str, Any], strict: bool = True) -> StudioValidationResult:
+    """Validate only audience/placement; later steps own creative and terms."""
+    result = StudioValidationResult()
+    if not target_type:
+        if strict:
+            result.errors.append("نوع هدف‌گیری را انتخاب کنید.")
+        return result
+    result.errors.extend(validate_target_placement(target_type, placement))
+    audience = _validate_target_config(target_type, config, strict=strict)
+    result.errors.extend(audience.errors)
+    result.warnings.extend(audience.warnings)
+    result.infos.extend(audience.infos)
+    return result
+
+
 def validate_studio_config(
     *,
     target_type: str,

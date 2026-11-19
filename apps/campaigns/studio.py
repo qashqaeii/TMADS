@@ -12,7 +12,7 @@ from apps.telegram_ads.constants import TMADS_TO_API_PLACEMENT
 from apps.telegram_ads.targeting.compatibility import default_placement_for_target
 from apps.telegram_ads.targeting.normalize import normalize_search_query, normalize_username, parse_promote_url
 from apps.campaigns.schedule_utils import parse_schedule_payload
-from apps.telegram_ads.targeting.validators import validate_studio_config
+from apps.telegram_ads.targeting.validators import validate_audience_step, validate_studio_config
 
 STUDIO_STEPS = [
     ("goal", "هدف تبلیغ"),
@@ -294,10 +294,9 @@ def validate_studio_step(campaign: Campaign, step: int, data, *, strict: bool) -
                 return errs
         return []
     if step == 2:
-        targeting = getattr(campaign, "targeting", None)
         cfg = parse_targeting_payload(data, campaign.target_type or "channels")
         placement = (data.get("placement") or campaign.placement or cfg.get("placement_api") or "")
-        result = validate_studio_config(
+        result = validate_audience_step(
             target_type=campaign.target_type or cfg.get("target_type", ""),
             placement=placement,
             config=cfg,
@@ -322,7 +321,7 @@ def validate_studio_step(campaign: Campaign, step: int, data, *, strict: bool) -
             return ["حداقل بودجه ۱۰۰ هزار تومان پیشنهاد می‌شود."]
         return []
     if step == 5 and strict:
-        apply_studio_step(campaign, 4, data)
+        # Review validation must not rewrite budget, dates or schedule.
         result = validate_studio_config(
             target_type=campaign.target_type,
             placement=campaign.placement,
