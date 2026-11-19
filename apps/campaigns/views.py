@@ -337,17 +337,6 @@ def campaign_wizard(request, campaign_id=None):
         if not _draft_revision_matches(campaign, request.POST):
             messages.error(request, "نسخه یا مرحله پیش‌نویس تغییر کرده است؛ صفحه جدید را بررسی کنید.")
             return redirect("campaigns:wizard", campaign_id=campaign.id)
-        if action == "verify_media" and step == 3:
-            from apps.telegram_ads.services.media import upload_saved_media
-            from apps.telegram_ads.exceptions import TelegramAdsError
-            try:
-                if request.FILES or request.POST.get("remove_creative_media") == "1":
-                    raise ValueError("ابتدا فایل را ذخیره کنید؛ سپس فایل ذخیره‌شده را منتقل کنید.")
-                upload_saved_media(campaign, actor=request.user)
-                messages.success(request, "شناسه رسانه از تلگرام دریافت شد؛ انتشار هنوز انجام نشده است.")
-            except (ValueError, TelegramAdsError):
-                messages.error(request, "انتقال رسانه انجام نشد یا هنوز فعال نیست. فایل محلی حفظ شده است.")
-            return redirect("campaigns:wizard", campaign_id=campaign.id)
         if action == "refresh_quote" and step == max_step:
             try:
                 _create_quote(campaign)
@@ -1060,3 +1049,29 @@ def upload_website_photo_draft(request, campaign_id):
     except (ValueError, TelegramAdsError):
         messages.error(request, "انتقال یا تأیید تصویر ممکن نشد؛ در صورت نتیجه نامطمئن، ارسال دوباره مسدود است.")
     return redirect("campaigns:wizard", campaign_id=campaign.id)
+
+
+
+@login_required
+@customer_required
+@require_POST
+def upload_ad_media_draft(request, campaign_id):
+    """Separate non-atomic prepayment media transfer endpoint.
+
+    The claim must commit before contacting Telegram; wizard transactions
+    must not enclose the external upload.
+    """
+    campaign = get_customer_campaign(request.user.customer_profile, campaign_id)
+    if ensure_studio_step(campaign) != 3 or not _campaign_editable(campaign):
+        messages.error(request, "رسانه را فقط در مرحله محتوای پیش‌نویس ارسال کنید.")
+        return redirect("campaigns:detail", campaign_id=campaign.pk)
+    if request.FILES or request.POST.get("remove_creative_media") == "1" or not _draft_revision_matches(campaign, request.POST):
+        messages.error(request, "ابتدا رسانه را ذخیره کنید و نسخه صفحه را تازه کنید.")
+        return redirect("campaigns:wizard", campaign_id=campaign.pk)
+    from apps.telegram_ads.services.media import upload_saved_media
+    try:
+        upload_saved_media(campaign, actor=request.user)
+        messages.success(request, "شناسه رسانه از تلگرام تأیید شد؛ تبلیغ منتشر نشده است.")
+    except ValueError:
+        messages.error(request, "انتقال یا تأیید رسانه انجام نشد؛ درخواست نامطمئن را بدون تطبیق تکرار نکنید.")
+    return redirect("campaigns:wizard", campaign_id=campaign.pk)

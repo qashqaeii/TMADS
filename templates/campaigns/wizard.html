@@ -241,7 +241,7 @@
         {% if creative and creative.media %}
         <div class="card-muted card-pad form-stack">
           <a class="btn btn-ghost btn-sm" href="{% url 'campaigns:creative_media' campaign.id creative.id %}">دریافت رسانه ذخیره‌شده</a>
-          {% if media_uploaded %}<span class="status status-active" role="status">شناسه رسانه دریافت شده</span>{% elif media_upload_enabled %}<button class="btn btn-ghost" type="submit" name="action" value="verify_media" formnovalidate data-confirm-title="انتقال فایل به تلگرام" data-confirm-message="فایل ذخیره‌شده به تلگرام منتقل می‌شود؛ هیچ تبلیغی منتشر یا پولی کسر نمی‌شود." data-confirm-label="انتقال فایل" data-confirm-tone="primary">انتقال فایل ذخیره‌شده به تلگرام</button>{% else %}<p class="ui-studio-warning">سرویس انتقال رسانه هنوز فعال نیست؛ پرداخت این پیش‌نویس تا تأیید فایل مسدود است.</p>{% endif %}
+          {% if media_uploaded %}<span class="status status-active" role="status">شناسه رسانه دریافت شده</span>{% elif media_upload_enabled %}<button class="btn btn-ghost" type="submit" name="action" value="verify_media" formaction="{% url 'campaigns:upload_ad_media' campaign.id %}" formnovalidate data-confirm-title="انتقال فایل به تلگرام" data-confirm-message="فایل ذخیره‌شده به تلگرام منتقل می‌شود؛ هیچ تبلیغی منتشر یا پولی کسر نمی‌شود." data-confirm-label="انتقال فایل" data-confirm-tone="primary">انتقال فایل ذخیره‌شده به تلگرام</button>{% else %}<p class="ui-studio-warning">سرویس انتقال رسانه هنوز فعال نیست؛ پرداخت این پیش‌نویس تا تأیید فایل مسدود است.</p>{% endif %}
           <label class="choice-card"><input type="checkbox" name="remove_creative_media" value="1"> حذف رسانه با ذخیره دستی یا ادامه</label>
         </div>
         {% endif %}

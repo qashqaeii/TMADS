@@ -64,30 +64,58 @@ def media_receipt(campaign):
     return None
 
 
-@transaction.atomic
 def upload_saved_media(campaign, *, actor):
-    campaign=Campaign.objects.select_for_update().get(pk=campaign.pk)
-    profile=getattr(actor,"customer_profile",None)
-    if not profile or profile.is_suspended or profile.pk!=campaign.customer_id:
+    """Claim before network I/O; uncertain outcomes cannot trigger a second upload."""
+    profile = getattr(actor, "customer_profile", None)
+    if not profile or profile.is_suspended:
         raise PermissionDenied
-    from apps.campaigns.views import _campaign_editable
-    if not _campaign_editable(campaign) or not media_upload_enabled():
-        raise ValueError("انتقال رسانه در وضعیت فعلی مجاز نیست.")
-    if media_receipt(campaign):
-        return media_receipt(campaign)
-    creative=campaign.creatives.first()
-    sig=_signature(campaign,creative)
-    if not sig:
-        raise ValueError("فایل ذخیره‌شده معتبر نیست.")
-    if not (campaign.ad_settings or {}).get("destination_rights_confirmed"):
-        raise ValueError("ابتدا تأیید حق تبلیغ و فایل را ذخیره کنید.")
-    with creative.media.open("rb") as f:
-        if validate_telegram_creative_media(f):
-            raise ValueError("فایل با محدودیت رسانه تلگرام سازگار نیست.")
-        f.seek(0)
-        result=TelegramAdsClient().upload_creative_media(f,filename="creative"+Path(creative.media.name).suffix.lower(),is_video=sig["field"]=="video_id")
-    media_id=result.get(sig["field"])
-    if not isinstance(media_id,str) or not media_id or len(media_id)>256:
-        raise ValueError("شناسه رسانه معتبر برنگشت.")
-    APIRequestLog.objects.create(operation="media_upload_receipt",success=True,meta={**sig,"media_id":media_id})
-    return {"field":sig["field"],"media_id":media_id}
+    with transaction.atomic():
+        campaign = Campaign.objects.select_for_update().get(pk=campaign.pk, customer=profile)
+        from apps.campaigns.views import _campaign_editable
+        if not _campaign_editable(campaign) or not media_upload_enabled():
+            raise ValueError("انتقال رسانه در وضعیت فعلی مجاز نیست.")
+        if media_receipt(campaign):
+            return media_receipt(campaign)
+        creative = campaign.creatives.first()
+        sig = _signature(campaign, creative)
+        if not sig:
+            raise ValueError("فایل ذخیره‌شده معتبر نیست.")
+        if not (campaign.ad_settings or {}).get("destination_rights_confirmed"):
+            raise ValueError("ابتدا حق استفاده از مقصد و رسانه را تأیید و ذخیره کنید.")
+        if APIRequestLog.objects.filter(
+                operation="media_upload_claim", meta__campaign_id=str(campaign.pk),
+                meta__state="uncertain").exists():
+            raise ValueError("نتیجه انتقال قبلی نامطمئن است؛ برای جلوگیری از تکرار باید تطبیق شود.")
+        with creative.media.open("rb") as stream:
+            errors = validate_telegram_creative_media(stream)
+            if errors:
+                raise ValueError("؛ ".join(errors))
+        # This operation is never invoked under the wizard's outer transaction.
+        APIRequestLog.objects.create(
+            operation="media_upload_claim", success=False,
+            meta={**sig, "state": "uncertain"},
+        )
+
+    try:
+        with creative.media.open("rb") as stream:
+            result = TelegramAdsClient().upload_creative_media(
+                stream,
+                filename="creative" + Path(creative.media.name).suffix.lower(),
+                is_video=sig["field"] == "video_id",
+            )
+        media_id = result.get(sig["field"]) if isinstance(result, dict) else None
+        if not isinstance(media_id, str) or not 0 < len(media_id) <= 256:
+            raise ValueError("شناسه رسانه از تلگرام تأیید نشد.")
+        # Bind confirmed receipt to both the account and exact content.
+        with transaction.atomic():
+            APIRequestLog.objects.create(
+                operation="media_upload_receipt", success=True,
+                meta={**sig, "media_id": media_id},
+            )
+            APIRequestLog.objects.filter(
+                operation="media_upload_claim",
+                meta__campaign_id=str(campaign.pk), meta__state="uncertain",
+            ).update(success=True, meta={**sig, "state": "completed"})
+        return {"field": sig["field"], "media_id": media_id}
+    except Exception as exc:
+        raise ValueError("نتیجه انتقال رسانه نامطمئن است؛ از درخواست مجدد تا تطبیق خودداری کنید.") from exc

@@ -13,6 +13,7 @@ urlpatterns = [
     path("<uuid:campaign_id>/manage/", remote_views.remote_management, name="remote_management"),
     path("<uuid:campaign_id>/wizard/", views.campaign_wizard, name="wizard"),
     path("<uuid:campaign_id>/website-photo/upload/", views.upload_website_photo_draft, name="upload_website_photo"),
+    path("<uuid:campaign_id>/ad-media/upload/", views.upload_ad_media_draft, name="upload_ad_media"),
     path("<uuid:campaign_id>/delete/", views.campaign_delete, name="delete"),
     path("<uuid:campaign_id>/duplicate/", views.campaign_duplicate, name="duplicate"),
     path("<uuid:campaign_id>/creative/<uuid:creative_id>/media/", views.creative_media_download, name="creative_media"),

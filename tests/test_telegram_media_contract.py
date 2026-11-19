@@ -19,3 +19,33 @@ def test_upload_disabled_does_not_contact_telegram(settings):
         with pytest.raises(TelegramAdsWriteDisabled):
             TelegramAdsClient().upload_creative_media(BytesIO(b"content"),filename="creative.png",is_video=False)
         run.assert_not_called()
+
+
+
+@pytest.mark.django_db
+def test_uncertain_media_upload_blocks_second_write(customer_user, settings, tmp_path):
+    from apps.campaigns.models import Campaign, AdCreative
+    from apps.telegram_ads.models import APIRequestLog
+    from apps.telegram_ads.services.media import upload_saved_media
+    settings.MEDIA_ROOT = str(tmp_path)
+    settings.TELEGRAM_ADS_API_TOKEN = "isolated-test-token"
+    buf = BytesIO()
+    Image.new("RGB", (640, 360)).save(buf, format="PNG")
+    campaign = Campaign.objects.create(
+        customer=customer_user.customer_profile, name="Media",
+        target_type="channels", destination="https://t.me/example",
+        ad_settings={"destination_rights_confirmed": True},
+    )
+    AdCreative.objects.create(campaign=campaign, media=SimpleUploadedFile("test.png", buf.getvalue()))
+    with patch("apps.telegram_ads.services.media.media_upload_enabled", return_value=True), patch(
+        "apps.telegram_ads.services.media.TelegramAdsClient"
+    ) as api:
+        api.return_value.upload_creative_media.side_effect = TimeoutError("simulated")
+        with pytest.raises(ValueError):
+            upload_saved_media(campaign, actor=customer_user)
+        assert APIRequestLog.objects.filter(
+            operation="media_upload_claim", meta__state="uncertain",
+        ).exists()
+        with pytest.raises(ValueError):
+            upload_saved_media(campaign, actor=customer_user)
+        api.return_value.upload_creative_media.assert_called_once()
