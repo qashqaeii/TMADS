@@ -2,46 +2,20 @@
 {% load core_filters %}
 {% block page_title %}مدیریت تبلیغ{% endblock %}
 {% block content %}
-<div class="app-stack ui-remote">
-  <nav class="ui-breadcrumb" aria-label="مسیر صفحه"><a href="{% url 'campaigns:list' %}">کمپین‌ها</a><span> / </span><a href="{% url 'campaigns:detail' campaign.id %}">{{ campaign.name|default:"کمپین" }}</a><span> / مدیریت</span></nav>
-  <header class="ui-page-heading">
-    <div><h1>مدیریت تبلیغ</h1><p class="page-sub">درخواست تغییر تبلیغ متصل به تلگرام</p></div>
-    <span class="status status-info">{{ ad.remote_status|telegram_remote_status_fa }}</span>
-  </header>
-  <div class="ui-remote-grid">
-    <section class="card card-pad">
-      <div class="ui-form-intro"><span class="ui-target-symbol">{% include "includes/lucide_icon.html" with name="sliders-horizontal" size="md" %}</span><div><h2>درخواست تغییر</h2><p>هر درخواست پس از بررسی مسئول حساب اجرا می‌شود.</p></div></div>
-      <div class="ui-remote-notice" role="status">{% include "includes/lucide_icon.html" with name="shield-check" size="sm" %}<p>ثبت فرم فقط درخواست ثبت می‌کند و به‌تنهایی تغییری در تلگرام یا کیف پول ایجاد نمی‌کند. افزایش و کاهش اعتبار نیازمند پیش‌فاکتور و تطبیق مالی جداگانه است.</p></div>
-      {% if has_open %}<p class="ui-studio-warning" role="status">یک درخواست در حال بررسی است. پس از تعیین تکلیف، درخواست بعدی را ثبت کنید.</p>{% endif %}
-      <form method="post" class="form-stack" data-remote-request>{% csrf_token %}
-        <div class="field"><label for="remote-action">نوع درخواست</label><select id="remote-action" name="action" required {% if not can_request %}disabled{% endif %}><option value="">انتخاب کنید</option>{% for key,label,icon,field in actions %}<option value="{{ key }}" data-value-type="{{ field }}">{{ label }}</option>{% endfor %}</select></div>
-        <div class="field" data-remote-value-wrapper hidden><label for="remote-value">مقدار جدید</label><input id="remote-value" name="value" autocomplete="off" disabled><p class="field-help" data-remote-help></p></div>
-        <button class="btn btn-primary" type="submit" {% if not can_request %}disabled{% endif %}>ثبت درخواست بررسی {% include "includes/lucide_icon.html" with name="arrow-left" size="sm" %}</button>
-      </form>
-    </section>
-    <aside class="card card-pad">
-      <h2 class="section-title">جزئیات اتصال</h2>
-      <div class="finance-line"><span>شناسه تلگرام</span><strong dir="ltr">{{ ad.remote_ad_id }}</strong></div>
-      <div class="finance-line"><span>وضعیت تلگرام</span><strong>{{ ad.remote_status|telegram_remote_status_fa }}</strong></div>
-      <div class="finance-line"><span>آخرین همگام‌سازی</span><time datetime="{{ ad.updated_at|date:'c' }}">{{ ad.updated_at|jalali_datetime }}</time></div>
-      <a class="btn btn-ghost" href="{% url 'campaigns:intraday' campaign.id %}">آمار ۵ دقیقه‌ای</a>
-    </aside>
-  </div>
-  <section class="card table-card">
-    <div class="dash-panel__head"><h2 class="section-title">تاریخچه درخواست‌ها</h2></div>
-    {% if operations %}
-      <div class="table-scroll"><table class="data-table"><thead><tr><th>عملیات</th><th>وضعیت</th><th>ثبت درخواست</th><th>توضیح</th></tr></thead><tbody>
-      {% for op in operations %}<tr><td>{{ op.get_action_display }}</td><td><span class="status {% if op.status == 'completed' %}status-active{% elif op.status == 'rejected' %}status-danger{% else %}status-warn{% endif %}">{{ op.get_status_display }}</span></td><td><time datetime="{{ op.created_at|date:'c' }}">{{ op.created_at|jalali_datetime }}</time></td><td>{{ op.note|default:"—" }}</td></tr>{% endfor %}
-      </tbody></table></div>
-    {% else %}<p class="ui-remote-empty">هنوز درخواستی ثبت نشده است.</p>{% endif %}
-  </section>
+<div class="app-stack ui-campaign-detail">
+<nav class="ui-breadcrumb" aria-label="مسیر صفحه"><a href="{% url 'campaigns:detail' campaign.id %}">{{ campaign.name|default:"کمپین" }}</a><span> / مدیریت تبلیغ</span></nav>
+{% include "includes/dash_header.html" with title="مدیریت تبلیغ" subtitle="کنترل تبلیغ متصل و پیگیری درخواست‌ها" with_sub=1 %}
+{% if ad %}
+<section class="card card-pad ui-remote-summary"><div class="ui-form-intro"><span class="ui-target-symbol">{% include "includes/lucide_icon.html" with name="sliders-horizontal" size="md" %}</span><div><h2>{{ campaign.name|default:"تبلیغ" }}</h2><p>شناسه تبلیغ: <bdi>#{{ ad.remote_ad_id }}</bdi></p></div></div><span class="status {{ campaign.status|campaign_status_class }}">{{ campaign.get_status_display }}</span></section>
+<p class="ui-studio-warning">عملیات ابتدا برای اپراتور ثبت می‌شود. توقف و ادامه ممکن است تاریخ فعال‌سازی و توقف تنظیم‌شده را در تلگرام پاک کند. وضعیت نهایی تنها پس از تأیید API نمایش داده می‌شود.</p>
+<section class="ui-remote-grid" aria-label="عملیات تبلیغ">
+  <article class="card card-pad form-stack"><h2 class="section-title">وضعیت انتشار</h2><p class="muted">توقف یا ادامه تبلیغ بدون ساخت کمپین جدید.</p><form method="post" class="hero-actions">{% csrf_token %}<button class="btn btn-ghost" name="action" value="pause" type="submit">درخواست توقف</button><button class="btn btn-primary" name="action" value="resume" type="submit">درخواست ادامه</button><button class="btn btn-ghost" name="action" value="review" type="submit">ارسال برای بررسی</button></form></article>
+  <article class="card card-pad form-stack"><h2 class="section-title">قیمت هر هزار نمایش</h2><form method="post" class="form-stack">{% csrf_token %}<div class="field"><label for="remote-cpm">CPM (TON)</label><input id="remote-cpm" name="value" type="number" min="0.01" step="0.01" required dir="ltr" value="{{ ad.remote_status_raw.cpm|default_if_none:'' }}"></div><button class="btn btn-primary" name="action" value="edit_cpm" type="submit">ثبت درخواست تغییر CPM</button></form></article>
+  <article class="card card-pad form-stack"><h2 class="section-title">سقف مصرف روزانه</h2><form method="post" class="form-stack">{% csrf_token %}<div class="field"><label for="remote-limit">سقف روزانه (TON؛ صفر یعنی بدون سقف)</label><input id="remote-limit" name="value" type="number" min="0" step="0.01" required dir="ltr"></div><button class="btn btn-primary" name="action" value="edit_daily_limit" type="submit">ثبت درخواست تغییر سقف</button></form></article>
+  <article class="card card-pad form-stack"><h2 class="section-title">عنوان داخلی</h2><form method="post" class="form-stack">{% csrf_token %}<div class="field"><label for="remote-title">عنوان (حداکثر ۱۲۸ بایت)</label><input id="remote-title" name="value" maxlength="128" required value="{{ ad.remote_status_raw.title|default:campaign.name }}"></div><button class="btn btn-ghost" name="action" value="edit_title" type="submit">ثبت درخواست عنوان</button></form></article>
+</section>
+<section class="ui-remote-grid" aria-label="مدیریت اعتبار"><article class="card card-pad form-stack"><h2 class="section-title">افزایش اعتبار تبلیغ</h2><p class="muted">دریافت برآورد نرخ و ثبت درخواست بررسی؛ هیچ مبلغی در این مرحله کسر نمی‌شود.</p><form method="post" class="form-stack">{% csrf_token %}<div class="field"><label for="increase-budget">بودجه درخواستی (تومان)</label><input id="increase-budget" name="value" type="number" min="100000" step="1" required dir="ltr"></div><button class="btn btn-primary" name="action" value="increase_budget" type="submit">مشاهده پیش‌فاکتور</button></form></article><article class="card card-pad form-stack"><h2 class="section-title">کاهش اعتبار تبلیغ</h2><p class="muted">در تلگرام تبلیغ باید حداقل ۱۰ دقیقه غیرفعال باشد. انتقال اعتبار به حساب مرکزی به معنی بازپرداخت ریالی نیست.</p><form method="post" class="form-stack">{% csrf_token %}<div class="field"><label for="decrease-budget">مقدار اعتبار (TON)</label><input id="decrease-budget" name="value" type="number" min="0.01" step="0.01" required dir="ltr"></div><button class="btn btn-ghost" name="action" value="decrease_budget" type="submit">بررسی درخواست کاهش</button></form></article></section>
+{% else %}<section class="card card-pad"><h2>تبلیغ متصل یکتا یافت نشد</h2><p class="muted">ابتدا اتصال و وضعیت ارسال را بررسی کنید.</p></section>{% endif %}
+<section class="card card-pad"><h2 class="section-title">تاریخچه درخواست‌ها</h2><div class="ui-remote-history">{% for op in operations %}<div><strong>{{ op.get_action_display }}</strong><span class="status {% if op.status == 'completed' %}status-active{% elif op.status == 'rejected' %}status-danger{% else %}status-warn{% endif %}">{{ op.get_status_display }}</span><time>{{ op.created_at|jalali_datetime }}</time>{% if op.note %}<p>{{ op.note }}</p>{% endif %}{% if op.status == 'pending' %}<form method="post">{% csrf_token %}<input type="hidden" name="operation_id" value="{{ op.pk }}"><button class="btn btn-ghost btn-sm" name="action" value="withdraw" type="submit">انصراف از درخواست</button></form>{% endif %}</div>{% empty %}<p class="muted">هنوز درخواستی ثبت نشده است.</p>{% endfor %}</div></section>
 </div>
-<script>
-(function(){var f=document.querySelector("[data-remote-request]");if(!f)return;
-var s=f.querySelector("select"),w=f.querySelector("[data-remote-value-wrapper]"),v=f.querySelector("input[name=value]"),h=f.querySelector("[data-remote-help]");
-function update(){var t=s.selectedOptions[0]&&s.selectedOptions[0].dataset.valueType||"none";w.hidden=t==="none";v.disabled=t==="none";v.required=t!=="none";
-v.type=t==="title"?"text":t==="none"?"text":"number";v.maxLength=t==="title"?128:256;v.step=t==="title"?"any":"0.01";v.min=t==="title"?"":"0.01";
-h.textContent=t==="budget"?"مبلغ TON پیشنهادی است؛ بدون پیش‌فاکتور پرداخت یا جابه‌جایی انجام نمی‌شود.":t==="cpm"?"CPM بر حسب TON برای هزار نمایش":t==="daily_limit"?"سقف روزانه به TON":"";
-} s.addEventListener("change",update);update();})();
-</script>
 {% endblock %}

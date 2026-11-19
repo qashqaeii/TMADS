@@ -1,107 +1,74 @@
-"""Customer requests for managing an existing Telegram advertisement.
-
-This path never writes to Telegram or debits a wallet. Operations require a
-separate authenticated, audited operator decision.
-"""
-from decimal import Decimal, InvalidOperation
-
+import uuid
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db import IntegrityError, transaction
 from django.shortcuts import redirect, render
-from django.views.decorators.http import require_http_methods
-
-from apps.accounts.permissions import customer_required
-from apps.campaigns.models import Campaign, RemoteAdOperation, TelegramAdvertisement
+from django.views.decorators.http import require_http_methods, require_POST
+from apps.accounts.permissions import customer_required, staff_ops_required
 from apps.campaigns.ownership import get_customer_campaign
-from apps.core.models import AuditLog
-
-OPEN_STATES = (
-    RemoteAdOperation.Status.PENDING,
-    RemoteAdOperation.Status.EXECUTING,
-    RemoteAdOperation.Status.UNCERTAIN,
-)
-ACTIONS = {
-    RemoteAdOperation.Action.PAUSE: ("توقف تبلیغ", "pause", "none"),
-    RemoteAdOperation.Action.RESUME: ("ادامه تبلیغ", "play", "none"),
-    RemoteAdOperation.Action.REVIEW: ("ارسال برای بررسی", "clipboard-check", "none"),
-    RemoteAdOperation.Action.EDIT_CPM: ("تغییر CPM", "gauge", "cpm"),
-    RemoteAdOperation.Action.EDIT_DAILY_LIMIT: ("تغییر سقف روزانه", "calendar-clock", "daily_limit"),
-    RemoteAdOperation.Action.EDIT_TITLE: ("تغییر عنوان داخلی", "pencil", "title"),
-    RemoteAdOperation.Action.INCREASE_BUDGET: ("درخواست افزایش بودجه", "plus-circle", "budget"),
-    RemoteAdOperation.Action.DECREASE_BUDGET: ("درخواست کاهش بودجه", "minus-circle", "budget"),
-}
-# A remote account or ad must always be verified before fulfilling a request.
-# Budget requests do not reserve/debit/release funds at this stage.
-
-
-def parse_request(action, raw):
-    if action not in ACTIONS:
-        raise ValueError("عملیات انتخاب‌شده معتبر نیست.")
-    field = ACTIONS[action][2]
-    if field == "none":
-        return {}
-    if field == "title":
-        title = (raw or "").strip()
-        if not title or len(title.encode("utf-8")) > 128:
-            raise ValueError("عنوان باید بین ۱ تا ۱۲۸ بایت باشد.")
-        return {"title": title}
-    try:
-        value = Decimal(str(raw).strip())
-        if (not value.is_finite() or value <= 0 or value > Decimal("99999999.99")
-                or value != value.quantize(Decimal("0.01"))):
-            raise ValueError
-    except (InvalidOperation, TypeError, ValueError):
-        raise ValueError("مقدار باید یک عدد مثبت با حداکثر دو رقم اعشار TON باشد.") from None
-    return {field: str(value)}
+from apps.campaigns.models import RemoteAdOperation
+from apps.telegram_ads.services.manage_ad import request_operation, execute_operation, reject_operation, withdraw_operation
+from apps.telegram_ads.exceptions import TelegramAdsError
+from django.shortcuts import get_object_or_404
 
 
 @login_required
 @customer_required
-@require_http_methods(["GET", "POST"])
+@require_http_methods(["GET","POST"])
 def remote_management(request, campaign_id):
-    campaign = get_customer_campaign(request.user.customer_profile, campaign_id)
-    ad = campaign.remote_ads.exclude(remote_ad_id="").order_by("-updated_at").first()
-    if ad is None:
-        messages.error(request, "هنوز تبلیغ متصل به تلگرام برای این کمپین وجود ندارد.")
-        return redirect("campaigns:detail", campaign_id=campaign.id)
-
-    if request.method == "POST":
+    campaign=get_customer_campaign(request.user.customer_profile,campaign_id)
+    if request.method=="POST":
         try:
-            payload = parse_request(request.POST.get("action", ""), request.POST.get("value", ""))
-            with transaction.atomic():
-                campaign = Campaign.objects.select_for_update().get(pk=campaign.pk)
-                ad = TelegramAdvertisement.objects.select_for_update().get(pk=ad.pk, campaign=campaign)
-                if campaign.status in {Campaign.Status.SUBMITTING, Campaign.Status.RECONCILIATION,
-                                       Campaign.Status.CANCELLED, Campaign.Status.FAILED}:
-                    raise ValueError("این کمپین در حال حاضر اجازه ثبت درخواست تغییر ندارد.")
-                if ad.operations.filter(status__in=OPEN_STATES).exists():
-                    raise ValueError("درخواست قبلی هنوز تعیین تکلیف نشده است.")
-                action = request.POST.get("action", "")
-                op = RemoteAdOperation.objects.create(
-                    advertisement=ad, action=action, request_payload=payload,
-                    status=RemoteAdOperation.Status.PENDING,
-                )
-                AuditLog.objects.create(
-                    actor=request.user, action="remote_ad.operation_requested",
-                    entity_type="campaign", entity_id=campaign.pk,
-                    new_state={"operation_id": str(op.pk), "action": op.action},
-                )
-            messages.success(request, "درخواست ثبت شد و برای بررسی اپراتور ارسال می‌شود. تغییر در تلگرام انجام نشده است.")
-        except (ValueError, IntegrityError) as exc:
-            messages.error(request, str(exc) if isinstance(exc, ValueError) else "درخواست مشابهی در جریان است.")
-        return redirect("campaigns:remote_management", campaign_id=campaign.pk)
-
-    operations = list(ad.operations.order_by("-created_at")[:15])
-    has_open = any(op.status in OPEN_STATES for op in operations)
-    return render(request, "campaigns/remote_management.html", {
-        "campaign": campaign,
-        "ad": ad,
-        "operations": operations,
-        "has_open": has_open,
-        "actions": [(key, label, icon, field) for key, (label, icon, field) in ACTIONS.items()],
-        "can_request": campaign.status not in {
-            Campaign.Status.SUBMITTING, Campaign.Status.RECONCILIATION,
-            Campaign.Status.CANCELLED, Campaign.Status.FAILED,
-        } and not has_open,
+            if request.POST.get("action")=="withdraw":
+                withdraw_operation(campaign.pk,uuid.UUID(request.POST.get("operation_id","")),actor=request.user)
+                messages.success(request,"درخواست پیش از اجرا پس گرفته شد.")
+                return redirect("campaigns:remote_management",campaign_id=campaign.pk)
+            if request.POST.get("action") in {"increase_budget","decrease_budget"}:
+                from apps.finance.budget_management import preview_budget
+                from apps.finance.exceptions import PricingError
+                try:
+                    proposal,token=preview_budget(campaign,actor=request.user,action=request.POST["action"],value=request.POST.get("value",""))
+                except PricingError:
+                    raise ValueError("نرخ معتبر برای ارائه پیش‌فاکتور در دسترس نیست.") from None
+                return render(request,"campaigns/budget_proposal.html",{"campaign":campaign,"proposal":proposal,"token":token})
+            if request.POST.get("action")=="confirm_budget_proposal":
+                from apps.finance.budget_management import submit_budget_proposal
+                submit_budget_proposal(campaign.pk,actor=request.user,token=request.POST.get("token",""))
+                messages.success(request,"درخواست بررسی بودجه ثبت شد؛ هیچ مبلغی کسر یا منتقل نشده است.")
+                return redirect("campaigns:remote_management",campaign_id=campaign.pk)
+            request_operation(campaign.pk,actor=request.user,action=request.POST.get("action",""),value=request.POST.get("value",""))
+            messages.success(request,"درخواست ثبت شد؛ هنوز تغییری در تلگرام انجام نشده است.")
+        except ValueError as exc:
+            messages.error(request,str(exc))
+        return redirect("campaigns:remote_management",campaign_id=campaign.pk)
+    ads=list(campaign.remote_ads.exclude(remote_ad_id="")[:2])
+    return render(request,"campaigns/remote_management.html",{
+        "campaign":campaign,"ad":ads[0] if len(ads)==1 else None,
+        "operations":RemoteAdOperation.objects.filter(advertisement__campaign=campaign)[:30],
     })
+
+
+@login_required
+@staff_ops_required
+@require_http_methods(["GET","POST"])
+def remote_operations(request):
+    if request.method=="POST":
+        try:
+            op=get_object_or_404(RemoteAdOperation,pk=uuid.UUID(request.POST.get("operation_id","")))
+            if request.POST.get("decision")=="execute":
+                execute_operation(op.pk,actor=request.user)
+                messages.success(request,"نتیجه عملیات از تلگرام تأیید شد.")
+            elif request.POST.get("decision")=="reject":
+                reject_operation(op.pk,actor=request.user,reason=request.POST.get("reason",""))
+                messages.success(request,"تصمیم ثبت شد.")
+            else:
+                raise ValueError("تصمیم معتبر نیست.")
+        except (ValueError,TelegramAdsError) as exc:
+            messages.error(request,str(exc))
+        return redirect("operations:remote_operations")
+    from django.core.paginator import Paginator
+    qs=RemoteAdOperation.objects.select_related("advertisement__campaign__customer")
+    status=request.GET.get("status","pending")
+    if status in RemoteAdOperation.Status.values:
+        qs=qs.filter(status=status)
+    page=Paginator(qs,30).get_page(request.GET.get("page"))
+    return render(request,"operations/remote_operations.html",{"page_obj":page,"statuses":RemoteAdOperation.Status.choices,"filter_status":status})

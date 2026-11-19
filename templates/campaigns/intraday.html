@@ -2,18 +2,11 @@
 {% load core_filters %}
 {% block page_title %}آمار درون‌روزی{% endblock %}
 {% block content %}
-<div class="app-stack ui-remote">
-  <nav class="ui-breadcrumb"><a href="{% url 'campaigns:detail' campaign.id %}">جزئیات کمپین</a> / آمار درون‌روزی</nav>
-  <header class="ui-page-heading"><div><h1>آمار ۵ دقیقه‌ای</h1><p class="page-sub">بازه‌های واقعی API تلگرام، بدون برآورد یا داده نمونه</p></div>
-  <a href="{% url 'campaigns:remote_management' campaign.id %}" class="btn btn-ghost">مدیریت تبلیغ</a></header>
-  <nav class="ui-intraday-ranges" aria-label="بازه زمانی">
-  <a href="?hours=6" class="btn {% if hours == 6 %}btn-primary{% else %}btn-ghost{% endif %}">۶ ساعت</a><a href="?hours=12" class="btn {% if hours == 12 %}btn-primary{% else %}btn-ghost{% endif %}">۱۲ ساعت</a><a href="?hours=24" class="btn {% if hours == 24 %}btn-primary{% else %}btn-ghost{% endif %}">۲۴ ساعت</a>
-  </nav>
-  {% if error %}<div class="ui-studio-warning" role="alert">{{ error }}</div>{% endif %}
-  {% if partial %}<div class="ui-studio-warning">بعضی بازه‌ها فاقد آمار معتبر هستند؛ جمع نمایش فقط برای داده‌های موجود است.</div>{% endif %}
-  <div class="ui-intraday-summary"><article class="card card-pad"><span>نمایش بازه‌های دریافت‌شده</span><strong class="tabnums">{{ total_views|persian_digits }}</strong></article><article class="card card-pad"><span>کلیک بازه‌های دریافت‌شده</span><strong class="tabnums">{{ total_clicks|persian_digits }}</strong></article></div>
-  <section class="card table-card"><div class="dash-panel__head"><h2 class="section-title">جزئیات بازه‌های ۵ دقیقه‌ای</h2><span class="muted">به‌روزرسانی کش: حداکثر ۲ دقیقه</span></div>
-  {% if points %}<div class="table-scroll"><table class="data-table"><thead><tr><th>زمان (Unix)</th><th>نمایش</th><th>کلیک</th><th>مصرف TON</th></tr></thead><tbody>{% for item in points %}<tr><td dir="ltr">{{ item.when|default:"—" }}</td><td class="tabnums">{{ item.views|default_if_none:"—" }}</td><td class="tabnums">{{ item.clicks|default_if_none:"—" }}</td><td class="tabnums" dir="ltr">{{ item.spent|default_if_none:"—" }}</td></tr>{% endfor %}</tbody></table></div>{% else %}<p class="ui-remote-empty">برای این بازه داده‌ای از تلگرام دریافت نشد.</p>{% endif %}
-  </section>
-</div>
+<div class="app-stack">
+<nav class="ui-breadcrumb"><a href="{% url 'campaigns:detail' campaign.pk %}">{{ campaign.name|default:"کمپین" }}</a><span>آمار درون‌روزی</span></nav>
+{% include "includes/dash_header.html" with title="آمار پنج‌دقیقه‌ای" subtitle="مشاهده عملکرد در بازه‌های کوتاه، بدون تغییر آمار روزانه" with_sub=1 %}
+<section class="card card-pad form-stack"><div class="hero-actions"><a href="?hours=6&load=1" class="btn {% if hours == 6 %}btn-primary{% else %}btn-ghost{% endif %}">۶ ساعت اخیر</a><a href="?hours=24&load=1" class="btn {% if hours == 24 %}btn-primary{% else %}btn-ghost{% endif %}">۲۴ ساعت اخیر</a></div><p class="muted">تنها بازه‌های کامل نمایش داده می‌شوند. نبود ردیف به معنی صفر بودن نمایش نیست.</p>
+{% if error %}<p class="ui-studio-warning" role="alert">{{ error }}</p>{% endif %}
+{% if loaded %}<div class="finance-line"><span>بازه‌های دریافتی / کل بازه</span><strong>{{ count }} / {{ slots }}</strong></div><div class="finance-line"><span>زمان دریافت</span><span>{{ fetched_at|jalali_datetime }}</span></div><div class="table-scroll"><table class="table"><thead><tr><th>شروع بازه</th><th>نمایش</th><th>کلیک</th><th>بازکردن</th><th>اقدام</th><th>هزینه</th></tr></thead><tbody>{% for row in rows %}<tr><td>{{ row.time|jalali_datetime }}</td><td>{{ row.views|default_if_none:"—" }}</td><td>{{ row.clicks|default_if_none:"—" }}</td><td>{{ row.opens|default_if_none:"—" }}</td><td>{{ row.actions|default_if_none:"—" }}</td><td>{% if row.spent != None %}<bdi>{{ row.spent }} {{ row.currency }}</bdi>{% else %}—{% endif %}</td></tr>{% empty %}<tr><td colspan="6">بازه‌ای از تلگرام دریافت نشد.</td></tr>{% endfor %}</tbody></table></div>{% else %}<p class="muted">برای دریافت آمار، بازه زمانی را انتخاب کنید.</p>{% endif %}
+</section></div>
 {% endblock %}
