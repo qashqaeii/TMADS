@@ -144,3 +144,12 @@
 .ui-final.pp-about .ui-public-reading{max-width:none;border-radius:22px}
 @media(max-width:720px){.pp-about .pp-about-intro{grid-template-columns:minmax(0,1fr)}}
 
+
+
+.ui-final.pp-contact .ui-public-contact{max-width:none;text-align:start;display:grid;justify-items:start;gap:13px;padding:clamp(24px,4vw,42px);border-radius:24px;background:linear-gradient(135deg,#fff,#eff7fc)}
+.pp-contact .ui-public-contact p{max-width:72ch;color:var(--pp-muted);line-height:2;margin:0}
+.pp-support-badge{font-size:.82rem;font-weight:700;color:var(--pp-blue);background:#e5f1fa;border-radius:99px;padding:5px 11px}
+.pp-contact .ui-contact-actions{margin:0}
+.pp-contact .pp-contact-topics .feature-card a{display:inline-flex;align-items:center;min-height:44px;color:var(--pp-blue);font-weight:650;text-decoration:underline;text-underline-offset:4px}
+@media(max-width:600px){.pp-contact .ui-contact-actions{display:grid;grid-template-columns:minmax(0,1fr);width:100%}.pp-contact .ui-public-contact>.btn{width:100%}}
+
