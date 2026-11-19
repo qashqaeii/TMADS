@@ -6,6 +6,7 @@ from decimal import Decimal
 
 from django.utils import timezone
 
+from apps.campaigns.metrics import _decimal, _int
 from apps.campaigns.models import Campaign, CampaignStatisticsSnapshot, CampaignTargeting, TelegramAdvertisement
 from apps.telegram_ads.client import TelegramAdsClient
 from apps.telegram_ads.constants import API_TO_TMADS_PLACEMENT, STATS_INTERVAL_DAY
@@ -237,10 +238,11 @@ def sync_ad_statistics_for(ad: TelegramAdvertisement, *, days: int | None = None
         snapshot_date = _snapshot_date_from_stat(row)
         if not snapshot_date:
             continue
-        impressions = int(row.get("views") or row.get("impressions") or row.get("opens") or 0)
-        clicks = int(row.get("clicks") or 0)
-        actions = int(row.get("actions") or row.get("joins") or 0)
-        spent = row.get("spent_budget") or row.get("spent") or 0
+        impressions = _int(row.get("views", row.get("impressions"))) or 0
+        clicks = _int(row.get("clicks")) or 0
+        actions = _int(row.get("actions", row.get("joins"))) or 0
+        currency = str(row.get("currency") or (ad.remote_status_raw or {}).get("currency") or "").upper()
+        spent = _decimal(row.get("spent_budget", row.get("spent"))) if currency == "TON" else None
         CampaignStatisticsSnapshot.objects.update_or_create(
             advertisement=ad,
             snapshot_date=snapshot_date,
@@ -248,8 +250,8 @@ def sync_ad_statistics_for(ad: TelegramAdvertisement, *, days: int | None = None
                 "impressions": impressions,
                 "clicks": clicks,
                 "actions": actions,
-                "spent_ton": Decimal(str(spent)),
-                "raw": {"kind": "period", "interval": STATS_INTERVAL_DAY, **row},
+                "spent_ton": spent if spent is not None else Decimal("0"),
+                "raw": {**row, "kind": "period", "interval": STATS_INTERVAL_DAY, "currency": currency, "spent_verified": spent is not None},
             },
         )
         written += 1

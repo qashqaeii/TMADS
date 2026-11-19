@@ -64,15 +64,15 @@
             </div>
             <div class="dash-campaign-row__nums dash-campaign-card__stats tabnums" aria-label="آمار کمپین">
               <div class="dash-campaign-stat">
-                <span class="dash-campaign-stat__value">{{ m.impressions|format_count }}</span>
+                <span class="dash-campaign-stat__value">{% if m.has_impressions %}{{ m.impressions|format_count }}{% else %}—{% endif %}</span>
                 <span class="dash-campaign-stat__label">نمایش</span>
               </div>
               <div class="dash-campaign-stat">
-                <span class="dash-campaign-stat__value">{{ m.clicks|format_count }}</span>
+                <span class="dash-campaign-stat__value">{% if m.has_clicks %}{{ m.clicks|format_count }}{% else %}—{% endif %}</span>
                 <span class="dash-campaign-stat__label">کلیک</span>
               </div>
               <div class="dash-campaign-stat dash-campaign-stat--accent">
-                <span class="dash-campaign-stat__value">{{ row.ctr|persian_digits }}<span class="dash-campaign-stat__suffix">٪</span></span>
+                <span class="dash-campaign-stat__value">{% if m.has_ctr %}{{ row.ctr|persian_digits }}<span class="dash-campaign-stat__suffix">٪</span>{% else %}—{% endif %}</span>
                 <span class="dash-campaign-stat__label">نرخ کلیک</span>
               </div>
             </div>

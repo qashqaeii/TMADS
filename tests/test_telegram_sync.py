@@ -15,7 +15,7 @@ def test_sync_ad_statistics_stores_period_rows(monkeypatch):
     ad = TelegramAdvertisement.objects.create(campaign=campaign, remote_ad_id="42")
 
     ts = int(datetime(2026, 1, 5, tzinfo=dt_timezone.utc).timestamp())
-    fake_items = [{"from_time": ts, "views": 10, "clicks": 2, "actions": 1, "spent_budget": "0.1"}]
+    fake_items = [{"from_time": ts, "views": 10, "clicks": 2, "actions": 1, "spent_budget": "0.1", "currency": "TON"}]
 
     class FakeClient:
         def get_ad_statistics(self, *args, **kwargs):
@@ -31,3 +31,5 @@ def test_sync_ad_statistics_stores_period_rows(monkeypatch):
     snap = CampaignStatisticsSnapshot.objects.get(advertisement=ad)
     assert snap.impressions == 10
     assert snap.raw.get("kind") == "period"
+
+    assert snap.raw["spent_verified"] is True

@@ -4,9 +4,9 @@
   <header class="campaign-kpi-ribbon__head">
     <h2 class="campaign-kpi-ribbon__title">شاخص‌های عملکرد</h2>
     {% if metrics.clicks %}
-    <div class="campaign-kpi-ribbon__insight tabnums" title="نرخ تبدیل کلیک به ورود">
+    <div class="campaign-kpi-ribbon__insight tabnums" title="نرخ تبدیل کلیک به اقدام">
       <span class="campaign-kpi-ribbon__insight-label">تبدیل</span>
-      <span class="campaign-kpi-ribbon__insight-value">{% if metrics.actions %}{{ metrics.conversion_rate|persian_digits }}٪{% else %}—{% endif %}</span>
+      <span class="campaign-kpi-ribbon__insight-value">{% if metrics.has_conversion %}{{ metrics.conversion_rate|persian_digits }}٪{% else %}—{% endif %}</span>
     </div>
     {% endif %}
   </header>
@@ -17,28 +17,28 @@
         <span class="campaign-kpi-ribbon__glyph" aria-hidden="true">{% include "includes/lucide_icon.html" with name="eye" size="kpi" %}</span>
         <span class="campaign-kpi-ribbon__name">نمایش</span>
       </p>
-      <p class="campaign-kpi-ribbon__value tabnums">{{ metrics.impressions|format_count }}</p>
+      <p class="campaign-kpi-ribbon__value tabnums">{% if metrics.has_impressions %}{{ metrics.impressions|format_count }}{% else %}—{% endif %}</p>
     </article>
     <article class="campaign-kpi-ribbon__cell" role="listitem" style="--kpi-accent: #147fc5;">
       <p class="campaign-kpi-ribbon__meta">
         <span class="campaign-kpi-ribbon__glyph" aria-hidden="true">{% include "includes/lucide_icon.html" with name="mouse-pointer-click" size="kpi" %}</span>
         <span class="campaign-kpi-ribbon__name">کلیک</span>
       </p>
-      <p class="campaign-kpi-ribbon__value tabnums">{{ metrics.clicks|format_count }}</p>
+      <p class="campaign-kpi-ribbon__value tabnums">{% if metrics.has_clicks %}{{ metrics.clicks|format_count }}{% else %}—{% endif %}</p>
     </article>
     <article class="campaign-kpi-ribbon__cell campaign-kpi-ribbon__cell--ctr" role="listitem" style="--kpi-accent: #ba8229;">
       <p class="campaign-kpi-ribbon__meta">
         <span class="campaign-kpi-ribbon__glyph" aria-hidden="true">{% include "includes/lucide_icon.html" with name="percent" size="kpi" %}</span>
         <span class="campaign-kpi-ribbon__name">نرخ کلیک</span>
       </p>
-      <p class="campaign-kpi-ribbon__value tabnums">{{ metrics.ctr|persian_digits }}<span class="campaign-kpi-ribbon__suffix">٪</span></p>
+      <p class="campaign-kpi-ribbon__value tabnums">{% if metrics.has_ctr %}{{ metrics.ctr|persian_digits }}<span class="campaign-kpi-ribbon__suffix">٪</span>{% else %}—{% endif %}</p>
     </article>
     <article class="campaign-kpi-ribbon__cell" role="listitem" style="--kpi-accent: #16866a;">
       <p class="campaign-kpi-ribbon__meta">
         <span class="campaign-kpi-ribbon__glyph" aria-hidden="true">{% include "includes/lucide_icon.html" with name="log-in" size="kpi" %}</span>
-        <span class="campaign-kpi-ribbon__name">ورود</span>
+        <span class="campaign-kpi-ribbon__name">اقدام</span>
       </p>
-      <p class="campaign-kpi-ribbon__value tabnums">{{ metrics.actions|format_count }}</p>
+      <p class="campaign-kpi-ribbon__value tabnums">{% if metrics.has_actions %}{{ metrics.actions|format_count }}{% else %}—{% endif %}</p>
     </article>
     <article class="campaign-kpi-ribbon__cell campaign-kpi-ribbon__cell--finance" role="listitem" style="--kpi-accent: #8794a7;">
       <p class="campaign-kpi-ribbon__meta">
@@ -46,9 +46,9 @@
         <span class="campaign-kpi-ribbon__name">هزینه</span>
       </p>
       <p class="campaign-kpi-ribbon__value campaign-kpi-ribbon__value--ton">{% ton_amount metrics.spent_ton exchange_rate_id=order_exchange_rate_id hint=0 %}</p>
-      {% if kpi_ribbon_mode == 'ref' and metrics.clicks and metrics.actions %}
-      <p class="campaign-kpi-ribbon__delta tabnums" title="نرخ تبدیل کلیک به ورود">
-        <span aria-hidden="true">+</span>{{ metrics.conversion_rate|persian_digits }}٪
+      {% if kpi_ribbon_mode == 'ref' and metrics.has_conversion %}
+      <p class="campaign-kpi-ribbon__delta tabnums" title="نرخ تبدیل کلیک به اقدام">
+        {{ metrics.conversion_rate|persian_digits }}٪
       </p>
       {% endif %}
     </article>

@@ -57,7 +57,7 @@ def test_chart_payload_all_days_when_no_limit():
     assert full["day_count"] == 40
 
 
-def test_period_metrics_reads_opens_from_raw():
+def test_period_metrics_never_treats_video_opens_as_views():
     row = {
         "impressions": 0,
         "clicks": 2,
@@ -66,7 +66,7 @@ def test_period_metrics_reads_opens_from_raw():
         "raw": {"kind": "period", "opens": 1200, "clicks": 2, "actions": 1},
     }
     imp, clk, act, _ = _period_metrics_from_snapshot(row)
-    assert imp == 1200
+    assert imp == 0
     assert clk == 2
 
 

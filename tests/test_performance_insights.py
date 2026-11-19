@@ -20,13 +20,13 @@ def test_performance_insights_picks_champion_and_lenses():
             "views": 10000,
             "clicks": 400,
             "actions": 80,
-            "spent_budget": "10",
+            "currency": "TON", "spent_budget": "10",
         },
     )
     TelegramAdvertisement.objects.create(
         campaign=weak,
         remote_ad_id="2",
-        remote_status_raw={"views": 200, "clicks": 4, "actions": 0, "spent_budget": "0.1"},
+        remote_status_raw={"views": 200, "clicks": 4, "actions": 0, "currency": "TON", "spent_budget": "0.1"},
     )
     rows = build_campaign_list_rows(Campaign.objects.filter(customer=customer))
     insights = build_portfolio_performance_insights(rows)

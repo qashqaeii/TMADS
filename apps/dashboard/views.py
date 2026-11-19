@@ -21,8 +21,7 @@ def home(request):
 
     wallet = ensure_wallet(customer)
 
-    recent_qs = campaigns.order_by("-updated_at")[:6]
-    recent_rows = build_campaign_list_rows(recent_qs)
+    recent_rows = sorted(portfolio_rows, key=lambda r: r.campaign.updated_at, reverse=True)[:6]
     activity = (
         CampaignStatusHistory.objects.filter(campaign__customer=customer)
         .select_related("campaign")
@@ -61,6 +60,7 @@ def home(request):
             "impressions": impressions,
             "clicks": clicks,
             "ctr": ctr,
+            "portfolio": portfolio,
             "wallet": wallet,
             "recent_rows": recent_rows,
             "activity": activity,

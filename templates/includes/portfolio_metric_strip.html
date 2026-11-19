@@ -3,6 +3,7 @@
   <header class="campaign-kpi-ribbon__head">
     <h2 class="campaign-kpi-ribbon__title">خلاصه پورتفولیو</h2>
   </header>
+  <p class="muted">آمار کل دریافتی از {{ kpis.stats_count|format_count }} از {{ kpis.linked_count|format_count }} کمپین متصل</p>
   <div class="campaign-kpi-ribbon__track" role="list">
     <article class="campaign-kpi-ribbon__cell" role="listitem" style="--kpi-accent: #1f9b78;">
       <p class="campaign-kpi-ribbon__meta">
@@ -16,21 +17,21 @@
         <span class="campaign-kpi-ribbon__glyph" aria-hidden="true">{% include "includes/lucide_icon.html" with name="eye" size="kpi" %}</span>
         <span class="campaign-kpi-ribbon__name">نمایش</span>
       </p>
-      <p class="campaign-kpi-ribbon__value tabnums">{{ kpis.total_impressions|format_count }}</p>
+      <p class="campaign-kpi-ribbon__value tabnums">{% if kpis.has_impressions %}{{ kpis.total_impressions|format_count }}{% else %}—{% endif %}</p>
     </article>
     <article class="campaign-kpi-ribbon__cell" role="listitem" style="--kpi-accent: #147fc5;">
       <p class="campaign-kpi-ribbon__meta">
         <span class="campaign-kpi-ribbon__glyph" aria-hidden="true">{% include "includes/lucide_icon.html" with name="mouse-pointer-click" size="kpi" %}</span>
         <span class="campaign-kpi-ribbon__name">کلیک</span>
       </p>
-      <p class="campaign-kpi-ribbon__value tabnums">{{ kpis.total_clicks|format_count }}</p>
+      <p class="campaign-kpi-ribbon__value tabnums">{% if kpis.has_clicks %}{{ kpis.total_clicks|format_count }}{% else %}—{% endif %}</p>
     </article>
     <article class="campaign-kpi-ribbon__cell campaign-kpi-ribbon__cell--ctr" role="listitem" style="--kpi-accent: #ba8229;">
       <p class="campaign-kpi-ribbon__meta">
         <span class="campaign-kpi-ribbon__glyph" aria-hidden="true">{% include "includes/lucide_icon.html" with name="percent" size="kpi" %}</span>
         <span class="campaign-kpi-ribbon__name">نرخ کلیک کل</span>
       </p>
-      <p class="campaign-kpi-ribbon__value tabnums">{{ kpis.weighted_ctr|persian_digits }}<span class="campaign-kpi-ribbon__suffix">٪</span></p>
+      <p class="campaign-kpi-ribbon__value tabnums">{% if kpis.has_ctr %}{{ kpis.weighted_ctr|persian_digits }}<span class="campaign-kpi-ribbon__suffix">٪</span>{% else %}—{% endif %}</p>
     </article>
     <article class="campaign-kpi-ribbon__cell campaign-kpi-ribbon__cell--finance" role="listitem" style="--kpi-accent: #8794a7;">
       <p class="campaign-kpi-ribbon__meta">

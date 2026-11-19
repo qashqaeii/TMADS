@@ -123,3 +123,6 @@ and verified/unverified labels instead of silently selecting search matches. Cou
 selections, stale location responses cannot overwrite results, and channel-mode fields are shown only when relevant.
 Mobile add-search control and larger selection targets added. Catalog requests are limited to the audience step.
 Actual browser QA is still pending.
+
+## Analytics correctness and missing-data UX
+Lifetime data is restricted to the ad object; video opens are not views, zero is an observed value, daily snapshots are not lifetime fallback. Per-metric availability, weighted CTR from comparable rows, and explicit TON currency for lifetime spend prevent fabricated numbers. Dashboard and list show missing values distinctly and disclose coverage; period aggregations share corrected parsing. Known foreign-currency daily spend is excluded. Historical unlabeled period amounts and visual/browser verification still need an isolated data audit. Sort changes reset the page. Regression tests updated to the bundled API contract; execution pending.

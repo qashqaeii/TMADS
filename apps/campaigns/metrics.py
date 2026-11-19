@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from decimal import Decimal
 from typing import Any
 
-from django.db.models import Prefetch, QuerySet
+from django.db.models import Prefetch, QuerySet, Sum
 from django.utils import timezone
 
 from apps.campaigns.models import Campaign, CampaignStatisticsSnapshot, TelegramAdvertisement
@@ -19,75 +19,54 @@ class AdLifetimeMetrics:
     remaining_ton: Decimal | None
     cpm: Decimal | None
     has_stats: bool
-    stats_source: str  # remote_raw | snapshot | none
+    stats_source: str  # remote_raw | none
     stats_stale: bool
     last_updated: timezone.datetime | None
+    has_impressions: bool = False
+    has_clicks: bool = False
+    has_actions: bool = False
+    currency: str | None = None
+    action_type: str = ""
+
+    @property
+    def has_ctr(self) -> bool:
+        return self.has_impressions and self.has_clicks and self.impressions > 0
 
 
 def _decimal(value: Any) -> Decimal | None:
-    if value is None or value == "":
+    if value is None or value == "" or isinstance(value, bool):
         return None
     try:
-        return Decimal(str(value))
-    except Exception:
+        result = Decimal(str(value))
+        return result if result.is_finite() and result >= 0 else None
+    except (ArithmeticError, TypeError, ValueError):
         return None
 
 
 def _int(value: Any) -> int | None:
-    if value is None or value == "":
+    parsed = _decimal(value)
+    if parsed is None or parsed > 9223372036854775807 or parsed != parsed.to_integral_value():
         return None
-    try:
-        return int(value)
-    except (TypeError, ValueError):
-        return None
+    return int(parsed)
 
 
 def lifetime_metrics_for_advertisement(ad: TelegramAdvertisement | None) -> AdLifetimeMetrics:
-    """Lifetime totals — never sum daily snapshots."""
-    empty = AdLifetimeMetrics(0, 0, 0, None, None, None, False, "none", False, None)
+    """Use only lifetime fields, never a daily snapshot or video-open count."""
     if not ad:
-        return empty
+        return AdLifetimeMetrics(0, 0, 0, None, None, None, False, "none", False, None)
 
     raw = ad.remote_status_raw if isinstance(ad.remote_status_raw, dict) else {}
-    impressions = _int(raw.get("views") if "views" in raw else raw.get("impressions"))
-    if not impressions:
-        impressions = _int(raw.get("opens"))
+    impressions = _int(raw.get("views", raw.get("impressions")))
     clicks = _int(raw.get("clicks"))
-    actions = _int(raw.get("actions") if "actions" in raw else raw.get("joins"))
-    spent = _decimal(raw.get("spent_budget") if "spent_budget" in raw else raw.get("spent"))
-    remaining = _decimal(raw.get("remaining_budget") if "remaining_budget" in raw else raw.get("remaining"))
-    cpm = _decimal(raw.get("cpm"))
-    source = "none"
-
-    if impressions is not None or clicks is not None or actions is not None:
-        source = "remote_raw"
-        impressions = impressions or 0
-        clicks = clicks or 0
-        actions = actions or 0
-    else:
-        latest = (
-            CampaignStatisticsSnapshot.objects.filter(advertisement=ad)
-            .order_by("-snapshot_date")
-            .first()
-        )
-        if latest:
-            source = "snapshot"
-            impressions = int(latest.impressions)
-            clicks = int(latest.clicks)
-            actions = int(latest.actions)
-            if spent is None and latest.spent_ton is not None:
-                spent = latest.spent_ton
-        else:
-            return empty
-
+    actions = _int(raw.get("actions", raw.get("joins")))
+    currency = str(raw.get("currency") or "").upper() or None
+    # The ledger and display contract is TON. Missing/other currencies must not
+    # be silently interpreted or converted as TON.
+    spent = _decimal(raw.get("spent_budget", raw.get("spent"))) if currency == "TON" else None
+    remaining = _decimal(raw.get("remaining_budget", raw.get("remaining"))) if currency == "TON" else None
+    cpm = _decimal(raw.get("cpm")) if currency == "TON" else None
+    has_stats = any(value is not None for value in (impressions, clicks, actions))
     last_updated = ad.updated_at
-    stats_stale = False
-    if last_updated:
-        age = timezone.now() - last_updated
-        stats_stale = age.total_seconds() > 3600 * 6
-
-    has_stats = source != "none" and (impressions > 0 or clicks > 0 or actions > 0 or (spent and spent > 0))
-
     return AdLifetimeMetrics(
         impressions=impressions or 0,
         clicks=clicks or 0,
@@ -96,28 +75,29 @@ def lifetime_metrics_for_advertisement(ad: TelegramAdvertisement | None) -> AdLi
         remaining_ton=remaining,
         cpm=cpm,
         has_stats=has_stats,
-        stats_source=source,
-        stats_stale=stats_stale,
+        stats_source="remote_raw" if has_stats else "none",
+        stats_stale=bool(last_updated and (timezone.now() - last_updated).total_seconds() > 21600),
         last_updated=last_updated,
+        has_impressions=impressions is not None,
+        has_clicks=clicks is not None,
+        has_actions=actions is not None,
+        currency=currency,
+        action_type=str(raw.get("action_type") or ""),
     )
 
 
+def latest_linked_ad(campaign: Campaign) -> TelegramAdvertisement | None:
+    cached = getattr(campaign, "_linked_ads", None)
+    if cached is not None:
+        return cached[0] if cached else None
+    return campaign.remote_ads.exclude(remote_ad_id="").order_by("-updated_at").first()
+
+
 def lifetime_metrics_for_campaign(campaign: Campaign) -> AdLifetimeMetrics:
-    ad = campaign.remote_ads.exclude(remote_ad_id="").order_by("-updated_at").first()
+    ad = latest_linked_ad(campaign)
     metrics = lifetime_metrics_for_advertisement(ad)
-    if metrics.cpm is None and campaign.cpm_bid is not None:
-        return AdLifetimeMetrics(
-            impressions=metrics.impressions,
-            clicks=metrics.clicks,
-            actions=metrics.actions,
-            spent_ton=metrics.spent_ton,
-            remaining_ton=metrics.remaining_ton,
-            cpm=campaign.cpm_bid,
-            has_stats=metrics.has_stats,
-            stats_source=metrics.stats_source,
-            stats_stale=metrics.stats_stale,
-            last_updated=metrics.last_updated,
-        )
+    if ad is None and campaign.cpm_bid is not None:
+        return replace(metrics, cpm=campaign.cpm_bid)
     return metrics
 
 
@@ -131,8 +111,10 @@ def campaign_sparkline(campaign: Campaign, *, days: int = 7) -> list[int]:
     """آخرین N روز نمایش روزانه (snapshot) — برای mini chart لیست."""
     rows = list(
         CampaignStatisticsSnapshot.objects.filter(advertisement__campaign=campaign)
+        .values("snapshot_date")
+        .annotate(total=Sum("impressions"))
         .order_by("snapshot_date")
-        .values_list("impressions", flat=True)
+        .values_list("total", flat=True)
     )
     if days and len(rows) > days:
         rows = rows[-days:]
@@ -154,7 +136,7 @@ def build_campaign_list_rows(campaigns: QuerySet[Campaign]) -> list[CampaignList
     rows: list[CampaignListRow] = []
     for campaign in campaigns:
         m = lifetime_metrics_for_campaign(campaign)
-        ad = campaign.remote_ads.exclude(remote_ad_id="").first()
+        ad = latest_linked_ad(campaign)
         spark = campaign_sparkline(campaign, days=7)
         rows.append(
             CampaignListRow(
@@ -175,7 +157,9 @@ def aggregate_portfolio_kpis(rows: list[CampaignListRow]) -> dict[str, Any]:
     total_impressions = sum(r.metrics.impressions for r in rows)
     total_clicks = sum(r.metrics.clicks for r in rows)
     total_actions = sum(r.metrics.actions for r in rows)
-    weighted_ctr = ctr_percent(total_impressions, total_clicks)
+    comparable = [r for r in rows if r.metrics.has_impressions and r.metrics.has_clicks]
+    ctr_impressions = sum(r.metrics.impressions for r in comparable)
+    weighted_ctr = ctr_percent(ctr_impressions, sum(r.metrics.clicks for r in comparable))
 
     spent_values = [r.metrics.spent_ton for r in rows if r.metrics.spent_ton is not None]
     total_spent_ton = sum(spent_values, start=Decimal("0")) if spent_values else None
@@ -189,6 +173,11 @@ def aggregate_portfolio_kpis(rows: list[CampaignListRow]) -> dict[str, Any]:
         "total_clicks": total_clicks,
         "total_actions": total_actions,
         "weighted_ctr": weighted_ctr,
+        "has_impressions": any(r.metrics.has_impressions for r in rows),
+        "has_clicks": any(r.metrics.has_clicks for r in rows),
+        "has_ctr": ctr_impressions > 0,
+        "stats_count": sum(r.metrics.has_stats for r in rows),
+        "linked_count": sum(bool(r.remote_ad_id) for r in rows),
         "total_spent_ton": total_spent_ton,
         "any_stale": any_stale,
     }
@@ -221,6 +210,7 @@ def optimize_campaign_list_queryset(qs: QuerySet[Campaign]) -> QuerySet[Campaign
         Prefetch(
             "remote_ads",
             queryset=TelegramAdvertisement.objects.exclude(remote_ad_id="").order_by("-updated_at"),
+            to_attr="_linked_ads",
         ),
         "creatives",
     )

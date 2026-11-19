@@ -76,10 +76,10 @@
       <div class="campaigns-table__sort" role="group" aria-label="مرتب‌سازی">
         <span class="campaigns-table__sort-label">مرتب‌سازی</span>
         <div class="campaigns-table__sort-track sort-pills">
-          <a class="sort-pill campaigns-table__sort-pill {% if sort == '-views' %}is-active{% endif %}" href="{% querystring sort='-views' %}">بازدید</a>
-          <a class="sort-pill campaigns-table__sort-pill {% if sort == '-ctr' %}is-active{% endif %}" href="{% querystring sort='-ctr' %}">نرخ کلیک</a>
-          <a class="sort-pill campaigns-table__sort-pill {% if sort == '-spent' %}is-active{% endif %}" href="{% querystring sort='-spent' %}">هزینه</a>
-          <a class="sort-pill campaigns-table__sort-pill {% if sort == '-created_at' or sort == '' %}is-active{% endif %}" href="{% querystring sort='-created_at' %}">جدیدترین</a>
+          <a class="sort-pill campaigns-table__sort-pill {% if sort == '-views' %}is-active{% endif %}" href="{% querystring sort='-views' page=None %}">بازدید</a>
+          <a class="sort-pill campaigns-table__sort-pill {% if sort == '-ctr' %}is-active{% endif %}" href="{% querystring sort='-ctr' page=None %}">نرخ کلیک</a>
+          <a class="sort-pill campaigns-table__sort-pill {% if sort == '-spent' %}is-active{% endif %}" href="{% querystring sort='-spent' page=None %}">هزینه</a>
+          <a class="sort-pill campaigns-table__sort-pill {% if sort == '-created_at' or sort == '' %}is-active{% endif %}" href="{% querystring sort='-created_at' page=None %}">جدیدترین</a>
         </div>
       </div>
     </div>
@@ -119,9 +119,9 @@
           </div>
         </td>
         <td class="campaigns-table__status"><span class="status status--pill {{ c.status|campaign_status_class }}">{{ c.get_status_display }}</span></td>
-        <td class="num tabnums campaigns-table__metric">{% if m.has_stats %}{{ m.impressions|format_count }}{% else %}<span class="muted">—</span>{% endif %}</td>
-        <td class="num tabnums campaigns-table__metric">{% if m.has_stats %}{{ m.clicks|format_count }}{% else %}—{% endif %}</td>
-        <td class="num tabnums campaigns-table__metric campaigns-table__metric--ctr">{% if m.has_stats %}{{ row.ctr|persian_digits }}٪{% else %}—{% endif %}</td>
+        <td class="num tabnums campaigns-table__metric">{% if m.has_impressions %}{{ m.impressions|format_count }}{% else %}<span class="muted">—</span>{% endif %}</td>
+        <td class="num tabnums campaigns-table__metric">{% if m.has_clicks %}{{ m.clicks|format_count }}{% else %}—{% endif %}</td>
+        <td class="num tabnums campaigns-table__metric campaigns-table__metric--ctr">{% if m.has_ctr %}{{ row.ctr|persian_digits }}٪{% else %}—{% endif %}</td>
         <td class="num tabnums campaigns-table__metric campaigns-table__metric--spent">{% ton_amount m.spent_ton hint=0 %}</td>
         <td dir="ltr" class="cell-destination col-advanced"><span title="{{ c.destination }}">{{ c.destination|shorten_url:32 }}</span></td>
         <td class="col-advanced">{{ row.placement_label }}</td>
@@ -134,7 +134,7 @@
           </div>
           {% else %}<span class="muted">—</span>{% endif %}
         </td>
-        <td class="num tabnums col-advanced">{% if m.has_stats %}{{ m.actions|format_count }}{% else %}—{% endif %}</td>
+        <td class="num tabnums col-advanced">{% if m.has_actions %}{{ m.actions|format_count }}{% else %}—{% endif %}</td>
         <td class="num tabnums col-advanced">{% ton_amount m.cpm hint=0 %}</td>
         <td class="num tabnums col-advanced">{% ton_amount m.remaining_ton hint=0 %}</td>
         <td class="col-advanced"><small class="muted tabnums">{% if m.last_updated %}{{ m.last_updated|jalali_datetime }}{% else %}—{% endif %}{% if m.stats_stale %}<span class="sync-hint" title="قدیمی">●</span>{% endif %}</small></td>
@@ -173,15 +173,15 @@
           <div class="campaigns-mobile-card__kpis tabnums" aria-label="شاخص‌های کمپین">
             <div class="campaigns-mobile-kpi">
               <span class="campaigns-mobile-kpi__label">نمایش</span>
-              <span class="campaigns-mobile-kpi__value">{% if m.has_stats %}{{ m.impressions|format_count }}{% else %}—{% endif %}</span>
+              <span class="campaigns-mobile-kpi__value">{% if m.has_impressions %}{{ m.impressions|format_count }}{% else %}—{% endif %}</span>
             </div>
             <div class="campaigns-mobile-kpi">
               <span class="campaigns-mobile-kpi__label">کلیک</span>
-              <span class="campaigns-mobile-kpi__value">{% if m.has_stats %}{{ m.clicks|format_count }}{% else %}—{% endif %}</span>
+              <span class="campaigns-mobile-kpi__value">{% if m.has_clicks %}{{ m.clicks|format_count }}{% else %}—{% endif %}</span>
             </div>
             <div class="campaigns-mobile-kpi campaigns-mobile-kpi--accent">
               <span class="campaigns-mobile-kpi__label">نرخ کلیک</span>
-              <span class="campaigns-mobile-kpi__value">{% if m.has_stats %}{{ row.ctr|persian_digits }}٪{% else %}—{% endif %}</span>
+              <span class="campaigns-mobile-kpi__value">{% if m.has_ctr %}{{ row.ctr|persian_digits }}٪{% else %}—{% endif %}</span>
             </div>
             <div class="campaigns-mobile-kpi">
               <span class="campaigns-mobile-kpi__label">مصرف</span>

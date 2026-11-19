@@ -5,11 +5,9 @@ from decimal import Decimal
 from typing import Any
 
 import jdatetime
-from django.db.models import Sum
-from django.db.models.functions import Coalesce
 from django.utils import timezone
 
-from apps.campaigns.metrics import ctr_percent, lifetime_metrics_for_campaign
+from apps.campaigns.metrics import _decimal, _int, ctr_percent, lifetime_metrics_for_campaign
 from apps.campaigns.models import Campaign, CampaignStatisticsSnapshot
 
 
@@ -31,18 +29,16 @@ def _period_metrics_from_snapshot(row: dict[str, Any]) -> tuple[int, int, int, D
 
     raw = row.get("raw")
     if isinstance(raw, dict):
-        if impressions <= 0:
-            impressions = int(raw.get("views") or raw.get("impressions") or raw.get("opens") or 0)
-        if clicks <= 0:
-            clicks = int(raw.get("clicks") or 0)
-        if actions <= 0:
-            actions = int(raw.get("actions") or raw.get("joins") or 0)
-        if spent_val <= 0:
-            raw_spent = raw.get("spent_budget")
-            if raw_spent is None:
-                raw_spent = raw.get("spent")
-            if raw_spent is not None and raw_spent != "":
-                spent_val = Decimal(str(raw_spent))
+        # Correct old normalized rows that substituted video opens for views.
+        if "views" in raw or "impressions" in raw or "opens" in raw:
+            impressions = _int(raw.get("views", raw.get("impressions"))) or 0
+        if "clicks" in raw:
+            clicks = _int(raw["clicks"]) or 0
+        if "actions" in raw or "joins" in raw:
+            actions = _int(raw.get("actions", raw.get("joins"))) or 0
+        if raw.get("currency") and str(raw["currency"]).upper() != "TON":
+            spent_val = Decimal("0")
+
 
     return impressions, clicks, actions, spent_val
 
@@ -110,6 +106,13 @@ def aggregate_campaign_metrics(campaign: Campaign) -> dict:
         "cpm": m.cpm,
         "cost_per_action": cost_per_action,
         "has_stats": m.has_stats,
+        "has_impressions": m.has_impressions,
+        "has_clicks": m.has_clicks,
+        "has_actions": m.has_actions,
+        "has_ctr": m.has_ctr,
+        "has_conversion": m.has_clicks and m.has_actions and clicks > 0,
+        "currency": m.currency,
+        "action_type": m.action_type,
         "stats_stale": m.stats_stale,
         "stats_source": m.stats_source,
         "last_updated": m.last_updated,
@@ -150,32 +153,23 @@ def _chart_from_rows(rows: list[dict[str, Any]]) -> dict:
 def portfolio_timeseries(customer, *, days: int = 30) -> dict:
     """جمع آمار روزانه همهٔ کمپین‌های مشتری (بازهٔ روزانه API)."""
     end = timezone.localdate()
-    start = end - timedelta(days=days)
-    grouped = (
-        CampaignStatisticsSnapshot.objects.filter(
-            advertisement__campaign__customer=customer,
-            snapshot_date__gte=start,
-            snapshot_date__lte=end,
-        )
-        .values("snapshot_date")
-        .annotate(
-            impressions=Coalesce(Sum("impressions"), 0),
-            clicks=Coalesce(Sum("clicks"), 0),
-            actions=Coalesce(Sum("actions"), 0),
-            spent=Coalesce(Sum("spent_ton"), Decimal("0")),
-        )
-        .order_by("snapshot_date")
-    )
-    rows = [
-        {
-            "snapshot_date": g["snapshot_date"],
-            "impressions": g["impressions"],
-            "clicks": g["clicks"],
-            "actions": g["actions"],
-            "spent_ton": g["spent"],
-        }
-        for g in grouped
-    ]
+    start = end - timedelta(days=max(1, days) - 1)
+    snapshots = CampaignStatisticsSnapshot.objects.filter(
+        advertisement__campaign__customer=customer,
+        snapshot_date__range=(start, end),
+    ).values("snapshot_date", "impressions", "clicks", "actions", "spent_ton", "raw")
+    by_date: dict[date, dict[str, Any]] = {}
+    for row in snapshots.iterator():
+        bucket = by_date.setdefault(row["snapshot_date"], {
+            "snapshot_date": row["snapshot_date"], "impressions": 0, "clicks": 0,
+            "actions": 0, "spent_ton": Decimal("0"),
+        })
+        impressions, clicks, actions, spent = _period_metrics_from_snapshot(row)
+        bucket["impressions"] += impressions
+        bucket["clicks"] += clicks
+        bucket["actions"] += actions
+        bucket["spent_ton"] += spent
+    rows = sorted(by_date.values(), key=lambda row: row["snapshot_date"])
     return _chart_from_rows(rows)
 
 
@@ -240,8 +234,9 @@ def budget_delivery_context(campaign: Campaign, metrics: dict) -> dict:
     if spent is not None and remaining is not None and (spent + remaining) > 0:
         total_ton = spent + remaining
         percent = float((spent / total_ton) * 100)
-    daily_limit = raw.get("daily_budget_limit") or raw.get("daily_budget")
-    daily_spent = raw.get("daily_spent_budget")
+    is_ton = metrics.get("currency") == "TON"
+    daily_limit = raw.get("daily_budget_limit", raw.get("daily_budget")) if is_ton else None
+    daily_spent = raw.get("daily_spent_budget") if is_ton else None
     spent_percent = round(percent, 1) if percent is not None else None
     tone = budget_consumption_tone(spent_percent=spent_percent, remaining_ton=remaining)
     show_chip, status_label = budget_status_chip(tone=tone, spent_percent=spent_percent)
@@ -267,7 +262,7 @@ def _decimal_or_none(value) -> Decimal | None:
     if value is None or value == "":
         return None
     try:
-        return Decimal(str(value))
+        return _decimal(value)
     except Exception:
         return None
 
