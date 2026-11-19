@@ -2,6 +2,7 @@
 {% load core_filters humanize ton_display static %}
 {% block page_title %}استودیو ساخت تبلیغ{% endblock %}
 {% block container_class %}container-wide{% endblock %}
+{% block extra_head %}{{ block.super }}{% if ai_available %}<link rel="stylesheet" href="{% static 'css/ui-ai.css' %}">{% endif %}{% endblock %}
 {% block content %}
 <div class="wizard-shell studio-shell ui-studio">
   {% include "includes/dash_header.html" with title="استودیو ساخت تبلیغ" subtitle=campaign.name|default:"پیش‌نویس جدید" with_sub=1 %}
@@ -209,6 +210,7 @@
       {% elif step == 3 %}
       <h2 class="section-title">محتوای تبلیغ</h2>
       {% if campaign.target_type != 'search' %}
+      {% if ai_available %}{% include "campaigns/includes/ai_creative.html" %}{% endif %}
       <div class="template-pills">{% for t in creative_templates %}<button type="button" class="btn btn-ghost btn-sm" data-creative-template-text="{{ t.text }}" data-creative-template-cta="{{ t.cta_label }}">{{ t.title }}</button>{% endfor %}</div>
       <div class="field" id="field-ad_text"><label for="studio-control-12">متن تبلیغ (۱–۱۶۰ کاراکتر)</label><textarea id="studio-control-12" name="ad_text" rows="5" maxlength="160" data-ad-text-counter>{% if creative %}{{ creative.ad_text }}{% endif %}</textarea>
       <p class="muted" data-ad-text-count style="font-size:.8rem;margin:.25rem 0 0" aria-live="polite"></p></div>
@@ -387,4 +389,5 @@
 </div>
 <script src="{% static 'js/ad-studio.js' %}"></script>
 <script defer src="{% static 'js/ui-studio.js' %}"></script>
+{% if ai_available %}<script defer src="{% static 'js/ui-ai.js' %}"></script>{% endif %}
 {% endblock %}

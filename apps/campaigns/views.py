@@ -544,6 +544,8 @@ def campaign_wizard(request, campaign_id=None):
         "schedule_weekdays": [{"index": i, "label": label} for i, label in enumerate(WEEKDAY_LABELS_FA)],
         "policy_preview_url": reverse("campaigns:policy_preview", kwargs={"campaign_id": campaign.id}),
     }
+    from apps.ai.provider import available as ai_available
+    ctx["ai_available"] = ai_available()
     return render(request, "campaigns/wizard.html", ctx)
 
 
