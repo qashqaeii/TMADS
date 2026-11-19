@@ -3,8 +3,8 @@
 {% block page_title %}{{ intro.title }}{% endblock %}
 {% block container_class %}container-wide{% endblock %}
 {% block content %}
-<div class="policy-center page-frame">
-  <header class="dash-header dash-header--luxe">
+<div class="policy-center app-stack ui-policy-center">
+  <header class="dash-header ui-page-heading dash-header--luxe">
     <div class="dash-header__main">
       <span class="dash-header__kicker">راهنما</span>
       <h1>{{ intro.title }}</h1>
@@ -12,7 +12,8 @@
     </div>
   </header>
 
-  <section class="card card--lift card-pad policy-intro">
+  <section class="card card-pad policy-intro">
+    <div class="ui-form-intro"><span class="ui-target-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="shield-check" size="md" %}</span><div><h2>پیش از انتشار</h2><p>نکات اصلی را مدنظر قرار دهید.</p></div></div>
     <ul class="policy-intro-list">
       {% for point in intro.points %}
       <li>{{ point }}</li>
@@ -31,17 +32,16 @@
     {% for cat in categories %}
     <details class="policy-accordion__item" {% if forloop.first %}open{% endif %}>
       <summary class="policy-accordion__head">
-        <span>{{ cat.title }}</span>
-        <span class="muted" style="font-size:.8rem">{{ cat.summary }}</span>
+        <span class="ui-policy-topic"><strong>{{ cat.title }}</strong><small>{{ cat.summary }}</small></span><span class="ui-policy-chevron" aria-hidden="true">{% include "includes/lucide_icon.html" with name="chevron-down" size="sm" %}</span>
       </summary>
       <div class="policy-accordion__body">
         <div class="policy-example-grid">
           <article>
-            <h3 class="section-title" style="font-size:.88rem;color:var(--success)">نمونهٔ مناسب</h3>
+            <h3 class="ui-example-good">{% include "includes/lucide_icon.html" with name="check-circle" size="sm" %} نمونهٔ مناسب</h3>
             <p dir="auto" style="margin:0;font-size:.9rem">{{ cat.good }}</p>
           </article>
           <article>
-            <h3 class="section-title" style="font-size:.88rem;color:var(--danger)">نمونهٔ مشکل‌دار</h3>
+            <h3 class="ui-example-bad">{% include "includes/lucide_icon.html" with name="alert-circle" size="sm" %} نمونهٔ مشکل‌دار</h3>
             <p dir="auto" style="margin:0;font-size:.9rem">{{ cat.bad }}</p>
           </article>
         </div>
