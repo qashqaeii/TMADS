@@ -40,6 +40,8 @@
     <div class="finance-line"><span>رزرو کل (ریال)</span><strong class="tabnums" dir="ltr">{{ wallet_liabilities.reserved|default:0|intcomma }}</strong></div>
   </section>
   <nav class="card card-pad ui-ops-links" aria-label="میانبرهای عملیات"><h2 class="section-title">دسترسی سریع</h2>
+    <a href="{% url 'operations:remote_operations' %}">{% include "includes/lucide_icon.html" with name="sliders-horizontal" size="md" %}<span>عملیات تبلیغات</span>{% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}</a>
+    <a href="{% url 'operations:telegram_account' %}">{% include "includes/lucide_icon.html" with name="line-chart" size="md" %}<span>گزارش حساب تلگرام</span>{% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}</a>
     <a href="{% url 'operations:campaigns' %}">{% include "includes/lucide_icon.html" with name="megaphone" size="md" %}<span>بررسی کمپین‌ها</span>{% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}</a>
     <a href="{% url 'operations:refunds' %}">{% include "includes/lucide_icon.html" with name="rotate-ccw" size="md" %}<span>بازپرداخت‌ها</span>{% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}</a>
     <a href="{% url 'operations:exchange_rates' %}">{% include "includes/lucide_icon.html" with name="coins" size="md" %}<span>نرخ گرام (تون)</span>{% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}</a>

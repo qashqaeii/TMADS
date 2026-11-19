@@ -20,7 +20,7 @@
         <td><time datetime="{{ e.created_at|date:'c' }}">{{ e.created_at|jalali_datetime }}</time></td>
       </tr>
       {% empty %}
-      <tr><td colspan="4"><div class="empty-state"><strong>هنوز تراکنشی ثبت نشده</strong><p class="muted">شارژها و تغییرات موجودی شما در این بخش نمایش داده می‌شوند.</p></div></td></tr>
+      <tr><td colspan="4"><div class="ui-empty"><span class="ui-empty__icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="arrow-down-up" size="md" %}</span><h2>هنوز تراکنشی ثبت نشده</h2><p>شارژها و تغییرات موجودی شما در این بخش نمایش داده می‌شوند.</p></div></td></tr>
       {% endfor %}
       </tbody>
     </table>

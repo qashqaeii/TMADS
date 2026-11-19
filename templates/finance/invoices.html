@@ -27,10 +27,7 @@
 </article>
 {% else %}
 <article class="card card--lift">
-  <div class="empty-state dash-panel__empty">
-    <strong>فاکتوری ثبت نشده</strong>
-    <p class="muted">پس از شارژ یا پرداخت کمپین، فاکتور اینجا نمایش داده می‌شود.</p>
-  </div>
+  <div class="ui-empty"><span class="ui-empty__icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="receipt" size="md" %}</span><h2>فاکتوری ثبت نشده</h2><p>پس از شارژ یا پرداخت کمپین، فاکتور اینجا نمایش داده می‌شود.</p></div>
 </article>
 {% endif %}
 </div>

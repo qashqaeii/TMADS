@@ -2,26 +2,16 @@
 {% load core_filters %}
 {% block page_title %}تبلیغات حساب اختصاصی{% endblock %}
 {% block content %}
-<div class="app-stack ui-account-page ui-related-ads">
-{% include "includes/dash_header.html" with title="تبلیغات حساب اختصاصی" subtitle="دریافت مستقیم اطلاعات از حساب زیرمجموعه تأییدشده تلگرام" with_sub=1 %}
-<nav class="ui-breadcrumb" aria-label="مسیر صفحه"><a href="{% url 'accounts:related_account' %}">حساب تبلیغاتی</a><span> / </span><span aria-current="page">تبلیغات</span></nav>
-{% if not row %}
-<section class="card card-pad ui-related-ads-empty"><span class="ui-target-symbol">{% include "includes/lucide_icon.html" with name="building-2" size="md" %}</span><h2>حساب اختصاصی فعال نیست</h2><p>نمایش تبلیغات این بخش فقط پس از ایجاد و تأیید حساب زیرمجموعه امکان‌پذیر است.</p><a href="{% url 'accounts:related_account' %}" class="btn btn-primary">بررسی وضعیت حساب</a></section>
-{% else %}
-<section class="card card-pad ui-related-ads-summary">
-<div class="ui-form-intro"><span class="ui-target-symbol">{% include "includes/lucide_icon.html" with name="megaphone" size="md" %}</span><div><h2>{{ row.title }}</h2><p>مشاهده خواندنی تبلیغات متعلق به حساب متصل</p></div></div>
-<div class="ui-related-ads-summary__side"><span class="status status-active">حساب تأییدشده</span><code dir="ltr">{{ row.remote_account_id }}</code></div>
-</section>
-<div class="ui-remote-notice" role="note">{% include "includes/lucide_icon.html" with name="shield-check" size="sm" %}<p>این فهرست از حساب زیرمجموعه شما خوانده می‌شود. هیچ بودجه‌ای منتقل و هیچ تبلیغی ساخته، ویرایش یا حذف نمی‌شود. کمپین‌های حساب مرکزی جداگانه مدیریت می‌شوند.</p></div>
-<form method="get" class="ui-related-ads-actions"><input type="hidden" name="load" value="1"><button type="submit" class="btn btn-primary">{% include "includes/lucide_icon.html" with name="refresh-cw" size="sm" %} دریافت تبلیغات</button><a class="btn btn-ghost" href="{% url 'accounts:advertiser_assets' %}">مخاطبان و تبدیل</a></form>
-{% if error %}<section class="card card-pad" role="alert"><strong>دریافت اطلاعات ناموفق</strong><p class="muted">{{ error }}</p></section>
-{% elif loaded %}<section class="card table-card">
-<header class="dash-panel__head"><h2 class="section-title">فهرست تبلیغات</h2><p class="muted">{% if total_count != None %}تعداد اعلام‌شده: {{ total_count|persian_digits }}{% else %}بر اساس پاسخ حساب{% endif %}</p></header>
-{% if items %}<div class="table-scroll" tabindex="0" role="region" aria-label="جدول تبلیغات حساب"><table class="data-table ui-related-ads-table"><thead><tr><th scope="col">تبلیغ</th><th scope="col">شناسه</th><th scope="col">وضعیت تلگرام</th><th scope="col">مصرف</th><th scope="col">باقی‌مانده</th></tr></thead><tbody>
-{% for ad in items %}<tr><td><strong>{{ ad.title|default:"بدون نام" }}</strong><small dir="auto">{{ ad.promote_url|default:"" }}</small></td><td><code dir="ltr">{{ ad.ad_id }}</code></td><td><span class="status {% if ad.status == 'active' %}status-active{% elif ad.status == 'declined' %}status-danger{% else %}status-warn{% endif %}">{{ ad.status|telegram_remote_status_fa }}</span></td><td><span dir="ltr">{{ ad.spent_budget|default_if_none:"—" }} {{ ad.currency|default:"" }}</span></td><td><span dir="ltr">{{ ad.remaining_budget|default_if_none:"—" }} {{ ad.currency|default:"" }}</span></td></tr>{% endfor %}
-</tbody></table></div>{% else %}<p class="ui-remote-empty">تبلیغی در پاسخ حساب دیده نشد.</p>{% endif %}
-</section>{% if next_offset %}<a class="btn btn-ghost" href="?load=1&amp;offset={{ next_offset|urlencode }}">صفحه بعدی {% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}</a>{% endif %}
-{% else %}<section class="card card-pad ui-related-ads-empty"><h2>دریافت تبلیغات</h2><p>برای دیدن تبلیغات این حساب، دکمه دریافت تبلیغات را انتخاب کنید.</p></section>{% endif %}
-{% endif %}
+<div class="app-stack ui-account-page ui-assets">
+<nav class="ui-breadcrumb" aria-label="مسیر صفحه"><a href="{% url 'accounts:related_account' %}">حساب تبلیغاتی</a>{% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}<span aria-current="page">تبلیغات حساب اختصاصی</span></nav>
+{% include "includes/dash_header.html" with title="تبلیغات حساب اختصاصی" subtitle="مشاهده فهرست تبلیغات در حساب مرتبط شما" with_sub=1 %}
+{% if row %}
+<section class="card card-pad form-stack"><header class="ui-remote-summary"><div class="ui-form-intro"><span class="ui-target-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="building-2" size="md" %}</span><div><h2>{{ row.title }}</h2><p>فهرست فقط خواندنی؛ بدون تغییر بودجه یا وضعیت تبلیغات</p></div></div><a class="btn btn-primary" href="?load=1">{% include "includes/lucide_icon.html" with name="refresh-cw" size="sm" %} دریافت تبلیغات</a></header>
+{% if error %}<p class="ui-studio-warning" role="alert">{{ error }}</p>{% endif %}</section>
+{% if loaded %}<section class="card table-card ui-report-result"><header class="dash-panel__head"><div><h2 class="section-title">تبلیغات دریافتی</h2><p class="muted">{{ items|length|persian_digits }} ردیف این صفحه{% if total_count != None %} · {{ total_count|format_count }} تبلیغ در حساب{% endif %}</p></div></header>
+{% if items %}<div class="table-scroll" tabindex="0" role="region" aria-label="تبلیغات حساب اختصاصی"><table class="data-table"><thead><tr><th scope="col">عنوان</th><th scope="col">شناسه</th><th scope="col">وضعیت</th><th scope="col">ارز</th></tr></thead><tbody>{% for item in items %}<tr><td>{{ item.title|default:"بدون عنوان" }}</td><td><bdi>#{{ item.ad_id }}</bdi></td><td><span class="status status-info">{{ item.status|default:"—" }}</span></td><td><bdi>{{ item.currency|default:"—" }}</bdi></td></tr>{% endfor %}</tbody></table></div>{% else %}<div class="ui-empty"><span class="ui-empty__icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="megaphone" size="md" %}</span><h2>تبلیغی دریافت نشد</h2><p>در پاسخ این صفحه از تلگرام تبلیغی وجود ندارد.</p></div>{% endif %}</section>
+{% if next_offset %}<nav class="hero-actions" aria-label="صفحه‌بندی"><a class="btn btn-ghost" href="?load=1">صفحه اول</a><a class="btn btn-primary" href="?load=1&amp;offset={{ next_offset|urlencode }}">صفحه بعد</a></nav>{% endif %}
+{% elif not error %}<section class="card"><div class="ui-empty"><span class="ui-empty__icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="list" size="md" %}</span><h2>دریافت فهرست تبلیغات</h2><p>برای مشاهده اطلاعات حساب، دکمه دریافت تبلیغات را انتخاب کنید.</p></div></section>{% endif %}
+{% else %}<section class="card"><div class="ui-empty"><span class="ui-empty__icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="building-2" size="md" %}</span><h2>حساب اختصاصی تأیید نشده</h2><p>برای مشاهده تبلیغات، ابتدا وضعیت حساب مرتبط خود را بررسی کنید.</p></div><div class="ui-empty-action"><a class="btn btn-primary" href="{% url 'accounts:related_account' %}">حساب تبلیغاتی</a></div></section>{% endif %}
 </div>
 {% endblock %}

@@ -12,8 +12,8 @@
 <button class="btn btn-primary" type="submit">ثبت درخواست</button></form>
 <aside class="card card-pad ui-finance-guide"><h2 class="section-title">درباره حساب مرتبط</h2><p>ایجاد حساب منوط به مجوز تلگرام و بررسی اپراتور است. اطلاعات در صورت اجرای درخواست برای تلگرام ارسال می‌شوند. ایجاد حساب به معنی فعال شدن انتقال اعتبار یا انتشار کمپین نیست.</p></aside></div>
 {% else %}{% if row.status == "provisioned" %}
-<div class="ui-account-shortcuts">
-<a class="btn btn-primary" href="{% url 'accounts:advertiser_assets' %}">مخاطبان و رهگیری تبدیل</a>
+<div class="ui-account-shortcuts hero-actions">
+<a class="btn btn-primary" href="{% url 'accounts:advertiser_assets' %}">{% include "includes/lucide_icon.html" with name="users" size="sm" %} مخاطبان و رهگیری تبدیل</a>
 <a class="btn btn-ghost" href="{% url 'accounts:related_ads' %}">تبلیغات حساب اختصاصی</a>
 </div>{% endif %}<p class="ui-studio-warning">مسیردهی کمپین و انتقال اعتبار به حساب‌های مرتبط هنوز فعال نیست؛ حساب مرکزی و تبلیغات موجود بدون تغییر باقی می‌مانند.</p>{% endif %}
 </div>

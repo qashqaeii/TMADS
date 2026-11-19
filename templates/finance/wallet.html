@@ -28,7 +28,7 @@
   <ul class="wallet-ledger">
     {% for e in recent_entries %}
     <li class="finance-line"><span class="finance-entry"><span>{{ e.get_entry_type_display }}</span><time class="muted" datetime="{{ e.created_at|date:'c' }}">{{ e.created_at|jalali_datetime }}</time></span><strong class="tabnums"><bdi>{{ e.amount_irr|irr_to_toman|format_irr }}</bdi> تومان</strong></li>
-    {% empty %}<li class="muted" style="padding:.75rem 0">تراکنشی نیست.</li>{% endfor %}
+    {% empty %}<li><div class="ui-empty"><span class="ui-empty__icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="wallet" size="md" %}</span><h2>تراکنشی ثبت نشده</h2><p>گردش اعتبار پس از ثبت تراکنش در این بخش نمایش داده می‌شود.</p></div></li>{% endfor %}
   </ul>
 
 </article>

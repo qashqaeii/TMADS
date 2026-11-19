@@ -5,7 +5,7 @@
 {% block content %}
 <div class="app-stack operations-page ui-ops">
 {% include "includes/dash_header.html" with title="گزارش حساب تلگرام" subtitle="اطلاعات مستقیم حساب مرکزی؛ فقط خواندن" with_sub=1 %}
-<nav class="ui-account-report-tabs" aria-label="بخش گزارش">{% for value,label in sections %}<a class="btn {% if value == section %}btn-primary{% else %}btn-ghost{% endif %}" href="?section={{ value }}" {% if value == section %}aria-current="page"{% endif %}>{{ label }}</a>{% endfor %}</nav>
+<nav class="ui-account-report-tabs ui-section-tabs" aria-label="بخش گزارش">{% for value,label in sections %}<a href="?section={{ value }}" {% if value == section %}aria-current="page"{% endif %}>{{ label }}</a>{% endfor %}</nav>
 <form method="get" class="card card-pad form-stack"><input type="hidden" name="section" value="{{ section }}"><input type="hidden" name="load" value="1">
 {% if section == "report" %}<div class="ui-report-fields"><div class="field"><label for="report-year">سال (میلادی API)</label><input id="report-year" type="number" name="year" min="2021" max="2100" value="{{ year }}" required></div><div class="field"><label for="report-month">ماه میلادی</label><input id="report-month" name="month" type="number" min="1" max="12" value="{{ month }}" required></div></div>
 {% elif section == "stats" %}<div class="field"><label for="report-interval">بازه آماری</label><select id="report-interval" name="interval"><option value="86400" {% if interval == "86400" %}selected{% endif %}>۳۰ روز گذشته (روزانه)</option><option value="300" {% if interval == "300" %}selected{% endif %}>۲۴ ساعت گذشته (پنج دقیقه‌ای)</option></select></div>
@@ -17,6 +17,6 @@
 {% if error %}<section class="card card-pad" role="alert"><strong>دریافت اطلاعات ناموفق</strong><p class="muted">{{ error }}</p></section>{% elif loaded %}
 <section class="card table-card"><header class="dash-panel__head"><h2 class="section-title">نتیجه گزارش</h2><p class="muted">{{ row_count|persian_digits }} ردیف · {{ fetched_at|jalali_datetime }}</p></header><div class="table-wrap" tabindex="0" role="region" aria-label="نتیجه گزارش"><table class="data-table"><thead><tr>{% for column in columns %}<th scope="col">{{ column }}</th>{% endfor %}</tr></thead><tbody>{% for row in rows %}<tr>{% for cell in row %}<td><bdi>{{ cell }}</bdi></td>{% endfor %}</tr>{% empty %}<tr><td colspan="{{ columns|length }}">داده‌ای در پاسخ وجود ندارد.</td></tr>{% endfor %}</tbody></table></div></section>
 {% if next_offset is not None %}<a class="btn btn-ghost" href="?section={{ section }}&amp;load=1&amp;offset={{ next_offset|urlencode }}">صفحه بعدی</a>{% endif %}
-{% else %}<section class="card card-pad"><p class="muted">بخش موردنظر را انتخاب کنید و اطلاعات را دریافت کنید. هیچ عملیات نوشتنی انجام نمی‌شود.</p></section>{% endif %}
+{% else %}<section class="card"><div class="ui-empty"><span class="ui-empty__icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="file-chart-column" size="md" %}</span><h2>دریافت گزارش حساب</h2><p>بخش موردنظر را انتخاب کنید و اطلاعات را دریافت کنید. هیچ عملیات نوشتنی انجام نمی‌شود.</p></div></section>{% endif %}
 </div>
 {% endblock %}

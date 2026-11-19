@@ -1,18 +1,19 @@
 {% extends "app_shell.html" %}
+{% load core_filters %}
 {% block page_title %}مخاطبان و تبدیل{% endblock %}
 {% block content %}
-<div class="app-stack ui-account-page">
+<div class="app-stack ui-account-page ui-assets">
 {% include "includes/dash_header.html" with title="مخاطبان و رهگیری تبدیل" subtitle="منابع اختصاصی حساب تبلیغاتی شما" with_sub=1 %}
 {% if not row %}<section class="card card-pad form-stack"><h2 class="section-title">ابتدا حساب اختصاصی را فعال کنید</h2><p class="muted">منابع حساب مرکزی در اختیار مشتریان قرار نمی‌گیرند.</p><a class="btn btn-primary" href="{% url 'accounts:related_account' %}">وضعیت حساب تبلیغاتی</a></section>
 {% else %}
 <section class="card card-pad form-stack">
 <div class="ui-remote-summary"><h2 class="section-title">{{ row.title }}</h2><span class="status status-active">حساب تأیید شده</span></div>
-<div class="hero-actions"><a class="btn {% if section == 'audiences' %}btn-primary{% else %}btn-ghost{% endif %}" href="?section=audiences">مخاطبان</a><a class="btn {% if section == 'pixel' %}btn-primary{% else %}btn-ghost{% endif %}" href="?section=pixel">پیکسل</a><a class="btn {% if section == 'events' %}btn-primary{% else %}btn-ghost{% endif %}" href="?section=events">رویدادها</a><a class="btn btn-ghost" href="?section={{ section }}&load=1">دریافت از تلگرام</a></div>
+<div class="ui-assets-toolbar"><nav class="ui-section-tabs" aria-label="منابع حساب"><a href="?section=audiences" {% if section == 'audiences' %}aria-current="page"{% endif %}>مخاطبان</a><a href="?section=pixel" {% if section == 'pixel' %}aria-current="page"{% endif %}>پیکسل</a><a href="?section=events" {% if section == 'events' %}aria-current="page"{% endif %}>رویدادها</a></nav><a class="btn btn-primary" href="?section={{ section }}&amp;load=1">{% include "includes/lucide_icon.html" with name="refresh-cw" size="sm" %} دریافت از تلگرام</a></div>
 <p class="muted"><a class="btn btn-ghost btn-sm" href="{% url 'accounts:related_ads' %}">مشاهده تبلیغات حساب</a></p>
-<p class="muted">منابع فقط از حساب اختصاصی شما خوانده می‌شوند. اتصال آن‌ها به کمپین، ارسال شماره تماس و انتقال اعتبار هنوز فعال نیست.</p>
+<p class="muted">منابع فقط از حساب اختصاصی شما خوانده می‌شوند. اتصال این منابع به کمپین و انتقال اعتبار هنوز فعال نیست. تغییر اعضا فقط با هش معتبر، مجوز فعال و تأیید شرایط پردازش داده امکان‌پذیر است.</p>
 {% if load_error %}<p class="ui-studio-warning" role="alert">{{ load_error }}</p>{% endif %}
 {% if loaded %}{% if section == 'pixel' %}<div class="finance-line"><span>شناسه پیکسل</span><bdi>{{ pixel.pixel_id|default:"—" }}</bdi></div>{% if pixel.code_snippet %}<div class="field"><label for="pixel-code">کد دریافتی (فقط متن)</label><textarea id="pixel-code" readonly dir="ltr">{{ pixel.code_snippet }}</textarea></div>{% endif %}
-{% else %}<div class="table-scroll"><table class="table"><thead><tr><th>عنوان</th><th>شناسه</th><th>اندازه یا نوع</th></tr></thead><tbody>{% for item in items %}<tr><td>{{ item.title }}</td><td><bdi>{% if section == 'audiences' %}{{ item.audience_id }}{% else %}{{ item.event_id }}{% endif %}</bdi></td><td>{% if section == 'audiences' %}{{ item.size|default_if_none:"—" }}{% else %}{{ item.type }}{% endif %}</td></tr>{% empty %}<tr><td colspan="3">منبعی در این صفحه یافت نشد.</td></tr>{% endfor %}</tbody></table></div><div class="hero-actions">{% if previous != None %}<a class="btn btn-ghost" href="?section={{ section }}&load=1&offset={{ previous }}">صفحه قبل</a>{% endif %}{% if next_offset != None %}<a class="btn btn-ghost" href="?section={{ section }}&load=1&offset={{ next_offset }}">صفحه بعد</a>{% endif %}</div>{% endif %}{% endif %}
+{% else %}<div class="table-scroll" tabindex="0" role="region" aria-label="منابع تبلیغاتی"><table class="data-table"><thead><tr><th scope="col">عنوان</th><th scope="col">شناسه</th><th scope="col">اندازه یا نوع</th></tr></thead><tbody>{% for item in items %}<tr><td>{{ item.title }}</td><td><bdi>{% if section == 'audiences' %}{{ item.audience_id }}{% else %}{{ item.event_id }}{% endif %}</bdi></td><td>{% if section == 'audiences' %}{{ item.size|default_if_none:"—" }}{% else %}{{ item.type }}{% endif %}</td></tr>{% empty %}<tr><td colspan="3">منبعی در این صفحه یافت نشد.</td></tr>{% endfor %}</tbody></table></div><div class="hero-actions">{% if previous != None %}<a class="btn btn-ghost" href="?section={{ section }}&load=1&offset={{ previous }}">صفحه قبل</a>{% endif %}{% if next_offset != None %}<a class="btn btn-ghost" href="?section={{ section }}&load=1&offset={{ next_offset }}">صفحه بعد</a>{% endif %}</div>{% endif %}{% endif %}
 </section>
 <section class="card card-pad form-stack"><h2 class="section-title">ایجاد منبع جدید</h2>
 {% if enabled and not unresolved %}<form method="post" class="form-stack">{% csrf_token %}<input type="hidden" name="nonce" value="{{ nonce }}"><input type="hidden" name="action" value="{% if section == 'audiences' %}audience{% elif section == 'pixel' %}pixel{% else %}event{% endif %}">
@@ -42,7 +43,7 @@
 </section>
 {% endif %}
 {% if section == 'audiences' %}
-<section class="card card-pad form-stack ui-audience-delete">
+<details class="card card-pad ui-sensitive-panel ui-audience-delete"><summary><span>حذف گروه استفاده‌نشده</span><span class="status status-danger">بازگشت‌ناپذیر</span>{% include "includes/lucide_icon.html" with name="chevron-down" size="sm" %}</summary><div class="form-stack ui-sensitive-body">
   <div class="ui-form-intro"><span class="ui-target-symbol">{% include "includes/lucide_icon.html" with name="trash-2" size="md" %}</span><div><h2>حذف گروه استفاده‌نشده</h2><p>فقط گروهی قابل حذف است که API تلگرام تعداد تبلیغات متصل به آن را صراحتاً صفر گزارش کند.</p></div></div>
   {% if enabled and not unresolved %}
   <form method="post" action="{% url 'accounts:audience_delete' %}" class="form-stack">{% csrf_token %}
@@ -52,10 +53,10 @@
     <button class="btn btn-danger-soft" type="submit" data-confirm-title="حذف گروه مخاطبان" data-confirm-message="این عملیات باعث حذف دائمی گروه در تلگرام می‌شود. تنها در صورت نبود تبلیغ مرتبط و با مجوز فعال اجرا خواهد شد." data-confirm-label="حذف گروه">درخواست حذف گروه</button>
   </form>
   {% else %}<p class="ui-studio-warning">حذف گروه تا تعیین تکلیف عملیات قبلی و فعال بودن مجوز متوقف است.</p>{% endif %}
-</section>
+</div></details>
 {% endif %}
 {% if section == 'audiences' %}
-<section class="card card-pad form-stack ui-audience-reset">
+<details class="card card-pad ui-sensitive-panel ui-audience-reset"><summary><span>خالی‌کردن کامل گروه مخاطبان</span><span class="status status-danger">بازگشت‌ناپذیر</span>{% include "includes/lucide_icon.html" with name="chevron-down" size="sm" %}</summary><div class="form-stack ui-sensitive-body">
   <div class="ui-form-intro"><span class="ui-target-symbol">{% include "includes/lucide_icon.html" with name="eraser" size="md" %}</span><div><h2>خالی‌کردن کامل گروه مخاطبان</h2><p>تنها در صورتی که هیچ تبلیغی به گروه متصل نباشد. این عملیات بازگشت‌پذیر نیست.</p></div></div>
   {% if enabled and not unresolved %}
   <form method="post" class="form-stack" action="{% url 'accounts:audience_reset' %}">{% csrf_token %}
@@ -66,7 +67,7 @@
     <button type="submit" class="btn btn-danger-soft" data-confirm-title="خالی‌کردن گروه" data-confirm-message="همه مخاطبان گروه از تلگرام حذف می‌شوند و این تغییر بازگشت‌پذیر نیست. فقط گروه بدون تبلیغ مرتبط خالی می‌شود." data-confirm-label="خالی‌کردن گروه">تأیید خالی‌سازی</button>
   </form>
   {% else %}<p class="ui-studio-warning">این عملیات تا تعیین تکلیف دسترسی یا عملیات قبلی غیرفعال است.</p>{% endif %}
-</section>
+</div></details>
 {% endif %}
 {% if section == 'events' %}
 <section class="card card-pad form-stack ui-event-management">
@@ -89,7 +90,7 @@ function update(){var rename=s.value==="rename";w.hidden=!rename;i.required=rena
 s.addEventListener("change",update);update();})();
 </script>
 {% endif %}
-<section class="card card-pad form-stack"><h2 class="section-title">تاریخچه عملیات منابع</h2>{% for op in operations %}<div class="finance-line"><span>{{ op.action }} · {{ op.created_at|date:"Y-m-d H:i" }}</span><span class="status {% if op.state == 'completed' %}status-active{% else %}status-warn{% endif %}">{% if op.state == 'completed' %}شناسه دریافت شد{% else %}نیازمند بررسی{% endif %}</span></div>{% empty %}<p class="muted">هنوز عملیاتی ثبت نشده است.</p>{% endfor %}</section>
+<section class="card card-pad form-stack"><h2 class="section-title">تاریخچه عملیات منابع</h2>{% for op in operations %}<div class="finance-line"><span>{{ op.action }} · {{ op.created_at|jalali_datetime }}</span><span class="status {% if op.state == 'completed' %}status-active{% else %}status-warn{% endif %}">{% if op.state == 'completed' %}شناسه دریافت شد{% else %}نیازمند بررسی{% endif %}</span></div>{% empty %}<p class="muted">هنوز عملیاتی ثبت نشده است.</p>{% endfor %}</section>
 {% endif %}
 </div>
 {% endblock %}

@@ -23,8 +23,8 @@
 </ul>
 {% else %}
 <article class="card card--lift">
-  <div class="empty-state dash-panel__empty">
-    <strong>تیکتی ثبت نشده</strong>
+  <div class="ui-empty">
+    <span class="ui-empty__icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="message-square" size="md" %}</span><h2>تیکتی ثبت نشده</h2>
     <p class="muted">سوال مالی، فنی یا کمپین — در یک جا پیگیری کنید.</p>
     <a class="btn btn-primary btn-sm" href="{% url 'support:create' %}">ثبت تیکت</a>
   </div>

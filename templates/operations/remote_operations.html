@@ -17,7 +17,7 @@
   </form></div>{% endif %}
 {% if op.status == 'pending' %}<form method="post" class="form-stack">{% csrf_token %}<input type="hidden" name="operation_id" value="{{ op.id }}"><div class="field"><label for="reason-{{ op.id }}">دلیل رد (در صورت رد)</label><input id="reason-{{ op.id }}" name="reason" maxlength="500"></div><div class="hero-actions"><button class="btn btn-primary" type="submit" name="decision" value="execute" {% if op.action == "increase_budget" or op.action == "decrease_budget" %}disabled{% endif %} data-confirm-title="اجرای عملیات" data-confirm-message="تغییر ممکن است بر مصرف اعتبار یا زمان‌بندی تبلیغ اثر بگذارد. ادامه می‌دهید؟" data-confirm-label="اجرا" data-confirm-tone="primary">بررسی و اجرا</button><button class="btn btn-danger-soft" type="submit" name="decision" value="reject">رد درخواست</button></div></form>{% endif %}
 </article>
-{% empty %}<div class="card card-pad"><p class="muted">درخواستی با این وضعیت وجود ندارد.</p></div>{% endfor %}
+{% empty %}<section class="card"><div class="ui-empty"><span class="ui-empty__icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="clipboard-check" size="md" %}</span><h2>صف خالی است</h2><p>درخواستی با این وضعیت وجود ندارد.</p></div></section>{% endfor %}
 <nav class="hero-actions" aria-label="صفحه‌بندی">{% if page_obj.has_previous %}<a class="btn btn-ghost" href="?status={{ filter_status|urlencode }}&page={{ page_obj.previous_page_number }}">قبلی</a>{% endif %}<span class="muted">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>{% if page_obj.has_next %}<a class="btn btn-ghost" href="?status={{ filter_status|urlencode }}&page={{ page_obj.next_page_number }}">بعدی</a>{% endif %}</nav>
 </div>
 {% endblock %}
