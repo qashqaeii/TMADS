@@ -53,3 +53,24 @@
 
 .ui-final .ui-shell .sidebar :focus-visible { outline-color:#9cd4f5; }
 @media(max-width:900px){ .ui-final .ui-shell :is(.topbar-account,.topbar-action--ghost,.topbar-menu){ min-width:44px;min-height:44px; } }
+
+/* Keep the navigation visually quiet and responsive to the real content width. */
+.ui-final .ui-shell { --app-gutter:clamp(14px,2.1vw,34px); }
+.ui-final .ui-shell .sidebar-head { border-bottom:1px solid rgb(255 255 255 / .08);margin-inline:12px;padding-inline:5px; }
+.ui-final .ui-shell .sidebar-scroll { overscroll-behavior:contain;scrollbar-width:thin; }
+.ui-final .ui-shell .sidebar-link { color:#c5d1df; }
+.ui-final .ui-shell .sidebar-link:hover { background:rgb(255 255 255 / .075);color:#fff; }
+.ui-final .ui-shell .sidebar-link.active { color:#fff;background:rgb(76 154 215 / .20);border-inline-start:2px solid #8acbfa; }
+.ui-final .ui-shell .sidebar-foot--compact { border-top:1px solid rgb(255 255 255 / .1); }
+.ui-final .ui-shell .sidebar-foot__balance-value { color:#fff; }
+.ui-final .ui-shell .sidebar-foot__topup { width:36px;height:36px;display:grid;place-items:center;border:1px solid rgb(255 255 255 / .2);border-radius:9px; }
+.ui-final .ui-shell .topbar--premium.topbar--utility { background:rgb(255 255 255 / .97); }
+.ui-final .ui-shell .topbar-title { overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+.ui-final .ui-shell .topbar-account-menu__identity { display:grid;gap:3px;padding:10px 12px;border-bottom:1px solid var(--ui-border);margin-bottom:4px;max-width:240px;overflow-wrap:anywhere; }
+.ui-final .ui-shell .topbar-account-menu__identity small { color:var(--ui-muted);font-size:.76rem; }
+.ui-final .ui-shell .topbar-account-menu__item { display:flex;align-items:center;gap:9px; }
+.ui-final .ui-shell .page-frame { max-inline-size:1480px;margin-inline:auto; }
+.ui-final .ui-page-heading { gap:10px 20px;padding-block-end:14px; }
+.ui-final .ui-page-heading .dash-header__title-row { align-items:center; }
+@media(max-width:900px){ .ui-final .ui-shell .sidebar-foot__topup { width:44px;height:44px; }.ui-final .ui-shell .topbar-title { max-width:35vw; } }
+@media(max-width:400px){ .ui-final .ui-shell .topbar-title { max-width:29vw; }.ui-final .ui-shell .topbar__cluster { gap:4px; } }

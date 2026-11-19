@@ -2,13 +2,13 @@
    Loaded after legacy executive styles; page-specific layouts live in the ui-* modules.
    Keep the existing Executive Blue identity and use these tokens for new work. */
 :root {
-  --ui-action: #126fa9;
-  --ui-action-hover: #095e93;
+  --ui-action: #146ca8;
+  --ui-action-hover: #105687;
   --ui-ink: #18283b;
   --ui-muted: #526479;
-  --ui-border: #dce5ee;
+  --ui-border: #dce4ee;
   --ui-panel: #fff;
-  --ui-canvas: #f5f7fa;
+  --ui-canvas: #f5f7fb;
   --ui-soft: #f3f6fa;
   --ui-focus: #187bb8;
   --ui-danger: #b42341;
@@ -17,10 +17,10 @@
   --ui-success-soft: #e8f5ef;
   --ui-warning: #895710;
   --ui-warning-soft: #fff6e5;
-  --ui-radius: 12px;
-  --ui-control-radius: 9px;
+  --ui-radius: 14px;
+  --ui-control-radius: 10px;
   --ui-control: 42px;
-  --ui-shadow: 0 2px 6px rgb(21 41 64 / .035);
+  --ui-shadow: 0 1px 3px rgb(21 41 64 / .035), 0 4px 14px rgb(21 41 64 / .025);
   --ui-overlay-shadow: 0 20px 70px rgb(16 29 48 / .16);
   --ui-motion: 150ms ease;
   --brand-action: var(--ui-action);
@@ -96,3 +96,36 @@
 @media(prefers-reduced-motion:reduce) {
   .ui-final :is(.btn,.topbar-action,.campaign-detail__action,.ui-dialog,.ui-notice) { transition:none;animation:none; }
 }
+
+/* Common reading and interaction primitives, including newly introduced screens. */
+:root { --ui-space-1:8px; --ui-space-2:12px; --ui-space-3:16px; --ui-space-4:24px; --ui-space-5:32px; --ui-card-pad:clamp(16px,2vw,24px); --ui-line:1.8; }
+.ui-final :where(h1,h2,h3,p,li,dd,dt,label) { overflow-wrap:anywhere; }
+.ui-final :where(.card,.form-stack,.field,.table-card,.table-scroll,.table-wrap,.panel-grid,.hero-actions) { min-inline-size:0; }
+.ui-final .card-pad { padding:var(--ui-card-pad); }
+.ui-final .section-title { font-size:1.05rem;line-height:1.6;font-weight:700; }
+.ui-final .form-stack { gap:var(--ui-space-3); }
+.ui-final .field :is(input,textarea,select):not([type=checkbox]):not([type=radio]):not([type=hidden]) { inline-size:100%; }
+.ui-final .field :is(input,textarea,select)[aria-invalid=true] { background:#fff8f9; }
+.ui-final .field input[type=file] { padding:8px;border:1px dashed #aebfd0;border-radius:var(--ui-control-radius);background:var(--ui-soft); }
+.ui-final .field input[type=file]::file-selector-button { font:inherit;font-weight:650;color:var(--ui-action);background:white;border:1px solid var(--ui-border);border-radius:7px;padding:7px 10px;margin-inline-end:8px;cursor:pointer; }
+.ui-final :is(input[type=checkbox],input[type=radio]) { accent-color:var(--ui-action); }
+.ui-final :is(.table-scroll,.table-wrap) { max-inline-size:100%;overflow-x:auto;overscroll-behavior-inline:contain;scrollbar-width:thin; }
+.ui-final .table-scroll:focus-visible,.ui-final .table-wrap:focus-visible { outline-offset:-2px; }
+.ui-final :is(.data-table,.table) { font-variant-numeric:tabular-nums; }
+.ui-final :is(.data-table,.table) :is(th,td) { vertical-align:middle; }
+.ui-final :is(.data-table,.table) th { background:var(--ui-soft);color:var(--ui-muted);font-weight:650; }
+.ui-final :is(.data-table,.table) tbody tr:hover td { background:#f7faff; }
+.ui-final .hero-actions { display:flex;align-items:center;flex-wrap:wrap;gap:8px; }
+.ui-final .ui-section-tabs { display:flex;gap:4px;align-items:center;overflow-x:auto;max-width:100%;padding:5px;background:var(--ui-soft);border:1px solid var(--ui-border);border-radius:12px;scrollbar-width:thin; }
+.ui-final .ui-section-tabs > a { display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;gap:6px;min-height:40px;padding:8px 14px;border:1px solid transparent;border-radius:8px;text-decoration:none;color:var(--ui-muted);font-size:.85rem;font-weight:650;white-space:nowrap; }
+.ui-final .ui-section-tabs > a[aria-current=page] { color:var(--ui-action);background:#fff;border-color:var(--ui-border);box-shadow:var(--ui-shadow); }
+.ui-final .ui-section-tabs > a:hover { color:var(--ui-action); }
+.ui-final .ui-empty { display:grid;justify-items:center;gap:8px;padding:clamp(24px,5vw,44px) 16px;text-align:center;color:var(--ui-muted); }
+.ui-final .ui-empty h2,.ui-final .ui-empty h3 { margin:0;font-size:1rem;color:var(--ui-ink); }
+.ui-final .ui-empty p { margin:0;max-width:48ch;font-size:.86rem;line-height:1.9; }
+.ui-empty__icon { display:grid;place-items:center;width:46px;height:46px;border-radius:13px;color:var(--ui-action);background:#e9f3fb;margin-bottom:4px; }
+.ui-final .ui-dialog__inner { padding:clamp(18px,4vw,28px); }
+.ui-final .ui-dialog__actions { border-top:1px solid var(--ui-border);padding-top:16px; }
+.ui-final .ui-notice__close { align-self:flex-start; }
+@media(max-width:600px) { .ui-final .ui-section-tabs > a { min-height:44px; }.ui-final .hero-actions > .btn { min-height:44px; }.ui-final .field :is(input,select,textarea):not([type=checkbox]):not([type=radio]) { font-size:16px; } }
+@media(prefers-reduced-motion:reduce) { .ui-final .ui-section-tabs a { transition:none; } }

@@ -12,7 +12,7 @@
       if (link.pathname === window.location.pathname) link.setAttribute('aria-current', 'page');
     });
     document.querySelectorAll('.field').forEach(function (field, index) {
-      var input = field.querySelector('input, select, textarea');
+      var input = field.querySelector('input:not([type="hidden"]), select, textarea');
       if (!input) return;
       var descriptions = (input.getAttribute('aria-describedby') || '').split(/\s+/).filter(Boolean);
       field.querySelectorAll('.field-help, .form-error').forEach(function (hint, i) {
@@ -21,6 +21,12 @@
       });
       if (descriptions.length) input.setAttribute('aria-describedby', descriptions.join(' '));
       if (field.querySelector('.form-error')) input.setAttribute('aria-invalid', 'true');
+    });
+
+    document.querySelectorAll('.table-scroll, .table-wrap').forEach(function (region) {
+      if (!region.hasAttribute('tabindex')) region.tabIndex = 0;
+      if (!region.hasAttribute('role')) region.setAttribute('role','region');
+      if (!region.hasAttribute('aria-label') && !region.hasAttribute('aria-labelledby')) region.setAttribute('aria-label','جدول اطلاعات؛ پیمایش افقی');
     });
 
     document.querySelectorAll('[data-disclosure-menu]').forEach(function (menu) {

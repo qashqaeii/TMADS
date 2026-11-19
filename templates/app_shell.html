@@ -28,8 +28,10 @@
           <span class="nav-label">کمپین‌ها</span>
         </a>
 
-        <p class="sidebar-group-label">مالی و حساب</p>
+        <p class="sidebar-group-label">حساب و مخاطبان</p>
         <a href="{% url 'accounts:related_account' %}" class="sidebar-link {% if '/accounts/advertiser-account' in request.path %}active{% endif %}"><span class="nav-icon">{% include "includes/lucide_icon.html" with name="building-2" size="sm" %}</span><span class="nav-label">حساب تبلیغاتی</span></a>
+        <a href="{% url 'accounts:advertiser_assets' %}" class="sidebar-link {% if '/accounts/advertiser-assets' in request.path %}active{% endif %}"{% if '/accounts/advertiser-assets' in request.path %} aria-current="page"{% endif %}><span class="nav-icon">{% include "includes/lucide_icon.html" with name="users" size="sm" %}</span><span class="nav-label">مخاطبان و تبدیل</span></a>
+        <p class="sidebar-group-label">مالی</p>
         <a href="{% url 'finance:wallet' %}" class="sidebar-link {% if '/finance/wallet' in request.path or '/finance/topup' in request.path or '/finance/transactions' in request.path %}active{% endif %}"{% if '/finance/wallet' in request.path or '/finance/topup' in request.path or '/finance/transactions' in request.path %} aria-current="page"{% endif %}>
           <span class="nav-icon">{% include "includes/nav_icon.html" with icon="wallet" %}</span>
           <span class="nav-label">کیف پول</span>
@@ -99,7 +101,7 @@
           <span class="sidebar-foot__balance-label">موجودی قابل استفاده</span>
           <span class="sidebar-foot__balance-value tabnums">{{ wallet_hint.available_toman|format_count }} ت</span>
         </a>
-        <a class="sidebar-foot__topup" href="{% url 'finance:topup' %}" title="شارژ کیف پول" aria-label="شارژ کیف پول">+</a>
+        <a class="sidebar-foot__topup" href="{% url 'finance:topup' %}" title="شارژ کیف پول" aria-label="شارژ کیف پول">{% include "includes/lucide_icon.html" with name="plus" size="sm" %}</a>
       </div>
       {% endif %}
       <a class="sidebar-foot__user" href="{% url 'accounts:profile' %}">
@@ -133,7 +135,7 @@
           {% if unread_notifications %}<span class="topbar-notify__badge tabnums" aria-hidden="true">{{ unread_notifications|format_count }}</span>{% endif %}
         </a>
         <span class="topbar__sep" aria-hidden="true"></span>
-        <a class="topbar-action topbar-action--primary topbar-cta" href="{% url 'campaigns:wizard_new' %}">
+        <a class="topbar-action topbar-action--primary topbar-cta" href="{% url 'campaigns:wizard_new' %}" aria-label="کمپین جدید">
           {% include "includes/lucide_icon.html" with name="plus" size="btn" %}
           <span class="topbar-cta__label">کمپین جدید</span>
         </a>
@@ -142,9 +144,10 @@
             <span class="topbar-account__avatar" aria-hidden="true">{{ user.get_username|slice:":1" }}</span>
           </button>
           <div id="account-navigation" class="topbar-account-menu" x-show="accountOpen" x-transition.opacity @click.outside="accountOpen = false" x-cloak aria-label="پیوندهای حساب">
-            <a class="topbar-account-menu__item" href="{% url 'accounts:profile' %}">پروفایل</a>
-            <a class="topbar-account-menu__item" href="{% url 'finance:wallet' %}">کیف پول</a>
-            <a class="topbar-account-menu__item topbar-account-menu__item--danger" href="{% url 'accounts:logout' %}">خروج</a>
+            <div class="topbar-account-menu__identity"><strong>{{ user.get_full_name|default:user.get_username }}</strong><small>حساب کاربری</small></div>
+            <a class="topbar-account-menu__item" href="{% url 'accounts:profile' %}">{% include "includes/lucide_icon.html" with name="user" size="sm" %} پروفایل</a>
+            <a class="topbar-account-menu__item" href="{% url 'finance:wallet' %}">{% include "includes/lucide_icon.html" with name="wallet" size="sm" %} کیف پول</a>
+            <a class="topbar-account-menu__item topbar-account-menu__item--danger" href="{% url 'accounts:logout' %}">{% include "includes/lucide_icon.html" with name="log-out" size="sm" %} خروج</a>
           </div>
         </span>
       </div>
