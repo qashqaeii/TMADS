@@ -1,9 +1,10 @@
 {% extends "public_base.html" %}
 {% block title %}درباره — {{ PRODUCT_NAME }}{% endblock %}
+{% block public_page_class %} pp-about{% endblock %}
 {% block content %}
 {% include "includes/public_hero.html" with title="درباره ما" subtitle="تی‌ام‌ادز؛ برای تصمیم‌گیری بهتر در تبلیغات تلگرام" show_subtitle=1 compact=1 %}
 <section class="section public-section container">
-  <article class="card card-pad legal-prose ui-public-reading">
+  <div class="pp-about-intro"><div class="pp-about-statement" data-pp-reveal><span class="ui-editorial-kicker">رویکرد تی‌ام‌ادز</span><h2>شفافیت، پیش از هر تصمیم.</h2><p>یک مسیر روشن برای طراحی کمپین، بررسی هزینه و سنجش نتایج تبلیغات تلگرام.</p><a href="#product-principles">اصول طراحی محصول</a></div><div class="pp-about-principles" data-pp-reveal><div><span>{% include "includes/lucide_icon.html" with name="wallet" size="md" %}</span><strong>شفافیت مالی</strong></div><div><span>{% include "includes/lucide_icon.html" with name="line-chart" size="md" %}</span><strong>تصمیم مبتنی بر داده</strong></div><div><span>{% include "includes/lucide_icon.html" with name="shield-check" size="md" %}</span><strong>مسئولیت‌پذیری</strong></div></div></div><article class="card card-pad legal-prose ui-public-reading" data-pp-reveal>
     <h2>چرا تی‌ام‌ادز شکل گرفت؟</h2><p>مدیریت یک کمپین تبلیغات تلگرام فقط انتشار یک پیام نیست؛ شناخت مخاطب، برنامه‌ریزی بودجه، بررسی محتوا و تحلیل نتیجه کنار هم قرار می‌گیرند. تی‌ام‌ادز با هدف ساده‌تر کردن این مسیر برای کسب‌وکارهای فارسی‌زبان طراحی شده است.</p>
     <h2>اصول محصول ما</h2><p><strong>شفافیت مالی:</strong> بودجه، کارمزد و مبلغ سفارش قبل از ثبت نمایش داده می‌شوند؛ تخصیص اعتبار با مصرف واقعی تبلیغ تفاوت دارد.</p>
     <p><strong>تصمیم‌گیری مبتنی بر داده:</strong> گزارش‌ها از داده‌های همگام‌شده تبلیغ تهیه می‌شوند و اطلاعات ناموجود نباید به‌عنوان نتیجه قطعی تلقی شوند.</p>
