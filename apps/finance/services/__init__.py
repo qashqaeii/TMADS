@@ -199,7 +199,7 @@ def complete_topup_payment(payment: Payment, *, deposit_description: str = "شا
         return True
     if payment.amount_irr <= 0 or payment.order_id is not None:
         raise ValueError("پرداخت شارژ کیف پول نامعتبر است.")
-    if payment.gateway == "zarinpal" and (not payment.provider_reference or payment.provider_amount_irr != payment.amount_irr):
+    if payment.gateway in ("zarinpal", "zibal") and (not payment.provider_reference or payment.provider_amount_irr != payment.amount_irr):
         raise ValueError("مبلغ یا شناسه پرداخت نیازمند تطبیق است.")
     if payment.provider_reference and Payment.objects.filter(gateway=payment.gateway, provider_reference=payment.provider_reference).exclude(pk=payment.pk).exists():
         raise ValueError("شناسه پرداخت قبلاً ثبت شده است.")

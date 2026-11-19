@@ -51,9 +51,11 @@ def release_checks():
     add("database", "پایگاه داده PostgreSQL", postgres,
         "برای استقرار تجاری پایگاه داده PostgreSQL و پشتیبان‌گیری مستقل لازم است.")
     payment = bool(
-        settings.PAYMENT_GATEWAY == "zarinpal"
-        and not settings.PAYMENT_FAKE_ENABLED and not settings.ZARINPAL_SANDBOX
-        and settings.ZARINPAL_MERCHANT_ID
+        not settings.PAYMENT_FAKE_ENABLED and (
+            (settings.PAYMENT_GATEWAY == "zarinpal" and not settings.ZARINPAL_SANDBOX and settings.ZARINPAL_MERCHANT_ID)
+            or (settings.PAYMENT_GATEWAY == "zibal" and settings.ZIBAL_MERCHANT_ID.strip()
+                and settings.ZIBAL_MERCHANT_ID.strip().lower() != "zibal")
+        )
     )
     add("payment", "اتصال تولیدی درگاه پرداخت", payment,
         "تأیید اعتبار تنظیمات فقط شرط اولیه است؛ تراکنش‌های آزمایشی واقعی جداگانه باید تأیید شوند.")

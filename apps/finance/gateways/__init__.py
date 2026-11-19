@@ -2,15 +2,18 @@ from django.conf import settings
 
 from .fake import FakeGateway
 from .zarinpal import ZarinpalGateway
+from .zibal import ZibalGateway
 
 
 def get_payment_gateway(name=None):
     name = (name or settings.PAYMENT_GATEWAY or "fake").lower()
     if name == "fake":
         return FakeGateway()
+    if name == "zibal":
+        return ZibalGateway()
     if name == "zarinpal":
         return ZarinpalGateway()
     raise NotImplementedError(f"Gateway {name} is not configured")
 
 
-__all__ = ["get_payment_gateway", "FakeGateway", "ZarinpalGateway"]
+__all__ = ["get_payment_gateway", "FakeGateway", "ZarinpalGateway", "ZibalGateway"]
