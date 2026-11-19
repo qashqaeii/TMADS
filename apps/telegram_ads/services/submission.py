@@ -22,6 +22,8 @@ def _claim_submission(campaign_id):
     with transaction.atomic():
         campaign = Campaign.objects.select_for_update().get(pk=campaign_id)
         order = require_submission_order(campaign, lock=True)
+        from apps.operations.review import require_recorded_approval
+        require_recorded_approval(campaign)
         assert_submission_ready(campaign)
         if campaign.target_type == Campaign.TargetType.BOTS:
             from apps.telegram_ads.services.bot_eligibility import validate_bot_targets

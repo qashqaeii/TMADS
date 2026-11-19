@@ -26,6 +26,12 @@ def paid_campaign(customer_user):
     order.save(update_fields=["status"])
     campaign.status = Campaign.Status.READY_FOR_SUBMISSION
     campaign.save(update_fields=["status"])
+    from apps.policies.services.preflight import CampaignPolicyPreflight
+    from apps.policies.services.policy_versions import get_active_policy_version
+    from apps.policies.models import OpsPolicyReview
+    CampaignPolicyPreflight.record_acceptance(campaign)
+    OpsPolicyReview.objects.create(campaign=campaign, reviewer=customer_user, decision="approve",
+        reason_customer_fa="test fixture", policy_version_code=get_active_policy_version().code)
     return campaign, order
 
 

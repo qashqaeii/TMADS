@@ -16,6 +16,8 @@ from apps.telegram_ads.client import TelegramAdsClient
 from apps.telegram_ads.exceptions import TelegramAdsError
 from apps.telegram_ads.services.submission import submit_campaign_to_telegram
 from apps.telegram_ads.models import APICapability, APIRequestLog
+from apps.operations.review import review_campaign, review_payment_order
+from apps.telegram_ads.services.submission_guard import require_submission_order
 
 
 @login_required
@@ -79,82 +81,28 @@ def campaign_review(request, campaign_id):
                 messages.warning(request, "پیش‌پرواز سیاست: موارد مسدودکننده وجود دارد.")
             else:
                 messages.success(request, "اعتبارسنجی سیاست دوباره اجرا شد.")
-        elif action == "approve":
-            from apps.policies.constants import FindingSeverity
-            from apps.policies.services.preflight import CampaignPolicyPreflight
-
-            run = CampaignPolicyPreflight(campaign, actor=request.user).run(
-                strict=True,
-                context="ops_approve",
-                check_operator=False,
-            )
-            if run.blocked:
-                blocked = [f.message_fa for f in run.findings if f.severity == FindingSeverity.BLOCKED]
-                messages.error(
-                    request,
-                    blocked[0] if blocked else "تأیید ممکن نیست: نقض سیاست قطعی.",
+        elif action in {"approve", "reject"}:
+            try:
+                review_campaign(
+                    campaign.id, actor=request.user, decision=action,
+                    reason=request.POST.get("reason", ""), internal_reason=request.POST.get("reason_internal", ""),
                 )
-                return redirect("operations:campaign_review", campaign_id=campaign.id)
-            campaign.status = Campaign.Status.READY_FOR_SUBMISSION
-            campaign.save(update_fields=["status", "updated_at"])
-            CampaignStatusHistory.objects.create(
-                campaign=campaign,
-                to_status=campaign.status,
-                note="تأیید داخلی",
-            )
-            notify_customer(
-                campaign.customer,
-                "کمپین تأیید شد",
-                "کمپین شما آماده ارسال به Telegram Ads است.",
-                level="success",
-                related_campaign_id=campaign.id,
-            )
-            messages.success(request, "کمپین تأیید شد.")
-        elif action == "reject":
-            reason = request.POST.get("reason", "").strip() or "نیاز به اصلاح محتوا"
-            from apps.policies.models import OpsPolicyReview
-            from apps.policies.services.preflight import CampaignPolicyPreflight
-
-            latest = CampaignPolicyPreflight.latest_evaluation(campaign)
-            OpsPolicyReview.objects.create(
-                campaign=campaign,
-                evaluation=latest,
-                reviewer=request.user,
-                decision="reject",
-                reason_customer_fa=reason,
-                reason_internal=request.POST.get("reason_internal", "").strip(),
-                policy_version_code=latest.policy_version.code if latest else "",
-            )
-            campaign.status = Campaign.Status.REJECTED
-            campaign.save(update_fields=["status", "updated_at"])
-            CampaignStatusHistory.objects.create(
-                campaign=campaign,
-                to_status=campaign.status,
-                note=reason,
-            )
-            notify_customer(
-                campaign.customer,
-                "کمپین رد شد",
-                reason,
-                level="danger",
-                related_campaign_id=campaign.id,
-            )
-            messages.warning(request, "کمپین رد شد.")
+                messages.success(request, "تصمیم بررسی کمپین ثبت شد.")
+            except ValueError as exc:
+                messages.error(request, str(exc))
         elif action == "submit_telegram":
             try:
                 submit_campaign_to_telegram(campaign)
-                messages.success(request, "ارسال به Telegram Ads انجام شد (در صورت فعال بودن write).")
+                messages.success(request, "شناسه تبلیغ دریافت شد؛ تسویه مالی پس از تطبیق ثبت می‌شود.")
             except TelegramAdsError as exc:
                 messages.error(request, str(exc))
             except ValueError as exc:
                 messages.error(request, str(exc))
         elif action == "link_ad":
-            remote_id = request.POST.get("remote_ad_id", "").strip()
-            if remote_id:
-                ad, _ = TelegramAdvertisement.objects.get_or_create(campaign=campaign)
-                ad.remote_ad_id = remote_id
-                ad.save(update_fields=["remote_ad_id", "updated_at"])
-                messages.success(request, "شناسه تبلیغ متصل شد.")
+            messages.error(request, "اتصال دستی شناسه بدون مستند تطبیق مجاز نیست.")
+        else:
+            messages.error(request, "اقدام نامعتبر است.")
+            return redirect("operations:campaign_review", campaign_id=campaign.id)
         AuditLog.objects.create(
             actor=request.user,
             action=f"ops.{action}",
@@ -181,6 +129,22 @@ def campaign_review(request, campaign_id):
         check_operator=True,
     )
     operator_gate = OperatorAdvertisingAuthorization.objects.filter(is_current=True).first()
+    review_block = ""
+    submit_block = ""
+    try:
+        review_payment_order(campaign)
+    except ValueError as exc:
+        review_block = str(exc)
+    try:
+        require_submission_order(campaign)
+        from apps.operations.review import require_recorded_approval
+        require_recorded_approval(campaign)
+        if not settings.TELEGRAM_ADS_WRITE_ENABLED or not settings.TELEGRAM_ADS_PAID_SUBMISSION_ENABLED:
+            raise ValueError("ارسال زنده در تنظیمات غیرفعال است.")
+        if policy_run.blocked:
+            raise ValueError("پیش‌شرط‌های سیاست یا مجوز اپراتور برقرار نیست.")
+    except ValueError as exc:
+        submit_block = str(exc)
 
     return render(
         request,
@@ -193,6 +157,8 @@ def campaign_review(request, campaign_id):
             "preflight": preflight,
             "policy_run": policy_run,
             "operator_gate": operator_gate,
+            "review_block": review_block,
+            "submit_block": submit_block,
         },
     )
 
