@@ -3,6 +3,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from decimal import Decimal, InvalidOperation
+from datetime import timedelta
+from django.utils import timezone
 from typing import Any
 
 from telead.limits import (
@@ -179,7 +182,7 @@ def validate_submission_ready(campaign) -> StudioValidationResult:
     targeting = getattr(campaign, "targeting", None)
     config = targeting.config if targeting else {}
     placement = campaign.placement or config.get("placement_api") or ""
-    return validate_studio_config(
+    result = validate_studio_config(
         target_type=campaign.target_type or "",
         placement=placement,
         config=config,
@@ -189,3 +192,23 @@ def validate_submission_ready(campaign) -> StudioValidationResult:
         ad_settings=campaign.ad_settings or {},
         strict=True,
     )
+    if not campaign.destination:
+        result.errors.append("مقصد تبلیغ الزامی است.")
+    if campaign.budget_irr <= 0:
+        result.errors.append("بودجه معتبر الزامی است.")
+    if campaign.daily_cap_irr < 0 or campaign.daily_cap_irr > campaign.budget_irr:
+        result.errors.append("سقف روزانه نامعتبر است.")
+    if campaign.cpm_bid is not None:
+        try:
+            cpm = Decimal(str(campaign.cpm_bid))
+            if not cpm.is_finite() or not 0 < cpm <= Decimal("99999999.99") or cpm != cpm.quantize(Decimal("0.01")):
+                result.errors.append("CPM نامعتبر است.")
+        except (ValueError, InvalidOperation):
+            result.errors.append("CPM نامعتبر است.")
+    current = timezone.now()
+    for value in (campaign.schedule_start, campaign.schedule_end):
+        if value and not current < value <= current + timedelta(days=365):
+            result.errors.append("زمان‌بندی باید در آینده و حداکثر تا ۳۶۵ روز بعد باشد.")
+    if campaign.schedule_start and campaign.schedule_end and campaign.schedule_end <= campaign.schedule_start:
+        result.errors.append("زمان توقف باید بعد از زمان فعال‌سازی باشد.")
+    return result

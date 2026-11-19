@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+from datetime import datetime, timedelta
+from decimal import Decimal, InvalidOperation
 from typing import Any
 
 from django.utils import timezone
@@ -184,8 +186,10 @@ def apply_studio_step(campaign: Campaign, step: int, data, files=None) -> None:
 
     if step == 1:
         target_type = (data.get("target_type") or campaign.target_type or "").strip()
-        if target_type:
+        if target_type and target_type != campaign.target_type:
             campaign.target_type = target_type
+            campaign.placement = default_placement_for_target(target_type)
+            CampaignTargeting.objects.filter(campaign=campaign).delete()
         mode = (data.get("studio_mode") or data.get("simple_mode") or "").strip()
         if mode in ("simple", "professional"):
             campaign.wizard_data = {**(campaign.wizard_data or {}), "studio_mode": mode}
@@ -226,61 +230,107 @@ def apply_studio_step(campaign: Campaign, step: int, data, files=None) -> None:
         promote, _ = parse_promote_url((data.get("destination") or campaign.destination or "").strip())
         if promote:
             campaign.destination = promote
-        campaign.ad_settings = {**(campaign.ad_settings or {}), **parse_ad_settings(data)}
+        settings = dict(campaign.ad_settings or {})
+        for key in ("show_userpic", "destination_rights_confirmed", "profile_complete_confirmed",
+                    "channel_active_confirmed", "bot_functional_confirmed"):
+            settings[key] = data.get(key) == "1"
+        campaign.ad_settings = settings
 
     elif step == 4:
-        try:
-            budget_toman = int(data.get("budget_toman") or 0)
-        except (TypeError, ValueError):
-            budget_toman = 0
-        if budget_toman:
-            campaign.budget_irr = budget_toman * 10_000
-        try:
-            daily_toman = int(data.get("daily_cap_toman") or 0)
-        except (TypeError, ValueError):
-            daily_toman = 0
-        campaign.daily_cap_irr = daily_toman * 10_000 if daily_toman else 0
-        cpm_raw = (data.get("cpm_bid") or "").strip()
-        if cpm_raw:
-            from decimal import Decimal, InvalidOperation
-
-            try:
-                campaign.cpm_bid = Decimal(cpm_raw)
-            except InvalidOperation:
-                pass
-        settings = {**(campaign.ad_settings or {}), **parse_ad_settings(data)}
-        if not data.get("schedule_enabled"):
+        errors = validate_budget_inputs(campaign, data, strict=False)
+        if errors:
+            raise ValueError("؛ ".join(errors))
+        if "budget_toman" in data:
+            campaign.budget_irr = int(data.get("budget_toman") or 0) * 10_000
+        if "daily_cap_toman" in data:
+            campaign.daily_cap_irr = int(data.get("daily_cap_toman") or 0) * 10_000
+        if "cpm_bid" in data:
+            campaign.cpm_bid = Decimal(data["cpm_bid"]) if data["cpm_bid"] else None
+        settings = dict(campaign.ad_settings or {})
+        parsed = parse_ad_settings(data)
+        for key in ("impression_frequency", "additional_info", "remote_initial_status"):
+            if key in parsed:
+                settings[key] = parsed[key]
+            elif key == "additional_info" and key in data:
+                settings.pop(key, None)
+        if parsed.get("schedule"):
+            settings["schedule"] = parsed["schedule"]
+        elif not data.get("schedule_enabled"):
             settings.pop("schedule", None)
         campaign.ad_settings = settings
-        start_raw = (data.get("schedule_start") or "").strip()
-        end_raw = (data.get("schedule_end") or "").strip()
-        from django.utils import timezone as dj_tz
-
-        if start_raw:
-            campaign.schedule_start = dj_tz.datetime.fromisoformat(start_raw)
-            if dj_tz.is_naive(campaign.schedule_start):
-                campaign.schedule_start = dj_tz.make_aware(
-                    campaign.schedule_start, dj_tz.get_current_timezone()
-                )
-        if end_raw:
-            campaign.schedule_end = dj_tz.datetime.fromisoformat(end_raw)
-            if dj_tz.is_naive(campaign.schedule_end):
-                campaign.schedule_end = dj_tz.make_aware(
-                    campaign.schedule_end, dj_tz.get_current_timezone()
-                )
+        for key in ("schedule_start", "schedule_end"):
+            if key in data:
+                value = datetime.fromisoformat(data[key]) if data[key] else None
+                if value and timezone.is_naive(value):
+                    value = timezone.make_aware(value)
+                setattr(campaign, key, value)
 
     elif step == 5:
-        settings = {**(campaign.ad_settings or {}), **parse_ad_settings(data)}
+        settings = dict(campaign.ad_settings or {})
+        settings["terms_accepted"] = data.get("terms_accepted") == "1"
+        if settings["terms_accepted"]:
+            settings["terms_accepted_at"] = timezone.now().isoformat()
+        else:
+            settings.pop("terms_accepted_at", None)
         campaign.ad_settings = settings
 
     campaign.save()
 
 
+def validate_budget_inputs(campaign, data, *, strict):
+    errors = []
+    def amount(key, previous):
+        raw = data.get(key)
+        if raw is None:
+            return previous
+        try:
+            units = int(raw or 0)
+            if not 0 <= units <= 922337203685477:
+                raise ValueError
+            return units * 10_000
+        except (TypeError, ValueError):
+            errors.append("بودجه و سقف روزانه باید عدد صحیح نامنفی باشند.")
+            return previous
+    budget = amount("budget_toman", campaign.budget_irr)
+    daily = amount("daily_cap_toman", campaign.daily_cap_irr)
+    if strict and budget < 1_000_000:
+        errors.append("حداقل بودجه ۱۰۰ هزار تومان است.")
+    if strict and daily > budget:
+        errors.append("سقف روزانه نباید بیشتر از بودجه کل باشد.")
+    raw_cpm = data.get("cpm_bid")
+    if raw_cpm not in (None, ""):
+        try:
+            cpm = Decimal(raw_cpm)
+            if not cpm.is_finite() or not 0 < cpm <= Decimal("99999999.99") or cpm != cpm.quantize(Decimal("0.01")):
+                raise ValueError
+        except (InvalidOperation, TypeError, ValueError):
+            errors.append("CPM باید عدد مثبت با حداکثر دو رقم اعشار باشد.")
+    dates = []
+    for key, previous in (("schedule_start", campaign.schedule_start), ("schedule_end", campaign.schedule_end)):
+        raw = data.get(key)
+        try:
+            value = previous if raw is None else datetime.fromisoformat(raw) if raw else None
+            if value and timezone.is_naive(value):
+                value = timezone.make_aware(value)
+            dates.append(value)
+            if strict and value and not timezone.now() < value <= timezone.now() + timedelta(days=365):
+                errors.append("زمان‌بندی باید در آینده و حداکثر تا ۳۶۵ روز بعد باشد.")
+        except (ValueError, TypeError, OverflowError):
+            dates.append(None)
+            errors.append("فرمت تاریخ زمان‌بندی معتبر نیست.")
+    if strict and all(dates) and dates[1] <= dates[0]:
+        errors.append("زمان توقف باید بعد از زمان فعال‌سازی باشد.")
+    if strict and data.get("schedule_enabled") and not parse_schedule_payload(data):
+        errors.append("برای زمان‌بندی هفتگی حداقل یک بازه معتبر انتخاب کنید.")
+    return list(dict.fromkeys(errors))
+
+
 def validate_studio_step(campaign: Campaign, step: int, data, *, strict: bool) -> list[str]:
     migrate_campaign_to_studio(campaign)
     if step == 1:
-        if strict and not (data.get("target_type") or campaign.target_type):
-            return ["نوع هدف‌گیری را انتخاب کنید."]
+        target_type = data.get("target_type") or campaign.target_type
+        if target_type not in Campaign.TargetType.values:
+            return ["نوع هدف‌گیری معتبر را انتخاب کنید."]
         dest = (data.get("destination") or campaign.destination or "").strip()
         if strict:
             _, errs = parse_promote_url(dest)
@@ -307,13 +357,7 @@ def validate_studio_step(campaign: Campaign, step: int, data, *, strict: bool) -
             return ["متن تبلیغ بیش از حد مجاز است."]
         return []
     if step == 4:
-        try:
-            budget = int(data.get("budget_toman") or 0)
-        except (TypeError, ValueError):
-            budget = 0
-        if strict and budget < 100:
-            return ["حداقل بودجه ۱۰۰ هزار تومان پیشنهاد می‌شود."]
-        return []
+        return validate_budget_inputs(campaign, data, strict=strict)
     if step == 5 and strict:
         # Review validation must not rewrite budget, dates or schedule.
         result = validate_studio_config(
@@ -323,7 +367,7 @@ def validate_studio_step(campaign: Campaign, step: int, data, *, strict: bool) -
             promote_url=campaign.destination,
             ad_text=(campaign.creatives.first().ad_text if campaign.creatives.first() else ""),
             title=campaign.name,
-            ad_settings={**(campaign.ad_settings or {}), **parse_ad_settings(data)},
+            ad_settings={**(campaign.ad_settings or {}), "terms_accepted": data.get("terms_accepted") == "1"},
             strict=True,
         )
         return result.errors

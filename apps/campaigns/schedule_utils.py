@@ -67,8 +67,11 @@ def parse_schedule_payload(data) -> dict[str, Any] | None:
         timezone=tz,
         use_viewer_timezone=use_viewer,
     )
-    schedule.validate()
-    return schedule.to_dict()
+    try:
+        schedule.validate()
+        return schedule.to_dict()
+    except (TypeError, ValueError, OverflowError):
+        return None
 
 
 def schedule_summary_fa(schedule: dict[str, Any] | None) -> str:
