@@ -68,6 +68,7 @@
             <span class="nav-label">بررسی کمپین</span>
           </a>
           <a href="{% url 'operations:remote_operations' %}" class="sidebar-link {% if '/ops/remote-operations' in request.path %}active{% endif %}"><span class="nav-icon">{% include "includes/lucide_icon.html" with name="sliders-horizontal" size="sm" %}</span><span class="nav-label">عملیات تبلیغات</span></a>
+          <a href="{% url 'operations:telegram_account' %}" class="sidebar-link {% if '/ops/telegram-account' in request.path %}active{% endif %}"><span class="nav-icon">{% include "includes/lucide_icon.html" with name="chart-no-axes-combined" size="sm" %}</span><span class="nav-label">گزارش حساب تلگرام</span></a>
           <a href="{% url 'operations:refunds' %}" class="sidebar-link {% if '/ops/refunds' in request.path %}active{% endif %}"{% if '/ops/refunds' in request.path %} aria-current="page"{% endif %}>
             <span class="nav-icon">{% include "includes/nav_icon.html" with icon="refund" %}</span>
             <span class="nav-label">بازپرداخت‌ها</span>

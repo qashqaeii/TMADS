@@ -15,6 +15,12 @@ logger = logging.getLogger(__name__)
 READ_PROBES: tuple[tuple[str, str], ...] = (
     ("account.read", "get_current_account"),
     ("account.info", "get_account_info"),
+    ("account.related", "get_related_accounts_list"),
+    ("account.transactions", "get_account_transactions_list"),
+    ("account.stats", "get_account_stats"),
+    ("account.report", "get_account_report"),
+    ("audiences.list", "get_audiences_list"),
+    ("pixel.events", "get_pixel_events_list"),
     ("ads.list", "get_ads_list"),
     ("ads.get", "get_ads_list"),  # same permission tier
     ("ads.stats", "get_ad_stats"),
@@ -31,6 +37,20 @@ WRITE_FEATURES: tuple[tuple[str, str], ...] = (
     ("ads.submit_review", "submitAdForReview"),
     ("ads.delete", "deleteAd"),
     ("media.upload_photo", "uploadAdPhoto"),
+    ("media.upload_video", "uploadAdVideo"),
+    ("media.website_photo", "uploadWebsitePhoto"),
+    ("ads.budget_increase", "increaseAdBudget"),
+    ("ads.budget_decrease", "decreaseAdBudget"),
+    ("account.create", "createAccount"),
+    ("account.budget_increase", "increaseAccountBudget"),
+    ("account.budget_decrease", "decreaseAccountBudget"),
+    ("audiences.create", "createAudience"),
+    ("audiences.edit", "editAudience"),
+    ("audiences.delete", "deleteAudience"),
+    ("pixel.create", "createPixel"),
+    ("pixel.event_create", "createPixelEvent"),
+    ("pixel.event_edit", "editPixelEvent"),
+    ("pixel.event_delete", "deletePixelEvent"),
 )
 
 
@@ -40,6 +60,20 @@ def _probe_read(client: TelegramAdsClient, method: str, *, sample_ad_id: int | N
             c.get_current_account()
         elif method == "get_account_info":
             c.get_account_info()
+        elif method == "get_related_accounts_list":
+            c.get_related_accounts_list(limit=1)
+        elif method == "get_account_transactions_list":
+            c.get_account_transactions_list(limit=1)
+        elif method == "get_account_stats":
+            now = timezone.now()
+            c.get_account_stats(now-timedelta(days=3),now,86400)
+        elif method == "get_account_report":
+            now = timezone.now()
+            c.get_account_report(now.year,now.month)
+        elif method == "get_audiences_list":
+            c.get_audiences_list(limit=1)
+        elif method == "get_pixel_events_list":
+            c.get_pixel_events_list(limit=1)
         elif method == "get_ads_list":
             c.get_ads_list(limit=1)
         elif method == "get_ad_stats":
@@ -102,7 +136,7 @@ def refresh_api_capabilities(*, sample_ad_id: int | None = None) -> int:
 
     for feature_key, api_method in WRITE_FEATURES:
         if not settings.TELEGRAM_ADS_WRITE_ENABLED:
-            state = APICapability.State.UNSUPPORTED
+            state = APICapability.State.UNVERIFIED
             details = {"reason": "TELEGRAM_ADS_WRITE_ENABLED=false", "api_method": api_method}
         else:
             state = APICapability.State.UNVERIFIED

@@ -122,9 +122,30 @@ class TelegramAdsClient:
 
     def list_advertisements(self) -> list[dict[str, Any]]:
         def _list(client):
-            ads_list = client.get_ads_list()
-            items = getattr(ads_list, "ads", None) or getattr(ads_list, "items", None) or []
-            return [_model_to_dict(ad) for ad in items]
+            items, seen, cursors = [], set(), set()
+            offset = None
+            for _ in range(1000):
+                page = client.get_ads_list(offset=offset, limit=100)
+                data = _model_to_dict(page)
+                ads = data.get("ads")
+                if not isinstance(ads, list):
+                    raise TelegramAdsError("ساختار فهرست تبلیغات معتبر نیست.")
+                for item in ads:
+                    row = _model_to_dict(item)
+                    ad_id = row.get("ad_id")
+                    if type(ad_id) is not int or ad_id <= 0 or ad_id in seen:
+                        raise TelegramAdsError("شناسه تکراری یا نامعتبر در صفحه‌بندی تبلیغات.")
+                    seen.add(ad_id)
+                    items.append(row)
+                offset = data.get("next_offset")
+                if not offset:
+                    if type(data.get("total_count")) is int and data["total_count"] != len(items):
+                        raise TelegramAdsError("تعداد تبلیغات هنگام دریافت تغییر کرده؛ دوباره تلاش کنید.")
+                    return items
+                if not isinstance(offset, str) or offset in cursors or not ads:
+                    raise TelegramAdsError("صفحه‌بندی تبلیغات کامل نشد.")
+                cursors.add(offset)
+            raise TelegramAdsError("سقف امن صفحه‌بندی تبلیغات رسید؛ داده ناقص استفاده نشد.")
 
         return self._run("list_advertisements", _list)
 
@@ -233,3 +254,28 @@ class TelegramAdsClient:
         if is_video:
             return self._run("upload_ad_video", lambda client: _model_to_dict(client.upload_ad_video(file, filename=filename)))
         return self._run("upload_ad_photo", lambda client: _model_to_dict(client.upload_ad_photo(file, filename=filename)))
+
+
+    def get_related_accounts(self, *, offset=0, limit=50):
+        return self._run("related_accounts", lambda c: _model_to_dict(c.get_related_accounts_list(offset=offset,limit=limit)))
+
+    def get_account_transactions(self, *, offset=None, limit=50):
+        return self._run("account_transactions", lambda c: _model_to_dict(c.get_account_transactions_list(offset=offset,limit=limit)))
+
+    def get_transaction_status(self, transaction_id):
+        return self._run("account_transaction_status", lambda c: _model_to_dict(c.get_transaction_status(transaction_id)))
+
+    def get_account_report(self, year, month):
+        return self._run("account_report", lambda c: [_model_to_dict(x) for x in c.get_account_report(year,month)])
+
+    def get_account_statistics(self, *, from_time, to_time, interval=86400):
+        return self._run("account_stats", lambda c: [_model_to_dict(x) for x in c.get_account_stats(from_time,to_time,interval)])
+
+    def get_audiences(self, *, offset=0, limit=50):
+        return self._run("audiences_list", lambda c: _model_to_dict(c.get_audiences_list(offset=offset,limit=limit)))
+
+    def get_pixel_info(self):
+        return self._run("pixel_info", lambda c: _model_to_dict(c.get_pixel()))
+
+    def get_pixel_events(self, *, offset=0, limit=50):
+        return self._run("pixel_events", lambda c: _model_to_dict(c.get_pixel_events_list(offset=offset,limit=limit)))

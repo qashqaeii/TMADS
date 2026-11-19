@@ -120,3 +120,6 @@
 @media(max-width:540px) { .ui-final .ui-ops .filter-exec__grid--inline { align-items:stretch; }.ui-final .ui-ops .filter-exec__field,.ui-filter-submit { width:100%; }.ui-filter-submit .btn { width:100%; } }
 
 .ui-remote-ops-card { display:grid;gap:12px; }.ui-remote-ops-card p { margin:4px 0;line-height:1.8; }
+
+.ui-account-report-tabs { display:flex;gap:8px;flex-wrap:wrap; }.ui-report-fields { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px; }
+@media(max-width:520px){.ui-report-fields{grid-template-columns:minmax(0,1fr)}.ui-account-report-tabs{flex-wrap:nowrap;overflow:auto;padding:4px}.ui-account-report-tabs .btn{flex:none}}
