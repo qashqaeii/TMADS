@@ -833,7 +833,13 @@ def studio_catalog_topics(request):
 def studio_catalog_locations(request):
     country = (request.GET.get("country") or "").strip().upper()
     q = (request.GET.get("q") or "").strip()
-    items = search_locations(country, q, limit=20)
+    from apps.telegram_ads.exceptions import TelegramAdsError
+    if _catalog_rate_limited(request.user.pk, "locations"):
+        return JsonResponse({"ok": False, "message": "چند لحظه صبر کنید."}, status=429)
+    try:
+        items = search_locations(country, q, limit=20, raise_on_unavailable=True)
+    except TelegramAdsError as exc:
+        return JsonResponse({"ok": False, "message": str(exc)}, status=503)
     return JsonResponse({"ok": True, "items": items})
 
 
@@ -841,14 +847,17 @@ _BOT_RESOLVE_LIMIT = 40
 _BOT_RESOLVE_WINDOW = 60
 
 
-def _bot_resolve_rate_limited(user_id: int) -> bool:
-    key = f"tmads:rate:bot_resolve:{user_id}"
+def _catalog_rate_limited(user_id: int, kind: str) -> bool:
+    key = f"tmads:rate:catalog:{kind}:{user_id}"
+    cache.add(key, 0, _BOT_RESOLVE_WINDOW)
     try:
-        count = cache.incr(key)
+        return cache.incr(key) > _BOT_RESOLVE_LIMIT
     except ValueError:
-        cache.set(key, 1, _BOT_RESOLVE_WINDOW)
-        count = 1
-    return count > _BOT_RESOLVE_LIMIT
+        return True
+
+
+def _bot_resolve_rate_limited(user_id: int) -> bool:
+    return _catalog_rate_limited(user_id, "bot")
 
 
 @login_required
@@ -874,7 +883,9 @@ def studio_catalog_resolve_bot(request):
 @customer_required
 @require_GET
 def studio_catalog_resolve_channel(request):
-    username = request.GET.get("username") or ""
+    if _catalog_rate_limited(request.user.pk, "channel"):
+        return JsonResponse({"ok": False, "pending": True, "error": "چند لحظه صبر کنید."}, status=429)
+    username = (request.GET.get("username") or "")[:256]
     return JsonResponse(resolve_channel(username))
 
 

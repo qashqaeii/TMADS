@@ -45,19 +45,25 @@ def build_input_target(target_type: str, config: dict[str, Any] | None) -> Any:
 
     if target_type == "channels":
         mode = (cfg.get("channel_mode") or cfg.get("mode") or "").strip()
-        if mode == "specific" or cfg.get("channel_ids"):
+        if not mode:
+            mode = "specific" if cfg.get("channel_ids") else "topics" if cfg.get("topic_ids") else "language"
+        if mode not in {"specific", "topics", "language"}:
+            raise ValueError("استراتژی هدف‌گیری کانال معتبر نیست.")
+        if mode == "specific":
             return InputAdTargetChannels(
                 channel_ids=_peer_list(cfg.get("channel_ids") or []),
                 exclude_channel_ids=_peer_list(cfg.get("exclude_channel_ids") or []),
+                exclude_topic_ids=[int(x) for x in cfg.get("exclude_topic_ids") or []],
             )
-        if mode == "topics" or cfg.get("topic_ids"):
+        if mode == "topics":
             langs = [str(c) for c in cfg.get("language_codes") or []]
             if not langs and cfg.get("language_code"):
                 langs = [str(cfg["language_code"])]
             return InputAdTargetChannels(
-                language_codes=langs[:1],
+                language_codes=langs,
                 topic_ids=[int(x) for x in cfg.get("topic_ids") or []],
                 exclude_topic_ids=[int(x) for x in cfg.get("exclude_topic_ids") or []],
+                exclude_channel_ids=_peer_list(cfg.get("exclude_channel_ids") or []),
             )
         return InputAdTargetChannels(
             language_codes=[str(c) for c in cfg.get("language_codes") or []],

@@ -118,21 +118,19 @@ def parse_targeting_payload(data, target_type: str) -> dict[str, Any]:
         cfg["bot_peer_checks"] = cached_bot_checks(cfg["bot_ids"])
 
     elif target_type == "channels":
-        cfg["channel_mode"] = (data.get("channel_mode") or "language").strip()
-        cfg["language_codes"] = getlist("language_codes") or getlist("channel_languages")
-        cfg["topic_ids"] = [int(x) for x in getlist("topic_ids") if str(x).isdigit()]
+        from apps.telegram_ads.targeting.normalize import parse_bot_peer_input
+
+        def peers(key):
+            values = [line.strip() for raw in getlist(key) for line in raw.splitlines() if line.strip()]
+            return [parse_bot_peer_input(value)[0] or value for value in values]
+
+        mode = (data.get("channel_mode") or "language").strip()
+        cfg["channel_mode"] = mode
+        cfg["language_codes"] = (getlist("language_codes") or getlist("channel_languages")) if mode in {"language", "topics"} else []
+        cfg["topic_ids"] = [int(x) for x in getlist("topic_ids") if str(x).isdigit()] if mode == "topics" else []
         cfg["exclude_topic_ids"] = [int(x) for x in getlist("exclude_topic_ids") if str(x).isdigit()]
-        channels = getlist("channel_ids")
-        raw_ch = data.get("channel_ids")
-        if raw_ch and not channels:
-            channels = [ln.strip() for ln in str(raw_ch).splitlines() if ln.strip()]
-        if data.get("channel_input"):
-            channels.append(normalize_username(str(data.get("channel_input"))))
-        cfg["channel_ids"] = [normalize_username(c) for c in channels if c]
-        excl = getlist("exclude_channel_ids")
-        if data.get("exclude_channel_input"):
-            excl.append(normalize_username(str(data.get("exclude_channel_input"))))
-        cfg["exclude_channel_ids"] = [normalize_username(c) for c in excl if c]
+        cfg["channel_ids"] = peers("channel_ids") if mode == "specific" else []
+        cfg["exclude_channel_ids"] = peers("exclude_channel_ids")
 
     elif target_type == "users":
         cfg["country_codes"] = [c.upper() for c in getlist("country_codes")]

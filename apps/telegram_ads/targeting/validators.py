@@ -49,9 +49,7 @@ def _validate_target_config(target_type: str, config: dict[str, Any], *, strict:
         return result
 
     if target_type == "search":
-        queries = dedupe_preserve_order(
-            [normalize_search_query(str(q)) for q in cfg.get("search_queries") or [] if str(q).strip()]
-        )
+        queries = [normalize_search_query(str(q)) for q in cfg.get("search_queries") or [] if str(q).strip()]
         if strict and not queries:
             result.errors.append("حداقل یک عبارت جستجو لازم است.")
         if len(queries) > TARGET_LIMITS["search_queries"]:
@@ -85,7 +83,15 @@ def _validate_target_config(target_type: str, config: dict[str, Any], *, strict:
             result.warnings.append("هدف‌گیری کاربران ممکن است بیش از حد محدود باشد.")
 
     if target_type == "channels":
-        mode = cfg.get("channel_mode") or cfg.get("mode") or "language"
+        mode = cfg.get("channel_mode") or cfg.get("mode") or ("specific" if cfg.get("channel_ids") else "topics" if cfg.get("topic_ids") else "language")
+        if mode not in {"specific", "topics", "language"}:
+            result.errors.append("استراتژی کانال معتبر نیست.")
+        if mode != "specific" and cfg.get("channel_ids"):
+            result.errors.append("کانال‌های مشخص با این استراتژی سازگار نیستند.")
+        if mode != "topics" and cfg.get("topic_ids"):
+            result.errors.append("موضوعات انتخاب‌شده با این استراتژی سازگار نیستند.")
+        if mode == "specific" and cfg.get("language_codes"):
+            result.errors.append("زبان مستقل در هدف‌گیری کانال مشخص قابل استفاده نیست.")
         if mode == "specific":
             if strict and not (cfg.get("channel_ids") or []):
                 result.errors.append("حداقل یک کانال مشخص انتخاب کنید.")

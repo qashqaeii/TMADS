@@ -208,8 +208,14 @@ class TelegramAdsClient:
             lambda client: _model_to_dict(client.submit_ad_for_review(ad_id=int(ad_id))),
         )
 
-    def resolve_target_channel(self, channel: str) -> dict[str, Any]:
-        return self._run("resolve_target_channel", lambda client: _model_to_dict(client.get_target_channel(channel)))
+    def resolve_target_channel(self, channel: str | int, *, for_excluding=False) -> dict[str, Any]:
+        return self._run("resolve_target_channel", lambda client: _model_to_dict(
+            client.get_target_channel(channel, for_excluding=True) if for_excluding else client.get_target_channel(channel)))
+
+    def get_target_locations_by_ids(self, location_ids: list[int]) -> list[dict[str, Any]]:
+        return self._run("get_target_locations_by_id", lambda client: [
+            _model_to_dict(item) for item in client.get_target_locations_by_id(location_ids=location_ids)
+        ])
 
     def get_target_locations(self, country_code: str, query: str, *, limit: int = 20) -> dict[str, Any]:
         return self._run(

@@ -111,3 +111,8 @@ Stored media is downloadable only via ownership-checked endpoint, even locally. 
 it. No selected media is silently omitted from a paid advert: submission and payment preflight
 block until real Telegram media upload support is verified. MP4/H.264 local checks are conservative,
 not proof of Telegram acceptance. Remote media upload remains a release blocker, not implemented.
+
+## Catalog truth
+No synthetic topic or city IDs are selectable; ISO language/country fallback codes are marked unverified.
+Live submission verifies selected catalog values, channel identities and geography via read-only API.
+The getTargetLocationsById adapter follows the repository API document; installed wrapper signature and live behavior require isolated verification. Channel strategy is now explicit; inactive selections cannot silently override it.

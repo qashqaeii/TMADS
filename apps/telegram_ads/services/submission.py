@@ -32,7 +32,10 @@ def _claim_submission(campaign_id):
             errors = validate_bot_targets(bot_ids, strict=True, require_verified=True)
             if errors or not bot_ids:
                 raise ValueError("؛ ".join(errors) or "ربات هدف تأیید نشده است.")
-        account = TelegramAdsClient().get_account()
+        client = TelegramAdsClient()
+        from apps.telegram_ads.services.catalog_verification import require_verified_catalog
+        require_verified_catalog(campaign, client)
+        account = client.get_account()
         try:
             remaining = Decimal(str(account["remaining_budget"]))
             if account.get("currency") != "TON" or not remaining.is_finite() or remaining < order.ton_allocation:
