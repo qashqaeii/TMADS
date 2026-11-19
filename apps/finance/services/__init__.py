@@ -128,6 +128,7 @@ def outstanding_order_reservation(wallet: Wallet, order_id: uuid.UUID) -> int:
         return rows.filter(entry_type=kind).aggregate(total=Sum("amount_irr"))["total"] or 0
     return (amount(WalletLedgerEntry.EntryType.RESERVATION)
             - amount(WalletLedgerEntry.EntryType.RESERVATION_RELEASE)
+            - amount(WalletLedgerEntry.EntryType.CREDIT_ALLOCATION)
             - amount(WalletLedgerEntry.EntryType.SPEND)
             - amount(WalletLedgerEntry.EntryType.SERVICE_FEE))
 

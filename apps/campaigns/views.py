@@ -657,6 +657,7 @@ def _quote_valid(campaign, order, quote):
         and quote.locked_total_irr == order.total_irr
         and payload.get("quote_status") == "locked"
         and payload.get("quote_nonce")
+        and payload.get("buffer_disposition") == "return_after_confirmed_allocation"
         and payload.get("requested_budget_irr") == campaign.budget_irr
         and payload.get("requested_daily_cap_irr") == campaign.daily_cap_irr
         and str(order.ton_allocation) == str(Decimal(str(payload.get("ton_allocation", "0"))).quantize(Decimal("0.000000001")))
@@ -684,6 +685,7 @@ def _create_quote(campaign: Campaign) -> None:
         **totals,
         "daily_limit_ton": str(daily_ton),
         "quote_nonce": uuid.uuid4().hex,
+        "buffer_disposition": "return_after_confirmed_allocation",
         "requested_budget_irr": campaign.budget_irr,
         "requested_daily_cap_irr": campaign.daily_cap_irr,
     }

@@ -87,3 +87,11 @@ in an isolated runtime with evidence, actual visual checks recorded, and
 external launch blockers clearly separated. Record completed work, commit SHA,
 verification and remaining tasks here after each coherent batch. Stop only
 when completed or when a genuine blocker prevents safe further progress.
+
+## Next batch — verified allocation settlement
+Source implementation: unique create receipt and strict read-only transaction evidence;
+locked allocation and service fee consume the order reservation separately from actual
+ad views spend. New quotes explicitly return the temporary rate buffer after verified
+allocation. Old quotes without these terms, incomplete histories, or missing create
+receipts remain locked for manual reconciliation. Remote sync no longer overwrites
+pending submission/reconciliation. Runtime and browser verification remain pending.

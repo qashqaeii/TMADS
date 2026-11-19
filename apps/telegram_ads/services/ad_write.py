@@ -122,4 +122,9 @@ def execute_create_ad(
     ad.placement = campaign.placement
     ad.promotion_url = campaign.destination
     ad.save()
+    APIRequestLog.objects.create(
+        operation="create_ad_receipt", success=True,
+        meta={"campaign_id": str(campaign.id), "order_id": str(order.id), "remote_ad_id": remote_id,
+              "idempotency_key": stable_key},
+    )
     return {"ok": True, "mode": mode.value, "result": result, "remote_ad_id": remote_id}

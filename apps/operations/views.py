@@ -98,6 +98,13 @@ def campaign_review(request, campaign_id):
                 messages.error(request, str(exc))
             except ValueError as exc:
                 messages.error(request, str(exc))
+        elif action == "settle_allocation":
+            from apps.finance.settlement import settle_confirmed_allocation
+            try:
+                settle_confirmed_allocation(campaign.pk, actor=request.user)
+                messages.success(request, "تخصیص اعتبار با سند تلگرام تطبیق و تسویه شد.")
+            except (ValueError, TelegramAdsError) as exc:
+                messages.error(request, str(exc))
         elif action == "link_ad":
             messages.error(request, "اتصال دستی شناسه بدون مستند تطبیق مجاز نیست.")
         else:
@@ -159,6 +166,7 @@ def campaign_review(request, campaign_id):
             "operator_gate": operator_gate,
             "review_block": review_block,
             "submit_block": submit_block,
+            "allocation_pending": bool(order and order.status == AdvertisingOrder.Status.SUBMITTING),
         },
     )
 

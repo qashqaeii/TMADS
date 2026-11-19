@@ -292,7 +292,7 @@
         <h3 class="section-title" style="font-size:.95rem;margin:0 0 .65rem">پیش‌فاکتور قطعی</h3>
         <div class="finance-line"><span>بودجه تبلیغ</span><strong class="tabnums">{{ quote_totals.advertising_budget_irr|irr_to_toman|format_irr }} تومان</strong></div>
         <div class="finance-line"><span>کارمزد</span><strong class="tabnums">{{ quote_totals.service_fee_irr|irr_to_toman|format_irr }} تومان</strong></div>
-        {% if quote_totals.risk_buffer_irr %}<div class="finance-line"><span>ذخیره ریسک نرخ</span><strong class="tabnums">{{ quote_totals.risk_buffer_irr|irr_to_toman|format_irr }} تومان</strong></div>{% endif %}
+        {% if quote_totals.risk_buffer_irr %}<div class="finance-line"><span>ذخیره موقت ریسک نرخ</span><strong class="tabnums">{{ quote_totals.risk_buffer_irr|irr_to_toman|format_irr }} تومان</strong></div><p class="muted studio-hint">ذخیره موقت، پس از تأیید تخصیص اعتبار در تلگرام به کیف پول شما بازمی‌گردد.</p>{% endif %}
         <div class="finance-line"><span>اعتبار خریداری‌شده</span><strong dir="ltr">{{ quote_totals.ton_allocation }} TON</strong></div>
         <div class="finance-line"><span>مبلغ قابل پرداخت</span><strong class="tabnums">{{ quote_totals.total_irr|irr_to_toman|format_irr }} تومان</strong></div>
         <p class="muted studio-hint">اعتبار پیش‌فاکتور تا {{ quote.expires_at|jalali_datetime }} است.</p>

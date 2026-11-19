@@ -75,8 +75,15 @@
         <button class="btn btn-primary" name="action" value="submit_telegram" type="submit" {% if submit_block %}disabled{% endif %}>ارسال تبلیغ</button>
       </form>
     </div>
+    {% if allocation_pending %}
+      <section class="card-muted card-pad form-stack" aria-labelledby="allocation-title">
+        <h3 class="section-title" id="allocation-title">تطبیق مالی تخصیص اعتبار</h3>
+        <p class="muted">تسویه فقط با سند واریز اعتبار به همین تبلیغ، از API تلگرام انجام می‌شود. در صورت مغایرت یا عدم قطعیت، رزرو بدون تغییر باقی می‌ماند.</p>
+        {% if remote_ads %}<form method="post">{% csrf_token %}<button class="btn btn-ghost" name="action" value="settle_allocation" type="submit">بررسی سند و تسویه</button></form>{% endif %}
+      </section>
+    {% endif %}
     {% if campaign.status == 'reconciliation' or campaign.status == 'submitting' %}
-      <div class="card-muted card-pad" role="status"><strong>نیازمند تطبیق</strong><p class="muted">برای جلوگیری از ارسال یا تخصیص تکراری، اتصال دستی یا ارسال مجدد غیرفعال است. تطبیق باید با مستند رسمی تلگرام انجام شود.</p></div>
+      <div class="card-muted card-pad" role="status"><strong>نیازمند تطبیق</strong><p class="muted">اتصال دستی یا ارسال مجدد غیرفعال است. ابتدا نتیجه ارسال را به‌صورت مستند بررسی کنید.</p></div>
     {% endif %}
   </section>
 </div>

@@ -36,6 +36,7 @@ class WalletLedgerEntry(UUIDModel, TimeStampedModel):
         DEPOSIT = "deposit", "واریز"
         RESERVATION = "reservation", "رزرو"
         RESERVATION_RELEASE = "reservation_release", "آزادسازی رزرو"
+        CREDIT_ALLOCATION = "credit_allocation", "تخصیص اعتبار تبلیغاتی"
         SPEND = "spend", "هزینه تبلیغ"
         SERVICE_FEE = "service_fee", "کارمزد سرویس"
         REFUND = "refund", "بازپرداخت"

@@ -112,6 +112,11 @@ def _sync_campaign_from_remote(ad: TelegramAdvertisement, *, include_target: boo
             campaign.cpm_bid = Decimal(str(cpm))
         except Exception:
             pass
+    # Remote display status must not undo a local submission/reconciliation lock.
+    from apps.finance.models import AdvertisingOrder
+    pending = AdvertisingOrder.objects.filter(campaign_id=campaign.pk, status=AdvertisingOrder.Status.SUBMITTING).exists()
+    if pending or campaign.status in {Campaign.Status.SUBMITTING, Campaign.Status.RECONCILIATION}:
+        return
     campaign.status = map_remote_status_to_campaign(item)
     update_fields = ["name", "destination", "placement", "status", "cpm_bid", "updated_at"]
     campaign.save(update_fields=update_fields)
