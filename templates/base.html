@@ -5,7 +5,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#146CA8">
-  <title>{% block title %}{{ PRODUCT_NAME }}{% endblock %}</title>
+  <title>{% if seo.title %}{{ seo.title }}{% else %}{% block title %}{{ PRODUCT_NAME }}{% endblock %}{% endif %}</title>
+  {% include "includes/seo_meta.html" %}
   <link rel="stylesheet" href="{% static 'css/app.css' %}">
   <link rel="stylesheet" href="{% static 'css/design-executive.css' %}">
   <link rel="stylesheet" href="{% static 'css/ui-foundation.css' %}">

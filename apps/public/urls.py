@@ -1,10 +1,12 @@
 from django.urls import path
 
-from . import views
+from . import views, seo
 
 app_name = "public"
 
 urlpatterns = [
+    path("robots.txt", seo.robots_txt, name="robots"),
+    path("sitemap.xml", seo.sitemap_xml, name="sitemap"),
     path("", views.home, name="home"),
     path("features/", views.features, name="features"),
     path("how-it-works/", views.how_it_works, name="how_it_works"),
