@@ -1,14 +1,14 @@
-﻿{% extends "app_shell.html" %}
+{% extends "app_shell.html" %}
 {% block page_title %}شارژ کیف پول{% endblock %}
 {% block container_class %}container-wide{% endblock %}
 {% block content %}
-<div class="app-stack">
+<div class="app-stack finance-page">
 {% include "includes/dash_header.html" with eyebrow="مالی" title="شارژ کیف پول" %}
-<form method="post" class="card card--lift card-pad form-stack" style="max-width:28rem">
+<form method="post" class="card card--lift card-pad form-stack finance-form">
   {% csrf_token %}
-  <div class="field"><label>مبلغ (تومان)</label><input name="amount_toman" type="number" min="1000" dir="ltr" required></div>
+  <div class="field"><label for="topup-amount">مبلغ (تومان)</label><input id="topup-amount" aria-describedby="topup-help" inputmode="numeric" name="amount_toman" type="number" min="1000" dir="ltr" required><p id="topup-help" class="field-help">حداقل مبلغ شارژ ۱٬۰۰۰ تومان است.</p></div>
   {% if payment_gateway == 'fake' %}<p class="muted" style="font-size:.85rem;margin:0">در محیط آزمایشی، پرداخت شبیه‌سازی می‌شود.</p>{% endif %}
-  <button class="btn btn-primary" type="submit">ادامه پرداخت</button>
+  <div class="finance-form__actions"><button class="btn btn-primary" type="submit">ادامه پرداخت</button><a class="btn btn-ghost" href="{% url 'finance:wallet' %}">بازگشت به کیف پول</a></div>
 </form>
 </div>
 {% endblock %}

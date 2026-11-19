@@ -1,7 +1,7 @@
 {% extends "public_base.html" %}
 {% block title %}تماس — {{ PRODUCT_NAME }}{% endblock %}
 {% block content %}
-{% include "includes/public_hero.html" with title="تماس" compact=1 %}
+{% include "includes/public_hero.html" with title="تماس" subtitle="برای پیگیری درخواست‌ها و دریافت راهنمایی" show_subtitle=1 compact=1 %}
 <section class="section public-section container">
   <article class="contact-card contact-card--exec">
     <h2>پشتیبانی مشتریان</h2>
@@ -10,8 +10,8 @@
     <a class="btn btn-primary" href="{% url 'support:create' %}">ثبت تیکت</a>
     {% else %}
     <div class="hero-actions" style="margin-top:.75rem">
-      <a class="btn btn-primary" href="{% url 'accounts:login' %}">ورود</a>
-      <a class="btn btn-ghost" href="{% url 'public:faq' %}">سوالات</a>
+      <a class="btn btn-primary" href="{% url 'accounts:login' %}">ورود و ثبت درخواست</a>
+      <a class="btn btn-ghost" href="{% url 'public:faq' %}">سوالات متداول</a>
     </div>
     {% endif %}
   </article>

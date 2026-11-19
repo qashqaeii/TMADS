@@ -114,7 +114,7 @@
       </button>
     </div>
 
-    <div class="tab-panel" role="tabpanel" id="campaign-panel-overview" aria-labelledby="campaign-tab-overview" x-show="tab === 'overview'" x-cloak>
+    <div class="tab-panel" role="tabpanel" tabindex="0" id="campaign-panel-overview" aria-labelledby="campaign-tab-overview" x-show="tab === 'overview'" x-cloak>
       <div class="panel-grid panel-2 campaign-detail__split">
         <section class="info-module info-module--lift campaign-overview-card">
           <header class="campaign-overview-card__head">
@@ -247,7 +247,7 @@
       {% endif %}
     </div>
 
-    <div class="tab-panel" role="tabpanel" id="campaign-panel-analytics" aria-labelledby="campaign-tab-analytics" x-show="tab === 'analytics'" x-cloak>
+    <div class="tab-panel" role="tabpanel" tabindex="0" id="campaign-panel-analytics" aria-labelledby="campaign-tab-analytics" x-show="tab === 'analytics'" x-cloak>
       <div class="campaign-analytics-suite">
         <section class="campaign-analytics-trend motion-reveal" aria-labelledby="campaign-analytics-trend-title">
           <header class="campaign-analytics-trend__head">
@@ -393,7 +393,7 @@
       </div>
     </div>
 
-    <div class="tab-panel" role="tabpanel" id="campaign-panel-creative" aria-labelledby="campaign-tab-creative" x-show="tab === 'creative'" x-cloak>
+    <div class="tab-panel" role="tabpanel" tabindex="0" id="campaign-panel-creative" aria-labelledby="campaign-tab-creative" x-show="tab === 'creative'" x-cloak>
       <section class="campaign-detail-panel campaign-detail-panel--creative motion-reveal">
         <header class="campaign-detail-panel__head">
           <span class="campaign-detail-panel__glyph" aria-hidden="true">{% include "includes/lucide_icon.html" with name="megaphone" size="sm" %}</span>
@@ -465,7 +465,7 @@
       </section>
     </div>
 
-    <div class="tab-panel" role="tabpanel" id="campaign-panel-targeting" aria-labelledby="campaign-tab-targeting" x-show="tab === 'targeting'" x-cloak>
+    <div class="tab-panel" role="tabpanel" tabindex="0" id="campaign-panel-targeting" aria-labelledby="campaign-tab-targeting" x-show="tab === 'targeting'" x-cloak>
       <section class="campaign-detail-panel campaign-detail-panel--targeting motion-reveal targeting-board-wrap">
         <header class="campaign-detail-panel__head targeting-board__hero">
           <span class="campaign-detail-panel__glyph" aria-hidden="true">{% include "includes/lucide_icon.html" with name="crosshair" size="sm" %}</span>
@@ -491,7 +491,7 @@
       </section>
     </div>
 
-    <div class="tab-panel" role="tabpanel" id="campaign-panel-finance" aria-labelledby="campaign-tab-finance" x-show="tab === 'finance'" x-cloak>
+    <div class="tab-panel" role="tabpanel" tabindex="0" id="campaign-panel-finance" aria-labelledby="campaign-tab-finance" x-show="tab === 'finance'" x-cloak>
       <div class="campaign-detail-panel-stack">
         {% if budget.has_remote and budget.spent_percent is not None %}
         <section class="campaign-detail-panel campaign-detail-panel--finance-meter motion-reveal" aria-label="مصرف بودجه">
@@ -561,7 +561,7 @@
       </div>
     </div>
 
-    <div class="tab-panel" role="tabpanel" id="campaign-panel-history" aria-labelledby="campaign-tab-history" x-show="tab === 'history'" x-cloak>
+    <div class="tab-panel" role="tabpanel" tabindex="0" id="campaign-panel-history" aria-labelledby="campaign-tab-history" x-show="tab === 'history'" x-cloak>
       <section class="campaign-detail-panel campaign-detail-panel--history motion-reveal">
         <header class="campaign-detail-panel__head">
           <span class="campaign-detail-panel__glyph" aria-hidden="true">{% include "includes/lucide_icon.html" with name="history" size="sm" %}</span>

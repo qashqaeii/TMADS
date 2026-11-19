@@ -1,15 +1,16 @@
-﻿{% extends "app_shell.html" %}
+{% extends "app_shell.html" %}
 {% load core_filters %}
 {% block page_title %}فاکتور {{ invoice.invoice_number }}{% endblock %}
 {% block container_class %}container-wide{% endblock %}
 {% block content %}
-<div class="app-stack">
+<div class="app-stack finance-page">
 {% url 'finance:invoices' as invoices_url %}
-{% include "includes/dash_header.html" with eyebrow="فاکتور" title=invoice.invoice_number subtitle=invoice.created_at|jalali_datetime with_sub=1 action_url=invoices_url action_label="همه" %}
-<section class="card card--lift card-pad">
-  <div class="finance-line"><span>شرح</span><strong>{{ invoice.description|default:"—" }}</strong></div>
+{% include "includes/dash_header.html" with eyebrow="فاکتور" title=invoice.invoice_number subtitle=invoice.created_at|jalali_datetime with_sub=1 action_url=invoices_url action_label="همه فاکتورها" %}
+<section class="card card--lift card-pad finance-invoice" aria-label="جزئیات فاکتور">
+  <h2 class="section-title">خلاصه فاکتور</h2>
+  <div class="finance-line"><span>شرح</span><strong class="finance-invoice__description">{{ invoice.description|default:"—" }}</strong></div>
   <div class="finance-line"><span>مبلغ</span><strong class="tabnums">{{ invoice.amount_irr|irr_to_toman|format_irr }} تومان</strong></div>
-  {% if invoice.order %}<div class="finance-line"><span>سفارش</span><code dir="ltr">{{ invoice.order_id }}</code></div>{% endif %}
+  {% if invoice.order %}<div class="finance-line"><span>سفارش</span><code class="finance-invoice__reference" dir="ltr">{{ invoice.order_id }}</code></div>{% endif %}
 </section>
 </div>
 {% endblock %}

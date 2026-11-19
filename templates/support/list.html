@@ -1,4 +1,4 @@
-﻿{% extends "app_shell.html" %}
+{% extends "app_shell.html" %}
 {% load core_filters %}
 {% block page_title %}پشتیبانی{% endblock %}
 {% block container_class %}container-wide{% endblock %}
@@ -7,13 +7,13 @@
 {% url 'support:create' as create_url %}
 {% include "includes/dash_header.html" with eyebrow="پشتیبانی" title="تیکت‌ها" action_url=create_url action_label="تیکت جدید" action_primary=1 %}
 {% if tickets %}
-<ul class="record-list">
+<ul class="record-list" aria-label="درخواست‌های پشتیبانی">
   {% for t in tickets %}
   <li>
     <a class="record-list__item" href="{% url 'support:detail' t.id %}">
       <span class="record-list__meta">
         <strong>{{ t.subject }}</strong>
-        <small>{{ t.created_at|jalali_datetime }}</small>
+        <small><time datetime="{{ t.created_at|date:'c' }}">{{ t.created_at|jalali_datetime }}</time></small>
       </span>
       <span class="status status--compact status-info">{{ t.get_status_display }}</span>
     </a>

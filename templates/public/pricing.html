@@ -1,12 +1,12 @@
 {% extends "public_base.html" %}
 {% block title %}تعرفه — {{ PRODUCT_NAME }}{% endblock %}
 {% block content %}
-{% include "includes/public_hero.html" with title="تعرفه" compact=1 %}
+{% include "includes/public_hero.html" with title="تعرفه" subtitle="هزینه‌ها را پیش از پرداخت بررسی کنید" show_subtitle=1 compact=1 %}
 <section class="section public-section container">
   <div class="pricing-shell">
     <article class="pricing-card--exec">
       <p class="badge-tg--exec badge-tg" style="margin:0">مدل شفاف</p>
-      <p class="price-tag">کارمزد درصدی</p>
+      <h2 class="price-tag">کارمزد درصدی</h2>
       <p class="muted" style="margin:.35rem 0 0;font-size:.88rem">بر بودجه خالص تبلیغ — قابل تنظیم در عملیات</p>
       <ul>
         <li>پیش‌فاکتور با نرخ گرام</li>

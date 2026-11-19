@@ -1,9 +1,9 @@
 {% extends "public_base.html" %}
 {% block title %}سوالات — {{ PRODUCT_NAME }}{% endblock %}
 {% block content %}
-{% include "includes/public_hero.html" with title="سوالات متداول" compact=1 %}
+{% include "includes/public_hero.html" with title="سوالات متداول" subtitle="پاسخ پرسش‌های رایج پیش از شروع" show_subtitle=1 compact=1 %}
 <section class="section public-section container">
-  <div class="faq-list faq-list--exec">
+  <div class="faq-list faq-list--exec" role="region" aria-label="پرسش‌ها و پاسخ‌ها">
     <details class="faq-item faq-item--exec"><summary>آیا به حساب Telegram Ads نیاز دارم؟</summary><p>خیر. تبلیغ از حساب مرکزی پلتفرم مدیریت می‌شود.</p></details>
     <details class="faq-item faq-item--exec"><summary>آیا نمایش تضمینی است؟</summary><p>خیر. اعداد گزارش از API واقعی خوانده می‌شوند.</p></details>
     <details class="faq-item faq-item--exec"><summary>پرداخت چگونه است؟</summary><p>کیف پول ریالی؛ در تولید درگاه واقعی فعال می‌شود.</p></details>

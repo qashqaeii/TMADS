@@ -1,12 +1,12 @@
-<div class="exec-menu exec-menu--detail campaign-detail__toolbar-item" x-data="{ open: false }" @keydown.escape.window="open = false">
-  <button type="button" class="exec-menu__trigger campaign-detail__action campaign-detail__action--more" @click="open = !open" :aria-expanded="open" aria-haspopup="menu">
+<details class="exec-menu exec-menu--detail campaign-detail__toolbar-item" data-disclosure-menu>
+  <summary class="exec-menu__trigger campaign-detail__action campaign-detail__action--more">
     <span class="campaign-detail__action-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="ellipsis" size="sm" %}</span>
     <span class="campaign-detail__action-label">بیشتر</span>
-  </button>
-  <div class="exec-menu__panel" x-show="open" x-transition.opacity @click.outside="open = false" x-cloak role="menu">
-    <a role="menuitem" class="exec-menu__item" href="{% url 'campaigns:wizard' campaign.id %}">ویرایش ویزارد</a>
-    <a role="menuitem" class="exec-menu__item" href="{% url 'campaigns:duplicate' campaign.id %}">تکثیر کمپین</a>
-    <a role="menuitem" class="exec-menu__item" href="{% url 'campaigns:export_csv' campaign.id %}">خروجی CSV</a>
+  </summary>
+  <div class="exec-menu__panel">
+    <a class="exec-menu__item" href="{% url 'campaigns:wizard' campaign.id %}">ویرایش ویزارد</a>
+    <a class="exec-menu__item" href="{% url 'campaigns:duplicate' campaign.id %}">تکثیر کمپین</a>
+    <a class="exec-menu__item" href="{% url 'campaigns:export_csv' campaign.id %}">خروجی CSV</a>
     {% if can_delete_draft %}
     <form method="post" action="{% url 'campaigns:delete' campaign.id %}" class="exec-menu__item exec-menu__item--danger" onsubmit="return confirm('این پیش‌نویس برای همیشه حذف شود؟');">
       {% csrf_token %}
@@ -14,4 +14,4 @@
     </form>
     {% endif %}
   </div>
-</div>
+</details>

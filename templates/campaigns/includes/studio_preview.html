@@ -1,13 +1,13 @@
 {% load core_filters %}
-<aside class="studio-aside" id="studio-preview-panel">
-  <p class="studio-aside__eyebrow">پیش‌نمایش</p>
+<aside class="studio-aside" id="studio-preview-panel" aria-labelledby="studio-preview-title">
+  <h2 class="studio-aside__eyebrow" id="studio-preview-title">پیش‌نمایش تبلیغ</h2>
   <p class="muted studio-disclaimer">پیش‌نمایش تقریبی است و ممکن است نمایش نهایی در تلگرام متفاوت باشد.</p>
 
   {% if campaign.target_type == 'search' %}
   <div class="tg-search-preview" dir="ltr">
-    <div class="tg-search-preview__bar">🔍 <span>{% firstof campaign.targeting.config.search_queries.0 'جستجو' %}</span></div>
+    <div class="tg-search-preview__bar"><span aria-hidden="true">{% include "includes/lucide_icon.html" with name="search" size="sm" %}</span> <span>{% firstof campaign.targeting.config.search_queries.0 'جستجو' %}</span></div>
     <div class="tg-search-preview__ad">
-      <div class="tg-search-preview__avatar"></div>
+      <div class="tg-search-preview__avatar" aria-hidden="true"></div>
       <div>
         <strong dir="auto">{{ campaign.name|default:'عنوان تبلیغ' }}</strong>
         <span class="tg-search-preview__badge">Ad</span>

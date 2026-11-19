@@ -3,7 +3,7 @@
 {% block page_title %}بازپرداخت‌ها{% endblock %}
 {% block container_class %}container-wide{% endblock %}
 {% block content %}
-<div class="app-stack">
+<div class="app-stack operations-page">
 {% include "includes/dash_header.html" with eyebrow="عملیات" title="بازپرداخت" %}
 <section class="filter-exec-shell" aria-label="فیلتر بازپرداخت">
   <form method="get" class="filter-exec">
@@ -23,14 +23,14 @@
 </section>
 {% if refunds %}
 <article class="card table-card card--lift">
-  <div class="table-wrap">
-    <table class="data-table">
-      <thead><tr><th>مشتری</th><th>مبلغ</th><th>وضعیت</th><th>دلیل</th><th>اقدام</th></tr></thead>
+  <div class="table-wrap" tabindex="0" role="region" aria-label="درخواست‌های بازپرداخت">
+    <table class="data-table"><caption class="sr-only">درخواست‌های بازپرداخت</caption>
+      <thead><tr><th scope="col">مشتری</th><th scope="col">مبلغ</th><th scope="col">وضعیت</th><th scope="col">دلیل</th><th scope="col">اقدام</th></tr></thead>
       <tbody>
       {% for r in refunds %}
         <tr>
           <td>{{ r.customer }}</td>
-          <td>{{ r.amount_irr|irr_to_toman|format_irr }} ت</td>
+          <td>{{ r.amount_irr|irr_to_toman|format_irr }} تومان</td>
           <td><span class="status status-info">{{ r.get_status_display }}</span></td>
           <td style="max-width:220px">{{ r.reason|truncatechars:100 }}</td>
           <td>
@@ -39,7 +39,7 @@
               <input type="hidden" name="refund_id" value="{{ r.id }}">
               <button class="btn btn-primary btn-sm" name="action" value="approve" type="submit">تأیید</button>
               <button class="btn btn-danger btn-sm" name="action" value="reject" type="submit">رد</button>
-              <input name="note" placeholder="دلیل رد" style="max-width:100px;font-size:.8rem">
+              <label class="sr-only" for="refund-note-{{ r.id }}">دلیل رد درخواست {{ r.customer }}</label><input id="refund-note-{{ r.id }}" name="note" placeholder="دلیل رد" class="operations-note">
             </form>
             {% else %}—{% endif %}
           </td>
@@ -50,7 +50,7 @@
   </div>
 </article>
 {% else %}
-<div class="empty-state card--lift"><strong>درخواست باز نیست</strong></div>
+<div class="empty-state card--lift"><strong>درخواستی با این فیلتر یافت نشد</strong></div>
 {% endif %}
 </div>
 {% endblock %}

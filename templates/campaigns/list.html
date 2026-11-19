@@ -86,24 +86,25 @@
   </header>
 
   {% if campaign_rows %}
-  <div class="table-wrap table-wrap--scroll campaign-table-desktop">
+  <div class="table-wrap table-wrap--scroll campaign-table-desktop" tabindex="0" role="region" aria-label="جدول کمپین‌ها؛ برای دیدن ستون‌های بیشتر پیمایش کنید">
     <table class="data-table data-table--campaigns" id="campaign-data-table">
+      <caption class="sr-only">وضعیت، عملکرد و عملیات کمپین‌ها</caption>
       <thead>
         <tr>
-          <th class="campaigns-table__col campaigns-table__col--name">کمپین</th>
-          <th class="campaigns-table__col campaigns-table__col--status">وضعیت</th>
-          <th class="num campaigns-table__col campaigns-table__col--metric">نمایش</th>
-          <th class="num campaigns-table__col campaigns-table__col--metric">کلیک</th>
-          <th class="num campaigns-table__col campaigns-table__col--metric">نرخ کلیک</th>
-          <th class="num campaigns-table__col campaigns-table__col--metric">مصرف</th>
-          <th class="col-advanced campaigns-table__col">مقصد</th>
-          <th class="col-advanced campaigns-table__col">جایگاه</th>
-          <th class="spark col-advanced campaigns-table__col">روند</th>
-          <th class="num col-advanced campaigns-table__col">ورود</th>
-          <th class="num col-advanced campaigns-table__col">هزینهٔ هزار نمایش</th>
-          <th class="num col-advanced campaigns-table__col">باقی‌مانده</th>
-          <th class="col-advanced campaigns-table__col">بروزرسانی</th>
-          <th class="campaigns-table__col campaigns-table__col--actions"><span class="sr-only">عملیات</span></th>
+          <th scope="col" class="campaigns-table__col campaigns-table__col--name">کمپین</th>
+          <th scope="col" class="campaigns-table__col campaigns-table__col--status">وضعیت</th>
+          <th scope="col" class="num campaigns-table__col campaigns-table__col--metric">نمایش</th>
+          <th scope="col" class="num campaigns-table__col campaigns-table__col--metric">کلیک</th>
+          <th scope="col" class="num campaigns-table__col campaigns-table__col--metric">نرخ کلیک</th>
+          <th scope="col" class="num campaigns-table__col campaigns-table__col--metric">مصرف</th>
+          <th scope="col" class="col-advanced campaigns-table__col">مقصد</th>
+          <th scope="col" class="col-advanced campaigns-table__col">جایگاه</th>
+          <th scope="col" class="spark col-advanced campaigns-table__col">روند</th>
+          <th scope="col" class="num col-advanced campaigns-table__col">ورود</th>
+          <th scope="col" class="num col-advanced campaigns-table__col">هزینهٔ هزار نمایش</th>
+          <th scope="col" class="num col-advanced campaigns-table__col">باقی‌مانده</th>
+          <th scope="col" class="col-advanced campaigns-table__col">بروزرسانی</th>
+          <th scope="col" class="campaigns-table__col campaigns-table__col--actions"><span class="sr-only">عملیات</span></th>
         </tr>
       </thead>
       <tbody>

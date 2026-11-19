@@ -13,8 +13,8 @@
     >
       <span class="dash-hero__chip-label">گرام</span>
       <span class="dash-hero__chip-value">{{ ton_rate_display.irr_per_ton|irr_to_toman|format_count }}</span>
-      <span class="dash-hero__chip-unit">ت</span>
-      {% if not ton_rate_display.is_fresh %}<span class="dash-hero__chip-dot" aria-label="نرخ لحظه‌ای نیست"></span>{% endif %}
+      <span class="dash-hero__chip-unit">تومان</span>
+      {% if not ton_rate_display.is_fresh %}<span class="dash-hero__chip-dot" aria-hidden="true"></span><span class="dash-hero__rate-note">آخرین نرخ ثبت‌شده</span>{% endif %}
     </p>
     {% endif %}
     <a class="dash-hero__cta btn btn-primary btn-sm" href="{% url 'campaigns:wizard_new' %}">

@@ -13,11 +13,13 @@
   <script defer src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
   <script defer src="{% static 'js/lucide-mount.js' %}"></script>
   <script defer src="{% static 'js/motion.js' %}"></script>
+  <script defer src="{% static 'js/navigation.js' %}"></script>
   <script defer src="{% static 'js/tmads-tooltips.js' %}"></script>
   {% block extra_head %}{% endblock %}
   {% block charts_head %}{% endblock %}
 </head>
 <body class="app-body {% block body_class %}{% endblock %}">
+  <a class="skip-link" href="#main-content">رفتن به محتوای اصلی</a>
   {% block body %}{% endblock %}
   {% if messages %}
   <div class="toast-stack" aria-live="polite">
@@ -28,3 +30,4 @@
   {% endif %}
 </body>
 </html>
+

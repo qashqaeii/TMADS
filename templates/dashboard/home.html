@@ -77,7 +77,7 @@
               </div>
             </div>
             <div class="dash-campaign-card__meta">
-              <time class="dash-campaign-row__when dash-campaign-card__when">{{ c.updated_at|jalali_datetime }}</time>
+              <time class="dash-campaign-row__when dash-campaign-card__when" datetime="{{ c.updated_at|date:'c' }}">{{ c.updated_at|jalali_datetime }}</time>
               <span class="dash-campaign-card__go" aria-hidden="true">{% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}</span>
             </div>
           </a>
@@ -112,7 +112,7 @@
               <a href="{% url 'campaigns:detail' a.campaign_id %}">{{ a.campaign.name|default:"کمپین" }}</a>
               — {% if a.note %}{{ a.note }}{% else %}به‌روزرسانی وضعیت{% endif %}
             </p>
-            <time class="dash-activity-list__time">{{ a.created_at|jalali_datetime }}</time>
+            <time class="dash-activity-list__time" datetime="{{ a.created_at|date:'c' }}">{{ a.created_at|jalali_datetime }}</time>
           </div>
         </li>
         {% endfor %}

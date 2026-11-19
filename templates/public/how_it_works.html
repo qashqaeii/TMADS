@@ -1,16 +1,16 @@
 {% extends "public_base.html" %}
 {% block title %}نحوه کار — {{ PRODUCT_NAME }}{% endblock %}
 {% block content %}
-{% include "includes/public_hero.html" with title="نحوه کار" compact=1 %}
+{% include "includes/public_hero.html" with title="نحوه کار" subtitle="شش گام از ایجاد حساب تا مشاهدهٔ گزارش" show_subtitle=1 compact=1 %}
 <section class="section public-section container">
-  <div class="steps-row steps-row--exec">
-    <article class="card step-card card--lift"><h3>ثبت‌نام</h3><p class="muted">ورود به داشبورد فارسی.</p></article>
-    <article class="card step-card card--lift"><h3>ساخت کمپین</h3><p class="muted">ویزارد چندمرحله‌ای.</p></article>
-    <article class="card step-card card--lift"><h3>پرداخت</h3><p class="muted">رزرو از کیف پول.</p></article>
-    <article class="card step-card card--lift"><h3>بررسی</h3><p class="muted">بازبینی توسط عملیات.</p></article>
-    <article class="card step-card card--lift"><h3>انتشار</h3><p class="muted">ارسال از حساب مرکزی.</p></article>
-    <article class="card step-card card--lift"><h3>گزارش</h3><p class="muted">آمار در داشبورد شما.</p></article>
-  </div>
+  <ol class="steps-row steps-row--exec public-steps">
+    <li class="card step-card card--lift"><h2>ثبت‌نام</h2><p class="muted">ورود به داشبورد فارسی.</p></li>
+    <li class="card step-card card--lift"><h2>ساخت کمپین</h2><p class="muted">ویزارد چندمرحله‌ای.</p></li>
+    <li class="card step-card card--lift"><h2>پرداخت</h2><p class="muted">رزرو از کیف پول.</p></li>
+    <li class="card step-card card--lift"><h2>بررسی</h2><p class="muted">بازبینی توسط عملیات.</p></li>
+    <li class="card step-card card--lift"><h2>انتشار</h2><p class="muted">ارسال از حساب مرکزی.</p></li>
+    <li class="card step-card card--lift"><h2>گزارش</h2><p class="muted">آمار در داشبورد شما.</p></li>
+  </ol>
   <p style="text-align:center;margin-top:1.75rem"><a class="btn btn-primary" href="{% url 'accounts:register' %}">شروع کنید</a></p>
 </section>
 {% endblock %}

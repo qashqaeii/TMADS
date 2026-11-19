@@ -669,6 +669,28 @@
     load();
     paint();
 
+    var cells = Array.from(root.querySelectorAll(".schedule-cell"));
+    cells.forEach(function (cell, index) {
+      cell.tabIndex = index === 0 ? 0 : -1;
+      cell.addEventListener("focus", function () {
+        cells.forEach(function (other) { other.tabIndex = other === cell ? 0 : -1; });
+      });
+      cell.addEventListener("keydown", function (event) {
+        if (event.altKey || event.metaKey) return;
+        var next = index;
+        var rtl = getComputedStyle(root).direction === "rtl";
+        if (event.key === "ArrowRight") next += rtl ? -1 : 1;
+        else if (event.key === "ArrowLeft") next += rtl ? 1 : -1;
+        else if (event.key === "ArrowDown") next += 24;
+        else if (event.key === "ArrowUp") next -= 24;
+        else if (event.key === "Home") next = event.ctrlKey ? 0 : Math.floor(index / 24) * 24;
+        else if (event.key === "End") next = event.ctrlKey ? cells.length - 1 : Math.floor(index / 24) * 24 + 23;
+        else return;
+        event.preventDefault();
+        cells[Math.max(0, Math.min(cells.length - 1, next))].focus();
+      });
+    });
+
     root.querySelectorAll(".schedule-cell").forEach(function (btn) {
       btn.addEventListener("click", function () {
         var tr = btn.closest("tr");

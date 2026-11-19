@@ -7,7 +7,7 @@
   {% include "includes/dash_header.html" with title="استودیو ساخت تبلیغ" subtitle=campaign.name|default:"پیش‌نویس جدید" with_sub=1 %}
   <nav class="wizard-progress wizard-progress--exec" aria-label="مراحل">
     {% for key, label in steps %}
-      <span class="wizard-step {% if forloop.counter == step %}is-active{% elif forloop.counter < step %}is-complete{% endif %}">{{ forloop.counter }}. {{ label }}</span>
+      <span {% if forloop.counter == step %}aria-current="step"{% endif %} class="wizard-step {% if forloop.counter == step %}is-active{% elif forloop.counter < step %}is-complete{% endif %}">{{ forloop.counter }}. {{ label }}</span>
     {% endfor %}
   </nav>
   <div class="studio-layout">
@@ -31,7 +31,7 @@
         <label class="choice-card {% if studio_mode == 'professional' %}is-selected{% endif %}">
           <input type="radio" name="studio_mode" value="professional" {% if studio_mode == 'professional' %}checked{% endif %}>
           <strong>تنظیمات حرفه‌ای</strong>
-          <p class="muted" style="margin:.3rem 0 0;font-size:.8rem">تمام گزینه‌های پیشرفته معتبر API.</p>
+          <p class="muted" style="margin:.3rem 0 0;font-size:.8rem">کنترل دقیق مخاطب، محتوا و زمان نمایش.</p>
         </label>
       </fieldset>
 
@@ -50,13 +50,13 @@
         {% endfor %}
       </div>
       <div class="field" style="margin-top:1rem">
-        <label>عنوان داخلی تبلیغ</label>
-        <input name="campaign_name" value="{{ campaign.name }}" maxlength="128" autocomplete="off">
+        <label for="studio-control-1">عنوان داخلی تبلیغ</label>
+        <input id="studio-control-1" name="campaign_name" value="{{ campaign.name }}" maxlength="128" autocomplete="off">
         <p class="muted" style="font-size:.8rem;margin:.25rem 0 0">فقط در پنل تلگرام نمایش داده می‌شود.</p>
       </div>
       <div class="field" id="field-destination">
-        <label>لینک مقصد (Promoted URL)</label>
-        <input name="destination" value="{{ campaign.destination }}" dir="ltr" placeholder="https://t.me/..." autocomplete="off">
+        <label for="studio-control-2">لینک مقصد (Promoted URL)</label>
+        <input id="studio-control-2" name="destination" value="{{ campaign.destination }}" dir="ltr" placeholder="https://t.me/..." autocomplete="off">
       </div>
       {% include "campaigns/includes/policy_panel.html" %}
 
@@ -81,18 +81,18 @@
 
       {% if campaign.target_type == 'search' %}
       <div data-search-chips data-max="10">
-        <label>عبارت‌های جستجو</label>
-        <input type="text" data-search-chip-input placeholder="عبارت را بنویسید و Enter بزنید" dir="auto">
+        <label for="studio-control-3">عبارت‌های جستجو</label>
+        <input id="studio-control-3" type="text" data-search-chip-input placeholder="عبارت را بنویسید و Enter بزنید" dir="auto">
         <p class="muted" data-search-counter style="margin:.35rem 0 0">۰ از ۱۰ عبارت جستجو</p>
         <ul class="chip-list" data-search-chip-list></ul>
         <input type="hidden" name="search_queries_json" data-search-chip-hidden value="{{ search_queries_json|escape }}">
       </div>
       {% elif campaign.target_type == 'bots' %}
       <div class="field bot-target-studio" data-bot-selector>
-        <label>ربات‌های هدف</label>
-        <p class="muted studio-hint studio-hint--sm">پس از وارد کردن نام کاربری، وضعیت ربات از API رسمی خوانده می‌شود.</p>
+        <label for="studio-bots">ربات‌های هدف</label>
+        <p id="studio-bots-hint" class="muted studio-hint studio-hint--sm">پس از وارد کردن نام کاربری، وضعیت ربات از API رسمی خوانده می‌شود.</p>
         <div class="catalog-row">
-          <input type="text" data-bot-input dir="ltr" placeholder="@mybot یا https://t.me/mybot" autocomplete="off" spellcheck="false">
+          <input id="studio-bots" aria-describedby="studio-bots-hint" type="text" data-bot-input dir="ltr" placeholder="@mybot یا https://t.me/mybot" autocomplete="off" spellcheck="false">
           <button type="button" class="btn btn-ghost btn-sm" data-bot-add disabled>افزودن</button>
         </div>
         <div class="bot-target-preview" data-bot-preview hidden aria-live="polite"></div>
@@ -103,51 +103,51 @@
       </div>
       {% elif campaign.target_type == 'channels' %}
       <div class="field">
-        <label>استراتژی هدف‌گیری کانال</label>
-        <select name="channel_mode">
+        <label for="studio-control-4">استراتژی هدف‌گیری کانال</label>
+        <select id="studio-control-4" name="channel_mode">
           <option value="language" {% if campaign.targeting.config.channel_mode == 'language' %}selected{% endif %}>بر اساس زبان کانال</option>
           <option value="topics" {% if campaign.targeting.config.channel_mode == 'topics' %}selected{% endif %}>زبان + موضوع</option>
           <option value="specific" {% if campaign.targeting.config.channel_mode == 'specific' %}selected{% endif %}>کانال‌های مشخص</option>
         </select>
       </div>
       <div class="field" data-multiselect data-field="language_codes" data-catalog='{{ catalog_languages_json|escape }}' data-kind="language">
-        <label>زبان کانال‌ها</label>
-        <input type="search" data-ms-search placeholder="جستجوی زبان…" dir="auto">
+        <label for="studio-control-5">زبان کانال‌ها</label>
+        <input id="studio-control-5" type="search" data-ms-search placeholder="جستجوی زبان…" dir="auto">
         <ul class="chip-list" data-ms-chips></ul>
         <div data-ms-hidden>
           {% if campaign.targeting %}{% for code in campaign.targeting.config.language_codes %}<input type="hidden" name="language_codes" value="{{ code }}">{% endfor %}{% endif %}
         </div>
       </div>
       <div class="field studio-pro-only" data-multiselect data-field="topic_ids" data-catalog='{{ catalog_topics_json|escape }}' data-kind="topic">
-        <label>موضوعات (شناسه)</label>
-        <input type="search" data-ms-search placeholder="جستجوی موضوع…" dir="auto">
+        <label for="studio-control-6">موضوعات (شناسه)</label>
+        <input id="studio-control-6" type="search" data-ms-search placeholder="جستجوی موضوع…" dir="auto">
         <ul class="chip-list" data-ms-chips></ul>
         <div data-ms-hidden>
           {% if campaign.targeting %}{% for tid in campaign.targeting.config.topic_ids %}<input type="hidden" name="topic_ids" value="{{ tid }}">{% endfor %}{% endif %}
         </div>
       </div>
       <div class="field studio-pro-only" data-channel-selector>
-        <label>کانال‌های مشخص</label>
-        <span class="catalog-row"><input type="text" data-channel-input dir="ltr" placeholder="@channel"><button type="button" class="btn btn-ghost btn-sm" data-channel-add>افزودن</button></span>
+        <label for="studio-channels">کانال‌های مشخص</label>
+        <span class="catalog-row"><input id="studio-channels" type="text" data-channel-input dir="ltr" placeholder="@channel"><button type="button" class="btn btn-ghost btn-sm" data-channel-add>افزودن</button></span>
         <ul class="chip-list" data-channel-chip-list></ul>
         <textarea name="channel_ids" hidden data-channel-hidden dir="ltr">{% if campaign.targeting %}{% for c in campaign.targeting.config.channel_ids %}{{ c }}
 {% endfor %}{% endif %}</textarea>
       </div>
-      <div class="field studio-pro-only"><label>کانال‌های مستثنی</label><textarea name="exclude_channel_ids" rows="2" dir="ltr">{% if campaign.targeting %}{% for c in campaign.targeting.config.exclude_channel_ids %}{{ c }}
+      <div class="field studio-pro-only"><label for="studio-control-7">کانال‌های مستثنی</label><textarea id="studio-control-7" name="exclude_channel_ids" rows="2" dir="ltr">{% if campaign.targeting %}{% for c in campaign.targeting.config.exclude_channel_ids %}{{ c }}
 {% endfor %}{% endif %}</textarea></div>
       {% elif campaign.target_type == 'users' %}
       <div class="field" data-multiselect data-field="country_codes" data-catalog='{{ catalog_countries_json|escape }}' data-kind="country">
-        <label>کشورها</label>
-        <input type="search" data-ms-search placeholder="جستجوی کشور (فارسی یا انگلیسی)…" dir="auto">
+        <label for="studio-control-8">کشورها</label>
+        <input id="studio-control-8" type="search" data-ms-search placeholder="جستجوی کشور (فارسی یا انگلیسی)…" dir="auto">
         <ul class="chip-list" data-ms-chips></ul>
         <div data-ms-hidden>
           {% if campaign.targeting %}{% for code in campaign.targeting.config.country_codes %}<input type="hidden" name="country_codes" value="{{ code }}">{% endfor %}{% endif %}
         </div>
       </div>
       <div class="field studio-pro-only" data-location-picker>
-        <label>شهر یا منطقه</label>
+        <label for="studio-location">شهر یا منطقه</label>
         <p class="muted" style="font-size:.8rem;margin:0 0 .35rem">پس از انتخاب یک کشور، نام شهر را جستجو کنید.</p>
-        <input type="search" data-location-search dir="auto" placeholder="نام شهر…" autocomplete="off">
+        <input id="studio-location" type="search" data-location-search dir="auto" placeholder="نام شهر…" autocomplete="off">
         <ul class="catalog-suggest" data-location-results role="listbox"></ul>
         <ul class="chip-list" data-location-chips></ul>
         <div data-location-hidden>
@@ -155,23 +155,23 @@
         </div>
       </div>
       <div class="field" data-multiselect data-field="topic_ids" data-catalog='{{ catalog_topics_json|escape }}' data-kind="topic">
-        <label>علایق و موضوعات</label>
-        <input type="search" data-ms-search placeholder="جستجوی موضوع…" dir="auto">
+        <label for="studio-control-9">علایق و موضوعات</label>
+        <input id="studio-control-9" type="search" data-ms-search placeholder="جستجوی موضوع…" dir="auto">
         <ul class="chip-list" data-ms-chips></ul>
         <div data-ms-hidden>
           {% if campaign.targeting %}{% for tid in campaign.targeting.config.topic_ids %}<input type="hidden" name="topic_ids" value="{{ tid }}">{% endfor %}{% endif %}
         </div>
       </div>
       <div class="field studio-pro-only" data-multiselect data-field="language_codes" data-catalog='{{ catalog_languages_json|escape }}' data-kind="language">
-        <label>زبان مخاطب</label>
-        <input type="search" data-ms-search placeholder="زبان…" dir="auto">
+        <label for="studio-control-10">زبان مخاطب</label>
+        <input id="studio-control-10" type="search" data-ms-search placeholder="زبان…" dir="auto">
         <ul class="chip-list" data-ms-chips></ul>
         <div data-ms-hidden>
           {% if campaign.targeting %}{% for code in campaign.targeting.config.language_codes %}<input type="hidden" name="language_codes" value="{{ code }}">{% endfor %}{% endif %}
         </div>
       </div>
-      <div class="field studio-pro-only"><label>دستگاه</label>
-        <select name="device">
+      <div class="field studio-pro-only"><label for="studio-control-11">دستگاه</label>
+        <select id="studio-control-11" name="device">
           <option value="">همه</option>
           <option value="ios" {% if campaign.targeting.config.device == 'ios' %}selected{% endif %}>iOS</option>
           <option value="android" {% if campaign.targeting.config.device == 'android' %}selected{% endif %}>Android</option>
@@ -186,17 +186,17 @@
       <h2 class="section-title">محتوای تبلیغ</h2>
       {% if campaign.target_type != 'search' %}
       <div class="template-pills">{% for t in creative_templates %}<a href="?template={{ t.id }}">{{ t.title }}</a>{% endfor %}</div>
-      <div class="field" id="field-ad_text"><label>متن تبلیغ (۱–۱۶۰ کاراکتر)</label><textarea name="ad_text" rows="5" maxlength="160" data-ad-text-counter>{% if creative %}{{ creative.ad_text }}{% endif %}</textarea>
+      <div class="field" id="field-ad_text"><label for="studio-control-12">متن تبلیغ (۱–۱۶۰ کاراکتر)</label><textarea id="studio-control-12" name="ad_text" rows="5" maxlength="160" data-ad-text-counter>{% if creative %}{{ creative.ad_text }}{% endif %}</textarea>
       <p class="muted" data-ad-text-count style="font-size:.8rem;margin:.25rem 0 0" aria-live="polite"></p></div>
-      <div class="field"><label>برچسب دکمه</label><input name="cta_label" value="{% if creative %}{{ creative.cta_label }}{% endif %}"></div>
+      <div class="field"><label for="studio-control-13">برچسب دکمه</label><input id="studio-control-13" name="cta_label" value="{% if creative %}{{ creative.cta_label }}{% endif %}"></div>
       {% else %}
       <p class="muted">تبلیغ جستجو متن اسپانسری جداگانه ندارد؛ عنوان و مقصد در پیش‌نمایش نشان داده می‌شوند.</p>
       {% endif %}
-      <div class="field"><label>لینک مقصد</label><input name="destination" value="{{ campaign.destination }}" dir="ltr"></div>
+      <div class="field"><label for="studio-control-14">لینک مقصد</label><input id="studio-control-14" name="destination" value="{{ campaign.destination }}" dir="ltr"></div>
       <label class="choice-card studio-pro-only" style="margin-top:.5rem"><input type="checkbox" name="show_userpic" value="1" {% if campaign.ad_settings.show_userpic %}checked{% endif %}> نمایش تصویر ربات/کانال مقصد</label>
       <div class="field studio-pro-only">
-        <label>تصویر یا ویدیو تبلیغ (آپلود محلی)</label>
-        <input type="file" name="creative_media" accept="image/jpeg,image/png,image/webp,video/mp4">
+        <label for="studio-control-15">تصویر یا ویدیو تبلیغ (آپلود محلی)</label>
+        <input id="studio-control-15" type="file" name="creative_media" accept="image/jpeg,image/png,image/webp,video/mp4">
         <p class="muted" style="font-size:.78rem;margin:.35rem 0 0">فایل روی سرور ذخیره و اعتبارسنجی می‌شود؛ بارگذاری به تلگرام فقط پس از تأیید عملیات انجام می‌شود.</p>
         {% if creative and creative.media %}<p class="muted" style="font-size:.8rem">فایل فعلی: {{ creative.media.name }}</p>{% endif %}
       </div>
@@ -212,10 +212,10 @@
       {% elif step == 4 %}
       <h2 class="section-title">بودجه و زمان‌بندی</h2>
       <div class="panel-grid panel-2">
-        <div class="field"><label>بودجه کل (هزار تومان)</label><input name="budget_toman" type="number" min="0" value="{% widthratio campaign.budget_irr 10000 1 %}" dir="ltr"></div>
-        <div class="field"><label>سقف روزانه تبلیغ (هزار تومان)</label><input name="daily_cap_toman" type="number" value="{% if campaign.daily_cap_irr %}{% widthratio campaign.daily_cap_irr 10000 1 %}{% endif %}" dir="ltr"></div>
+        <div class="field"><label for="studio-control-16">بودجه کل (هزار تومان)</label><input id="studio-control-16" name="budget_toman" type="number" min="0" value="{% widthratio campaign.budget_irr 10000 1 %}" dir="ltr"></div>
+        <div class="field"><label for="studio-control-17">سقف روزانه تبلیغ (هزار تومان)</label><input id="studio-control-17" name="daily_cap_toman" type="number" value="{% if campaign.daily_cap_irr %}{% widthratio campaign.daily_cap_irr 10000 1 %}{% endif %}" dir="ltr"></div>
       </div>
-      <div class="field"><label>CPM (گرام / TON در حساب عملیات)</label><input name="cpm_bid" type="number" step="0.01" value="{{ campaign.cpm_bid|default:'' }}" dir="ltr"></div>
+      <div class="field"><label for="studio-control-18">CPM (گرام / TON در حساب عملیات)</label><input id="studio-control-18" name="cpm_bid" type="number" step="0.01" value="{{ campaign.cpm_bid|default:'' }}" dir="ltr"></div>
       <p class="muted" style="font-size:.85rem">نمایش مالی برای شما به تومان است؛ تخصیص واقعی بر اساس نرخ نوبیتکس و واحد Gram حساب تلگرام محاسبه می‌شود.</p>
       <div class="field">
         <label>حداکثر نمایش روزانه به هر کاربر</label>
@@ -227,20 +227,20 @@
       </div>
       <div class="panel-grid panel-2">
         <div class="field">
-          <label>فعال‌سازی از (ساعت محلی ایران)</label>
-          <input name="schedule_start" type="datetime-local" value="{% if campaign.schedule_start %}{{ campaign.schedule_start|date:'Y-m-d\TH:i' }}{% endif %}">
+          <label for="studio-control-19">فعال‌سازی از (ساعت محلی ایران)</label>
+          <input id="studio-control-19" name="schedule_start" type="datetime-local" value="{% if campaign.schedule_start %}{{ campaign.schedule_start|date:'Y-m-d\TH:i' }}{% endif %}">
           {% if campaign.schedule_start %}<p class="muted" style="font-size:.78rem;margin:.25rem 0 0">شمسی: {{ campaign.schedule_start|jalali_datetime }}</p>{% endif %}
         </div>
         <div class="field">
-          <label>توقف از (ساعت محلی ایران)</label>
-          <input name="schedule_end" type="datetime-local" value="{% if campaign.schedule_end %}{{ campaign.schedule_end|date:'Y-m-d\TH:i' }}{% endif %}">
+          <label for="studio-control-20">توقف از (ساعت محلی ایران)</label>
+          <input id="studio-control-20" name="schedule_end" type="datetime-local" value="{% if campaign.schedule_end %}{{ campaign.schedule_end|date:'Y-m-d\TH:i' }}{% endif %}">
           {% if campaign.schedule_end %}<p class="muted" style="font-size:.78rem;margin:.25rem 0 0">شمسی: {{ campaign.schedule_end|jalali_datetime }}</p>{% endif %}
         </div>
       </div>
       {% include "campaigns/includes/schedule_grid.html" %}
       <label class="choice-card"><input type="radio" name="remote_initial_status" value="active" {% if campaign.ad_settings.remote_initial_status != 'on_hold' %}checked{% endif %}> وضعیت اولیه: فعال پس از تأیید</label>
       <label class="choice-card"><input type="radio" name="remote_initial_status" value="on_hold" {% if campaign.ad_settings.remote_initial_status == 'on_hold' %}checked{% endif %}> وضعیت اولیه: در انتظار (On Hold)</label>
-      <div class="field studio-pro-only"><label>سایر اطلاعات (Ad Identifier)</label><input name="additional_info" maxlength="64" value="{{ campaign.ad_settings.additional_info|default:'' }}"></div>
+      <div class="field studio-pro-only"><label for="studio-control-21">سایر اطلاعات (Ad Identifier)</label><input id="studio-control-21" name="additional_info" maxlength="64" value="{{ campaign.ad_settings.additional_info|default:'' }}"></div>
       {% if ton_rate_display %}
       <article class="card card-pad card-muted" style="margin-top:1rem">
         <p class="muted" style="margin:0 0 .5rem;font-size:.85rem">نرخ هر گرام</p>

@@ -1,9 +1,9 @@
-﻿{% extends "app_shell.html" %}
+{% extends "app_shell.html" %}
 {% load core_filters %}
 {% block page_title %}کیف پول{% endblock %}
 {% block container_class %}container-wide{% endblock %}
 {% block content %}
-<div class="app-stack">
+<div class="app-stack finance-page">
 {% url 'finance:topup' as topup_url %}
 {% include "includes/dash_header.html" with title="کیف پول" subtitle="موجودی قابل استفاده و رزرو کمپین" with_sub=1 action_url=topup_url action_label="شارژ" action_primary=1 %}
 <section class="metric-strip metric-strip--wallet" aria-label="خلاصه کیف پول">
@@ -22,11 +22,11 @@
 <article class="card table-card card--lift">
   <header class="dash-panel__head" style="border-bottom:1px solid var(--border-default)">
     <div class="dash-panel__title"><h2 class="section-title">تراکنش‌های اخیر</h2></div>
-    <a class="btn btn-ghost btn-sm" href="{% url 'finance:transactions' %}">همه</a>
+    <a class="btn btn-ghost btn-sm" href="{% url 'finance:transactions' %}">همه تراکنش‌ها</a>
   </header>
   <ul class="wallet-ledger">
     {% for e in recent_entries %}
-    <li class="finance-line"><span>{{ e.get_entry_type_display }}</span><strong class="tabnums" dir="ltr">{{ e.amount_irr|irr_to_toman|format_irr }} ت</strong></li>
+    <li class="finance-line"><span class="finance-entry"><span>{{ e.get_entry_type_display }}</span><time class="muted" datetime="{{ e.created_at|date:'c' }}">{{ e.created_at|jalali_datetime }}</time></span><strong class="tabnums"><bdi>{{ e.amount_irr|irr_to_toman|format_irr }}</bdi> تومان</strong></li>
     {% empty %}<li class="muted" style="padding:.75rem 0">تراکنشی نیست.</li>{% endfor %}
   </ul>
   <div class="wallet-ledger__actions">

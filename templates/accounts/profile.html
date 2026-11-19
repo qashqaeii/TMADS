@@ -4,21 +4,22 @@
 {% block content %}
 <div class="app-stack">
 {% include "includes/dash_header.html" with eyebrow="حساب" title="پروفایل" %}
-<div class="panel-grid panel-2">
+<div class="panel-grid panel-2 account-settings">
   <form method="post" class="card card--lift card-pad form-stack">
     {% csrf_token %}
     <h2 class="section-title">اطلاعات نمایشی</h2>
-    <div class="field"><label>نام نمایشی</label><input name="display_name" value="{{ profile.display_name }}"></div>
-    <div class="field"><label>نام کسب‌وکار</label><input name="company_name" value="{{ profile.company_name }}"></div>
-    <div class="field"><label>ایمیل</label><input value="{{ user.email }}" disabled></div>
-    <div class="field"><label>موبایل</label><input value="{{ user.mobile|default:'—' }}" disabled></div>
+    <div class="field"><label for="profile-display-name">نام نمایشی</label><input id="profile-display-name" autocomplete="name" name="display_name" value="{{ profile.display_name }}"></div>
+    <div class="field"><label for="profile-company">نام کسب‌وکار</label><input id="profile-company" autocomplete="organization" name="company_name" value="{{ profile.company_name }}"></div>
+    <div class="field"><label for="profile-email">ایمیل</label><input id="profile-email" dir="ltr" value="{{ user.email }}" disabled></div>
+    <div class="field"><label for="profile-mobile">موبایل</label><input id="profile-mobile" dir="ltr" value="{{ user.mobile|default:'—' }}" disabled></div>
     <button class="btn btn-primary" type="submit">ذخیره</button>
   </form>
   <section class="card card--lift card-pad form-stack">
     <h2 class="section-title">تغییر رمز عبور</h2>
-    <form method="post">{% csrf_token %}<input type="hidden" name="action" value="password">
+    <p class="section-description">برای امنیت حساب، رمزی انتخاب کنید که در سرویس دیگری استفاده نمی‌کنید.</p>
+    <form method="post" class="form-stack">{% csrf_token %}<input type="hidden" name="action" value="password">
       {% for field in password_form %}
-      <div class="field"><label>{{ field.label }}</label>{{ field }}{% if field.errors %}<div class="form-error">{{ field.errors }}</div>{% endif %}</div>
+      {% include "includes/auth_field.html" with field=field %}
       {% endfor %}
       <button class="btn btn-ghost" type="submit">به‌روزرسانی رمز</button>
     </form>

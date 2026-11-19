@@ -1,9 +1,9 @@
-﻿{% extends "app_shell.html" %}
+{% extends "app_shell.html" %}
 {% load core_filters %}
 {% block page_title %}بررسی کمپین{% endblock %}
 {% block container_class %}container-wide{% endblock %}
 {% block content %}
-<div class="app-stack">
+<div class="app-stack operations-page">
 <a class="btn btn-ghost btn-sm" href="{% url 'operations:campaigns' %}" style="align-self:flex-start">بازگشت به صف</a>
 <header class="dash-header dash-header--luxe dash-header--rich">
   <div class="dash-header__main">
@@ -20,18 +20,18 @@
 <div class="panel-grid panel-2">
   <section class="card card--lift card-pad">
     <h2 class="section-title">جزئیات کمپین</h2>
-    <div class="finance-line"><span>مقصد</span><span dir="ltr" class="muted">{{ campaign.destination|default:"—" }}</span></div>
+    <div class="finance-line"><span>مقصد</span><span dir="ltr" class="muted operations-wrap">{{ campaign.destination|default:"—" }}</span></div>
     <div class="finance-line"><span>جایگاه</span><span>{{ campaign.get_placement_display|default:"—" }}</span></div>
     <div class="finance-line"><span>هدف</span><span>{{ campaign.get_objective_display|default:"—" }}</span></div>
     {% if order %}
     <div class="finance-line"><span>جمع سفارش</span><strong class="tabnums">{{ order.total_irr|irr_to_toman|format_irr }} تومان</strong></div>
     {% endif %}
     {% if creative %}
-    <h3 class="section-title" style="margin-top:1rem;font-size:.88rem">خلاقه</h3>
-    <p style="margin:0;font-size:.88rem">{{ creative.ad_text|default:"—" }}</p>
+    <h3 class="section-title" style="margin-top:1rem;font-size:.88rem">محتوای تبلیغ</h3>
+    <p style="margin:0;font-size:.88rem">{{ creative.ad_text|default:"—"|linebreaksbr }}</p>
     {% endif %}
     {% if policy_run %}
-    <h3 class="section-title" style="margin-top:1rem;font-size:.88rem">پیش‌پرواز سیاست</h3>
+    <h3 class="section-title" style="margin-top:1rem;font-size:.88rem">بررسی قوانین تبلیغ</h3>
     {% include "campaigns/includes/policy_panel.html" %}
     {% if operator_gate %}
     <p class="muted" style="font-size:.8rem;margin-top:.5rem">درگاه حساب مرکزی: {{ operator_gate.get_state_display }}</p>
@@ -57,7 +57,7 @@
   <section class="card card--lift card-pad form-stack">
     <h2 class="section-title">اقدام عملیات</h2>
     <form method="post" class="form-stack">{% csrf_token %}
-      <div class="field"><label>دلیل رد (در صورت رد)</label><textarea name="reason" rows="2" placeholder="توضیح برای مشتری"></textarea></div>
+      <div class="field"><label for="review-reason">دلیل رد (در صورت رد)</label><textarea id="review-reason" name="reason" rows="2" placeholder="توضیح برای مشتری"></textarea></div>
       <div style="display:flex;flex-wrap:wrap;gap:.45rem">
         <button class="btn btn-primary btn-sm" name="action" value="approve" type="submit">تأیید</button>
         <button class="btn btn-danger btn-sm" name="action" value="reject" type="submit">رد</button>
@@ -66,7 +66,7 @@
       </div>
     </form>
     <form method="post" class="form-stack" style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border-default)">{% csrf_token %}
-      <div class="field"><label>شناسه تبلیغ (دستی)</label><input name="remote_ad_id" dir="ltr" placeholder="Remote Ad ID"></div>
+      <div class="field"><label for="review-remote-id">شناسه تبلیغ (دستی)</label><input id="review-remote-id" name="remote_ad_id" dir="ltr" placeholder="Remote Ad ID"></div>
       <button class="btn btn-ghost btn-sm" name="action" value="link_ad" type="submit">اتصال شناسه</button>
     </form>
   </section>

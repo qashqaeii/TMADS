@@ -3,9 +3,9 @@
 {% block page_title %}مرکز عملیات{% endblock %}
 {% block container_class %}container-wide{% endblock %}
 {% block content %}
-<div class="app-stack">
+<div class="app-stack operations-page">
   {% include "includes/dash_header.html" with eyebrow="عملیات" title="مرکز عملیات" %}
-  <div class="kpi-exec-grid">
+  <div class="kpi-exec-grid" role="region" aria-label="خلاصه عملیات">
     <article class="kpi-exec">
       <span class="kpi-exec__icon">{% include "includes/kpi_icon.html" with name="users" %}</span>
       <div class="kpi-exec__body">

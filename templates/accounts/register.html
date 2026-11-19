@@ -5,15 +5,14 @@
   <div class="auth-card auth-card--exec">
     <h1>ایجاد حساب</h1>
     <p class="muted">در کمتر از یک دقیقه وارد داشبورد شوید.</p>
-    <form method="post" class="form-stack" style="max-width:none">
+    <form method="post" class="form-stack">
       {% csrf_token %}
-      <div class="field"><label>نام کاربری</label>{{ form.username }}</div>
-      <div class="field"><label>ایمیل</label>{{ form.email }}</div>
-      <div class="field"><label>رمز عبور</label>{{ form.password1 }}</div>
-      <div class="field"><label>تکرار رمز</label>{{ form.password2 }}</div>
+      {% if form.non_field_errors %}<div class="form-error" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+      {% for field in form %}{% include "includes/auth_field.html" with field=field %}{% endfor %}
       <button class="btn btn-primary btn-lg" type="submit">ثبت‌نام</button>
-      <p class="muted" style="margin:0">قبلاً عضو شده‌اید؟ <a href="{% url 'accounts:login' %}">ورود</a></p>
+      <p class="auth-links">قبلاً عضو شده‌اید؟ <a href="{% url 'accounts:login' %}">ورود</a></p>
     </form>
   </div>
 </section>
 {% endblock %}
+
