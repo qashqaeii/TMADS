@@ -161,6 +161,8 @@ class RemoteAdOperation(TenantOwnedModel):
         EDIT_CPM = "edit_cpm", "تغییر CPM"
         EDIT_DAILY_LIMIT = "edit_daily_limit", "تغییر سقف روزانه"
         EDIT_TITLE = "edit_title", "تغییر عنوان داخلی"
+        INCREASE_BUDGET = "increase_budget", "افزایش اعتبار تبلیغ"
+        DECREASE_BUDGET = "decrease_budget", "کاهش اعتبار تبلیغ"
 
     class Status(models.TextChoices):
         PENDING = "pending", "در انتظار اپراتور"

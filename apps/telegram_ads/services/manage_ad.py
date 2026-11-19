@@ -23,6 +23,8 @@ OPEN = [Status.PENDING, Status.EXECUTING, Status.UNCERTAIN]
 def parse_request(action, value=""):
     if action not in Action.values:
         raise ValueError("عملیات معتبر نیست.")
+    if action in (Action.INCREASE_BUDGET,Action.DECREASE_BUDGET):
+        raise ValueError("درخواست بودجه باید از مسیر پیش‌فاکتور و بررسی اعتبار ثبت شود.")
     if action in (Action.EDIT_CPM, Action.EDIT_DAILY_LIMIT):
         try:
             amount = Decimal(value)
@@ -85,6 +87,8 @@ def reject_operation(operation_id, *, actor, reason):
 
 
 def _guard(campaign, op):
+    if op.action in (Action.INCREASE_BUDGET,Action.DECREASE_BUDGET):
+        raise ValueError("اجرای مالی تا تکمیل تسویه و تأیید شرایط تجاری غیرفعال است؛ هیچ مبلغی منتقل نمی‌شود.")
     if not settings.TELEGRAM_ADS_WRITE_ENABLED or not settings.TELEGRAM_ADS_PAID_SUBMISSION_ENABLED:
         raise ValueError("عملیات زنده تبلیغات غیرفعال است.")
     if not CampaignPolicyPreflight.operator_submission_allowed():

@@ -17,6 +17,19 @@ def remote_management(request, campaign_id):
     campaign=get_customer_campaign(request.user.customer_profile,campaign_id)
     if request.method=="POST":
         try:
+            if request.POST.get("action") in {"increase_budget","decrease_budget"}:
+                from apps.finance.budget_management import preview_budget
+                from apps.finance.exceptions import PricingError
+                try:
+                    proposal,token=preview_budget(campaign,actor=request.user,action=request.POST["action"],value=request.POST.get("value",""))
+                except PricingError:
+                    raise ValueError("نرخ معتبر برای ارائه پیش‌فاکتور در دسترس نیست.") from None
+                return render(request,"campaigns/budget_proposal.html",{"campaign":campaign,"proposal":proposal,"token":token})
+            if request.POST.get("action")=="confirm_budget_proposal":
+                from apps.finance.budget_management import submit_budget_proposal
+                submit_budget_proposal(campaign.pk,actor=request.user,token=request.POST.get("token",""))
+                messages.success(request,"درخواست بررسی بودجه ثبت شد؛ هیچ مبلغی کسر یا منتقل نشده است.")
+                return redirect("campaigns:remote_management",campaign_id=campaign.pk)
             request_operation(campaign.pk,actor=request.user,action=request.POST.get("action",""),value=request.POST.get("value",""))
             messages.success(request,"درخواست ثبت شد؛ هنوز تغییری در تلگرام انجام نشده است.")
         except ValueError as exc:
