@@ -109,3 +109,15 @@
 .ui-budget-alert-card__form {display:flex;align-items:center;gap:7px;flex-wrap:wrap}
 .ui-final .ui-budget-alert-card__form select {min-height:38px;border:1px solid var(--ui-border);border-radius:8px;background:#fff;color:var(--ui-ink);font-family:inherit;font-size:.85rem;padding:7px 11px}
 @media(max-width:600px){.ui-budget-alert-card__form,.ui-budget-alert-card__form select {width:100%}.ui-budget-alert-card__form button {flex:1}}
+
+/* Conservative performance recommendations: no automated financial action. */
+.ui-final .ui-performance-advice {border:1px solid var(--ui-border);border-radius:var(--ui-radius);background:#fff;padding:16px;margin-bottom:16px}
+.ui-performance-advice>header {display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.ui-performance-advice>header h2 {font-size:1rem;margin:0;line-height:1.6;color:var(--ui-ink)}
+.ui-performance-advice>header p {margin:3px 0;color:var(--ui-muted);font-size:.8rem;line-height:1.7}
+.ui-performance-advice__grid {display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:9px}
+.ui-performance-advice__item {padding:13px;border-radius:9px;background:#f3f7fa;border:1px solid var(--ui-border)}
+.ui-performance-advice__item--warning {background:#fffaef;border-color:#eddfc4}
+.ui-performance-advice__item--info {background:#f0f7fc;border-color:#d1e4f0}
+.ui-performance-advice__item h3 {font-size:.87rem;font-weight:700;margin:0 0 6px;color:var(--ui-ink)}
+.ui-performance-advice__item p {font-size:.8rem;color:var(--ui-muted);line-height:1.8;margin:0}
