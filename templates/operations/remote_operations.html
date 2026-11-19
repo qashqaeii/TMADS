@@ -1,0 +1,18 @@
+{% extends "app_shell.html" %}
+{% load core_filters %}
+{% block page_title %}عملیات تبلیغات{% endblock %}
+{% block content %}
+<div class="app-stack operations-page ui-ops">
+{% include "includes/dash_header.html" with title="صف عملیات تبلیغات" subtitle="بررسی و اجرای درخواست‌های مشتریان" with_sub=1 %}
+<p class="ui-studio-warning">اجرای زنده به مجوز اپراتور، گیت‌های امنیتی و شرایط مالی وابسته است. درخواست نامطمئن هرگز دوباره اجرا نمی‌شود.</p>
+<form method="get" class="card card-pad filter-row"><div class="field"><label for="remote-status">وضعیت</label><select id="remote-status" name="status"><option value="all">همه</option>{% for value,label in statuses %}<option value="{{ value }}" {% if value == filter_status %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div><button class="btn btn-primary" type="submit">اعمال فیلتر</button></form>
+{% for op in page_obj %}
+<article class="card card-pad ui-remote-ops-card"><header class="ui-remote-summary"><div><h2 class="section-title">{{ op.get_action_display }}</h2><a href="{% url 'operations:campaign_review' op.advertisement.campaign_id %}">{{ op.advertisement.campaign.name }}</a><p class="muted">{{ op.advertisement.campaign.customer }} · <bdi>#{{ op.advertisement.remote_ad_id }}</bdi></p></div><span class="status {% if op.status == 'completed' %}status-active{% elif op.status == 'rejected' %}status-danger{% else %}status-warn{% endif %}">{{ op.get_status_display }}</span></header>
+{% for key,value in op.request_payload.items %}<div class="finance-line"><span dir="ltr">{{ key }}</span><strong dir="auto">{{ value }}</strong></div>{% endfor %}
+{% if op.note %}<p>{{ op.note }}</p>{% endif %}
+{% if op.status == 'pending' %}<form method="post" class="form-stack">{% csrf_token %}<input type="hidden" name="operation_id" value="{{ op.id }}"><div class="field"><label for="reason-{{ op.id }}">دلیل رد (در صورت رد)</label><input id="reason-{{ op.id }}" name="reason" maxlength="500"></div><div class="hero-actions"><button class="btn btn-primary" type="submit" name="decision" value="execute" data-confirm-title="اجرای عملیات" data-confirm-message="تغییر ممکن است بر مصرف اعتبار یا زمان‌بندی تبلیغ اثر بگذارد. ادامه می‌دهید؟" data-confirm-label="اجرا" data-confirm-tone="primary">بررسی و اجرا</button><button class="btn btn-danger-soft" type="submit" name="decision" value="reject">رد درخواست</button></div></form>{% endif %}
+</article>
+{% empty %}<div class="card card-pad"><p class="muted">درخواستی با این وضعیت وجود ندارد.</p></div>{% endfor %}
+<nav class="hero-actions" aria-label="صفحه‌بندی">{% if page_obj.has_previous %}<a class="btn btn-ghost" href="?status={{ filter_status|urlencode }}&page={{ page_obj.previous_page_number }}">قبلی</a>{% endif %}<span class="muted">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>{% if page_obj.has_next %}<a class="btn btn-ghost" href="?status={{ filter_status|urlencode }}&page={{ page_obj.next_page_number }}">بعدی</a>{% endif %}</nav>
+</div>
+{% endblock %}

@@ -90,3 +90,13 @@
 .ui-final .lifecycle-rail__step--current .lifecycle-rail__node { border-color:var(--ui-action);color:var(--ui-action);background:#e9f3fb; }
 .ui-final .ui-tip-surface { border:1px solid var(--ui-border);border-radius:10px;box-shadow:var(--ui-overlay-shadow); }
 @media(max-width:600px){.ui-final .chart-range .chart-range__btn{min-height:44px;}}
+
+/* Published ad management */
+.ui-remote-summary { display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap; }
+.ui-remote-grid { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:start; }
+.ui-remote-grid p { margin:0;font-size:.85rem;line-height:1.8; }
+.ui-remote-history { display:grid;gap:0; }
+.ui-remote-history > div { display:flex;flex-wrap:wrap;align-items:center;gap:10px;border-top:1px solid var(--ui-border);padding:12px 0; }
+.ui-remote-history time { margin-inline-start:auto;color:var(--ui-muted);font-size:.8rem; }
+.ui-remote-history p { flex-basis:100%;margin:0;color:var(--ui-muted);font-size:.85rem; }
+@media(max-width:700px) { .ui-remote-grid { grid-template-columns:minmax(0,1fr); } }

@@ -5,6 +5,7 @@
 {% block content %}
 <div class="app-stack operations-page ui-ops">
 <nav class="ui-breadcrumb" aria-label="مسیر صفحه"><a href="{% url 'operations:campaigns' %}">صف کمپین‌ها</a>{% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}<span aria-current="page">بررسی کمپین</span></nav>
+<a class="btn btn-ghost btn-sm" href="{% url 'operations:remote_operations' %}">صف عملیات تبلیغات</a>
 <header class="dash-header ui-page-heading dash-header--luxe dash-header--rich">
   <div class="dash-header__main">
     <div class="dash-header__title-row">

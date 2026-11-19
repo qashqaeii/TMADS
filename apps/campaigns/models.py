@@ -151,3 +151,35 @@ class CampaignStatusHistory(UUIDModel):
 
     class Meta:
         ordering = ["-created_at"]
+
+
+class RemoteAdOperation(TenantOwnedModel):
+    class Action(models.TextChoices):
+        PAUSE = "pause", "توقف تبلیغ"
+        RESUME = "resume", "ادامه تبلیغ"
+        REVIEW = "review", "ارسال مجدد برای بررسی"
+        EDIT_CPM = "edit_cpm", "تغییر CPM"
+        EDIT_DAILY_LIMIT = "edit_daily_limit", "تغییر سقف روزانه"
+        EDIT_TITLE = "edit_title", "تغییر عنوان داخلی"
+
+    class Status(models.TextChoices):
+        PENDING = "pending", "در انتظار اپراتور"
+        EXECUTING = "executing", "در حال اجرا"
+        COMPLETED = "completed", "انجام‌شده"
+        REJECTED = "rejected", "رد شده"
+        UNCERTAIN = "uncertain", "نیازمند تطبیق"
+
+    advertisement = models.ForeignKey(TelegramAdvertisement, on_delete=models.PROTECT, related_name="operations")
+    action = models.CharField(max_length=24, choices=Action.choices)
+    status = models.CharField(max_length=16, choices=Status.choices, default=Status.PENDING)
+    request_payload = models.JSONField(default=dict)
+    result_payload = models.JSONField(default=dict)
+    note = models.CharField(max_length=500, blank=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        constraints = [
+            models.UniqueConstraint(fields=["advertisement"],
+                condition=models.Q(status__in=["pending", "executing", "uncertain"]),
+                name="unique_open_remote_ad_operation"),
+        ]

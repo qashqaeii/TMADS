@@ -118,3 +118,5 @@
 .ui-dialog--primary .ui-dialog__symbol { background:#e8f3fb;color:var(--ui-action); }
 @media(max-width:1050px) { .ui-ops-overview,.ui-ops-api-layout,.ui-final .ui-ops .ui-ops-review-layout { grid-template-columns:minmax(0,1fr); } }
 @media(max-width:540px) { .ui-final .ui-ops .filter-exec__grid--inline { align-items:stretch; }.ui-final .ui-ops .filter-exec__field,.ui-filter-submit { width:100%; }.ui-filter-submit .btn { width:100%; } }
+
+.ui-remote-ops-card { display:grid;gap:12px; }.ui-remote-ops-card p { margin:4px 0;line-height:1.8; }
