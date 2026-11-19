@@ -1,0 +1,25 @@
+{% load core_filters %}
+<aside class="dash-board dash-board--activity{% if not activity %} is-empty{% endif %}">
+      <header class="dash-board__head">
+        <h2 class="dash-board__heading">فعالیت</h2>
+        <a class="dash-board__link" href="{% url 'dashboard:notifications' %}">اعلان‌ها</a>
+      </header>
+      {% if activity %}
+      <ul class="dash-activity-list">
+        {% for a in activity %}
+        <li class="dash-activity-list__item">
+          <span class="dash-activity-list__dot" aria-hidden="true"></span>
+          <div class="dash-activity-list__body">
+            <p class="dash-activity-list__line">
+              <a href="{% url 'campaigns:detail' a.campaign_id %}">{{ a.campaign.name|default:"کمپین" }}</a>
+              — {% if a.note %}{{ a.note }}{% else %}به‌روزرسانی وضعیت{% endif %}
+            </p>
+            <time class="dash-activity-list__time" datetime="{{ a.created_at|date:'c' }}">{{ a.created_at|jalali_datetime }}</time>
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="dash-board__hint">رویدادی ثبت نشده است.</p>
+      {% endif %}
+    </aside>

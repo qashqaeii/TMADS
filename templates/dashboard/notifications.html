@@ -3,7 +3,7 @@
 {% block page_title %}اعلان‌ها{% endblock %}
 {% block container_class %}container-wide{% endblock %}
 {% block content %}
-<div class="app-stack">
+<div class="app-stack ui-notifications">
 {% include "includes/dash_header.html" with eyebrow="پیام" title="اعلان‌ها" %}
 {% if notifications %}
 <div class="dash-toolbar">
@@ -16,7 +16,8 @@
     <li class="activity-feed__item notification-item {% if not n.is_read %}is-unread{% endif %}">
       <span class="activity-feed__dot" aria-hidden="true"></span>
       <div class="activity-feed__body">
-        <p class="activity-feed__line"><strong>{{ n.title }}</strong>{% if not n.is_read %}<span class="sr-only"> — خوانده‌نشده</span>{% endif %}{% if n.body %}<span class="activity-feed__sep">·</span><span>{{ n.body }}</span>{% endif %}</p>
+        <div class="ui-notification-heading"><strong>{{ n.title }}</strong>{% if not n.is_read %}<span class="status status-info">جدید</span>{% endif %}</div>
+        {% if n.body %}<p class="ui-notification-message">{{ n.body }}</p>{% endif %}
         <time class="activity-feed__time muted" datetime="{{ n.created_at|date:'c' }}">{{ n.created_at|jalali_datetime }}</time>
       </div>
     </li>

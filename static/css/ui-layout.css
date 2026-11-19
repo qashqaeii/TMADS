@@ -1,0 +1,52 @@
+/* Shared application layout. All pages inherit one spacing and reading scale. */
+.ui-shell { --sidebar-width:248px; --app-gutter:clamp(16px,2.7vw,32px); --section-gap:18px; background:var(--ui-canvas); }
+.ui-final .ui-shell .app-main { min-width:0; }
+.ui-final .ui-shell .app-content { padding-block:24px 44px; background-color:var(--ui-canvas); }
+.ui-final .ui-shell .page-frame { width:100%; min-width:0; gap:18px; }
+.ui-final .ui-shell .sidebar--premium { box-shadow:none;border-inline-end:1px solid #20334b; }
+.ui-final .ui-shell .sidebar--premium::before { background:linear-gradient(180deg,rgb(16 29 48 / .80),rgb(16 29 48 / .96)); }
+.ui-final .ui-shell .sidebar-head { padding:20px 16px 12px; }
+.ui-final .ui-shell .sidebar-scroll { padding:4px 10px 12px; }
+.ui-final .ui-shell .sidebar-group-label { font-size:.7rem; font-weight:600; color:#9eafc3; margin:18px 8px 7px; letter-spacing:normal; }
+.ui-final .ui-shell .sidebar-group-label:first-child { margin-top:4px; }
+.ui-final .ui-shell .sidebar-nav { gap:3px; }
+.ui-final .ui-shell .sidebar-link { min-height:40px; padding:9px 10px; border-radius:8px; font-size:.875rem; line-height:1.5; gap:10px; }
+.ui-final .ui-shell .sidebar-link.active { border-inline-start:2px solid #64b8eb; }
+.ui-final .ui-shell .sidebar-link .nav-icon { flex:none; }
+.ui-final .ui-shell .sidebar-admin-block { padding:0; background:transparent; border:none; }
+.ui-final .ui-shell .sidebar-foot--compact { padding:12px 12px max(14px,env(safe-area-inset-bottom)); gap:9px; }
+.ui-final .ui-shell .sidebar-foot__row { padding:10px 8px; border:1px solid rgb(255 255 255 / .13); border-radius:9px; }
+.ui-final .ui-shell .sidebar-foot__balance-label { color:#b0c0d1; font-size:.72rem; }
+.ui-final .ui-shell .sidebar-foot__balance-value { font-size:.95rem; }
+.ui-final .ui-shell .sidebar-foot__user { min-width:0; min-height:44px; border-radius:8px; }
+.ui-final .ui-shell .topbar--premium.topbar--utility { min-height:62px; padding:9px var(--app-gutter); background:#fff; border-bottom:1px solid var(--ui-border); backdrop-filter:none; gap:12px; }
+.ui-final .ui-shell .topbar__cluster { min-width:0; gap:10px; }
+.ui-workspace-label { display:inline-flex;align-items:center;gap:7px;color:var(--ui-muted);font-size:.82rem;white-space:nowrap; }
+.ui-final .ui-shell .topbar-title { color:var(--ui-ink);font-size:.82rem;font-weight:600;max-width:240px; }
+.ui-final .ui-shell .topbar-title:not(:empty) { border-inline-start:1px solid var(--ui-border);padding-inline-start:11px; }
+.ui-final .ui-shell .topbar-action--ghost { width:40px;padding:0; }
+.ui-final .ui-shell .topbar-account { border:1px solid var(--ui-border);border-radius:9px;width:42px;height:42px;padding:4px; }
+.ui-final .ui-shell .topbar-account__avatar { width:30px;height:30px;border-radius:7px; }
+.ui-final .ui-page-heading { display:flex;align-items:center;justify-content:space-between;gap:12px 24px;flex-wrap:wrap;min-height:0;padding:0 0 12px;background:none;box-shadow:none;border:0;border-bottom:1px solid var(--ui-border);border-radius:0; }
+.ui-final .ui-page-heading .dash-header__main { min-width:0; }
+.ui-final .ui-page-heading .dash-header__title-row { gap:8px;flex-wrap:wrap; }
+.ui-final .ui-page-heading h1 { color:var(--ui-ink);font-size:clamp(1.35rem,2vw,1.75rem);font-weight:750;line-height:1.55;letter-spacing:normal;overflow-wrap:anywhere; }
+.ui-final .ui-page-heading .dash-header__kicker { font-size:.72rem; color:var(--ui-muted);background:transparent;padding:0; }
+.ui-final .ui-page-heading .page-sub { font-size:.85rem;line-height:1.85;color:var(--ui-muted);margin:4px 0 0; }
+.ui-final .ui-page-heading .dash-header__actions { display:flex;flex-wrap:wrap;gap:8px; }
+.ui-final .app-stack { gap:18px;min-width:0; }
+@media(max-width:900px) {
+ .ui-final .ui-shell .sidebar--premium { width:min(300px,88vw); }
+ .ui-final .ui-shell .sidebar-link { min-height:44px; }
+ .ui-final .ui-shell .topbar--premium.topbar--utility { min-height:58px;padding:7px 14px; }
+ .ui-final .ui-shell .app-content { padding-block:17px 32px; }
+ .ui-workspace-label { display:none; }
+ .ui-final .ui-shell .topbar-title { border:0;padding:0; }
+}
+@media(max-width:520px) {
+ .ui-final .ui-shell .topbar__cluster { gap:6px; }
+ .ui-final .ui-shell .topbar-cta { width:44px;padding:0; }
+ .ui-final .ui-shell .topbar__sep { display:none; }
+ .ui-final .ui-page-heading { align-items:flex-start; }
+ .ui-final .ui-page-heading .dash-header__actions { width:100%; }
+}

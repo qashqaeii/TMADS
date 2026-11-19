@@ -6,12 +6,12 @@
 {% if has_chart %}{% include "includes/charts_exec_scripts.html" %}{% endif %}
 {% endblock %}
 {% block content %}
-<div class="dash-home dash-home--premium">
+<div class="dash-home dash-home--premium ui-dashboard">
   {% include "includes/dash_home_hero.html" %}
 
   {% include "includes/dash_home_kpi.html" with active_count=active_count total_campaigns=total_campaigns impressions=impressions clicks=clicks ctr=ctr %}
 
-  <section class="dash-workspace" aria-label="تحلیل و کیف پول">
+  <section class="dash-workspace ui-dashboard-workspace" aria-label="تحلیل و کیف پول">
     <article class="dash-chart-card dash-chart-card--lux">
       <header class="dash-chart-card__head">
         <h2 class="dash-chart-card__title">روند نمایش و کلیک</h2>
@@ -27,10 +27,13 @@
         {% endif %}
       </div>
     </article>
-    {% include "includes/wallet_module_compact.html" with wallet=wallet %}
+    <div class="ui-dashboard-rail">
+      {% include "includes/wallet_module_compact.html" with wallet=wallet %}
+      {% include "dashboard/includes/activity_compact.html" %}
+    </div>
   </section>
 
-  <section class="dash-bottom{% if not activity %} dash-bottom--solo{% endif %}" aria-label="کمپین و فعالیت">
+  <section class="dash-bottom ui-dashboard-recent" aria-label="کمپین‌های اخیر">
     <article class="dash-board dash-board--campaigns">
       <header class="dash-board__head">
         <div class="dash-board__title">
@@ -97,30 +100,7 @@
       {% endif %}
     </article>
 
-    <aside class="dash-board dash-board--activity{% if not activity %} is-empty{% endif %}">
-      <header class="dash-board__head">
-        <h2 class="dash-board__heading">فعالیت</h2>
-        <a class="dash-board__link" href="{% url 'dashboard:notifications' %}">اعلان‌ها</a>
-      </header>
-      {% if activity %}
-      <ul class="dash-activity-list">
-        {% for a in activity %}
-        <li class="dash-activity-list__item">
-          <span class="dash-activity-list__dot" aria-hidden="true"></span>
-          <div class="dash-activity-list__body">
-            <p class="dash-activity-list__line">
-              <a href="{% url 'campaigns:detail' a.campaign_id %}">{{ a.campaign.name|default:"کمپین" }}</a>
-              — {% if a.note %}{{ a.note }}{% else %}به‌روزرسانی وضعیت{% endif %}
-            </p>
-            <time class="dash-activity-list__time" datetime="{{ a.created_at|date:'c' }}">{{ a.created_at|jalali_datetime }}</time>
-          </div>
-        </li>
-        {% endfor %}
-      </ul>
-      {% else %}
-      <p class="dash-board__hint">رویدادی ثبت نشده است.</p>
-      {% endif %}
-    </aside>
+
   </section>
 </div>
 

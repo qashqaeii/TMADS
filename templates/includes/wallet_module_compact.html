@@ -19,11 +19,11 @@
   {% endwith %}
   <dl class="wallet-module__rows">
     <div class="wallet-module__row">
-      <dt>موجودی</dt>
+      <dt>موجودی قابل استفاده</dt>
       <dd class="tabnums">{{ wallet.available_irr|irr_to_toman|format_irr }} <span class="wallet-module__unit">تومان</span></dd>
     </div>
     <div class="wallet-module__row">
-      <dt>رزرو</dt>
+      <dt>رزرو سفارش‌ها</dt>
       <dd class="tabnums">{{ wallet.reserved_irr|irr_to_toman|format_irr }} <span class="wallet-module__unit">تومان</span></dd>
     </div>
   </dl>

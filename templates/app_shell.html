@@ -2,7 +2,7 @@
 {% load core_filters %}
 {% block body_class %}is-app{% endblock %}
 {% block body %}
-<div class="app-layout" x-data="{ open: false, accountOpen: false }" @keydown.escape.window="open = false; accountOpen = false">
+<div class="app-layout ui-shell" x-data="{ open: false, accountOpen: false }" @keydown.escape.window="open = false; accountOpen = false">
   <div class="sidebar-backdrop mobile-only" x-show="open" x-transition.opacity @click="open = false" x-cloak aria-hidden="true"></div>
   <aside class="sidebar sidebar--premium" :class="{ 'is-open': open }" id="app-sidebar" aria-label="ناوبری پنل" data-mobile-drawer>
     <header class="sidebar-head">
@@ -92,7 +92,7 @@
       {% if wallet_hint %}
       <div class="sidebar-foot__row">
         <a class="sidebar-foot__balance" href="{% url 'finance:wallet' %}">
-          <span class="sidebar-foot__balance-label">کیف پول</span>
+          <span class="sidebar-foot__balance-label">موجودی قابل استفاده</span>
           <span class="sidebar-foot__balance-value tabnums">{{ wallet_hint.available_toman|format_count }} ت</span>
         </a>
         <a class="sidebar-foot__topup" href="{% url 'finance:topup' %}" title="شارژ کیف پول" aria-label="شارژ کیف پول">+</a>
@@ -114,7 +114,8 @@
         <button type="button" class="topbar-menu mobile-only" @click="open = !open" :aria-expanded="open" aria-controls="app-sidebar" aria-label="باز و بسته کردن منو">
           <span class="topbar-menu__bars" aria-hidden="true"></span>
         </button>
-        <div class="topbar-title">{% block page_title %}داشبورد{% endblock %}</div>
+        <span class="ui-workspace-label">{% include "includes/lucide_icon.html" with name="layout-grid" size="sm" %}<span>فضای کار</span></span>
+        <span class="topbar-title">{% block page_title %}داشبورد{% endblock %}</span>
       </div>
       <div class="topbar__cluster topbar__cluster--end topbar-actions" role="group" aria-label="میانبرهای حساب">
         <a
