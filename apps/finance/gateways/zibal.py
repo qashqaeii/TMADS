@@ -11,8 +11,12 @@ START = "https://gateway.zibal.ir/start/"
 
 
 def track_id(value):
-    value = str(value or "")
-    return value if re.fullmatch(r"[0-9]{1,32}", value) and int(value) > 0 else ""
+    if type(value) not in (str, int):
+        return ""
+    value = str(value)
+    if not re.fullmatch(r"[0-9]{1,32}", value) or int(value) <= 0:
+        return ""
+    return str(int(value))
 
 
 def exact_integer(value):
@@ -56,7 +60,7 @@ class ZibalGateway(PaymentGateway):
         ref = track_id(data.get("trackId"))
         if code == 100 and ref:
             return GatewayResult(True, ref, {"code": code, "redirect_url": START + ref})
-        return GatewayResult(False, raw={"code": code, "error": data.get("error", "request_rejected")})
+        return GatewayResult(False, raw={"code": code, "error": data.get("error") if data.get("error") in ("merchant_not_configured", "gateway_unavailable", "invalid_response") else "request_rejected"})
 
     def verify_payment(self, *, provider_reference, amount_irr):
         ref = track_id(provider_reference)
@@ -72,12 +76,13 @@ class ZibalGateway(PaymentGateway):
                 return GatewayResult(False, ref, {"code": code, "error": "inquiry_not_confirmed"})
             data = inquiry
         paid = exact_integer(data.get("amount"))
-        bank_ref = str(data.get("refNumber") or "")
+        raw_ref = data.get("refNumber")
+        bank_ref = str(raw_ref) if type(raw_ref) in (str, int) and raw_ref else ""
         if not re.fullmatch(r"[0-9A-Za-z_-]{1,128}", bank_ref):
             bank_ref = ""
         audit = {"code": code, "paid_amount_irr": paid, "bank_reference": bank_ref}
         if code not in (100, 201):
-            return GatewayResult(False, ref, {**audit, "error": data.get("error", "not_verified")})
+            return GatewayResult(False, ref, {**audit, "error": data.get("error") if data.get("error") in ("merchant_not_configured", "gateway_unavailable", "invalid_response") else "not_verified"})
         if paid != amount_irr or not bank_ref:
             return GatewayResult(False, ref, {**audit, "error": "amount_or_receipt_mismatch"})
         if data.get("trackId") is not None and track_id(data.get("trackId")) != ref:

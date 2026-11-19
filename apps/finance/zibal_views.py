@@ -1,6 +1,5 @@
 """Zibal checkout, callback and customer-only receipt; never trust callback as payment proof."""
 import uuid
-from urllib.parse import urlsplit
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -11,6 +10,7 @@ from django.utils import timezone
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_GET, require_POST
 from apps.accounts.permissions import customer_required
+from apps.public.seo import public_origin
 from .gateways import get_payment_gateway
 from .gateways.zibal import START, track_id
 from .models import Payment, PaymentVerification
@@ -19,17 +19,9 @@ from .services import complete_topup_payment
 
 def callback_url(request, payment_id):
     path = reverse("finance:zibal_callback", kwargs={"payment_id": payment_id})
-    origin = settings.PUBLIC_SITE_URL.strip().rstrip("/")
     if settings.APP_ENV.upper() == "PRODUCTION":
-        try:
-            parsed = urlsplit(origin)
-            if (parsed.scheme != "https" or not parsed.hostname or parsed.username or parsed.password
-                    or parsed.path or parsed.query or parsed.fragment):
-                return ""
-            _ = parsed.port
-        except ValueError:
-            return ""
-        return origin + path
+        origin = public_origin()
+        return origin + path if origin else ""
     return request.build_absolute_uri(path)
 
 
@@ -59,6 +51,7 @@ def initiate_zibal(request, amount_irr):
                                     description=f"topup-{payment.pk}") if url else None
     ref = track_id(result.provider_reference) if result and result.success else ""
     if not ref:
+        # No redirect was issued; there was no customer handoff to this attempt.
         payment.status = Payment.Status.FAILED
         payment.save(update_fields=["status", "updated_at"])
         return redirect("finance:payment_result", payment_id=payment.pk)
@@ -106,6 +99,7 @@ def verify_zibal(payment_id, *, expected_track):
                                                          amount_irr=payment.amount_irr)
     audit = result.raw or {}
     matches = (result.success and result.provider_reference == expected_track
+               and type(audit.get("paid_amount_irr")) is int
                and audit.get("paid_amount_irr") == payment.amount_irr and bool(audit.get("bank_reference")))
     PaymentVerification.objects.create(payment=payment, success=bool(matches), raw_payload={
         "code": audit.get("code"), "paid_amount_irr": audit.get("paid_amount_irr"),
@@ -113,6 +107,8 @@ def verify_zibal(payment_id, *, expected_track):
     })
     if matches:
         complete_topup_payment(payment, deposit_description="شارژ کیف پول (زیبال)")
+    # A definitive unpaid result is not proof of cancellation forever. Keep the
+    # original attempt available for safe rechecking; do not encourage a new charge.
 
 
 @never_cache
@@ -122,7 +118,8 @@ def zibal_callback(request, payment_id):
     # trigger authenticated server-to-server verification. Receipt remains private.
     ref = track_id(request.GET.get("trackId"))
     order_id = request.GET.get("orderId", "")
-    if ref and (not order_id or order_id == str(payment_id)) and request.GET.get("success") == "1":
+    if ref and (not order_id or order_id == str(payment_id)):
+        # Cancellation and success query values are untrusted; verify both paths.
         verify_zibal(payment_id, expected_track=ref)
     return redirect("finance:payment_result", payment_id=payment_id)
 
@@ -134,9 +131,12 @@ def zibal_callback(request, payment_id):
 def payment_result(request, payment_id):
     payment = owned_payment(request, payment_id)
     receipt = payment.verifications.filter(success=True).order_by("-created_at").first()
+    latest = payment.verifications.order_by("-created_at").first()
     invoice = payment.invoices.first() if payment.status == Payment.Status.VERIFIED else None
     return render(request, "finance/payment_result.html", {
         "payment": payment, "invoice": invoice,
+        "last_checked_at": latest.created_at if latest else None,
+        "last_unpaid": bool(latest and latest.raw_payload.get("code") == 202),
         "bank_reference": (receipt.raw_payload.get("bank_reference", "") if receipt else ""),
     })
 

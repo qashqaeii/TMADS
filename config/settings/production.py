@@ -1,5 +1,6 @@
 from .base import *  # noqa: F403
 from django.core.exceptions import ImproperlyConfigured
+from urllib.parse import urlsplit
 
 # Selecting production settings must enable production safeguards regardless
 # of the APP_ENV value in a development .env file.
@@ -24,6 +25,19 @@ if PAYMENT_GATEWAY not in ("zarinpal", "zibal") or PAYMENT_FAKE_ENABLED:
     MISSING_PRODUCTION_SECRETS.append("PAYMENT_GATEWAY / PAYMENT_FAKE_ENABLED")
 if PAYMENT_GATEWAY == "zibal" and (not ZIBAL_MERCHANT_ID.strip() or ZIBAL_MERCHANT_ID.strip().lower() == "zibal"):
     MISSING_PRODUCTION_SECRETS.append("ZIBAL_MERCHANT_ID (live merchant required)")
+if PAYMENT_GATEWAY == "zibal":
+    try:
+        origin = urlsplit(PUBLIC_SITE_URL.strip())
+        valid_origin = (origin.scheme == "https" and origin.hostname
+                        and origin.hostname not in ("localhost", "127.0.0.1", "::1")
+                        and not origin.username and not origin.password
+                        and origin.path in ("", "/") and not origin.query and not origin.fragment
+                        and not any(ch.isspace() for ch in origin.netloc) and "\\" not in origin.netloc)
+        _ = origin.port
+    except ValueError:
+        valid_origin = False
+    if not valid_origin:
+        MISSING_PRODUCTION_SECRETS.append("PUBLIC_SITE_URL (registered HTTPS payment origin required)")
 if PAYMENT_GATEWAY == "zarinpal" and (not ZARINPAL_MERCHANT_ID or ZARINPAL_SANDBOX):
     MISSING_PRODUCTION_SECRETS.append("ZARINPAL_MERCHANT_ID / ZARINPAL_SANDBOX")
 if TELEGRAM_ADS_PAID_SUBMISSION_ENABLED and not TELEGRAM_ADS_WRITE_ENABLED:
