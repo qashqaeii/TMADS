@@ -89,3 +89,15 @@
 .pp-features .ui-landing-end{border-radius:22px;padding:clamp(22px,4vw,35px)}
 @media(max-width:600px){.ui-final.pp-features .pp-feature-core .feature-card{min-height:0}.pp-features .pp-feature-advanced .ui-public-feature-grid{grid-template-columns:minmax(0,1fr)}}
 
+
+
+.ui-final.pp-how-it-works .pp-journey{list-style:none;padding:0;gap:14px;margin-block:0 28px;counter-reset:ppstep}
+.ui-final.pp-how-it-works .pp-journey .step-card{min-height:190px;position:relative;border-radius:18px;counter-increment:ppstep;gap:12px}
+.pp-how-it-works .ui-public-step-head>span:last-child{color:var(--pp-blue);font-size:1.25rem;font-weight:800;font-variant-numeric:tabular-nums}
+.pp-how-it-works .ui-public-step-head .ui-target-symbol{border-radius:14px}
+.pp-how-it-works .pp-journey .step-card:nth-child(3n+1){border-inline-start:3px solid #8ab8d8}
+.ui-final.pp-how-it-works .pp-guide-reading{max-width:100%;border-radius:20px;padding:clamp(20px,4vw,35px)}
+.pp-how-it-works .pp-guide-reading h2{font-size:1.2rem;color:var(--pp-ink);margin-block:12px 8px}
+.pp-how-it-works .pp-guide-action{justify-content:flex-start}
+@media(max-width:600px){.ui-final.pp-how-it-works .pp-journey .step-card{min-height:0;border-inline-start:3px solid #8ab8d8}}
+

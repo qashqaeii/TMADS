@@ -1,9 +1,10 @@
 {% extends "public_base.html" %}
 {% block title %}نحوه کار — {{ PRODUCT_NAME }}{% endblock %}
+{% block public_page_class %} pp-how-it-works{% endblock %}
 {% block content %}
 {% include "includes/public_hero.html" with title="آموزش تبلیغات تلگرام" subtitle="شش گام عملی از ایجاد حساب تا ارزیابی نتایج کمپین" show_subtitle=1 compact=1 %}
 <section class="section public-section container">
-  <ol class="steps-row steps-row--exec public-steps ui-public-steps">
+  <nav class="pp-section-nav" aria-label="بخش‌های صفحه"><a href="#guide-steps">شش مرحله</a><a href="#guide-preparation">آمادگی و سنجش</a><a href="#campaign-playbook">چک‌لیست عملی</a></nav><ol id="guide-steps" class="steps-row steps-row--exec public-steps ui-public-steps pp-journey" data-pp-reveal>
     <li class="card step-card card--lift"><div class="ui-public-step-head"><span class="ui-target-symbol">{% include "includes/lucide_icon.html" with name="user-plus" size="md" %}</span><span>۰۱</span></div><h2>ثبت‌نام</h2><p class="muted">حساب بسازید و وارد داشبورد فارسی شوید. هدف کسب‌وکار و مقصد تبلیغ را آماده کنید.</p></li>
     <li class="card step-card card--lift"><div class="ui-public-step-head"><span class="ui-target-symbol">{% include "includes/lucide_icon.html" with name="layers" size="md" %}</span><span>۰۲</span></div><h2>ساخت کمپین</h2><p class="muted">نوع کمپین، متن، مقصد و مخاطبان واجد شرایط را انتخاب و پیش‌نویس را ذخیره کنید.</p></li>
     <li class="card step-card card--lift"><div class="ui-public-step-head"><span class="ui-target-symbol">{% include "includes/lucide_icon.html" with name="wallet" size="md" %}</span><span>۰۳</span></div><h2>پرداخت</h2><p class="muted">بودجه، نرخ تبدیل و کارمزد را در پیش‌فاکتور ببینید؛ در صورت فعال بودن پرداخت، سفارش و رزرو مبلغ انجام می‌شود.</p></li>
@@ -11,14 +12,14 @@
     <li class="card step-card card--lift"><div class="ui-public-step-head"><span class="ui-target-symbol">{% include "includes/lucide_icon.html" with name="send" size="md" %}</span><span>۰۵</span></div><h2>انتشار</h2><p class="muted">ارسال تنها پس از بررسی، احراز مجوز و فعال بودن قابلیت‌های لازم انجام می‌شود؛ زمان تأیید تلگرام تضمین نمی‌شود.</p></li>
     <li class="card step-card card--lift"><div class="ui-public-step-head"><span class="ui-target-symbol">{% include "includes/lucide_icon.html" with name="line-chart" size="md" %}</span><span>۰۶</span></div><h2>گزارش</h2><p class="muted">پس از انتشار و همگام‌سازی داده، نمایش، هزینه و سایر شاخص‌های در دسترس را بررسی کنید.</p></li>
   </ol>
-  <article class="card card-pad legal-prose ui-public-reading">
+  <article id="guide-preparation" class="card card-pad legal-prose ui-public-reading pp-guide-reading" data-pp-reveal>
     <h2>قبل از ساخت اولین تبلیغ چه چیزهایی آماده کنیم؟</h2>
     <p>یک هدف قابل سنجش، مقصد معتبر، متن روشن و بودجه‌ای متناسب با ریسک کسب‌وکار انتخاب کنید. اگر هدف جذب کاربر است، کیفیت کانال یا مسیر ربات و تجربه پس از کلیک را نیز بررسی کنید.</p>
     <h2>چطور عملکرد کمپین را ارزیابی کنیم؟</h2>
     <p>CPM هزینه پیشنهادی به‌ازای هزار نمایش است. در صورت وجود داده کافی، شاخص‌های نمایش، هزینه و اقدام مخاطب را در کنار هم بررسی کنید؛ هر شاخص باید با هدف کمپین متناسب باشد. تغییرات بودجه یا محتوا را پس از بررسی داده انجام دهید.</p>
     <p><a href="{% url 'public:pricing' %}">آشنایی با هزینه و CPM</a> · <a href="{% url 'public:features' %}">امکانات استودیو</a> · <a href="https://ads.telegram.org/guidelines" rel="noopener">قوانین تبلیغات تلگرام</a></p>
   </article>
-  <div class="ui-public-center-action">{% if user.is_authenticated %}<a class="btn btn-primary" href="{% url 'campaigns:wizard_new' %}">ساخت کمپین</a>{% else %}<a class="btn btn-primary" href="{% url 'accounts:register' %}">ایجاد حساب</a>{% endif %}</div>
+  <div class="ui-public-center-action pp-guide-action">{% if user.is_authenticated %}<a class="btn btn-primary" href="{% url 'campaigns:wizard_new' %}">ساخت کمپین</a>{% else %}<a class="btn btn-primary" href="{% url 'accounts:register' %}">ایجاد حساب</a>{% endif %}</div>
 </section>
 <section id="campaign-playbook" class="ui-editorial container" aria-labelledby="campaign-playbook-heading">
   <header class="ui-editorial-head"><p class="ui-editorial-kicker">راهنمای عملی</p><h2 id="campaign-playbook-heading">چک‌لیست ساخت یک کمپین قابل ارزیابی</h2><p>این راهنما برای اولین تجربه و همچنین بازبینی کمپین‌های بعدی کاربرد دارد. پیش از پرداخت، ورودی‌های اصلی و معیار موفقیت را ثبت کنید.</p></header>
