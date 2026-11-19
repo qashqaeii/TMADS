@@ -31,9 +31,9 @@
         <span class="campaigns-insights__hero-mark" aria-hidden="true">{% include "includes/lucide_icon.html" with name="trophy" size="sm" %}</span>
         <a class="campaigns-insights__hero-name" href="{% url 'campaigns:detail' performance_insights.champion.campaign_id %}">{{ performance_insights.champion.campaign_name }}</a>
         <div class="campaigns-insights__hero-ctas">
-          <a class="campaigns-insights__cta campaigns-insights__cta--primary" href="{% url 'campaigns:detail' performance_insights.champion.campaign_id %}">مشاهده</a>
+          <a class="btn btn-primary btn-sm campaigns-insights__cta campaigns-insights__cta--primary" href="{% url 'campaigns:detail' performance_insights.champion.campaign_id %}">مشاهده</a>
           <form method="post" action="{% url 'campaigns:duplicate' performance_insights.champion.campaign_id %}">
-            {% csrf_token %}<button type="submit" class="campaigns-insights__cta">مشابه</button>
+            {% csrf_token %}<button type="submit" class="btn btn-ghost btn-sm campaigns-insights__cta">ساخت مشابه</button>
           </form>
         </div>
       </div>

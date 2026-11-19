@@ -6,39 +6,10 @@
 {% include "includes/charts_exec_scripts.html" %}
 {% endblock %}
 {% block content %}
-<div class="app-stack campaign-detail campaign-detail--luxe">
+<div class="app-stack campaign-detail campaign-detail--luxe ui-campaign-detail">
+  <nav class="ui-breadcrumb" aria-label="مسیر صفحه"><a href="{% url 'campaigns:list' %}">کمپین‌ها</a>{% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}<span aria-current="page">جزئیات کمپین</span></nav>
   <article class="campaign-detail__brief campaign-detail__hero campaign-detail__hero--exec campaign-detail__hero--luxe campaign-detail__hero--ref campaign-detail__hero--minimal" aria-label="خلاصه کمپین">
-    <header class="campaign-detail__hero-toolbar campaign-detail__toolbar campaign-detail__toolbar--luxe campaign-detail__toolbar--ref campaign-detail__toolbar--minimal" aria-label="عملیات کمپین">
-      <div class="campaign-detail__toolbar-track" role="group" aria-label="میانبرهای عملیاتی">
-        {% if campaign.status == 'active' %}
-        <a class="campaign-detail__action campaign-detail__action--primary campaign-detail__toolbar-item" href="{% url 'support:create' %}?campaign={{ campaign.id }}&amp;intent=pause">
-          <span class="campaign-detail__action-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="pause" size="sm" %}</span>
-          <span class="campaign-detail__action-label">درخواست توقف</span>
-        </a>
-        {% endif %}
-        {% if can_edit_campaign %}
-        <a class="campaign-detail__action campaign-detail__toolbar-item" href="{% url 'campaigns:wizard' campaign.id %}">
-          <span class="campaign-detail__action-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="pencil" size="sm" %}</span>
-          <span class="campaign-detail__action-label">ویرایش</span>
-        </a>
-        {% endif %}
-        <a class="campaign-detail__action campaign-detail__action--support campaign-detail__toolbar-item" href="{% url 'support:create' %}?campaign={{ campaign.id }}">
-          <span class="campaign-detail__action-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="headphones" size="sm" %}</span>
-          <span class="campaign-detail__action-label">پشتیبانی</span>
-        </a>
-        <span class="campaign-detail__toolbar-sep" aria-hidden="true"></span>
-        {% include "includes/campaign_actions_menu.html" %}
-      </div>
-      {% if budget.has_remote %}
-      <form method="post" action="{% url 'campaigns:refresh_stats' %}" class="campaign-detail__actions-form campaign-detail__toolbar-aux">{% csrf_token %}
-        <input type="hidden" name="campaign_id" value="{{ campaign.id }}">
-        <button type="submit" class="campaign-detail__action campaign-detail__action--refresh" title="بروزرسانی آمار">
-          <span class="campaign-detail__action-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="refresh-cw" size="sm" %}</span>
-          <span class="campaign-detail__action-label">بروزرسانی</span>
-        </button>
-      </form>
-      {% endif %}
-    </header>
+
 
     <div class="campaign-detail__hero-body campaign-detail__hero-body--ref campaign-detail__hero-body--minimal">
       <header class="campaign-detail__masthead campaign-detail__masthead--luxe campaign-detail__masthead--minimal">
@@ -86,6 +57,37 @@
       </aside>
       {% endif %}
     </div>
+    <header class="campaign-detail__hero-toolbar campaign-detail__toolbar campaign-detail__toolbar--luxe campaign-detail__toolbar--ref campaign-detail__toolbar--minimal" aria-label="عملیات کمپین">
+      <div class="campaign-detail__toolbar-track" role="group" aria-label="میانبرهای عملیاتی">
+        {% if campaign.status == 'active' %}
+        <a class="campaign-detail__action campaign-detail__action--primary campaign-detail__toolbar-item" href="{% url 'support:create' %}?campaign={{ campaign.id }}&amp;intent=pause">
+          <span class="campaign-detail__action-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="pause" size="sm" %}</span>
+          <span class="campaign-detail__action-label">درخواست توقف</span>
+        </a>
+        {% endif %}
+        {% if can_edit_campaign %}
+        <a class="campaign-detail__action campaign-detail__toolbar-item" href="{% url 'campaigns:wizard' campaign.id %}">
+          <span class="campaign-detail__action-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="pencil" size="sm" %}</span>
+          <span class="campaign-detail__action-label">ویرایش</span>
+        </a>
+        {% endif %}
+        <a class="campaign-detail__action campaign-detail__action--support campaign-detail__toolbar-item" href="{% url 'support:create' %}?campaign={{ campaign.id }}">
+          <span class="campaign-detail__action-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="headphones" size="sm" %}</span>
+          <span class="campaign-detail__action-label">پشتیبانی</span>
+        </a>
+        <span class="campaign-detail__toolbar-sep" aria-hidden="true"></span>
+        {% include "includes/campaign_actions_menu.html" %}
+      </div>
+      {% if budget.has_remote %}
+      <form method="post" action="{% url 'campaigns:refresh_stats' %}" class="campaign-detail__actions-form campaign-detail__toolbar-aux">{% csrf_token %}
+        <input type="hidden" name="campaign_id" value="{{ campaign.id }}">
+        <button type="submit" class="campaign-detail__action campaign-detail__action--refresh" title="بروزرسانی آمار">
+          <span class="campaign-detail__action-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="refresh-cw" size="sm" %}</span>
+          <span class="campaign-detail__action-label">بروزرسانی</span>
+        </button>
+      </form>
+      {% endif %}
+    </header>
   </article>
 
   {% include "includes/campaign_metrics_strip.html" with kpi_ribbon_mode="ref" %}

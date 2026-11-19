@@ -6,14 +6,13 @@
 {% if has_portfolio_chart %}{% include "includes/charts_exec_scripts.html" %}{% endif %}
 {% endblock %}
 {% block content %}
-<div class="app-stack campaigns-page campaigns-page--luxe">
+<div class="app-stack campaigns-page campaigns-page--luxe ui-campaign-list">
 <div class="campaigns-list-hero-shell motion-reveal">
 {% include "campaigns/includes/list_page_header.html" %}
 </div>
 
 {% include "includes/portfolio_metric_strip.html" %}
 
-{% include "campaigns/includes/performance_insights.html" %}
 
 {% if has_any_campaigns and not has_portfolio_chart %}
 <p class="campaigns-portfolio-note" role="status">
@@ -228,7 +227,7 @@
     {% elif not has_any_campaigns %}
     <p class="campaigns-empty__title">هنوز کمپینی ندارید</p>
     <p class="campaigns-empty__text muted">با استودیو پنج‌مرحله‌ای، اولین تبلیغ تلگرام را بسازید — پیش‌نویس خودکار ذخیره می‌شود.</p>
-    <a class="campaign-detail__action campaigns-empty__cta campaigns-empty__cta--primary" href="{% url 'campaigns:wizard_new' %}">ایجاد اولین کمپین</a>
+    <a class="btn btn-primary campaigns-empty__cta campaigns-empty__cta--primary" href="{% url 'campaigns:wizard_new' %}">ایجاد اولین کمپین</a>
     {% else %}
     <p class="campaigns-empty__title">کمپینی در این صفحه نیست</p>
     <p class="campaigns-empty__text muted">صفحهٔ بعد را امتحان کنید یا فیلترها را بررسی کنید.</p>
@@ -236,6 +235,8 @@
   </div>
   {% endif %}
 </article>
+
+{% include "campaigns/includes/performance_insights.html" %}
 
 {% if has_portfolio_chart %}
 <details class="campaign-portfolio-disclosure campaign-portfolio-disclosure--luxe campaign-portfolio-chart motion-reveal">

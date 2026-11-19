@@ -1,5 +1,5 @@
 <div class="row-actions__group">
-  <a class="campaigns-table__link-btn campaigns-table__link-btn--primary" href="{% url 'campaigns:detail' campaign.id %}">مشاهده</a>
+  <a class="btn btn-ghost btn-sm campaigns-table__link-btn" href="{% url 'campaigns:detail' campaign.id %}">مشاهده</a>
   {% if campaign.status == 'draft' %}
   <a class="campaigns-table__link-btn" href="{% url 'campaigns:wizard' campaign.id %}">ادامه پیش‌نویس</a>
   <details class="row-actions__overflow" data-disclosure-menu>

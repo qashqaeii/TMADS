@@ -1,4 +1,4 @@
-<header class="dash-header dash-header--luxe campaigns-list-hero" aria-label="سرفصل کمپین‌ها">
+<header class="dash-header ui-page-heading dash-header--luxe campaigns-list-hero" aria-label="سرفصل کمپین‌ها">
   <div class="dash-header__main campaigns-list-hero__lead">
     <h1>کمپین‌ها</h1>
     <span class="campaigns-list-hero__rule" aria-hidden="true"></span>
@@ -11,7 +11,7 @@
         <span class="campaign-detail__action-label">به‌روزرسانی آمار</span>
       </button>
     </form>
-    <a class="campaign-detail__action campaigns-hero__action campaigns-hero__action--create" href="{% url 'campaigns:wizard_new' %}">
+    <a class="btn btn-primary campaigns-hero__action campaigns-hero__action--create" href="{% url 'campaigns:wizard_new' %}">
       <span class="campaign-detail__action-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="plus" size="sm" %}</span>
       <span class="campaign-detail__action-label">ساخت تبلیغ</span>
     </a>

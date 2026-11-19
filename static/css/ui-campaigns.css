@@ -1,0 +1,83 @@
+/* Campaign management: list first, secondary insights, compact identity and analysis. */
+.ui-final :is(.ui-campaign-list,.ui-campaign-detail) { gap:18px;min-width:0; }
+.ui-final .ui-campaign-list .campaigns-list-hero-shell { padding:0;background:none;border:0;box-shadow:none; }
+.ui-final .ui-campaign-list .campaigns-list-hero { background:none;min-height:0;padding:0 0 14px;border:0;border-bottom:1px solid var(--ui-border);border-radius:0;box-shadow:none; }
+.ui-final .ui-campaign-list .campaigns-list-hero h1 { font-size:1.65rem; }
+.ui-final .ui-campaign-list .campaigns-list-hero__rule { display:none; }
+.ui-final .ui-campaign-list .campaigns-list-hero__lead { gap:9px 16px; }
+.ui-final .ui-campaign-list .campaigns-list-hero__sub { color:var(--ui-muted);font-size:.85rem;white-space:normal; }
+.ui-final :is(.ui-campaign-list,.ui-campaign-detail) .campaign-kpi-ribbon { border:1px solid var(--ui-border);border-radius:var(--ui-radius);background:white;box-shadow:var(--ui-shadow);padding:16px; }
+.ui-final :is(.ui-campaign-list,.ui-campaign-detail) .campaign-kpi-ribbon__head { display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 10px; }
+.ui-final :is(.ui-campaign-list,.ui-campaign-detail) .campaign-kpi-ribbon__title { font-size:.98rem;font-weight:700; }
+.ui-final .ui-campaign-list .campaign-kpi-ribbon > p.muted { font-size:.8rem;margin:0 0 12px;line-height:1.8; }
+.ui-final :is(.ui-campaign-list,.ui-campaign-detail) .campaign-kpi-ribbon__track { display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0; }
+.ui-final :is(.ui-campaign-list,.ui-campaign-detail) .campaign-kpi-ribbon__cell { min-height:0;min-width:0;background:none;border:0;border-radius:0;box-shadow:none;padding:10px 14px;transform:none; }
+.ui-final :is(.ui-campaign-list,.ui-campaign-detail) .campaign-kpi-ribbon__cell:not(:first-child) { border-inline-start:1px solid var(--ui-border); }
+.ui-final :is(.ui-campaign-list,.ui-campaign-detail) .campaign-kpi-ribbon__name { font-size:.83rem;color:var(--ui-muted); }
+.ui-final :is(.ui-campaign-list,.ui-campaign-detail) .campaign-kpi-ribbon__value { font-size:clamp(1.15rem,2vw,1.75rem);font-weight:750;overflow-wrap:anywhere;line-height:1.4; }
+.ui-final .ui-campaign-list .campaigns-filter--luxe { border:1px solid var(--ui-border);border-radius:var(--ui-radius);background:#fff;box-shadow:none;padding:14px; }
+.ui-final .ui-campaign-list .campaigns-filter__bar { display:grid;grid-template-columns:minmax(180px,2fr) minmax(110px,1fr) minmax(110px,1fr) auto;align-items:end;gap:12px; }
+.ui-final .ui-campaign-list .campaigns-filter__field { min-width:0; }
+.ui-final .ui-campaign-list .campaigns-filter__input-wrap input { padding-inline-start:36px; }
+.ui-final .ui-campaign-list .campaigns-filter__label { color:var(--ui-muted);font-size:.8rem;font-weight:650; }
+.ui-final .ui-campaign-list .campaigns-table-board--luxe { background:#fff;border:1px solid var(--ui-border);border-radius:var(--ui-radius);box-shadow:var(--ui-shadow);min-width:0; }
+.ui-final .ui-campaign-list .campaigns-table__head { padding:14px 16px;gap:12px; }
+.ui-final .ui-campaign-list .campaigns-table__title { font-size:1.02rem;font-weight:700; }
+.ui-final .ui-campaign-list .data-table--campaigns { border-collapse:separate;border-spacing:0;font-size:.85rem; }
+.ui-final .ui-campaign-list .data-table--campaigns th { background:var(--ui-soft);color:var(--ui-muted);font-weight:650;padding:12px 14px; }
+.ui-final .ui-campaign-list .data-table--campaigns td { padding:13px 14px;border-block-end:1px solid var(--ui-border); }
+.ui-final .ui-campaign-list .data-table--campaigns tbody tr:hover td { background:#f6fafe; }
+.ui-final .ui-campaign-list .campaign-title { color:var(--ui-ink);font-size:.92rem;font-weight:700;overflow-wrap:anywhere; }
+.ui-final .ui-campaign-list .campaigns-table__identity-meta { font-size:.74rem; }
+.ui-final .ui-campaign-list .row-actions__group { gap:6px;align-items:center; }
+.ui-final .ui-campaign-list .campaigns-table__sort-track { background:var(--ui-soft);border:1px solid var(--ui-border);border-radius:9px;padding:3px; }
+.ui-final .ui-campaign-list .sort-pill { border-radius:6px;min-height:32px;color:var(--ui-muted); }
+.ui-final .ui-campaign-list .sort-pill.is-active { background:#fff;color:var(--ui-action);box-shadow:var(--ui-shadow); }
+.ui-final .ui-campaign-list .campaigns-mobile-card--luxe { border-radius:var(--ui-radius);border:1px solid var(--ui-border);background:#fff;box-shadow:none; }
+.ui-final .ui-campaign-list .campaigns-mobile-card__rail { display:none; }
+.ui-final .ui-campaign-list .campaigns-mobile-card__kpis { background:var(--ui-soft);border-radius:8px;padding:10px;gap:10px; }
+.ui-final .ui-campaign-list .campaigns-mobile-kpi__label { font-size:.75rem;color:var(--ui-muted); }
+.ui-final .ui-campaign-list .campaigns-mobile-kpi__value { font-size:.95rem; }
+.ui-final .ui-campaign-list :is(.campaigns-insights--premium,.campaign-portfolio-disclosure--luxe) { border:1px solid var(--ui-border);background:#fff;box-shadow:var(--ui-shadow);border-radius:var(--ui-radius); }
+.ui-final .ui-campaign-list .campaigns-insights__accent { display:none; }
+.ui-final .ui-campaign-list .campaigns-insights__hero { background:#f1f7fc;border:1px solid #d6e9f5;border-radius:var(--ui-radius);box-shadow:none; }
+.ui-final .ui-campaign-list .campaigns-insights__tile { background:white;border:1px solid var(--ui-border);border-radius:10px;box-shadow:none; }
+.ui-breadcrumb { display:flex;align-items:center;gap:6px;font-size:.8rem;color:var(--ui-muted); }
+.ui-breadcrumb a { color:var(--ui-action); }
+.ui-final .ui-campaign-detail .campaign-detail__hero--minimal { padding:0;background:white;border:1px solid var(--ui-border);border-radius:var(--ui-radius);box-shadow:var(--ui-shadow);overflow:visible; }
+.ui-final .ui-campaign-detail .campaign-detail__hero-body--minimal { display:flex;align-items:center;justify-content:space-between;gap:18px;padding:20px; }
+.ui-final .ui-campaign-detail .campaign-detail__masthead--minimal { flex:1;min-width:0; }
+.ui-final .ui-campaign-detail .campaign-detail__title { font-size:clamp(1.45rem,2.4vw,1.9rem);font-weight:750;line-height:1.5;overflow-wrap:anywhere; }
+.ui-final .ui-campaign-detail .campaign-detail__meta-bar { display:flex;flex-wrap:wrap;gap:8px 14px;font-size:.82rem;color:var(--ui-muted); }
+.ui-final .ui-campaign-detail .campaign-detail__hero-budget--minimal { flex:none;min-width:120px; }
+.ui-final .ui-campaign-detail .campaign-detail__toolbar--minimal { border:0;border-top:1px solid var(--ui-border);background:var(--ui-soft);border-radius:0 0 var(--ui-radius) var(--ui-radius);padding:10px 16px;gap:8px; }
+.ui-final .ui-campaign-detail .campaign-detail__toolbar-track { display:flex;flex-wrap:wrap;gap:8px; }
+.ui-final .ui-campaign-detail .campaign-detail__action { min-height:36px;padding:7px 11px;font-size:.82rem; }
+.ui-final .ui-campaign-detail .tab-bar--ref { display:flex;overflow-x:auto;flex-wrap:nowrap;gap:5px;padding:5px;margin:0 0 16px;background:#fff;border:1px solid var(--ui-border);border-radius:10px;scrollbar-width:thin; }
+.ui-final .ui-campaign-detail .tab-bar--ref button { flex:1 0 auto;min-height:40px;padding:8px 14px;border-radius:7px;white-space:nowrap;font-size:.85rem;color:var(--ui-muted);background:transparent;box-shadow:none; }
+.ui-final .ui-campaign-detail .tab-bar--ref button.is-active { background:#e9f3fb;color:var(--ui-action);font-weight:700; }
+.ui-final .ui-campaign-detail :is(.campaign-overview-card,.campaign-detail-panel,.campaign-trend-card,.campaign-analytics-trend,.campaign-analytics-funnel,.campaign-analytics-spend,.campaign-performance-badges--luxe) { border:1px solid var(--ui-border);border-radius:var(--ui-radius);box-shadow:var(--ui-shadow);background:#fff;padding:18px;min-width:0; }
+.ui-final .ui-campaign-detail .campaign-overview-card__title { font-size:1rem; }
+.ui-final .ui-campaign-detail .campaign-overview-card__brand-deco { display:none; }
+.ui-final .ui-campaign-detail :is(.campaign-overview-facts__row,.campaign-overview-metrics__item) { background:transparent;border:0;border-bottom:1px solid var(--ui-border);border-radius:0;padding:11px 0; }
+.ui-final .ui-campaign-detail :is(.campaign-overview-facts__row,.campaign-overview-metrics__item):last-child { border-bottom:0; }
+.ui-final .ui-campaign-detail .campaign-performance-badges__card { background:var(--ui-soft);border:1px solid var(--ui-border);border-radius:9px;box-shadow:none; }
+.ui-final .ui-campaign-detail .campaign-history-timeline { max-height:none;overflow:visible; }
+@media(max-width:1100px) {
+ .ui-final .ui-campaign-list .campaigns-filter__bar { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media(max-width:680px) {
+ .ui-final :is(.ui-campaign-list,.ui-campaign-detail) .campaign-kpi-ribbon__track { grid-template-columns:repeat(2,minmax(0,1fr));gap:0; }
+ .ui-final :is(.ui-campaign-list,.ui-campaign-detail) .campaign-kpi-ribbon__cell { border:0;border-bottom:1px solid var(--ui-border);padding:12px 8px; }
+ .ui-final :is(.ui-campaign-list,.ui-campaign-detail) .campaign-kpi-ribbon__cell:not(:first-child) { border-inline-start:0; }
+ .ui-final :is(.ui-campaign-list,.ui-campaign-detail) .campaign-kpi-ribbon__cell:nth-child(even) { border-inline-start:1px solid var(--ui-border); }
+ .ui-final :is(.ui-campaign-list,.ui-campaign-detail) .campaign-kpi-ribbon__cell:last-child { grid-column:1/-1;border:0; }
+ .ui-final .ui-campaign-list .campaigns-filter__bar { grid-template-columns:minmax(0,1fr); }
+ .ui-final .ui-campaign-list .campaigns-filter__actions { display:flex;gap:8px; }
+ .ui-final .ui-campaign-list .campaigns-filter__actions > * { flex:1; }
+ .ui-final .ui-campaign-detail .campaign-detail__hero-body--minimal { padding:16px;flex-wrap:wrap; }
+ .ui-final .ui-campaign-detail .campaign-detail__hero-budget--minimal { margin:auto; }
+ .ui-final .ui-campaign-detail .campaign-detail__toolbar--minimal { padding:10px;flex-wrap:wrap; }
+ .ui-final .ui-campaign-detail .campaign-detail__action { min-height:44px; }
+ .ui-final .ui-campaign-detail :is(.campaign-overview-card,.campaign-detail-panel,.campaign-trend-card,.campaign-analytics-trend,.campaign-analytics-funnel,.campaign-analytics-spend) { padding:13px; }
+}

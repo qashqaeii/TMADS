@@ -1,6 +1,5 @@
 {% load core_filters ton_display %}
 <section class="campaign-kpi-board campaign-kpi-board--luxe campaign-kpi-ribbon metric-strip metric-strip--campaign motion-reveal{% if kpi_ribbon_mode == 'ref' %} campaign-kpi-ribbon--ref{% endif %}" aria-label="آمار کمپین">
-  {% if kpi_ribbon_mode != 'ref' %}
   <header class="campaign-kpi-ribbon__head">
     <h2 class="campaign-kpi-ribbon__title">شاخص‌های عملکرد</h2>
     {% if metrics.clicks %}
@@ -10,7 +9,6 @@
     </div>
     {% endif %}
   </header>
-  {% endif %}
   <div class="campaign-kpi-ribbon__track" role="list">
     <article class="campaign-kpi-ribbon__cell campaign-kpi-ribbon__cell--lead" role="listitem" style="--kpi-accent: #249fe5;">
       <p class="campaign-kpi-ribbon__meta">
@@ -46,11 +44,7 @@
         <span class="campaign-kpi-ribbon__name">هزینه</span>
       </p>
       <p class="campaign-kpi-ribbon__value campaign-kpi-ribbon__value--ton">{% ton_amount metrics.spent_ton exchange_rate_id=order_exchange_rate_id hint=0 %}</p>
-      {% if kpi_ribbon_mode == 'ref' and metrics.has_conversion %}
-      <p class="campaign-kpi-ribbon__delta tabnums" title="نرخ تبدیل کلیک به اقدام">
-        {{ metrics.conversion_rate|persian_digits }}٪
-      </p>
-      {% endif %}
+
     </article>
   </div>
 </section>
