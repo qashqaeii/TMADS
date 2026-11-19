@@ -4,7 +4,7 @@
 {% block page_title %}کیف پول{% endblock %}
 {% block container_class %}container-wide{% endblock %}
 {% block content %}
-<div class="app-stack finance-page ui-finance">
+<div class="app-stack finance-page ui-finance pay-wallet">
 {% url 'finance:topup' as topup_url %}
 {% include "includes/dash_header.html" with title="کیف پول" subtitle="مدیریت اعتبار، رزرو و گردش مالی" with_sub=1 %}
 <section class="ui-wallet-layout" aria-label="خلاصه کیف پول">
@@ -21,7 +21,7 @@
     <div class="ui-finance-links"><a href="{% url 'finance:invoices' %}">فاکتورها {% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}</a><a href="{% url 'finance:refunds' %}">بازپرداخت {% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}</a></div>
   </article>
 </section>
-{% if recent_payments %}<article class="card card-pad pay-history"><header><h2 class="section-title">پرداخت‌های بانکی اخیر</h2><p class="muted">برای پیگیری، وضعیت درخواست شارژ را باز کنید.</p></header><ul>{% for payment in recent_payments %}<li><div><strong>{{ payment.amount_irr|irr_to_toman|format_irr }} تومان</strong><small>{{ payment.created_at|jalali_datetime }}</small></div><span class="pay-state pay-state--{{ payment.status }}">{{ payment.get_status_display }}</span><a class="btn btn-ghost btn-sm" href="{% url 'finance:payment_result' payment.id %}">جزئیات</a></li>{% endfor %}</ul></article>{% endif %}
+{% if recent_payments %}<article class="card card-pad pay-history" aria-labelledby="bank-payment-history"><header><div><h2 id="bank-payment-history" class="section-title">پرداخت‌های بانکی اخیر</h2><p class="muted">تلاش‌های شارژ و وضعیت تأیید آنها</p></div><a class="btn btn-ghost btn-sm" href="{% url 'finance:topup' %}">شارژ کیف پول</a></header><ul>{% for payment in recent_payments %}<li><div class="pay-history-amount"><strong><bdi>{{ payment.amount_irr|irr_to_toman|format_irr }}</bdi> تومان</strong><small><time datetime="{{ payment.created_at|date:'c' }}">{{ payment.created_at|jalali_datetime }}</time></small></div><span class="pay-state pay-state--{{ payment.status }}">{% if payment.status == 'redirected' or payment.status == 'created' %}در انتظار تأیید{% else %}{{ payment.get_status_display }}{% endif %}</span><a class="btn btn-ghost btn-sm" href="{% url 'finance:payment_result' payment.id %}">{% if payment.status == 'verified' %}رسید{% else %}پیگیری{% endif %} {% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}</a></li>{% endfor %}</ul></article>{% endif %}
 <article class="card table-card card--lift">
   <header class="dash-panel__head" style="border-bottom:1px solid var(--border-default)">
     <div class="dash-panel__title"><h2 class="section-title">تراکنش‌های اخیر</h2></div>

@@ -1,0 +1,3 @@
+# Payment UI acceptance
+Payment logic is unchanged. The checkout, handoff, result states, wallet history and invoice share a minimal RTL visual system. Content-width container queries complement viewport media queries to account for the dashboard sidebar. Long Toman values and tracking codes may wrap, and copying is progressive enhancement.
+Automated Django tests exercise rendering, states, long formatted amounts and action separation. Manually review 320, 360, 390, 768, 1024, 1440px viewport widths with the sidebar open/closed; confirm no horizontal overflow, focus, touch controls, keyboard input and copy behavior. Real gateway pages and bank-side layouts are controlled by Zibal, not TMADS.

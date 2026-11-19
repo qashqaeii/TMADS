@@ -1,14 +1,16 @@
 {% extends "app_shell.html" %}
-{% load core_filters %}
+{% load core_filters static %}
+{% block extra_head %}{{ block.super }}<link rel="stylesheet" href="{% static 'css/ui-payment.css' %}">{% endblock %}
 {% block page_title %}فاکتور {{ invoice.invoice_number }}{% endblock %}
 {% block container_class %}container-wide{% endblock %}
 {% block content %}
-<div class="app-stack finance-page ui-finance">
+<div class="app-stack finance-page ui-finance pay-invoice-page">
 {% url 'finance:invoices' as invoices_url %}
 {% include "includes/dash_header.html" with eyebrow="فاکتور" title=invoice.invoice_number subtitle=invoice.created_at|jalali_datetime with_sub=1 action_url=invoices_url action_label="همه فاکتورها" %}
-<section class="card card--lift card-pad finance-invoice" aria-label="جزئیات فاکتور">
-  <div class="ui-invoice-masthead"><div><span class="ui-target-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="receipt" size="md" %}</span><h2 class="section-title">خلاصه فاکتور</h2></div><span class="muted" dir="ltr">{{ invoice.invoice_number }}</span></div><div class="ui-invoice-total"><span>مبلغ فاکتور</span><strong class="tabnums">{{ invoice.amount_irr|irr_to_toman|format_irr }} <small>تومان</small></strong></div>
+<section class="card card-pad finance-invoice pay-invoice" aria-label="جزئیات فاکتور">
+  <div class="ui-invoice-masthead"><div><span class="ui-target-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="receipt" size="md" %}</span><h2 class="section-title">خلاصه فاکتور</h2></div><span class="muted" dir="ltr">{{ invoice.invoice_number }}</span></div><div class="ui-invoice-total"><span>مبلغ فاکتور</span><strong class="tabnums"><bdi>{{ invoice.amount_irr|irr_to_toman|format_irr }}</bdi> <small>تومان</small></strong></div>
   <div class="finance-line"><span>شرح</span><strong class="finance-invoice__description">{{ invoice.description|default:"—" }}</strong></div>
+  {% if invoice.payment and invoice.payment.gateway == "zibal" %}<div class="finance-line"><span>درگاه</span><strong>زیبال</strong></div><div class="finance-line"><span>کد پیگیری پرداخت</span><code class="finance-invoice__reference" dir="ltr">{{ invoice.payment.provider_reference }}</code></div><a class="btn btn-ghost pay-invoice-link" href="{% url 'finance:payment_result' invoice.payment.id %}">مشاهده رسید پرداخت</a>{% endif %}
   {% if invoice.order %}<div class="finance-line"><span>سفارش</span><code class="finance-invoice__reference" dir="ltr">{{ invoice.order_id }}</code></div>{% endif %}
 </section>
 </div>
