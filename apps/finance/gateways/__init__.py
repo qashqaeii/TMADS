@@ -4,8 +4,8 @@ from .fake import FakeGateway
 from .zarinpal import ZarinpalGateway
 
 
-def get_payment_gateway():
-    name = (settings.PAYMENT_GATEWAY or "fake").lower()
+def get_payment_gateway(name=None):
+    name = (name or settings.PAYMENT_GATEWAY or "fake").lower()
     if name == "fake":
         return FakeGateway()
     if name == "zarinpal":

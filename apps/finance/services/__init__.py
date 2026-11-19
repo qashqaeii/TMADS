@@ -25,8 +25,15 @@ def credit_wallet_deposit(
     description: str = "",
 ) -> WalletLedgerEntry:
     wallet = Wallet.objects.select_for_update().get(pk=wallet.pk)
-    if WalletLedgerEntry.objects.filter(idempotency_key=idempotency_key).exists():
-        return WalletLedgerEntry.objects.get(idempotency_key=idempotency_key)
+    if amount_irr <= 0:
+        raise ValueError("مبلغ تراکنش باید مثبت باشد.")
+    existing = WalletLedgerEntry.objects.filter(idempotency_key=idempotency_key).first()
+    if existing:
+        if (existing.wallet_id != wallet.pk or existing.amount_irr != amount_irr
+                or existing.entry_type != WalletLedgerEntry.EntryType.DEPOSIT
+                or existing.related_order_id != None):
+            raise ValueError("کلید تراکنش با عملیات مالی دیگری مرتبط است.")
+        return existing
 
     wallet.available_irr += amount_irr
     wallet.save(update_fields=["available_irr", "updated_at"])
@@ -45,8 +52,15 @@ def credit_wallet_deposit(
 @transaction.atomic
 def reserve_for_order(wallet: Wallet, amount_irr: int, order_id: uuid.UUID, idempotency_key: str):
     wallet = Wallet.objects.select_for_update().get(pk=wallet.pk)
-    if WalletLedgerEntry.objects.filter(idempotency_key=idempotency_key).exists():
-        return WalletLedgerEntry.objects.get(idempotency_key=idempotency_key)
+    if amount_irr <= 0:
+        raise ValueError("مبلغ تراکنش باید مثبت باشد.")
+    existing = WalletLedgerEntry.objects.filter(idempotency_key=idempotency_key).first()
+    if existing:
+        if (existing.wallet_id != wallet.pk or existing.amount_irr != amount_irr
+                or existing.entry_type != WalletLedgerEntry.EntryType.RESERVATION
+                or existing.related_order_id != order_id):
+            raise ValueError("کلید تراکنش با عملیات مالی دیگری مرتبط است.")
+        return existing
 
     if wallet.available_irr < amount_irr:
         raise ValueError("موجودی کیف پول کافی نیست.")
@@ -77,11 +91,18 @@ def release_reservation_for_order(
     description: str = "آزادسازی رزرو سفارش",
 ) -> WalletLedgerEntry:
     wallet = Wallet.objects.select_for_update().get(pk=wallet.pk)
-    if WalletLedgerEntry.objects.filter(idempotency_key=idempotency_key).exists():
-        return WalletLedgerEntry.objects.get(idempotency_key=idempotency_key)
+    if amount_irr <= 0:
+        raise ValueError("مبلغ تراکنش باید مثبت باشد.")
+    existing = WalletLedgerEntry.objects.filter(idempotency_key=idempotency_key).first()
+    if existing:
+        if (existing.wallet_id != wallet.pk or existing.amount_irr != amount_irr
+                or existing.entry_type != WalletLedgerEntry.EntryType.RESERVATION_RELEASE
+                or existing.related_order_id != order_id):
+            raise ValueError("کلید تراکنش با عملیات مالی دیگری مرتبط است.")
+        return existing
 
-    if wallet.reserved_irr < amount_irr:
-        raise ValueError("مبلغ رزرو کافی نیست.")
+    if wallet.reserved_irr < amount_irr or outstanding_order_reservation(wallet, order_id) < amount_irr:
+        raise ValueError("مبلغ رزرو این سفارش کافی نیست.")
 
     wallet.reserved_irr -= amount_irr
     wallet.available_irr += amount_irr
@@ -97,6 +118,18 @@ def release_reservation_for_order(
         related_order_id=order_id,
         description=description,
     )
+
+
+def outstanding_order_reservation(wallet: Wallet, order_id: uuid.UUID) -> int:
+    """Net reservation attributable to one order, not the wallet's pooled balance."""
+    from django.db.models import Sum
+    rows = wallet.ledger_entries.filter(related_order_id=order_id)
+    def amount(kind):
+        return rows.filter(entry_type=kind).aggregate(total=Sum("amount_irr"))["total"] or 0
+    return (amount(WalletLedgerEntry.EntryType.RESERVATION)
+            - amount(WalletLedgerEntry.EntryType.RESERVATION_RELEASE)
+            - amount(WalletLedgerEntry.EntryType.SPEND)
+            - amount(WalletLedgerEntry.EntryType.SERVICE_FEE))
 
 
 def resolve_irr_per_ton() -> int:
@@ -158,11 +191,13 @@ def calculate_quote_totals(advertising_budget_irr: int) -> dict:
         }
 
 
+@transaction.atomic
 def complete_topup_payment(payment: Payment, *, deposit_description: str = "شارژ کیف پول") -> bool:
+    payment = Payment.objects.select_for_update().get(pk=payment.pk)
     if payment.status == Payment.Status.VERIFIED:
         return True
-    payment.status = Payment.Status.VERIFIED
-    payment.save(update_fields=["status", "updated_at"])
+    if payment.amount_irr <= 0 or payment.order_id is not None:
+        raise ValueError("پرداخت شارژ کیف پول نامعتبر است.")
     wallet = ensure_wallet(payment.customer)
     credit_wallet_deposit(
         wallet,
@@ -171,6 +206,8 @@ def complete_topup_payment(payment: Payment, *, deposit_description: str = "شا
         description=deposit_description,
     )
     issue_invoice_for_payment(payment, description=deposit_description)
+    payment.status = Payment.Status.VERIFIED
+    payment.save(update_fields=["status", "updated_at"])
     from apps.notifications.services import notify_customer
 
     notify_customer(
@@ -184,8 +221,6 @@ def complete_topup_payment(payment: Payment, *, deposit_description: str = "شا
 
 def verify_fake_payment(payment: Payment) -> bool:
     """Sandbox-only server-side verification."""
-    if not settings.PAYMENT_FAKE_ENABLED and settings.APP_ENV == "PRODUCTION":
+    if not settings.PAYMENT_FAKE_ENABLED or settings.APP_ENV.upper() == "PRODUCTION" or payment.gateway != "fake":
         return False
-    payment.provider_reference = payment.provider_reference or f"fake-{payment.id}"
-    payment.save(update_fields=["provider_reference", "updated_at"])
     return complete_topup_payment(payment, deposit_description="شارژ کیف پول (آزمایشی)")

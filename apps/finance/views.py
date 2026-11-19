@@ -3,13 +3,15 @@ import uuid
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
+from django.views.decorators.http import require_GET
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 
 from apps.accounts.permissions import customer_required
 from apps.finance.gateways import get_payment_gateway
 
-from .models import Invoice, Payment, RefundRequest, WalletLedgerEntry
+from .models import Invoice, Payment, PaymentVerification, RefundRequest, WalletLedgerEntry
 from .refunds import create_refund_request, eligible_orders_for_refund
 from .services import complete_topup_payment, ensure_wallet, verify_fake_payment
 
@@ -90,46 +92,47 @@ def topup_view(request):
 
 @login_required
 @customer_required
+@require_GET
+@transaction.atomic
 def topup_callback(request, payment_id):
     payment = get_object_or_404(
-        Payment,
-        id=payment_id,
-        customer=request.user.customer_profile,
+        Payment.objects.select_for_update(),
+        id=payment_id, customer=request.user.customer_profile,
     )
     if payment.status == Payment.Status.VERIFIED:
         return redirect("finance:wallet")
-
-    gateway = get_payment_gateway()
-    authority = request.GET.get("Authority") or payment.provider_reference
-    status_param = request.GET.get("Status", "")
-
+    if payment.order_id is not None or payment.status != Payment.Status.REDIRECTED or not payment.provider_reference:
+        messages.error(request, "پرداخت معتبر یا آماده بررسی نیست.")
+        return redirect("finance:wallet")
     if payment.gateway == "fake":
-        gateway.verify_payment(provider_reference=payment.provider_reference, amount_irr=payment.amount_irr)
         if verify_fake_payment(payment):
             messages.success(request, "پرداخت آزمایشی با موفقیت تأیید شد و کیف پول شارژ شد.")
         else:
-            messages.error(request, "تأیید پرداخت ناموفق بود.")
-    elif status_param and status_param != "OK":
-        payment.status = Payment.Status.FAILED
-        payment.save(update_fields=["status", "updated_at"])
-        messages.error(request, "پرداخت توسط کاربر لغو شد یا ناموفق بود.")
+            messages.error(request, "پرداخت آزمایشی مجاز نیست.")
+        return redirect("finance:wallet")
+
+    authority = request.GET.get("Authority", "")
+    status_param = request.GET.get("Status", "")
+    if payment.gateway != "zarinpal" or authority != payment.provider_reference:
+        messages.error(request, "شناسه پرداخت با سفارش ثبت‌شده مطابقت ندارد.")
+        return redirect("finance:wallet")
+    if status_param != "OK":
+        messages.warning(request, "پرداخت تکمیل نشده؛ در صورت پرداخت از پشتیبانی پیگیری کنید.")
+        return redirect("finance:wallet")
+
+    gateway = get_payment_gateway(payment.gateway)
+    result = gateway.verify_payment(provider_reference=payment.provider_reference, amount_irr=payment.amount_irr)
+    PaymentVerification.objects.create(
+        payment=payment, success=result.success,
+        raw_payload={"provider_reference_matched": True},
+    )
+    if result.success and result.provider_reference == payment.provider_reference:
+        complete_topup_payment(payment)
+        messages.success(request, "پرداخت با موفقیت تأیید شد و کیف پول شارژ شد.")
     else:
-        payment.provider_reference = authority or payment.provider_reference
-        payment.save(update_fields=["provider_reference", "updated_at"])
-        result = gateway.verify_payment(
-            provider_reference=payment.provider_reference,
-            amount_irr=payment.amount_irr,
-        )
-        if result.success:
-            complete_topup_payment(payment)
-            messages.success(request, "پرداخت با موفقیت تأیید شد و کیف پول شارژ شد.")
-        else:
-            payment.status = Payment.Status.FAILED
-            payment.save(update_fields=["status", "updated_at"])
-            messages.error(request, "تأیید پرداخت در درگاه ناموفق بود.")
-
+        # An uncertain external result must remain retryable; never mark verified on callback data alone.
+        messages.error(request, "تأیید پرداخت هنوز انجام نشده است. دوباره تلاش کنید یا با پشتیبانی تماس بگیرید.")
     return redirect("finance:wallet")
-
 
 @login_required
 @customer_required

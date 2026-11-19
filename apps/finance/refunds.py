@@ -7,7 +7,7 @@ from apps.core.models import AuditLog
 from apps.notifications.services import notify_customer
 
 from .models import AdvertisingOrder, RefundRequest
-from .services import ensure_wallet, release_reservation_for_order
+from .services import ensure_wallet, outstanding_order_reservation, release_reservation_for_order
 
 
 REFUNDABLE_CAMPAIGN_STATUSES = {
@@ -25,14 +25,18 @@ def eligible_orders_for_refund(customer):
     ).order_by("-created_at")
 
 
+@transaction.atomic
 def create_refund_request(*, customer, order: AdvertisingOrder, reason: str) -> RefundRequest:
-    campaign = Campaign.objects.filter(id=order.campaign_id, customer=customer).first()
+    campaign = Campaign.objects.select_for_update().filter(id=order.campaign_id, customer=customer).first()
+    order = AdvertisingOrder.objects.select_for_update().get(pk=order.pk, customer=customer)
     if not campaign:
         raise ValueError("کمپین یافت نشد.")
     if order.status != AdvertisingOrder.Status.PAID:
         raise ValueError("فقط سفارش‌های پرداخت‌شده قابل بازپرداخت هستند.")
-    if campaign.status not in REFUNDABLE_CAMPAIGN_STATUSES:
+    if campaign.status not in REFUNDABLE_CAMPAIGN_STATUSES or campaign.remote_ads.exclude(remote_ad_id="").exists():
         raise ValueError("این کمپین در وضعیت فعال/ارسال‌شده قابل بازپرداخت خودکار نیست.")
+    if outstanding_order_reservation(ensure_wallet(customer), order.id) != order.total_irr or order.total_irr <= 0:
+        raise ValueError("رزرو مالی سفارش نیازمند تطبیق است.")
     if RefundRequest.objects.filter(order=order, status__in=[RefundRequest.Status.OPEN, RefundRequest.Status.REVIEW]).exists():
         raise ValueError("درخواست بازپرداخت باز برای این سفارش وجود دارد.")
 
@@ -47,18 +51,23 @@ def create_refund_request(*, customer, order: AdvertisingOrder, reason: str) -> 
 
 @transaction.atomic
 def approve_refund(refund: RefundRequest, *, actor) -> RefundRequest:
+    campaign = Campaign.objects.select_for_update().get(id=refund.order.campaign_id, customer=refund.customer)
+    order = AdvertisingOrder.objects.select_for_update().get(pk=refund.order_id, customer=refund.customer)
+    refund.refresh_from_db()
     if refund.status not in {RefundRequest.Status.OPEN, RefundRequest.Status.REVIEW}:
         raise ValueError("درخواست در وضعیت قابل تأیید نیست.")
-
-    order = refund.order
-    campaign = Campaign.objects.select_for_update().get(id=order.campaign_id)
+    if (order.status != AdvertisingOrder.Status.PAID or campaign.status not in REFUNDABLE_CAMPAIGN_STATUSES
+            or campaign.remote_ads.exclude(remote_ad_id="").exists() or refund.amount_irr != order.total_irr):
+        raise ValueError("وضعیت سفارش تغییر کرده؛ بازپرداخت خودکار مجاز نیست.")
     wallet = ensure_wallet(refund.customer)
+    if outstanding_order_reservation(wallet, order.id) != refund.amount_irr or refund.amount_irr <= 0:
+        raise ValueError("رزرو مالی این سفارش نیازمند تطبیق است.")
 
     release_reservation_for_order(
         wallet,
         refund.amount_irr,
         order.id,
-        idempotency_key=f"refund-release-{refund.id}",
+        idempotency_key=f"refund-release-order-{order.id}",
         description="بازپرداخت سفارش کمپین",
     )
 
