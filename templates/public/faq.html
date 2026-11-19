@@ -1,10 +1,11 @@
 {% extends "public_base.html" %}
 {% block title %}سوالات — {{ PRODUCT_NAME }}{% endblock %}
+{% block public_page_class %} pp-faq{% endblock %}
 {% block content %}
 {% include "includes/public_hero.html" with title="سوالات متداول تبلیغات تلگرام" subtitle="پاسخ روشن به پرسش‌های مربوط به هزینه، هدف‌گیری، پرداخت و مدیریت کمپین" show_subtitle=1 compact=1 %}
 <section class="section public-section container">
-  <div class="ui-faq-layout"><div class="faq-list faq-list--exec ui-public-faq" role="region" aria-label="پرسش‌ها و پاسخ‌ها">
-    <details class="faq-item faq-item--exec"><summary>تبلیغات رسمی تلگرام یا Telegram Ads چیست؟</summary><p>سامانه خود تلگرام برای نمایش پیام‌های اسپانسری در جایگاه‌های واجد شرایط است. بودجه، پیشنهاد CPM و هدف‌گیری بسته به نوع تبلیغ تنظیم می‌شود. تی‌ام‌ادز محیط فارسی برای آماده‌سازی و مدیریت این فرایند است.</p></details>
+  <form class="pp-faq-search" data-pp-faq-search role="search" hidden><label for="pp-faq-query">جستجو در سوالات متداول</label><div><input id="pp-faq-query" type="search" placeholder="مثلاً بودجه یا پرداخت" autocomplete="off"><button type="button" class="btn btn-ghost">پاک کردن</button></div><p data-pp-faq-count role="status"></p></form><div class="ui-faq-layout"><div class="faq-list faq-list--exec ui-public-faq" role="region" aria-label="پرسش‌ها و پاسخ‌ها">
+    <details class="faq-item faq-item--exec ui-pp-faq-item"><summary>تبلیغات رسمی تلگرام یا Telegram Ads چیست؟</summary><p>سامانه خود تلگرام برای نمایش پیام‌های اسپانسری در جایگاه‌های واجد شرایط است. بودجه، پیشنهاد CPM و هدف‌گیری بسته به نوع تبلیغ تنظیم می‌شود. تی‌ام‌ادز محیط فارسی برای آماده‌سازی و مدیریت این فرایند است.</p></details>
     <details class="faq-item faq-item--exec"><summary>آیا به حساب Telegram Ads نیاز دارم؟</summary><p>مدل تی‌ام‌ادز برای مدیریت از طریق حساب مرکزی طراحی شده است؛ دسترسی و ارسال واقعی به شرایط حساب و مجوزهای لازم وابسته است.</p></details>
     <details class="faq-item faq-item--exec"><summary>تفاوت تبلیغات تلگرام ادز با خرید پست در کانال چیست؟</summary><p>در خرید مستقیم پست معمولاً با مدیر کانال توافق می‌کنید. در Telegram Ads تنظیمات و گزارش از طریق پلتفرم تبلیغاتی انجام می‌شود و نمایش مطابق شرایط و الگوریتم همان سرویس است.</p></details>
     <details class="faq-item faq-item--exec"><summary>هزینه تبلیغات تلگرام چقدر است؟</summary><p>مبلغ به بودجه کمپین، نرخ تبدیل ارز تبلیغاتی، کارمزد و شرایط سفارش بستگی دارد. هزینه قطعی را در پیش‌فاکتور معتبر بررسی کنید. <a href="{% url 'public:pricing' %}">راهنمای هزینه و تعرفه</a>.</p></details>
@@ -20,7 +21,7 @@
     <details class="faq-item faq-item--exec"><summary>اگر تبلیغ رد شود چه کنم؟</summary><p>دلیل یا وضعیت ثبت‌شده را بررسی کنید، محتوا و مقصد را با قوانین تطبیق دهید و از طریق تیکت پیگیری کنید. <a href="{% url 'public:content_policy' %}">سیاست محتوای تبلیغاتی</a>.</p></details>
     <details class="faq-item faq-item--exec"><summary>گزارش عملکرد شامل چه اطلاعاتی است؟</summary><p>شاخص‌هایی مانند نمایش، هزینه، نرخ و سایر مقادیر قابل دریافت از API، پس از همگام‌سازی نمایش داده می‌شوند. داده‌های ناقص ممکن است هنوز در دسترس نباشند.</p></details>
     <details class="faq-item faq-item--exec"><summary>چگونه شروع کنم؟</summary><p>با ایجاد حساب و ساخت پیش‌نویس، بدون اینکه آن را به معنی ثبت سفارش یا انتشار تلقی کنید. <a href="{% url 'public:how_it_works' %}">راهنمای قدم‌به‌قدم</a>.</p></details>
-  </div><aside class="card card-pad ui-faq-help"><span class="ui-target-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="headphones" size="md" %}</span><h2>سؤال دیگری دارید؟</h2><p>از طریق بخش پشتیبانی، درخواست خود را پیگیری کنید.</p><a class="btn btn-ghost" href="{% url 'public:contact' %}">ارتباط با پشتیبانی</a></aside></div>
+  </div><aside class="card card-pad ui-faq-help" data-pp-reveal><span class="ui-target-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="headphones" size="md" %}</span><h2>سؤال دیگری دارید؟</h2><p>از طریق بخش پشتیبانی، درخواست خود را پیگیری کنید.</p><a class="btn btn-ghost" href="{% url 'public:contact' %}">ارتباط با پشتیبانی</a></aside></div>
 </section>
 <section id="faq-deeper" class="ui-editorial container" aria-labelledby="faq-deeper-heading">
   <header class="ui-editorial-head"><p class="ui-editorial-kicker">پرسش‌های تکمیلی</p><h2 id="faq-deeper-heading">مشکلات رایج و تصمیم‌های قبل از سفارش</h2><p>اگر هنوز درباره ثبت سفارش مطمئن نیستید، این پرسش‌ها به شما کمک می‌کنند مسئله را از مسیر درست دنبال کنید.</p></header>

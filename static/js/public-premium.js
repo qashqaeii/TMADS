@@ -17,6 +17,28 @@
       }, {threshold: 0.06});
       root.querySelectorAll('[data-pp-reveal], .ui-landing-section-head, .ui-editorial-head').forEach(function(el){observer.observe(el);});
     }
+    var search = root.querySelector('[data-pp-faq-search]');
+    if (search) {
+      var input = search.querySelector('input');
+      var count = search.querySelector('[data-pp-faq-count]');
+      var cards = Array.from(root.querySelectorAll('.ui-faq-layout .ui-public-faq details'));
+      var normalize = function(value) { return value.normalize('NFKC').toLowerCase().replace(/ي/g,'ی').replace(/ك/g,'ک').replace(/[\\u200c\\u200d]/g,' ').replace(/\\s+/g,' ').trim(); };
+      search.hidden = false;
+      function filter() {
+        var q = normalize(input.value);
+        var visible = 0;
+        cards.forEach(function(card) {
+          var found = !q || normalize(card.textContent).indexOf(q) !== -1;
+          card.hidden = !found;
+          if (found) visible++;
+        });
+        count.textContent = q ? visible.toLocaleString('fa-IR') + ' پرسش مطابق جستجو' : 'همه پرسش‌ها';
+      }
+      input.addEventListener('input', filter);
+      search.addEventListener('submit', function(e){e.preventDefault();});
+      search.querySelector('button').addEventListener('click',function(){input.value='';filter();input.focus();});
+      filter();
+    }
     root.querySelectorAll('details.ui-pp-faq-item, .ui-public-faq details').forEach(function(el){
       el.addEventListener('toggle',function(){
         var answer = el.querySelector('p');

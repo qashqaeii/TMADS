@@ -115,3 +115,18 @@
 .ui-final.pp-pricing .ui-public-reading{max-width:none}
 @media(max-width:810px){.ui-final.pp-pricing .ui-public-pricing{grid-template-columns:minmax(0,1fr)}}
 
+
+
+.pp-faq .pp-faq-search{max-width:100%;margin-block-end:20px;background:white;border:1px solid var(--pp-line);border-radius:18px;padding:18px;display:grid;gap:8px}
+.pp-faq .pp-faq-search[hidden],.pp-faq .ui-public-faq details[hidden]{display:none!important}
+.pp-faq .pp-faq-search label{font-weight:700;color:var(--pp-ink)}
+.pp-faq .pp-faq-search>div{display:flex;gap:10px;align-items:center}
+.pp-faq .pp-faq-search input{flex:1;min-width:0;min-height:46px;border:1px solid var(--pp-line);border-radius:10px;padding:10px 13px;font:inherit;background:#f8fafc}
+.pp-faq .pp-faq-search p{margin:0;color:var(--pp-muted);font-size:.85rem}
+.ui-final.pp-faq .ui-public-faq details{border-radius:14px;transition:background-color .25s,border-color .25s}
+.ui-final.pp-faq .ui-public-faq details[open]{background:#fff;border-color:#a6c9e2}
+.ui-final.pp-faq .ui-public-faq details summary{padding:18px;min-height:55px;cursor:pointer}
+.ui-final.pp-faq .ui-public-faq details[open] summary{color:var(--pp-blue)}
+.pp-faq .ui-faq-help{border-radius:18px;background:linear-gradient(145deg,#fff,#edf5fb);border-color:var(--pp-line);box-shadow:none;padding:24px}
+@media(min-width:901px){.pp-faq .ui-faq-help{position:sticky;top:94px}}
+
