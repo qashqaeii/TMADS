@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import ExchangeRate, Invoice, Payment, PlatformFeeRule, RefundRequest, Wallet, WalletLedgerEntry
+from .models import ExchangeRate, Invoice, Payment, PaymentVerification, PlatformFeeRule, RefundRequest, Wallet, WalletLedgerEntry
 
 
 @admin.register(Wallet)
@@ -19,6 +19,27 @@ class WalletLedgerEntryAdmin(admin.ModelAdmin):
 class PaymentAdmin(admin.ModelAdmin):
     list_display = ("customer", "amount_irr", "gateway", "status", "created_at")
     list_filter = ("gateway", "status")
+    search_fields = ("id", "provider_reference", "customer__user__username")
+    readonly_fields = tuple(field.name for field in Payment._meta.fields)
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(PaymentVerification)
+class PaymentVerificationAdmin(admin.ModelAdmin):
+    list_display = ("payment", "success", "created_at")
+    list_filter = ("success",)
+    readonly_fields = tuple(field.name for field in PaymentVerification._meta.fields)
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 
 @admin.register(Invoice)

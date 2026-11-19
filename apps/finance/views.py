@@ -14,6 +14,7 @@ from apps.finance.gateways import get_payment_gateway
 from .models import Invoice, Payment, PaymentVerification, RefundRequest, WalletLedgerEntry
 from .refunds import create_refund_request, eligible_orders_for_refund
 from .services import complete_topup_payment, ensure_wallet, verify_fake_payment
+from .zibal_views import initiate_zibal
 
 
 def _gateway_name() -> str:
@@ -31,6 +32,7 @@ def wallet_view(request):
         {
             "wallet": wallet,
             "recent_entries": recent,
+            "recent_payments": Payment.objects.filter(customer=request.user.customer_profile, gateway="zibal", order__isnull=True)[:10],
         },
     )
 
@@ -51,6 +53,9 @@ def topup_view(request):
         if amount_irr < 10000:
             messages.error(request, "حداقل مبلغ شارژ ۱٬۰۰۰ تومان است.")
             return redirect("finance:topup")
+
+        if _gateway_name() == "zibal":
+            return initiate_zibal(request, amount_irr)
 
         payment = Payment.objects.create(
             customer=request.user.customer_profile,
@@ -96,7 +101,7 @@ def topup_view(request):
     return render(
         request,
         "finance/topup.html",
-        {"wallet": wallet, "payment_gateway": _gateway_name()},
+        {"wallet": wallet, "payment_gateway": _gateway_name(), "payment_nonce": str(uuid.uuid4())},
     )
 
 
