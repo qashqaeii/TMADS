@@ -186,7 +186,7 @@
       {% elif step == 3 %}
       <h2 class="section-title">محتوای تبلیغ</h2>
       {% if campaign.target_type != 'search' %}
-      <div class="template-pills">{% for t in creative_templates %}<a href="?template={{ t.id }}">{{ t.title }}</a>{% endfor %}</div>
+      <div class="template-pills">{% for t in creative_templates %}<button type="button" class="btn btn-ghost btn-sm" data-creative-template-text="{{ t.text }}" data-creative-template-cta="{{ t.cta_label }}">{{ t.title }}</button>{% endfor %}</div>
       <div class="field" id="field-ad_text"><label for="studio-control-12">متن تبلیغ (۱–۱۶۰ کاراکتر)</label><textarea id="studio-control-12" name="ad_text" rows="5" maxlength="160" data-ad-text-counter>{% if creative %}{{ creative.ad_text }}{% endif %}</textarea>
       <p class="muted" data-ad-text-count style="font-size:.8rem;margin:.25rem 0 0" aria-live="polite"></p></div>
       <div class="field"><label for="studio-control-13">برچسب دکمه</label><input id="studio-control-13" name="cta_label" value="{% if creative %}{{ creative.cta_label }}{% endif %}"></div>

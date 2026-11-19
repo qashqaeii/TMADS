@@ -334,7 +334,7 @@ def studio_payload_from_post(data) -> dict[str, Any]:
     """Flat dict for wizard_data / autosave."""
     out: dict[str, Any] = {}
     for key in data.keys():
-        if key in {"csrfmiddlewaretoken", "action"}:
+        if key in {"csrfmiddlewaretoken", "action", "draft_revision", "studio_step", "quote_nonce", "bot_eligibility_json"}:
             continue
         if hasattr(data, "getlist"):
             values = data.getlist(key)

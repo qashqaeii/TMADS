@@ -320,6 +320,9 @@ def campaign_wizard(request, campaign_id=None):
 
     if request.method == "POST":
         action = request.POST.get("action", "next")
+        if not _draft_revision_matches(campaign, request.POST):
+            messages.error(request, "نسخه یا مرحله پیش‌نویس تغییر کرده است؛ صفحه جدید را بررسی کنید.")
+            return redirect("campaigns:wizard", campaign_id=campaign.id)
         if action == "refresh_quote" and step == max_step:
             try:
                 _create_quote(campaign)
@@ -374,6 +377,7 @@ def campaign_wizard(request, campaign_id=None):
                             "مشتری تأیید می‌کند حق تبلیغ مقصد را دارد، محتوا دقیق است، "
                             "بررسی نهایی با تلگرام است و تأیید TMADS تضمین نمایش نیست."
                         )
+                        campaign.refresh_from_db()
                         CampaignPolicyPreflight.record_acceptance(
                             campaign,
                             request=request,
@@ -397,10 +401,6 @@ def campaign_wizard(request, campaign_id=None):
                 messages.info(request, "تغییرات ذخیره شد.")
 
             return redirect("campaigns:wizard", campaign_id=campaign.id)
-
-    template_id = request.GET.get("template", "").strip()
-    if template_id and step == 5:
-        _apply_creative_template(campaign, template_id)
 
     quote = None
     order = AdvertisingOrder.objects.filter(campaign_id=campaign.id, customer=customer).first()
@@ -512,27 +512,21 @@ def campaign_autosave(request, campaign_id):
     if not _campaign_editable(campaign):
         return JsonResponse({"ok": False, "message": "این کمپین دیگر قابل ویرایش نیست."}, status=409)
     migrate_campaign_to_studio(campaign)
-    client_revision = request.POST.get("draft_revision")
-    if client_revision is not None:
-        try:
-            client_rev = int(client_revision)
-            if client_rev != campaign.draft_revision:
-                return JsonResponse(
-                    {
-                        "ok": False,
-                        "conflict": True,
-                        "server_revision": campaign.draft_revision,
-                        "message": "نسخهٔ دیگری از پیش‌نویس ذخیره شده است.",
-                    },
-                    status=409,
-                )
-        except (TypeError, ValueError):
-            return JsonResponse({"ok": False, "message": "نسخه پیش‌نویس نامعتبر است."}, status=400)
-
+    if not _draft_revision_matches(campaign, request.POST):
+        return JsonResponse({"ok": False, "conflict": True, "server_revision": campaign.draft_revision,
+            "message": "نسخه یا مرحله پیش‌نویس تغییر کرده است. صفحه را تازه کنید."}, status=409)
     step = ensure_studio_step(campaign)
-    if request.POST.get("studio_step") not in (None, str(step)):
-        return JsonResponse({"ok": False, "conflict": True, "message": "مرحله تغییر کرده است؛ صفحه را تازه کنید."}, status=409)
-    apply_studio_step(campaign, step, request.POST, files=request.FILES)
+    try:
+        errors = validate_studio_step(campaign, step, request.POST, strict=False)
+    except (TypeError, ValueError, OverflowError):
+        errors = ["فرمت داده‌های پیش‌نویس معتبر نیست."]
+    if errors:
+        return JsonResponse({"ok": False, "message": "؛ ".join(errors)}, status=400)
+    try:
+        with transaction.atomic():
+            apply_studio_step(campaign, step, request.POST)
+    except (ValueError, TypeError, OverflowError):
+        return JsonResponse({"ok": False, "message": "اطلاعات پیش‌نویس معتبر نیست."}, status=400)
     campaign.wizard_data = {**campaign.wizard_data, **studio_payload_from_post(request.POST)}
     campaign.draft_revision += 1
     campaign.draft_saved_at = timezone.now()
@@ -633,6 +627,13 @@ def _targeting_from_post(data) -> dict:
         "topics": data.get("topics", ""),
         "advanced": data.get("advanced_targeting", ""),
     }
+
+
+def _draft_revision_matches(campaign, data):
+    try:
+        return int(data.get("draft_revision", "-1")) == campaign.draft_revision and int(data.get("studio_step", "-1")) == ensure_studio_step(campaign)
+    except (ValueError, TypeError):
+        return False
 
 
 def _campaign_editable(campaign):
@@ -866,15 +867,29 @@ def studio_catalog_resolve_channel(request):
 @login_required
 @customer_required
 @require_POST
+@transaction.atomic
 def campaign_policy_preview(request, campaign_id):
     customer = request.user.customer_profile
     campaign = get_customer_campaign(customer, campaign_id)
+    campaign = Campaign.objects.select_for_update().get(pk=campaign.pk)
+    if not _campaign_editable(campaign):
+        return JsonResponse({"ok": False, "message": "کمپین ثبت شده و قابل تغییر نیست."}, status=409)
+    if not _draft_revision_matches(campaign, request.POST):
+        return JsonResponse({"ok": False, "message": "نسخه پیش‌نویس تغییر کرده است."}, status=409)
     rate_key = f"tmads:policy_preview:{request.user.pk}"
     if cache.get(rate_key):
         return JsonResponse({"ok": False, "message": "لطفاً چند ثانیه صبر کنید."}, status=429)
     cache.set(rate_key, 1, 3)
     step = ensure_studio_step(campaign)
-    apply_studio_step(campaign, step, request.POST, files=request.FILES)
+    try:
+        errors = validate_studio_step(campaign, step, request.POST, strict=False)
+        if errors:
+            transaction.set_rollback(True)
+            return JsonResponse({"ok": False, "message": "؛ ".join(errors)}, status=400)
+        apply_studio_step(campaign, step, request.POST)  # never write media for a preview
+    except (TypeError, ValueError, OverflowError):
+        transaction.set_rollback(True)
+        return JsonResponse({"ok": False, "message": "اطلاعات پیش‌نمایش نامعتبر است."}, status=400)
     from apps.policies.services.engine import evaluate_campaign
 
     run = evaluate_campaign(
@@ -891,6 +906,7 @@ def campaign_policy_preview(request, campaign_id):
         }
         for f in run.findings
     ]
+    transaction.set_rollback(True)  # policy preview must never persist campaign/creative changes
     return JsonResponse(
         {
             "ok": True,

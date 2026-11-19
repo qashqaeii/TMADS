@@ -19,47 +19,74 @@
     var url = form.getAttribute("data-autosave-url");
     var status = document.getElementById("draft-save-status");
     var revisionInput = form.querySelector('input[name="draft_revision"]');
-    if (!url || !status) return;
+    if (!url || !status || !revisionInput) return;
+    var timer = null, pending = null, dirty = false, leaving = false, conflicted = false;
 
-    var save = debounce(function () {
-      status.textContent = "در حال ذخیره…";
-      status.dataset.state = "pending";
+    function show(message, state) {
+      status.textContent = message;
+      status.dataset.state = state;
+    }
+    function queue() {
+      clearTimeout(timer);
+      if (!leaving && !conflicted) timer = setTimeout(save, 1800);
+    }
+    function save() {
+      if (pending || leaving || !dirty || conflicted) return;
+      dirty = false;
+      show("در حال ذخیره…", "pending");
       var data = new FormData(form);
+      data.delete("creative_media");
       data.set("action", "save_draft");
-      fetch(url, {
-        method: "POST",
-        body: data,
-        credentials: "same-origin",
-        headers: { "X-Requested-With": "XMLHttpRequest" },
-      })
-        .then(function (r) {
-          return r.json().then(function (j) {
-            return { ok: r.ok, body: j };
-          });
-        })
-        .then(function (res) {
+      pending = fetch(url, {method: "POST", body: data, credentials: "same-origin",
+        headers: {"X-Requested-With": "XMLHttpRequest"}})
+        .then(function(r) {return r.json().then(function(body) {return {ok:r.ok, code:r.status, body:body};});})
+        .then(function(res) {
           if (!res.ok) {
-            status.textContent =
-              res.body && res.body.message
-                ? res.body.message
-                : "ذخیره تغییرات ناموفق بود";
-            status.dataset.state = "error";
-            return;
+            conflicted = res.code === 409;
+            show(res.body.message || "ذخیره انجام نشد", "error");
+            return false;
           }
-          if (revisionInput && res.body.revision != null) {
-            revisionInput.value = res.body.revision;
-          }
-          status.textContent = "همه تغییرات ذخیره شد";
-          status.dataset.state = "ok";
+          revisionInput.value = res.body.revision;
+          var media = form.querySelector('input[name="creative_media"]');
+          show(media && media.files.length ? "متن ذخیره شد؛ فایل با ذخیره دستی ثبت می‌شود." :
+            dirty ? "تغییرات جدید در انتظار ذخیره…" : "همه تغییرات ذخیره شد", dirty ? "pending" : "ok");
+          return true;
         })
-        .catch(function () {
-          status.textContent = "ذخیره تغییرات ناموفق بود";
-          status.dataset.state = "error";
+        .catch(function() {show("اتصال قطع شد؛ ذخیره ناموفق بود.", "error"); return false;})
+        .finally(function() {pending = null; if (dirty && !leaving && !conflicted) queue();});
+    }
+    function changed(event) {
+      if (event.target.type === "file") {
+        show("فایل را با ذخیره دستی یا دکمه بعدی ثبت کنید.", "pending");
+        return;
+      }
+      if (leaving || conflicted) return;
+      dirty = true;
+      queue();
+    }
+    form.addEventListener("input", changed);
+    form.addEventListener("change", changed);
+    form.addEventListener("submit", function(event) {
+      if (conflicted) {
+        event.preventDefault();
+        show("نسخه دیگری ذخیره شده است؛ پس از حفظ متن خود صفحه را تازه کنید.", "error");
+        return;
+      }
+      clearTimeout(timer);
+      if (pending) {
+        event.preventDefault();
+        if (leaving) return;
+        leaving = true;
+        var submitter = event.submitter;
+        pending.then(function(ok) {
+          leaving = false;
+          if (ok) form.requestSubmit(submitter || undefined);
+          else show("ذخیره قبلی تأیید نشد؛ دوباره تلاش کنید.", "error");
         });
-    }, 1800);
-
-    form.addEventListener("input", save);
-    form.addEventListener("change", save);
+      } else {
+        leaving = true;
+      }
+    });
   }
 
   function initStudioMode(form) {
@@ -810,6 +837,7 @@
     btn.addEventListener("click", function () {
       if (status) status.textContent = "در حال بررسی…";
       var data = new FormData(form);
+      data.delete("creative_media");
       fetch(url, { method: "POST", body: data, credentials: "same-origin" })
         .then(function (r) {
           return r.json();
@@ -837,6 +865,14 @@
     if (!form) return;
     initAutosave(form);
     initStudioMode(form);
+    form.querySelectorAll("[data-creative-template-text]").forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        var text = form.querySelector('[name="ad_text"]');
+        var cta = form.querySelector('[name="cta_label"]');
+        if (text) {text.value = btn.dataset.creativeTemplateText; dispatchInput(text);}
+        if (cta) {cta.value = btn.dataset.creativeTemplateCta || ""; dispatchInput(cta);}
+      });
+    });
     initPolicyRefresh(form);
     initLocationPicker(form);
     document.querySelectorAll("[data-search-chips]").forEach(initSearchChips);

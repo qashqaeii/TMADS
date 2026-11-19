@@ -24,7 +24,7 @@ def test_actual_audience_post_advances_without_creative_or_terms(client, custome
     client.force_login(customer_user)
     with patch("apps.telegram_ads.services.bot_eligibility.validate_bot_targets", return_value=[]):
         response = client.post(reverse("campaigns:wizard", args=[campaign.id]), {
-            "action": "next", "placement": placement, "draft_revision": 0, **fields,
+            "action": "next", "placement": placement, "draft_revision": 0, "studio_step": 2, **fields,
         })
     campaign.refresh_from_db()
     assert response.status_code == 302

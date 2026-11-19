@@ -136,6 +136,7 @@ def test_wizard_autosave_and_draft(client, customer_user):
         url,
         {
             "draft_revision": "0",
+            "studio_step": "1",
             "target_type": "search",
             "destination": "https://t.me/x",
             "campaign_name": "autosave",
@@ -188,7 +189,7 @@ def test_studio_step_flow_quote(client, customer_user):
     AdCreative.objects.create(campaign=campaign, ad_text="ad")
     CampaignTargeting.objects.create(campaign=campaign, config={"language_codes": ["fa"]})
     url = reverse("campaigns:wizard", kwargs={"campaign_id": campaign.id})
-    client.post(url, {"action": "next", "budget_toman": "100", "cpm_bid": "1"})
+    client.post(url, {"action": "next", "budget_toman": "100", "cpm_bid": "1", "studio_step": "4", "draft_revision": "0"})
     campaign.refresh_from_db()
     assert campaign.wizard_step == 5
     assert campaign.status == Campaign.Status.AWAITING_PAYMENT
