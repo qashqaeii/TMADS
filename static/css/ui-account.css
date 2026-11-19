@@ -23,3 +23,18 @@
 .ui-final .ui-account-page .account-settings .card { padding:20px;gap:16px; }
 @media(max-width:800px) { .ui-final .ui-account-page .account-settings { grid-template-columns:minmax(0,1fr); } }
 @media(max-width:480px) { .ui-final .ui-auth-card { padding:20px; }.ui-profile-summary { flex-wrap:wrap;padding:14px; }.ui-profile-handle { margin:0; } }
+
+/* Account-scoped read-only inventory. */
+.ui-account-shortcuts,.ui-related-ads-actions {display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.ui-related-ads-summary {display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px}
+.ui-related-ads-summary__side {display:grid;gap:6px;justify-items:end;color:var(--ui-muted)}
+.ui-related-ads-summary__side code {max-width:220px;overflow-wrap:anywhere}
+.ui-related-ads-empty {display:grid;justify-items:start;gap:10px}
+.ui-related-ads-empty h2 {margin:0;font-size:1.05rem}
+.ui-related-ads-empty p {margin:0;color:var(--ui-muted);line-height:1.8;font-size:.86rem}
+.ui-related-ads .table-card {padding:0;overflow:hidden}
+.ui-related-ads .table-scroll {overflow:auto}
+.ui-related-ads-table {min-width:640px}
+.ui-related-ads-table th {background:var(--ui-soft);font-weight:650;color:var(--ui-muted)}
+.ui-related-ads-table :is(th,td) {padding:12px 14px}
+.ui-related-ads-table td small {display:block;margin-top:5px;color:var(--ui-muted);overflow-wrap:anywhere;line-height:1.7}

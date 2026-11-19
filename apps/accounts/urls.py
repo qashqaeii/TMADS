@@ -3,6 +3,7 @@ from django.urls import path, reverse_lazy
 
 from . import views
 from apps.telegram_ads.related_views import customer_related_account
+from apps.telegram_ads.account_ad_views import related_account_ads
 from apps.telegram_ads.asset_views import customer_assets, customer_audience_update, customer_audience_delete, customer_audience_reset, customer_pixel_event_manage
 
 app_name = "accounts"
@@ -12,6 +13,7 @@ urlpatterns = [
     path("login/", views.login_view, name="login"),
     path("logout/", views.logout_view, name="logout"),
     path("advertiser-account/", customer_related_account, name="related_account"),
+    path("advertiser-account/ads/", related_account_ads, name="related_ads"),
     path("advertiser-assets/", customer_assets, name="advertiser_assets"),
     path("advertiser-assets/audiences/update/", customer_audience_update, name="audience_update"),
     path("advertiser-assets/audiences/delete/", customer_audience_delete, name="audience_delete"),

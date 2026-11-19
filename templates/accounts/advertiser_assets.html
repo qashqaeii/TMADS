@@ -8,6 +8,7 @@
 <section class="card card-pad form-stack">
 <div class="ui-remote-summary"><h2 class="section-title">{{ row.title }}</h2><span class="status status-active">حساب تأیید شده</span></div>
 <div class="hero-actions"><a class="btn {% if section == 'audiences' %}btn-primary{% else %}btn-ghost{% endif %}" href="?section=audiences">مخاطبان</a><a class="btn {% if section == 'pixel' %}btn-primary{% else %}btn-ghost{% endif %}" href="?section=pixel">پیکسل</a><a class="btn {% if section == 'events' %}btn-primary{% else %}btn-ghost{% endif %}" href="?section=events">رویدادها</a><a class="btn btn-ghost" href="?section={{ section }}&load=1">دریافت از تلگرام</a></div>
+<p class="muted"><a class="btn btn-ghost btn-sm" href="{% url 'accounts:related_ads' %}">مشاهده تبلیغات حساب</a></p>
 <p class="muted">منابع فقط از حساب اختصاصی شما خوانده می‌شوند. اتصال آن‌ها به کمپین، ارسال شماره تماس و انتقال اعتبار هنوز فعال نیست.</p>
 {% if load_error %}<p class="ui-studio-warning" role="alert">{{ load_error }}</p>{% endif %}
 {% if loaded %}{% if section == 'pixel' %}<div class="finance-line"><span>شناسه پیکسل</span><bdi>{{ pixel.pixel_id|default:"—" }}</bdi></div>{% if pixel.code_snippet %}<div class="field"><label for="pixel-code">کد دریافتی (فقط متن)</label><textarea id="pixel-code" readonly dir="ltr">{{ pixel.code_snippet }}</textarea></div>{% endif %}
