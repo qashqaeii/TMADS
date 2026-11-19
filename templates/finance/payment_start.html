@@ -1,0 +1,19 @@
+{% extends "app_shell.html" %}
+{% load static core_filters %}
+{% block extra_head %}{{ block.super }}<link rel="stylesheet" href="{% static 'css/ui-payment.css' %}">{% endblock %}
+{% block container_class %}container-wide{% endblock %}
+{% block page_title %}آماده پرداخت{% endblock %}
+{% block content %}
+<div class="pay-flow">
+{% include "includes/dash_header.html" with eyebrow="کیف پول" title="انتقال به درگاه پرداخت" %}
+<ol class="pay-rail" aria-label="مراحل شارژ"><li class="is-done"><span>✓</span> انتخاب مبلغ</li><li aria-current="step"><span>۲</span> پرداخت بانکی</li><li><span>۳</span> تأیید و رسید</li></ol>
+<section class="pay-result-grid">
+  <article class="pay-result-card pay-result-card--ready">
+    <span class="pay-orb" aria-hidden="true">{% include "includes/lucide_icon.html" with name="shield-check" size="lg" %}</span>
+    <h2>پرداخت شما آماده است</h2><p>مبلغ زیر را بررسی کنید و برای پرداخت به صفحه زیبال بروید. اطلاعات کارت را فقط در صفحه بانکی وارد کنید.</p>
+    <div class="pay-amount"><small>مبلغ قابل پرداخت</small><strong>{{ payment.amount_irr|irr_to_toman|format_irr }} <small>تومان</small></strong></div>
+    <a class="btn btn-primary btn-lg" href="{{ gateway_url }}" referrerpolicy="origin">ورود به درگاه زیبال {% include "includes/lucide_icon.html" with name="arrow-left" size="btn" %}</a>
+    <a class="btn btn-ghost" href="{% url 'finance:payment_result' payment.id %}">مشاهده وضعیت درخواست</a>
+  </article>
+  <aside class="pay-receipt"><h2>اطلاعات درخواست</h2><dl><div><dt>درگاه</dt><dd>زیبال</dd></div><div><dt>شناسه پیگیری درگاه</dt><dd><bdi>{{ payment.provider_reference }}</bdi></dd></div><div><dt>زمان ثبت</dt><dd>{{ payment.created_at|jalali_datetime }}</dd></div></dl><p class="pay-help">اعتبار فقط پس از تأیید نهایی پرداخت در کیف پول ثبت می‌شود.</p></aside>
+</section></div>{% endblock %}

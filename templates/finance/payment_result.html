@@ -1,0 +1,33 @@
+{% extends "app_shell.html" %}
+{% load static core_filters %}
+{% block extra_head %}{{ block.super }}<link rel="stylesheet" href="{% static 'css/ui-payment.css' %}">{% endblock %}
+{% block container_class %}container-wide{% endblock %}
+{% block page_title %}نتیجه پرداخت{% endblock %}
+{% block content %}
+<div class="pay-flow">
+{% include "includes/dash_header.html" with eyebrow="کیف پول" title="نتیجه پرداخت" %}
+<ol class="pay-rail" aria-label="مراحل شارژ"><li class="is-done"><span>✓</span> انتخاب مبلغ</li><li class="{% if payment.status == 'verified' %}is-done{% endif %}"><span>۲</span> پرداخت بانکی</li><li aria-current="step"><span>۳</span> نتیجه و رسید</li></ol>
+<section class="pay-result-grid">
+  <article class="pay-result-card {% if payment.status == 'verified' %}pay-result-card--success{% elif payment.status == 'failed' %}pay-result-card--failed{% else %}pay-result-card--pending{% endif %}">
+    {% if payment.status == 'verified' %}
+      <span class="pay-orb" aria-hidden="true">{% include "includes/lucide_icon.html" with name="check-circle" size="lg" %}</span><h2>پرداخت موفق بود</h2><p>پرداخت شما تأیید و مبلغ به کیف پول اضافه شد.</p>
+    {% elif payment.status == 'failed' %}
+      <span class="pay-orb" aria-hidden="true">{% include "includes/lucide_icon.html" with name="alert-circle" size="lg" %}</span><h2>درخواست پرداخت تکمیل نشد</h2><p>برای این درخواست شارژ تأییدشده‌ای ثبت نشده است. اگر مبلغی کسر شده، ابتدا از پشتیبانی پیگیری کنید.</p>
+    {% else %}
+      <span class="pay-orb" aria-hidden="true">{% include "includes/lucide_icon.html" with name="clock" size="lg" %}</span><h2>در انتظار تأیید پرداخت</h2><p>پرداخت ممکن است انجام نشده باشد یا هنوز تأیید نشده باشد. اگر مبلغی کسر شده، دوباره پرداخت نکنید؛ وضعیت را بررسی کنید.</p>
+    {% endif %}
+    <div class="pay-amount"><small>مبلغ درخواست</small><strong>{{ payment.amount_irr|irr_to_toman|format_irr }} <small>تومان</small></strong></div>
+    <div class="pay-actions">
+    {% if payment.status == 'verified' %}
+      <a class="btn btn-primary" href="{% url 'finance:wallet' %}">بازگشت به کیف پول</a>{% if invoice %}<a class="btn btn-ghost" href="{% url 'finance:invoice_detail' invoice.id %}">مشاهده فاکتور</a>{% endif %}
+    {% elif payment.status == 'failed' %}
+      <a class="btn btn-primary" href="{% url 'finance:topup' %}">بازگشت به شارژ کیف پول</a>
+    {% else %}
+      {% if payment.provider_reference %}<form method="post" action="{% url 'finance:payment_recheck' payment.id %}">{% csrf_token %}<button type="submit" class="btn btn-primary">بررسی مجدد وضعیت</button></form>{% endif %}
+      <a class="btn btn-ghost" href="{% url 'finance:wallet' %}">بازگشت به کیف پول</a>
+    {% endif %}
+      <a class="btn btn-ghost" href="{% url 'support:create' %}">ارتباط با پشتیبانی</a>
+    </div>
+  </article>
+  <aside class="pay-receipt"><h2>جزئیات تراکنش</h2><dl><div><dt>وضعیت</dt><dd><span class="pay-state pay-state--{{ payment.status }}">{{ payment.get_status_display }}</span></dd></div><div><dt>درگاه</dt><dd>زیبال</dd></div><div><dt>شناسه درخواست</dt><dd><bdi>{{ payment.id }}</bdi></dd></div>{% if payment.provider_reference %}<div><dt>کد پیگیری زیبال</dt><dd><bdi>{{ payment.provider_reference }}</bdi></dd></div>{% endif %}{% if bank_reference %}<div><dt>شماره مرجع بانکی</dt><dd><bdi>{{ bank_reference }}</bdi></dd></div>{% endif %}<div><dt>تاریخ ثبت</dt><dd>{{ payment.created_at|jalali_datetime }}</dd></div></dl><p class="pay-help">برای پیگیری، شناسه درخواست یا کد پیگیری را نزد خود نگه دارید.</p></aside>
+</section></div>{% endblock %}

@@ -1,0 +1,24 @@
+/* TMADS payment experience; scoped to wallet and checkout. */
+.pay-flow{--pay-ink:#142c43;--pay-muted:#52667a;--pay-line:#dbe5ee;display:grid;gap:22px;min-width:0}
+.pay-rail{display:flex;gap:8px;align-items:center;justify-content:space-between;list-style:none;padding:14px;margin:0;border:1px solid var(--pay-line);border-radius:16px;background:#fff}
+.pay-rail li{display:flex;align-items:center;gap:8px;color:var(--pay-muted);font-size:.88rem;min-width:0}
+.pay-rail li span{width:30px;height:30px;display:grid;place-items:center;border-radius:50%;background:#edf3f8;color:#44617a;flex:none;font-weight:700}
+.pay-rail li[aria-current=step]{color:#126ca8;font-weight:750}.pay-rail li[aria-current=step] span{background:#146ca8;color:#fff}.pay-rail li.is-done span{background:#e5f5ed;color:#17663e}
+.pay-result-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr);gap:18px;align-items:start}
+.pay-result-card,.pay-receipt{min-width:0;background:#fff;border:1px solid var(--pay-line);border-radius:22px;padding:clamp(20px,4vw,40px);box-shadow:0 12px 38px rgb(20 44 67 / .05)}
+.pay-result-card{display:grid;gap:15px;justify-items:start;--pay-accent:#146ca8;--pay-soft:#e7f2fb;animation:pay-in .45s cubic-bezier(.2,.8,.2,1) both}
+.pay-result-card--success{--pay-accent:#167548;--pay-soft:#e7f5ed}.pay-result-card--failed{--pay-accent:#a52d3d;--pay-soft:#fbecef}.pay-result-card--pending{--pay-accent:#976111;--pay-soft:#fff3dc}
+.pay-orb{width:66px;height:66px;display:grid;place-items:center;border-radius:20px;background:var(--pay-soft);color:var(--pay-accent)}
+.pay-result-card h2{font-size:clamp(1.5rem,3vw,2.15rem);line-height:1.55;margin:0;color:var(--pay-ink)}
+.pay-result-card p,.pay-help{color:var(--pay-muted,#52667a);line-height:1.95;margin:0;font-size:.92rem}
+.pay-amount,.pay-balance{display:grid;gap:7px;background:#f5f8fb;border:1px solid #dfe8f0;border-radius:15px;padding:18px;width:100%;min-width:0}
+.pay-amount>small,.pay-balance>small{color:#52667a}.pay-amount strong,.pay-balance strong{font-size:clamp(1.4rem,3.2vw,2.3rem);color:var(--pay-ink);overflow-wrap:anywhere;font-variant-numeric:tabular-nums}.pay-amount strong small,.pay-balance strong small{font-size:.84rem;font-weight:500}
+.pay-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center;width:100%}.pay-actions form{margin:0}
+.pay-flow .btn{min-height:44px;transition:transform .2s,box-shadow .2s}.pay-flow .btn:active{transform:scale(.98)}.pay-flow :is(a,button,input):focus-visible{outline:2px solid #146ca8;outline-offset:3px}
+.pay-receipt h2{margin:0 0 16px;font-size:1.15rem}.pay-receipt dl{margin:0 0 16px;display:grid}.pay-receipt dl>div{display:flex;flex-wrap:wrap;justify-content:space-between;gap:5px 16px;border-block-end:1px solid var(--pay-line);padding:12px 0}.pay-receipt dt{color:var(--pay-muted);font-size:.86rem}.pay-receipt dd{margin:0;max-width:100%;overflow-wrap:anywhere;font-weight:650;font-size:.88rem}
+.pay-provider{display:flex;align-items:center;gap:12px;padding:14px;border:1px solid var(--pay-line);border-radius:14px;background:#f5f9fc}.pay-provider-icon{color:#146ca8;background:#e1eef9;border-radius:12px;width:44px;height:44px;display:grid;place-items:center;flex:none}.pay-provider small{display:block;color:var(--pay-muted);line-height:1.7}
+.pay-state{font-size:.8rem;font-weight:650;padding:4px 9px;border-radius:8px;background:#fff1d8;color:#80520e;white-space:nowrap}.pay-state--verified{background:#e8f6ef;color:#16663e}.pay-state--failed{background:#fbecef;color:#a52d3d}
+.pay-history ul{list-style:none;padding:0;margin:12px 0 0}.pay-history li{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:10px;padding:12px 0;border-block-start:1px solid #dce5ed}.pay-history li small{display:block;color:#52667a;font-size:.78rem}
+@keyframes pay-in{from{opacity:.75;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:760px){.pay-result-grid{grid-template-columns:minmax(0,1fr)}.pay-rail{padding:10px;gap:5px}.pay-rail li{font-size:.75rem;gap:4px}.pay-rail li span{width:23px;height:23px}.pay-actions form,.pay-actions .btn,.pay-result-card>.btn{width:100%}.pay-history li{grid-template-columns:minmax(0,1fr) auto}.pay-history li>a{grid-column:1/-1}}
+@media(prefers-reduced-motion:reduce){.pay-flow *{animation:none!important;transition:none!important}}

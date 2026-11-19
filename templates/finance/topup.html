@@ -1,19 +1,20 @@
 {% extends "app_shell.html" %}
-{% load static %}
+{% load static core_filters %}
+{% block extra_head %}{{ block.super }}<link rel="stylesheet" href="{% static 'css/ui-payment.css' %}">{% endblock %}
 {% block page_title %}شارژ کیف پول{% endblock %}
 {% block container_class %}container-wide{% endblock %}
 {% block content %}
-<div class="app-stack finance-page ui-finance">
+<div class="app-stack finance-page ui-finance pay-flow">
 {% include "includes/dash_header.html" with eyebrow="مالی" title="شارژ کیف پول" %}
-<div class="ui-finance-flow"><form method="post" class="card card-pad form-stack finance-form" data-topup-form>
+<ol class="pay-rail" aria-label="مراحل شارژ"><li aria-current="step"><span>۱</span> انتخاب مبلغ</li><li><span>۲</span> پرداخت بانکی</li><li><span>۳</span> تأیید و رسید</li></ol><div class="ui-finance-flow"><form method="post" class="card card-pad form-stack finance-form" data-topup-form>
   <div class="ui-form-intro"><span class="ui-target-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="wallet" size="md" %}</span><div><h2>مبلغ شارژ</h2><p>مبلغ دلخواه را به تومان وارد کنید.</p></div></div>
-  {% csrf_token %}
+  {% csrf_token %}<input type="hidden" name="payment_nonce" value="{{ payment_nonce }}">
   <div class="field"><label for="topup-amount">مبلغ (تومان)</label><input id="topup-amount" aria-describedby="topup-help" inputmode="numeric" name="amount_toman" type="number" min="1000" dir="ltr" required><p id="topup-help" class="field-help">حداقل مبلغ شارژ ۱٬۰۰۰ تومان است.</p></div>
   <div class="ui-quick-amounts" role="group" aria-label="مبالغ پیشنهادی" data-quick-amounts hidden><button type="button" class="btn btn-ghost" data-amount="50000" aria-pressed="false">۵۰ هزار</button><button type="button" class="btn btn-ghost" data-amount="100000" aria-pressed="false">۱۰۰ هزار</button><button type="button" class="btn btn-ghost" data-amount="500000" aria-pressed="false">۵۰۰ هزار</button></div>
   <div class="ui-topup-total" aria-live="polite" data-topup-total hidden><span>مبلغ انتخاب‌شده</span><strong data-topup-value>—</strong></div>
-  {% if payment_gateway == 'fake' %}<p class="ui-studio-warning" role="status">در محیط آزمایشی، پرداخت شبیه‌سازی می‌شود.</p>{% endif %}
-  <div class="finance-form__actions"><button class="btn btn-primary" type="submit">ادامه پرداخت</button><a class="btn btn-ghost" href="{% url 'finance:wallet' %}">بازگشت به کیف پول</a></div>
-</form><aside class="card card-pad ui-finance-guide"><h2 class="section-title">فرایند شارژ</h2><ol><li>مبلغ مورد نظر را انتخاب کنید.</li><li>فرایند پرداخت را ادامه دهید.</li><li>پس از تأیید پرداخت، اعتبار در کیف پول ثبت می‌شود.</li></ol><a href="{% url 'finance:transactions' %}">مشاهده تراکنش‌ها</a></aside></div>
+  {% if payment_gateway == 'zibal' %}<div class="pay-provider"><span class="pay-provider-icon">{% include "includes/lucide_icon.html" with name="shield-check" size="md" %}</span><div><strong>درگاه زیبال</strong><small>پرداخت در صفحه بانکی؛ تأیید از سمت سرور</small></div></div>{% endif %}{% if payment_gateway == 'fake' %}<p class="ui-studio-warning" role="status">در محیط آزمایشی، پرداخت شبیه‌سازی می‌شود.</p>{% endif %}
+  <div class="finance-form__actions"><button class="btn btn-primary" type="submit" data-payment-submit>ادامه پرداخت {% include "includes/lucide_icon.html" with name="arrow-left" size="btn" %}</button><a class="btn btn-ghost" href="{% url 'finance:wallet' %}">بازگشت به کیف پول</a></div>
+</form><aside class="card card-pad ui-finance-guide"><h2 class="section-title">فرایند شارژ</h2><div class="pay-balance"><small>موجودی فعلی</small><strong>{{ wallet.available_irr|irr_to_toman|format_irr }} <small>تومان</small></strong></div><ol><li>مبلغ مورد نظر را انتخاب کنید.</li><li>فرایند پرداخت را ادامه دهید.</li><li>پس از تأیید پرداخت، اعتبار در کیف پول ثبت می‌شود.</li></ol><p class="pay-help">اگر از حساب بانکی مبلغی کسر شد و نتیجه نامشخص بود، ابتدا وضعیت همان پرداخت را بررسی کنید.</p><a href="{% url 'finance:transactions' %}">مشاهده تراکنش‌ها</a></aside></div>
 </div>
 <script defer src="{% static 'js/ui-finance.js' %}"></script>
 {% endblock %}
