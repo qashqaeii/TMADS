@@ -83,7 +83,7 @@
       {% if campaign.target_type == 'search' %}
       <div data-search-chips data-max="10">
         <label for="studio-control-3">عبارت‌های جستجو</label>
-        <input id="studio-control-3" type="text" data-search-chip-input placeholder="عبارت را بنویسید و Enter بزنید" dir="auto">
+        <div class="catalog-row"><input id="studio-control-3" type="text" data-search-chip-input placeholder="عبارت جستجو" dir="auto" autocomplete="off"><button type="button" class="btn btn-ghost btn-sm" data-search-add>افزودن عبارت</button></div>
         <p class="muted" data-search-counter style="margin:.35rem 0 0">۰ از ۱۰ عبارت جستجو</p>
         <ul class="chip-list" data-search-chip-list></ul>
         <input type="hidden" name="search_queries_json" data-search-chip-hidden value="{{ search_queries_json|escape }}">
@@ -111,23 +111,27 @@
           <option value="specific" {% if campaign.targeting.config.channel_mode == 'specific' %}selected{% endif %}>کانال‌های مشخص</option>
         </select>
       </div>
-      <div class="field" data-multiselect data-field="language_codes" data-catalog='{{ catalog_languages_json|escape }}' data-kind="language">
+      <div class="field" data-channel-modes="language topics" data-multiselect data-field="language_codes" data-catalog='{{ catalog_languages_json|escape }}' data-kind="language">
         <label for="studio-control-5">زبان کانال‌ها</label>
-        <input id="studio-control-5" type="search" data-ms-search placeholder="جستجوی زبان…" dir="auto">
+        <input id="studio-control-5" type="search" data-ms-search placeholder="جستجوی زبان…" dir="auto" aria-controls="catalog-options-5" aria-expanded="false" aria-describedby="catalog-status-5" autocomplete="off">
+        <ul id="catalog-options-5" class="catalog-suggest" data-ms-results hidden></ul>
+        <p id="catalog-status-5" class="field-help" data-ms-status aria-live="polite"></p>
         <ul class="chip-list" data-ms-chips></ul>
         <div data-ms-hidden>
           {% if campaign.targeting %}{% for code in campaign.targeting.config.language_codes %}<input type="hidden" name="language_codes" value="{{ code }}">{% endfor %}{% endif %}
         </div>
       </div>
-      <div class="field studio-pro-only" data-multiselect data-field="topic_ids" data-catalog='{{ catalog_topics_json|escape }}' data-kind="topic">
-        <label for="studio-control-6">موضوعات (شناسه)</label>
-        <input id="studio-control-6" type="search" data-ms-search placeholder="جستجوی موضوع…" dir="auto">
+      <div class="field" data-channel-modes="topics" data-multiselect data-field="topic_ids" data-catalog='{{ catalog_topics_json|escape }}' data-kind="topic">
+        <label for="studio-control-6">موضوعات کانال</label>
+        <input id="studio-control-6" type="search" data-ms-search placeholder="جستجوی موضوع…" dir="auto" aria-controls="catalog-options-6" aria-expanded="false" aria-describedby="catalog-status-6" autocomplete="off">
+        <ul id="catalog-options-6" class="catalog-suggest" data-ms-results hidden></ul>
+        <p id="catalog-status-6" class="field-help" data-ms-status aria-live="polite"></p>
         <ul class="chip-list" data-ms-chips></ul>
         <div data-ms-hidden>
           {% if campaign.targeting %}{% for tid in campaign.targeting.config.topic_ids %}<input type="hidden" name="topic_ids" value="{{ tid }}">{% endfor %}{% endif %}
         </div>
       </div>
-      <div class="field studio-pro-only" data-channel-selector>
+      <div class="field" data-channel-modes="specific" data-channel-selector>
         <label for="studio-channels">کانال‌های مشخص</label>
         <span class="catalog-row"><input id="studio-channels" type="text" data-channel-input dir="ltr" placeholder="@channel"><button type="button" class="btn btn-ghost btn-sm" data-channel-add>افزودن</button></span>
         <ul class="chip-list" data-channel-chip-list></ul>
@@ -139,7 +143,9 @@
       {% elif campaign.target_type == 'users' %}
       <div class="field" data-multiselect data-field="country_codes" data-catalog='{{ catalog_countries_json|escape }}' data-kind="country">
         <label for="studio-control-8">کشورها</label>
-        <input id="studio-control-8" type="search" data-ms-search placeholder="جستجوی کشور (فارسی یا انگلیسی)…" dir="auto">
+        <input id="studio-control-8" type="search" data-ms-search placeholder="جستجوی کشور (فارسی یا انگلیسی)…" dir="auto" aria-controls="catalog-options-8" aria-expanded="false" aria-describedby="catalog-status-8" autocomplete="off">
+        <ul id="catalog-options-8" class="catalog-suggest" data-ms-results hidden></ul>
+        <p id="catalog-status-8" class="field-help" data-ms-status aria-live="polite"></p>
         <ul class="chip-list" data-ms-chips></ul>
         <div data-ms-hidden>
           {% if campaign.targeting %}{% for code in campaign.targeting.config.country_codes %}<input type="hidden" name="country_codes" value="{{ code }}">{% endfor %}{% endif %}
@@ -149,7 +155,8 @@
         <label for="studio-location">شهر یا منطقه</label>
         <p class="muted" style="font-size:.8rem;margin:0 0 .35rem">پس از انتخاب یک کشور، نام شهر را جستجو کنید.</p>
         <input id="studio-location" type="search" data-location-search dir="auto" placeholder="نام شهر…" autocomplete="off">
-        <ul class="catalog-suggest" data-location-results role="listbox"></ul>
+        <ul class="catalog-suggest" data-location-results hidden></ul>
+        <p class="field-help" data-location-status aria-live="polite"></p>
         <ul class="chip-list" data-location-chips></ul>
         <div data-location-hidden>
           {% if campaign.targeting %}{% for lid in campaign.targeting.config.location_ids %}<input type="hidden" name="location_ids" value="{{ lid }}">{% endfor %}{% endif %}
@@ -157,7 +164,9 @@
       </div>
       <div class="field" data-multiselect data-field="topic_ids" data-catalog='{{ catalog_topics_json|escape }}' data-kind="topic">
         <label for="studio-control-9">علایق و موضوعات</label>
-        <input id="studio-control-9" type="search" data-ms-search placeholder="جستجوی موضوع…" dir="auto">
+        <input id="studio-control-9" type="search" data-ms-search placeholder="جستجوی موضوع…" dir="auto" aria-controls="catalog-options-9" aria-expanded="false" aria-describedby="catalog-status-9" autocomplete="off">
+        <ul id="catalog-options-9" class="catalog-suggest" data-ms-results hidden></ul>
+        <p id="catalog-status-9" class="field-help" data-ms-status aria-live="polite"></p>
         <ul class="chip-list" data-ms-chips></ul>
         <div data-ms-hidden>
           {% if campaign.targeting %}{% for tid in campaign.targeting.config.topic_ids %}<input type="hidden" name="topic_ids" value="{{ tid }}">{% endfor %}{% endif %}
@@ -165,7 +174,9 @@
       </div>
       <div class="field studio-pro-only" data-multiselect data-field="language_codes" data-catalog='{{ catalog_languages_json|escape }}' data-kind="language">
         <label for="studio-control-10">زبان مخاطب</label>
-        <input id="studio-control-10" type="search" data-ms-search placeholder="زبان…" dir="auto">
+        <input id="studio-control-10" type="search" data-ms-search placeholder="زبان…" dir="auto" aria-controls="catalog-options-10" aria-expanded="false" aria-describedby="catalog-status-10" autocomplete="off">
+        <ul id="catalog-options-10" class="catalog-suggest" data-ms-results hidden></ul>
+        <p id="catalog-status-10" class="field-help" data-ms-status aria-live="polite"></p>
         <ul class="chip-list" data-ms-chips></ul>
         <div data-ms-hidden>
           {% if campaign.targeting %}{% for code in campaign.targeting.config.language_codes %}<input type="hidden" name="language_codes" value="{{ code }}">{% endfor %}{% endif %}

@@ -56,6 +56,11 @@
         .finally(function() {pending = null; if (dirty && !leaving && !conflicted) queue();});
     }
     function changed(event) {
+      if (event.target.matches && event.target.matches("input:not([name]), select:not([name]), textarea:not([name])")) return;
+      if (event.target.name === "remove_creative_media") {
+        show("حذف فایل با ذخیره دستی ثبت می‌شود.", "pending");
+        return;
+      }
       if (event.target.type === "file") {
         show("فایل را با ذخیره دستی یا دکمه بعدی ثبت کنید.", "pending");
         return;
@@ -121,7 +126,7 @@
         li.textContent = q;
         var btn = document.createElement("button");
         btn.type = "button";
-        btn.setAttribute("aria-label", "حذف");
+        btn.setAttribute("aria-label", "حذف " + q);
         btn.textContent = "×";
         btn.addEventListener("click", function () {
           chips.splice(idx, 1);
@@ -161,6 +166,10 @@
         input.value = "";
       }
     });
+    var addButton = root.querySelector("[data-search-add]");
+    if (addButton) addButton.addEventListener("click", function() {
+      addQueries(input.value); input.value = ""; input.focus();
+    });
     input.addEventListener("paste", function (e) {
       var text = (e.clipboardData || window.clipboardData).getData("text");
       if (text && /[\n,;]/.test(text)) {
@@ -192,93 +201,136 @@
     sync();
   }
 
+  function suggestionButton(list, label, note, onPick) {
+    var li = document.createElement("li");
+    var button = document.createElement("button");
+    button.type = "button";
+    button.className = "catalog-suggest__item";
+    var name = document.createElement("span");
+    name.textContent = label;
+    button.appendChild(name);
+    if (note) {
+      var small = document.createElement("small");
+      small.textContent = note;
+      button.appendChild(small);
+    }
+    button.addEventListener("click", onPick);
+    li.appendChild(button);
+    list.appendChild(li);
+    return button;
+  }
+
+  function appendChip(list, label, remove) {
+    var li = document.createElement("li");
+    li.className = "chip";
+    var text = document.createElement("span");
+    text.textContent = label;
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.textContent = "×";
+    btn.setAttribute("aria-label", "حذف " + label);
+    btn.addEventListener("click", remove);
+    li.append(text, btn);
+    list.appendChild(li);
+  }
+
   function initMultiselect(root) {
-    var catalog = [];
-    try {
-      catalog = JSON.parse(root.getAttribute("data-catalog") || "[]");
-    } catch (e) {
-      catalog = [];
-    }
-    var kind = root.getAttribute("data-kind") || "";
+    var catalog;
+    try { catalog = JSON.parse(root.getAttribute("data-catalog") || "[]"); } catch (_) { catalog = []; }
+    if (!Array.isArray(catalog)) catalog = [];
+    var kind = root.getAttribute("data-kind");
     var search = root.querySelector("[data-ms-search]");
-    var chipsEl = root.querySelector("[data-ms-chips]");
-    var hiddenWrap = root.querySelector("[data-ms-hidden]");
-    if (!search || !chipsEl || !hiddenWrap) return;
+    var chips = root.querySelector("[data-ms-chips]");
+    var fields = root.querySelector("[data-ms-hidden]");
+    var results = root.querySelector("[data-ms-results]");
+    var status = root.querySelector("[data-ms-status]");
+    if (!search || !chips || !fields || !results || !status) return;
 
-    function selectedValues() {
-      return Array.prototype.map.call(
-        hiddenWrap.querySelectorAll("input[type=hidden]"),
-        function (inp) {
-          return inp.value;
-        }
-      );
+    function inputs() { return Array.from(fields.querySelectorAll("input")); }
+    function value(item) { return String(kind === "country" ? item.country_code : kind === "topic" ? item.topic_id : item.language_code); }
+    function label(item) { return String(item.name_fa || item.name || value(item)); }
+    function maximum() {
+      var mode = root.closest("form").querySelector('[name="channel_mode"]');
+      return kind === "topic" ? 20 : kind === "language" && mode && mode.value === "topics" ? 1 : 8;
     }
-
-    function labelFor(item) {
-      if (kind === "country")
-        return (item.name_fa || item.name || item.country_code) + " (" + item.country_code + ")";
-      if (kind === "topic") return (item.name || "") + " #" + item.topic_id;
-      return (item.name || item.language_code) + " (" + item.language_code + ")";
+    function updateStatus() {
+      status.textContent = inputs().length.toLocaleString("fa-IR") + " از " + maximum().toLocaleString("fa-IR") + " انتخاب";
+      if (!catalog.length) status.textContent += " · فهرست در دسترس نیست یا نتیجه‌ای ندارد";
+      else if (catalog.some(function(item) { return item.verified === false; })) status.textContent += " · پیشنهادهای اولیه؛ تأیید API در انتظار";
+      if (inputs().length > maximum()) status.textContent += " · انتخاب اضافی را حذف کنید";
     }
-
-    function valueFor(item) {
-      if (kind === "country") return item.country_code;
-      if (kind === "topic") return String(item.topic_id);
-      return item.language_code;
-    }
-
     function syncChips() {
-      chipsEl.innerHTML = "";
-      selectedValues().forEach(function (val) {
-        var li = document.createElement("li");
-        li.className = "chip";
-        li.textContent = val;
-        var btn = document.createElement("button");
-        btn.type = "button";
-        btn.textContent = "×";
-        btn.addEventListener("click", function () {
-          hiddenWrap.querySelectorAll('input[value="' + val + '"]').forEach(function (n) {
-            n.remove();
-          });
-          syncChips();
-          dispatchInput(root);
+      chips.replaceChildren();
+      inputs().forEach(function(inp) {
+        var item = catalog.find(function(row) { return value(row) === inp.value; });
+        appendChip(chips, item ? label(item) + (item.verified === false ? " (در انتظار تأیید)" : "") : inp.value + " (نیازمند بررسی)", function() {
+          inp.remove(); syncChips(); renderOptions(); dispatchInput(root); search.focus();
         });
-        li.appendChild(btn);
-        chipsEl.appendChild(li);
       });
+      updateStatus();
     }
-
-    var runSearch = debounce(function () {
-      var q = (search.value || "").trim().toLowerCase();
-      if (q.length < 1) return;
-      var picked = selectedValues();
-      catalog
-        .filter(function (item) {
-          var label = labelFor(item).toLowerCase();
-          return label.indexOf(q) >= 0 || valueFor(item).toLowerCase().indexOf(q) >= 0;
-        })
-        .slice(0, 8)
-        .forEach(function (item) {
-          var val = valueFor(item);
-          if (picked.indexOf(val) >= 0) return;
-          if (kind === "country" && picked.length >= 8) return;
-          var inp = document.createElement("input");
-          inp.type = "hidden";
-          inp.name = root.getAttribute("data-field");
-          inp.value = val;
-          hiddenWrap.appendChild(inp);
-          syncChips();
-          dispatchInput(root);
-          search.value = "";
-        });
-    }, 280);
-
-    search.addEventListener("input", runSearch);
-    search.addEventListener("keydown", function (e) {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        runSearch();
+    function closeOptions() {
+      results.replaceChildren(); results.hidden = true;
+      search.setAttribute("aria-expanded", "false");
+    }
+    function renderOptions() {
+      results.replaceChildren();
+      var q = search.value.trim().toLocaleLowerCase();
+      var selected = new Set(inputs().map(function(inp) { return inp.value; }));
+      var options = catalog.filter(function(item) {
+        return !selected.has(value(item)) && (label(item).toLocaleLowerCase().includes(q) || value(item).toLowerCase().includes(q));
+      }).slice(0, 12);
+      if (inputs().length >= maximum() || !options.length) {
+        closeOptions();
+        updateStatus();
+        if (q && !options.length) status.textContent += " · نتیجه دیگری یافت نشد";
+        return;
       }
+      options.forEach(function(item) {
+        suggestionButton(results, label(item), item.verified === false ? value(item) + " · تأیید نشده" : value(item), function() {
+          if (inputs().length >= maximum() || inputs().some(function(n) { return n.value === value(item); })) return;
+          var inp = document.createElement("input");
+          inp.type = "hidden"; inp.name = root.getAttribute("data-field"); inp.value = value(item);
+          fields.appendChild(inp);
+          search.value = "";
+          syncChips(); closeOptions(); dispatchInput(root); search.focus();
+        });
+      });
+      results.hidden = false;
+      search.setAttribute("aria-expanded", "true");
+    }
+    search.addEventListener("focus", renderOptions);
+    search.addEventListener("input", renderOptions);
+    search.addEventListener("keydown", function(event) {
+      if (event.key === "Escape") closeOptions();
+      if (event.key === "ArrowDown") {
+        event.preventDefault();
+        renderOptions();
+        var first = results.querySelector("button");
+        if (first) first.focus();
+      }
+      if (event.key === "Enter") {
+        event.preventDefault();
+        var buttons = results.querySelectorAll("button");
+        if (buttons.length === 1) buttons[0].click();
+        else if (buttons.length) buttons[0].focus();
+      }
+    });
+    results.addEventListener("keydown", function(event) {
+      if (event.key === "Escape") { closeOptions(); search.focus(); }
+      if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+        event.preventDefault();
+        var buttons = Array.from(results.querySelectorAll("button"));
+        var next = buttons.indexOf(document.activeElement) + (event.key === "ArrowDown" ? 1 : -1);
+        if (next < 0) search.focus();
+        else if (buttons[next]) buttons[next].focus();
+      }
+    });
+    root.addEventListener("focusout", function(event) {
+      if (!root.contains(event.relatedTarget)) closeOptions();
+    });
+    root.closest("form").addEventListener("change", function(event) {
+      if (event.target.name === "channel_mode") { closeOptions(); updateStatus(); }
     });
     syncChips();
   }
@@ -768,6 +820,22 @@
     }
   }
 
+  function initChannelMode(form) {
+    var select = form.querySelector('[name="channel_mode"]');
+    if (!select) return;
+    function sync() {
+      form.querySelectorAll("[data-channel-modes]").forEach(function(section) {
+        var active = section.dataset.channelModes.split(" ").includes(select.value);
+        section.hidden = !active;
+        section.querySelectorAll("input, textarea, select, button").forEach(function(control) {
+          control.disabled = !active;
+        });
+      });
+    }
+    select.addEventListener("change", sync);
+    sync();
+  }
+
   function initLocationPicker(form) {
     var root = form.querySelector("[data-location-picker]");
     if (!root) return;
@@ -775,58 +843,98 @@
     var results = root.querySelector("[data-location-results]");
     var chips = root.querySelector("[data-location-chips]");
     var hiddenWrap = root.querySelector("[data-location-hidden]");
+    var status = root.querySelector("[data-location-status]");
     var base = form.getAttribute("data-catalog-locations");
-    if (!search || !results || !chips || !hiddenWrap || !base) return;
+    var countryRoot = form.querySelector('[data-field="country_codes"]');
+    if (!search || !results || !chips || !hiddenWrap || !base || !status || !countryRoot) return;
+    var requestNumber = 0, controller = null;
 
-    function countries() {
-      var ms = form.querySelector('[data-field="country_codes"]');
-      if (!ms) return "";
-      var inp = ms.querySelector("[data-ms-hidden] input");
-      return inp ? inp.value : "";
+    function country() {
+      var selected = countryRoot.querySelectorAll("[data-ms-hidden] input");
+      return selected.length === 1 ? selected[0].value : "";
     }
-
-    var queryLocations = debounce(function () {
-      var country = countries();
-      var q = (search.value || "").trim();
-      if (!country || q.length < 2) {
-        results.innerHTML = "";
-        return;
-      }
-      fetch(base + "?country=" + encodeURIComponent(country) + "&q=" + encodeURIComponent(q), {
-        credentials: "same-origin",
-      })
-        .then(function (r) {
-          return r.json();
-        })
-        .then(function (j) {
-          results.innerHTML = "";
-          (j.items || []).forEach(function (loc) {
-            var li = document.createElement("li");
-            li.className = "catalog-suggest__item";
-            li.textContent = (loc.name || "") + (loc.region ? " — " + loc.region : "");
-            li.addEventListener("click", function () {
-              var exists = hiddenWrap.querySelector('input[value="' + loc.location_id + '"]');
-              if (!exists) {
-                var inp = document.createElement("input");
-                inp.type = "hidden";
-                inp.name = "location_ids";
-                inp.value = loc.location_id;
-                hiddenWrap.appendChild(inp);
-                var chip = document.createElement("li");
-                chip.className = "chip";
-                chip.textContent = loc.name + " (#" + loc.location_id + ")";
-                chips.appendChild(chip);
-                dispatchInput(root);
-              }
-              search.value = "";
-              results.innerHTML = "";
-            });
-            results.appendChild(li);
-          });
+    function resetResults() {
+      requestNumber += 1;
+      if (controller) controller.abort();
+      results.replaceChildren(); results.hidden = true;
+    }
+    function renderChips() {
+      chips.replaceChildren();
+      Array.from(hiddenWrap.querySelectorAll("input")).forEach(function(inp) {
+        appendChip(chips, inp.dataset.label || ("موقعیت #" + inp.value), function() {
+          inp.remove(); renderChips(); dispatchInput(root);
         });
-    }, 350);
+      });
+    }
+    var previousCountry = country();
+    function countryChanged() {
+      var selected = country();
+      if (selected !== previousCountry) {
+        previousCountry = selected;
+        resetResults();
+        hiddenWrap.replaceChildren(); renderChips();
+        search.value = "";
+        status.textContent = "با تغییر کشور، موقعیت‌های قبلی حذف شدند.";
+        dispatchInput(root);
+      }
+      search.disabled = !selected;
+      if (!selected) status.textContent = "برای انتخاب شهر، دقیقاً یک کشور انتخاب کنید.";
+    }
+    countryRoot.addEventListener("input", countryChanged);
+    search.disabled = !previousCountry;
+    if (!previousCountry) status.textContent = "برای انتخاب شهر، دقیقاً یک کشور انتخاب کنید.";
+    renderChips();
 
-    search.addEventListener("input", queryLocations);
+    var queryLocations = debounce(function() {
+      var selectedCountry = country(), q = search.value.trim();
+      if (!selectedCountry || q.length < 2) return;
+      var seq = ++requestNumber;
+      controller = new AbortController();
+      status.textContent = "در حال جستجو…";
+      fetch(base + "?country=" + encodeURIComponent(selectedCountry) + "&q=" + encodeURIComponent(q),
+        {credentials:"same-origin", signal:controller.signal})
+        .then(function(r) { return r.json().then(function(body) {return {ok:r.ok,body:body};}); })
+        .then(function(response) {
+          if (seq !== requestNumber || country() !== selectedCountry || q !== search.value.trim()) return;
+          results.replaceChildren();
+          if (!response.ok || !response.body.ok) {
+            status.textContent = response.body.message || "فهرست موقعیت‌ها در دسترس نیست.";
+            return;
+          }
+          var items = response.body.items || [];
+          var picked = new Set(Array.from(hiddenWrap.querySelectorAll("input")).map(function(inp){return inp.value;}));
+          items.filter(function(loc){return loc.verified && loc.country_code === selectedCountry && !picked.has(String(loc.location_id));}).forEach(function(loc) {
+            suggestionButton(results, loc.name, loc.region, function() {
+              if (country() !== selectedCountry || hiddenWrap.querySelectorAll("input").length >= 20) {
+                status.textContent = "حداکثر ۲۰ موقعیت در یک کشور قابل انتخاب است."; return;
+              }
+              var inp = document.createElement("input");
+              inp.type = "hidden"; inp.name = "location_ids"; inp.value = String(loc.location_id); inp.dataset.label = loc.name;
+              hiddenWrap.appendChild(inp);
+              resetResults(); renderChips(); search.value = ""; status.textContent = "موقعیت اضافه شد.";
+              dispatchInput(root); search.focus();
+            });
+          });
+          results.hidden = !results.children.length;
+          status.textContent = results.hidden ? "موقعیت دیگری یافت نشد." : "موقعیت موردنظر را انتخاب کنید.";
+        })
+        .catch(function(err) { if (err.name !== "AbortError" && seq === requestNumber) status.textContent = "ارتباط با فهرست موقعیت‌ها برقرار نشد."; });
+    }, 350);
+    search.addEventListener("input", function() {
+      resetResults();
+      status.textContent = search.value.trim().length >= 2 ? "در حال جستجو…" : "حداقل دو حرف بنویسید.";
+      queryLocations();
+    });
+    search.addEventListener("keydown", function(event) {
+      if (event.key === "Enter") event.preventDefault();
+      if (event.key === "ArrowDown") {
+        event.preventDefault(); var first = results.querySelector("button"); if (first) first.focus();
+      }
+      if (event.key === "Escape") resetResults();
+    });
+    root.addEventListener("focusout", function(event) {
+      if (!root.contains(event.relatedTarget)) resetResults();
+    });
   }
 
   function initPolicyRefresh(form) {
@@ -877,6 +985,7 @@
     initLocationPicker(form);
     document.querySelectorAll("[data-search-chips]").forEach(initSearchChips);
     document.querySelectorAll("[data-multiselect]").forEach(initMultiselect);
+    initChannelMode(form);
     document.querySelectorAll("[data-schedule-editor]").forEach(initScheduleEditor);
     document.querySelectorAll("[data-bot-selector]").forEach(function (el) {
       initBotTargetingSelector(el, form.getAttribute("data-resolve-bot"));

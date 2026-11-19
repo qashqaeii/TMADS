@@ -116,3 +116,10 @@ not proof of Telegram acceptance. Remote media upload remains a release blocker,
 No synthetic topic or city IDs are selectable; ISO language/country fallback codes are marked unverified.
 Live submission verifies selected catalog values, channel identities and geography via read-only API.
 The getTargetLocationsById adapter follows the repository API document; installed wrapper signature and live behavior require isolated verification. Channel strategy is now explicit; inactive selections cannot silently override it.
+
+## Studio targeting interaction
+Searchable catalogs now show explicit suggestions, accessible keyboard/button selection, named removable chips,
+and verified/unverified labels instead of silently selecting search matches. Country changes clear incompatible city
+selections, stale location responses cannot overwrite results, and channel-mode fields are shown only when relevant.
+Mobile add-search control and larger selection targets added. Catalog requests are limited to the audience step.
+Actual browser QA is still pending.

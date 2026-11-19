@@ -7724,22 +7724,41 @@ body.is-app .sync-hint[title] {
 
 .catalog-suggest {
   list-style: none;
-  margin: 0.35rem 0 0;
-  padding: 0;
+  margin: 0.25rem 0 0;
+  padding: 0.3rem;
   border: 1px solid var(--border-default);
   border-radius: var(--radius-sm);
   background: var(--surface-primary);
-  max-height: 10rem;
+  max-height: 15rem;
   overflow: auto;
+  overscroll-behavior: contain;
 }
+.catalog-suggest[hidden], .studio-form [data-channel-modes][hidden] { display: none !important; }
 .catalog-suggest__item {
-  padding: 0.45rem 0.65rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  width: 100%;
+  min-height: 44px;
+  padding: .55rem .75rem;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
   cursor: pointer;
-  font-size: 0.88rem;
+  font: inherit;
+  font-size: .88rem;
+  text-align: start;
 }
-.catalog-suggest__item:hover {
+.catalog-suggest__item small { color: var(--text-secondary); font-size: .75rem; min-width: 0; overflow-wrap: anywhere; }
+.catalog-suggest__item:hover, .catalog-suggest__item:focus-visible {
   background: var(--surface-secondary);
+  outline-offset: -2px;
 }
+.studio-form .chip-list .chip { overflow-wrap: anywhere; }
+.studio-form .chip-list button { min-width: 2rem; min-height: 2rem; border-radius: 999px; }
+.studio-form [data-ms-search] { min-height: 44px; }
 
 .schedule-editor {
   margin-top: 1rem;
