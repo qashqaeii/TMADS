@@ -9,7 +9,7 @@ from apps.telegram_ads.exceptions import TelegramAdsError
 from apps.telegram_ads.models import RelatedAccountRequest, AccountAssetOperation
 from apps.policies.services.preflight import CampaignPolicyPreflight
 
-EVENT_TYPES=("page_view","purchase","lead","add_to_cart","complete_registration","custom")
+EVENT_TYPES=("page_view","add_to_cart","add_to_wishlist","customize_product","initiate_checkout","add_payment_info","purchase","contact","lead","schedule","complete_registration","submit_application","start_trial","subscribe","view_content","search","find_location","donate","custom")
 SALT="tmads.customer-assets.v1"
 
 def owned_account(actor):

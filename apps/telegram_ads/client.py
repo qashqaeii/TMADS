@@ -98,6 +98,9 @@ class TelegramAdsClient:
             except (TelegramAdsNotConfigured, TelegramAdsWriteDisabled, TelegramAdsError):
                 raise
             except Exception as exc:
+                if operation in {"related_account_create", "customer_asset_create"}:
+                    logger.warning("Telegram Ads API %s failed", operation)
+                    raise TelegramAdsError("عملیات منابع تبلیغاتی ناموفق بود.") from None
                 try:
                     from telead.errors import APIError, TransportError
 

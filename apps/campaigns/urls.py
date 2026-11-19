@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import views, remote_views
+from . import views, remote_views, intraday_views
 
 app_name = "campaigns"
 
@@ -9,6 +9,7 @@ urlpatterns = [
     path("refresh-stats/", views.campaign_refresh_stats, name="refresh_stats"),
     path("new/", views.campaign_wizard, name="wizard_new"),
     path("<uuid:campaign_id>/", views.campaign_detail, name="detail"),
+    path("<uuid:campaign_id>/intraday/", intraday_views.campaign_intraday, name="intraday"),
     path("<uuid:campaign_id>/manage/", remote_views.remote_management, name="remote_management"),
     path("<uuid:campaign_id>/wizard/", views.campaign_wizard, name="wizard"),
     path("<uuid:campaign_id>/delete/", views.campaign_delete, name="delete"),

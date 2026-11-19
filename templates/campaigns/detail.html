@@ -64,6 +64,7 @@
           <span class="campaign-detail__action-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="pause" size="sm" %}</span>
           <span class="campaign-detail__action-label">مدیریت تبلیغ</span>
         </a>
+        <a class="campaign-detail__action campaign-detail__toolbar-item" href="{% url 'campaigns:intraday' campaign.id %}"><span class="campaign-detail__action-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="line-chart" size="sm" %}</span><span class="campaign-detail__action-label">آمار درون‌روزی</span></a>
         {% endif %}
         {% if can_edit_campaign %}
         <a class="campaign-detail__action campaign-detail__toolbar-item" href="{% url 'campaigns:wizard' campaign.id %}">
