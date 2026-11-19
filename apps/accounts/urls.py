@@ -1,7 +1,7 @@
 from django.contrib.auth import views as auth_views
 from django.urls import path, reverse_lazy
 
-from . import views
+from . import views, sms_views
 from apps.telegram_ads.related_views import customer_related_account
 from apps.telegram_ads.account_ad_views import related_account_ads
 from apps.telegram_ads.asset_views import customer_assets, customer_audience_update, customer_audience_delete, customer_audience_reset, customer_pixel_event_manage
@@ -19,6 +19,7 @@ urlpatterns = [
     path("advertiser-assets/audiences/delete/", customer_audience_delete, name="audience_delete"),
     path("advertiser-assets/audiences/reset/", customer_audience_reset, name="audience_reset"),
     path("advertiser-assets/pixel-events/manage/", customer_pixel_event_manage, name="pixel_event_manage"),
+    path("profile/sms/", sms_views.mobile_settings, name="mobile_settings"),
     path("profile/", views.profile_view, name="profile"),
     path(
         "password-reset/",

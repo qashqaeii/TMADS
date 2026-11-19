@@ -80,5 +80,8 @@ def send_budget_alerts():
                 "related_campaign_id": ad.campaign_id,
             },
         )
+        if made:
+            from .sms import enqueue_sms
+            enqueue_sms(ad.campaign.customer, "budget_low", alert["event_key"], {})
         created += int(made)
     return created

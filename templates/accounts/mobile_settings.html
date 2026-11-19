@@ -1,0 +1,16 @@
+{% extends "app_shell.html" %}
+{% block page_title %}اعلان پیامکی{% endblock %}
+{% block content %}
+<div class="app-stack ui-account-page">
+  {% include "includes/dash_header.html" with eyebrow="حساب" title="اعلان پیامکی" subtitle="مدیریت شماره تأییدشده و اطلاع‌رسانی‌های حساب" with_sub=1 %}
+  <div class="panel-grid panel-2 account-settings">
+    <section class="card card-pad form-stack">
+      <div class="ui-form-intro"><span class="ui-target-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="smartphone" size="md" %}</span><div><h2>تأیید شماره موبایل</h2><p>کد یک‌بارمصرف به شماره جدید ارسال می‌شود.</p></div></div>
+      {% if not sms_available %}<p role="status" class="muted">سرویس تأیید پیامکی فعلاً در دسترس نیست.</p>{% endif %}
+      <form method="post" class="form-stack">{% csrf_token %}<input type="hidden" name="action" value="send"><div class="field"><label for="sms-phone">شماره موبایل</label><input id="sms-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel-national" dir="ltr" maxlength="20" placeholder="09xxxxxxxxx" required></div><button type="submit" class="btn btn-primary" {% if not sms_available %}disabled{% endif %}>ارسال کد تأیید</button></form>
+      {% if challenge %}<form method="post" class="form-stack">{% csrf_token %}<input type="hidden" name="action" value="verify"><p class="muted">کد ارسال‌شده به <bdi>{{ challenge.phone }}</bdi> را وارد کنید.</p><div class="field"><label for="sms-code">کد شش‌رقمی</label><input id="sms-code" name="code" dir="ltr" inputmode="numeric" autocomplete="one-time-code" maxlength="6" required></div><button class="btn btn-primary" type="submit">تأیید شماره</button></form>{% endif %}
+    </section>
+    <section class="card card-pad form-stack"><h2 class="section-title">تنظیمات اطلاع‌رسانی</h2>{% if contact %}<p>شماره تأییدشده: <bdi>{{ contact.phone }}</bdi></p><p>وضعیت: {% if contact.enabled %}فعال{% else %}غیرفعال{% endif %}</p><form method="post">{% csrf_token %}<button class="btn btn-ghost" name="action" value="{% if contact.enabled %}disable{% else %}enable{% endif %}">{% if contact.enabled %}غیرفعال کردن پیامک{% else %}فعال کردن پیامک{% endif %}</button></form>{% else %}<p class="muted">برای دریافت اعلان‌های حساب ابتدا شماره را تأیید کنید.</p>{% endif %}<p class="muted">پیامک‌های سیستمی مربوط به پرداخت و وضعیت تبلیغات هستند. اعلان‌های داخل داشبورد همچنان در دسترس‌اند.</p><a href="{% url 'accounts:profile' %}" class="btn btn-ghost">بازگشت به پروفایل</a></section>
+  </div>
+</div>
+{% endblock %}

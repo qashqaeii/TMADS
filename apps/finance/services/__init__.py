@@ -221,6 +221,10 @@ def complete_topup_payment(payment: Payment, *, deposit_description: str = "شا
         "مبلغ به موجودی شما اضافه شد.",
         level="success",
     )
+    if payment.gateway != "fake":
+        from apps.notifications.sms import enqueue_sms
+        enqueue_sms(payment.customer, "wallet_credit", f"payment:{payment.pk}:verified",
+                    {"amount": str(payment.amount_irr // 10)})
     return True
 
 

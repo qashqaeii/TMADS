@@ -12,7 +12,7 @@
     <div class="field"><label for="profile-display-name">نام نمایشی</label><input id="profile-display-name" autocomplete="name" name="display_name" value="{{ profile.display_name }}"></div>
     <div class="field"><label for="profile-company">نام کسب‌وکار</label><input id="profile-company" autocomplete="organization" name="company_name" value="{{ profile.company_name }}"></div>
     <div class="field"><label for="profile-email">ایمیل</label><input id="profile-email" dir="ltr" value="{{ user.email }}" disabled></div>
-    <div class="field"><label for="profile-mobile">موبایل</label><input id="profile-mobile" dir="ltr" value="{{ user.mobile|default:'—' }}" disabled></div>
+    <div class="field"><label for="profile-mobile">موبایل</label><input id="profile-mobile" dir="ltr" value="{{ user.mobile|default:'—' }}" disabled><a href="{% url 'accounts:mobile_settings' %}">تأیید موبایل و تنظیم اعلان پیامکی</a></div>
     <button class="btn btn-primary" type="submit">ذخیره</button>
   </form>
   <section class="card card--lift card-pad form-stack">
