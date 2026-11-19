@@ -1,0 +1,62 @@
+"""Render and template regression checks for the final UI pass (no live writes)."""
+from pathlib import Path
+
+import pytest
+from django.template.loader import get_template
+from django.urls import reverse
+
+
+def test_all_project_html_templates_compile():
+    root = Path(__file__).resolve().parents[1] / "templates"
+    paths = sorted(root.rglob("*.html"))
+    assert paths
+    for path in paths:
+        get_template(path.relative_to(root).as_posix())
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("route", [
+    "public:home", "public:features", "public:how_it_works", "public:pricing",
+    "public:faq", "public:contact", "public:about", "public:terms",
+    "public:privacy", "public:refund", "public:content_policy", "accounts:login",
+    "accounts:register", "accounts:password_reset",
+    "accounts:password_reset_done", "accounts:password_reset_complete",
+])
+def test_public_ui_shell(client, route):
+    response = client.get(reverse(route))
+    assert response.status_code == 200, route
+    assert b'ui-foundation.css' in response.content
+    assert b'id="ui-confirmation"' in response.content
+    assert b'dir="rtl"' in response.content
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("route", [
+    "dashboard:home", "dashboard:notifications", "campaigns:list",
+    "finance:wallet", "finance:topup", "finance:transactions",
+    "finance:invoices", "finance:refunds", "support:list", "support:create",
+    "accounts:profile", "policies:ad_policies",
+])
+def test_customer_ui_shell(client, customer_user, route):
+    client.force_login(customer_user)
+    response = client.get(reverse(route))
+    assert response.status_code == 200, route
+    assert b'ui-shell' in response.content
+    assert b'id="main-content"' in response.content
+    assert b'id="ui-confirmation"' in response.content
+
+
+@pytest.mark.django_db
+def test_draft_detail_and_wizard_markup(client, customer_user):
+    from apps.campaigns.models import Campaign
+
+    client.force_login(customer_user)
+    draft = Campaign.objects.create(customer=customer_user.customer_profile, name="UI test draft")
+    detail = client.get(reverse("campaigns:detail", args=[draft.id]))
+    assert detail.status_code == 200
+    wizard = client.get(reverse("campaigns:wizard", args=[draft.id]))
+    assert wizard.status_code == 200
+    assert b'ui-studio' in wizard.content
+    assert b'draft_revision' in wizard.content
+    assert b'csrfmiddlewaretoken' in wizard.content
+    assert b'aria-current="step"' in wizard.content

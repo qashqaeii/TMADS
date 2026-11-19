@@ -9,9 +9,28 @@ one blue primary action, semantic status colors, 9px controls, 12px surfaces, 42
 controls (44px mobile), keyboard focus and readable type. Use existing Lucide icons.
 Keep legacy styles until their active usages can be safely migrated; no blanket purge.
 
-## Work ledger
-- Shared foundation: control variants, fields, status, feedback, overlay, delete confirmation.
-- Remaining: shell/mobile, dashboard, campaign list/detail, studio, finance, account/support,
-  operations, public pages, inventory of partials and verification.
-- Current verification: source only. Previous GitHub Actions had no runner or steps;
-  browser and runtime QA must be reported separately, never claimed from static inspection.
+## Completed source changes (commits)
+- Foundation: e3bf6d9 — shared tokens, controls, feedback and native confirmation.
+- Shell/dashboard/notifications: 407c683.
+- Campaign list/detail/analytics: f7afac4.
+- Studio/targeting/schedule/live approximate preview: 25e3907.
+- Finance/wallet/top-up/ledger/invoice/refund: 4c5978b.
+- Authentication/password recovery/profile: a1bcb9c.
+- Support/policy center: 9d78db1.
+- Operations review/rates/API/refunds/audit: 9e8e8cd.
+- Public landing/features/how-it-works/pricing/FAQ/contact/legal: dbda9c3.
+- Shared interaction and accessibility pass: d669b97.
+
+Page-specific modules inherit the shared foundation and existing executive design.
+Legacy CSS remains loaded for existing partial compatibility; removal requires
+browser-based regression evidence. Do not claim measured UI quality or fully
+verified production readiness from source edits. The landing illustration is
+schematic, explicitly labeled as sample data. No financial or remote gates changed.
+
+## Verification
+Added template compile and customer/public route smoke tests plus a local-only
+Playwright suite at three viewport sizes. These new tests have not been run in
+the connector environment. Existing GitHub Actions executions failed before
+runner allocation. Browser-level verification, Django test execution, staff
+screens, all wizard branches, and populated financial/analytics states must be
+checked against an isolated running environment before deployment.
