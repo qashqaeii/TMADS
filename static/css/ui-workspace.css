@@ -175,3 +175,20 @@
 .ui-empty-action { display:flex;justify-content:center;padding:0 16px 24px; }
 @media(max-width:1150px){.ui-final .ui-remote-management .ui-remote-grid{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:600px){.ui-final .ui-remote-management .ui-remote-grid .hero-actions>.btn{flex:1 1 auto}.ui-final .ui-ops .ui-remote-ops-card > form{padding:10px}}
+
+/* Auditable, secret-free launch readiness workspace. */
+.ui-release-summary {display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.ui-release-summary>div:first-child {display:grid;gap:7px;justify-items:start}
+.ui-release-summary h2 {font-size:1.1rem;margin:0}
+.ui-release-summary p {color:var(--ui-muted);margin:0;line-height:1.8;font-size:.85rem}
+.ui-release-numbers {display:flex;gap:16px;flex-wrap:wrap}
+.ui-release-numbers span {display:grid;gap:4px;color:var(--ui-muted);font-size:.8rem}
+.ui-release-numbers strong {font-size:1.3rem;color:var(--ui-ink)}
+.ui-release-checks {display:grid;gap:0}
+.ui-release-check {display:flex;align-items:center;gap:13px;padding:16px 3px;border-top:1px solid var(--ui-border)}
+.ui-release-check__icon {flex:none;color:var(--ui-muted)}
+.ui-release-check>div {flex:1;min-width:0}
+.ui-release-check h3 {margin:0;font-size:.9rem}
+.ui-release-check p {margin:5px 0 0;color:var(--ui-muted);line-height:1.75;font-size:.8rem}
+.ui-release-check>.status {flex:none}
+@media(max-width:600px){.ui-release-check{flex-wrap:wrap}.ui-release-check>.status{margin-inline-start:auto}}
