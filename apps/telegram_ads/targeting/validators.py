@@ -66,18 +66,9 @@ def _validate_target_config(target_type: str, config: dict[str, Any], *, strict:
         bot_errors = validate_bot_targets(
             bots,
             strict=strict,
-            peer_checks=cfg.get("bot_peer_checks") or {},
+            warnings=result.warnings,
         )
         result.errors.extend(bot_errors)
-        pending = any(
-            (check or {}).get("eligibility") in {"api_unavailable", "unknown"}
-            and not (check or {}).get("hard_block")
-            for check in (cfg.get("bot_peer_checks") or {}).values()
-        )
-        if strict and pending and bots:
-            result.warnings.append(
-                "واجد شرایط بودن حداقل یک ربات هنوز از طریق API تأیید نشده است؛ پیش از ارسال، تیم عملیات بررسی می‌کند."
-            )
 
     if target_type == "users":
         placement = cfg.get("placement_api") or cfg.get("placement") or ""

@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 import logging
+import hashlib
 import re
 from dataclasses import asdict, dataclass, field
 from typing import Any, Literal
 
 from django.core.cache import cache
+from django.conf import settings
 
 from apps.telegram_ads.client import TelegramAdsClient
 from apps.telegram_ads.exceptions import (
@@ -47,7 +49,7 @@ _INVALID_CODES = frozenset(
     }
 )
 _INSUFFICIENT_TEXT = re.compile(
-    r"1000\+?\s*daily|daily\s+users|BOT_TOO_SMALL",
+    r"target bot must have 1000\+\s*daily users\b|\bBOT_TOO_SMALL\b",
     re.IGNORECASE,
 )
 
@@ -90,7 +92,8 @@ class BotEligibilityResult:
 
 
 def _cache_key(username: str) -> str:
-    return f"tmads:bot_elig:v1:{username.casefold().lstrip('@')}"
+    account_scope = hashlib.sha256(settings.TELEGRAM_ADS_API_TOKEN.encode()).hexdigest()[:16]
+    return f"tmads:bot_elig:v2:{account_scope}:{username.casefold().lstrip('@')}"
 
 
 def _metadata_from_payload(data: dict[str, Any]) -> BotMetadata:
@@ -127,7 +130,7 @@ def _classify_api_error(code: str | None, description: str | None = None) -> Bot
             username=None,
             eligibility="invalid_bot",
             message_fa=_MSG_INVALID,
-            hard_block=False,
+            hard_block=True,
             verified=True,
             api_code=code_u,
         )
@@ -165,7 +168,7 @@ def check_bot_eligibility(value: str, *, use_cache: bool = True) -> BotEligibili
             username=None,
             eligibility="invalid_bot",
             message_fa=_MSG_INVALID,
-            hard_block=False,
+            hard_block=True,
             verified=True,
         )
 
@@ -220,8 +223,10 @@ def check_bot_eligibility(value: str, *, use_cache: bool = True) -> BotEligibili
         logger.exception("bot eligibility internal error for query=%r", query[:64])
         raise
 
-    meta = _metadata_from_payload(data)
+    meta = _metadata_from_payload(data if isinstance(data, dict) else {})
     bot_payload = meta.to_dict()
+    if not isinstance(meta.bot_id, int) or isinstance(meta.bot_id, bool) or meta.bot_id <= 0:
+        return BotEligibilityResult(False, query, username_at, "unknown", _MSG_UNKNOWN)
     result = BotEligibilityResult(
         ok=True,
         query=query,
@@ -251,29 +256,49 @@ def _result_cache_payload(result: BotEligibilityResult) -> dict[str, Any]:
     }
 
 
+def cached_bot_checks(bot_ids: list[str]) -> dict[str, Any]:
+    """Display-only snapshots from our own server cache; never trust posted flags."""
+    checks = {}
+    for raw in bot_ids[:100]:
+        at, _ = parse_bot_peer_input(raw)
+        if at:
+            cached = cache.get(_cache_key(at))
+            if isinstance(cached, dict):
+                checks[at] = cached
+    return checks
+
+
 def validate_bot_targets(
     bot_ids: list[str],
     *,
     strict: bool = False,
     peer_checks: dict[str, Any] | None = None,
+    warnings: list[str] | None = None,
+    require_verified: bool = False,
 ) -> list[str]:
-    """Return Persian error messages for bots that hard-block submission."""
+    """Only server-side checks are authoritative; pending is never a verified success."""
     errors: list[str] = []
     seen: set[str] = set()
-    checks = peer_checks or {}
+    if len(bot_ids) > 100:
+        return ["حداکثر ۱۰۰ ربات قابل انتخاب است."]
     for raw in bot_ids:
         at, _ = parse_bot_peer_input(raw)
-        if not at or at.casefold() in seen:
+        if not at:
+            if strict:
+                errors.append(f"{str(raw)[:32]}: {_MSG_INVALID}")
+            continue
+        if at.casefold() in seen:
+            if strict:
+                errors.append(f"{at}: ربات تکراری است.")
             continue
         seen.add(at.casefold())
-        saved = checks.get(at) or checks.get(at.lstrip("@"))
-        if isinstance(saved, dict) and saved.get("hard_block") and saved.get("verified"):
-            label = (saved.get("bot") or {}).get("title") or at
-            errors.append(f"{label}: {saved.get('message_fa') or _MSG_INSUFFICIENT}")
+        if not strict and not require_verified:
             continue
-        if strict:
-            result = check_bot_eligibility(at, use_cache=True)
-            if result.hard_block:
-                label = result.bot.get("title") or at
-                errors.append(f"{label}: {result.message_fa}")
+        result = check_bot_eligibility(at, use_cache=not require_verified)
+        if result.hard_block:
+            errors.append(f"{at}: {result.message_fa}")
+        elif require_verified and not (result.eligibility == "eligible" and result.verified):
+            errors.append(f"{at}: صلاحیت ربات هنوز تأیید نشده است؛ ارسال ممکن نیست.")
+        elif warnings is not None and result.eligibility in {"unknown", "api_unavailable"}:
+            warnings.append(f"{at}: هنوز از طریق API تأیید نشده است؛ پیش از ارسال مجدداً بررسی می‌شود.")
     return errors

@@ -23,6 +23,13 @@ def _claim_submission(campaign_id):
         campaign = Campaign.objects.select_for_update().get(pk=campaign_id)
         order = require_submission_order(campaign, lock=True)
         assert_submission_ready(campaign)
+        if campaign.target_type == Campaign.TargetType.BOTS:
+            from apps.telegram_ads.services.bot_eligibility import validate_bot_targets
+            targeting = getattr(campaign, "targeting", None)
+            bot_ids = (targeting.config if targeting else {}).get("bot_ids") or []
+            errors = validate_bot_targets(bot_ids, strict=True, require_verified=True)
+            if errors or not bot_ids:
+                raise ValueError("؛ ".join(errors) or "ربات هدف تأیید نشده است.")
         account = TelegramAdsClient().get_account()
         try:
             remaining = Decimal(str(account["remaining_budget"]))

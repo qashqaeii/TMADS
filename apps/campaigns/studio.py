@@ -109,17 +109,11 @@ def parse_targeting_payload(data, target_type: str) -> dict[str, Any]:
         single = (data.get("bot_input") or "").strip()
         if single:
             bots.append(normalize_username(single))
-        cfg["bot_ids"] = [normalize_username(b) for b in bots if b]
-        raw_checks = (data.get("bot_eligibility_json") or "").strip()
-        if raw_checks:
-            try:
-                import json as _json
+        from apps.telegram_ads.targeting.normalize import parse_bot_peer_input
+        from apps.telegram_ads.services.bot_eligibility import cached_bot_checks
 
-                parsed = _json.loads(raw_checks)
-                if isinstance(parsed, dict):
-                    cfg["bot_peer_checks"] = parsed
-            except (TypeError, ValueError):
-                pass
+        cfg["bot_ids"] = [parse_bot_peer_input(b)[0] or str(b).strip()[:256] for b in bots if b]
+        cfg["bot_peer_checks"] = cached_bot_checks(cfg["bot_ids"])
 
     elif target_type == "channels":
         cfg["channel_mode"] = (data.get("channel_mode") or "language").strip()

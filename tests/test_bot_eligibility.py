@@ -148,7 +148,8 @@ def test_validate_studio_multiple_bots_and_draft_checks():
             "@vote": {"eligibility": "api_unavailable", "hard_block": False},
         },
     }
-    with patch("apps.telegram_ads.services.bot_eligibility.validate_bot_targets", return_value=[]):
+    with patch("apps.telegram_ads.services.bot_eligibility.check_bot_eligibility") as checker:
+        checker.return_value = MagicMock(hard_block=False, eligibility="api_unavailable")
         result = validate_studio_config(
             target_type="bots",
             placement="bot_banner",
@@ -199,4 +200,18 @@ def test_draft_preserves_bot_peer_checks(client, customer_user):
     }
     cfg = parse_targeting_payload(payload, "bots")
     assert "@vote" in cfg["bot_ids"]
-    assert cfg["bot_peer_checks"]["@vote"]["eligibility"] == "eligible"
+    # Browser-supplied eligibility is not authoritative and is not persisted.
+    assert "@vote" not in cfg["bot_peer_checks"]
+
+
+def test_short_official_username_and_fake_url():
+    assert parse_bot_peer_input("@gif") == ("@gif", "@gif")
+    assert parse_bot_peer_input("https://evil.invalid/t.me/vote") == (None, None)
+
+
+@patch("apps.telegram_ads.services.bot_eligibility.TelegramAdsClient")
+def test_empty_success_is_not_verified(mock_client):
+    mock_client.return_value.resolve_target_bot.return_value = {}
+    result = check_bot_eligibility("@vote", use_cache=False)
+    assert result.eligibility == "unknown"
+    assert not result.verified

@@ -63,7 +63,7 @@ def test_preflight_persists_findings(customer_user):
         ad_settings={"terms_accepted": True},
     )
     AdCreative.objects.create(campaign=campaign, ad_text="متن ساده")
-    CampaignTargeting.objects.create(campaign=campaign, config={"bot_ids": ["@b"]})
+    CampaignTargeting.objects.create(campaign=campaign, config={"bot_ids": ["@vote"]})
     result = CampaignPolicyPreflight(campaign).run(
         strict=True, context="test", check_operator=False
     )
@@ -89,7 +89,7 @@ def test_submission_blocked_without_operator_gate(customer_user):
         ad_settings={"terms_accepted": True, "destination_rights_confirmed": True},
     )
     AdCreative.objects.create(campaign=campaign, ad_text="متن")
-    CampaignTargeting.objects.create(campaign=campaign, config={"bot_ids": ["@b"]})
+    CampaignTargeting.objects.create(campaign=campaign, config={"bot_ids": ["@vote"]})
     with pytest.raises(ValueError):
         assert_submission_ready(campaign)
 
@@ -118,7 +118,7 @@ def test_submission_allowed_with_operator_approved(customer_user):
         },
     )
     AdCreative.objects.create(campaign=campaign, ad_text="متن کوتاه")
-    CampaignTargeting.objects.create(campaign=campaign, config={"bot_ids": ["@b"]})
+    CampaignTargeting.objects.create(campaign=campaign, config={"bot_ids": ["@vote"]})
     result = assert_submission_ready(campaign)
     assert result.submission_ready
 

@@ -362,11 +362,15 @@
     function normalize(raw) {
       raw = (raw || "").trim();
       if (!raw) return "";
-      if (raw.indexOf("t.me/") >= 0) {
-        var m = raw.match(/t\.me\/([A-Za-z0-9_]{4,32})/i);
-        if (m) return "@" + m[1];
-      }
-      if (raw.charAt(0) !== "@") raw = "@" + raw.replace(/^@+/, "");
+      var direct = raw.match(/^@?([A-Za-z0-9_]{3,32})$/);
+      if (direct) return "@" + direct[1];
+      try {
+        var url = new URL(raw.indexOf("://") >= 0 ? raw : "https://" + raw);
+        var match = url.pathname.match(/^\/([A-Za-z0-9_]{3,32})\/?$/);
+        if (/^https?:$/.test(url.protocol) && ["t.me", "telegram.me"].indexOf(url.hostname) >= 0 && !url.username && !url.password && !url.port && match) {
+          return "@" + match[1];
+        }
+      } catch (_) {}
       return raw;
     }
 
@@ -396,69 +400,65 @@
       if (hiddenJson) hiddenJson.value = JSON.stringify(map);
     }
 
+    function textNode(tag, cls, value, dir) {
+      var el = document.createElement(tag);
+      if (cls) el.className = cls;
+      if (dir) el.dir = dir;
+      el.textContent = String(value || "");
+      return el;
+    }
+
+    function appendBotContent(parent, prefix, title, user, message, photo) {
+      var img = null;
+      try {
+        var url = new URL(photo);
+        if (url.protocol === "https:") {
+          img = document.createElement("img");
+          img.className = prefix + "__avatar";
+          img.src = url.href;
+          img.alt = "";
+          img.loading = "lazy";
+          img.referrerPolicy = "no-referrer";
+        }
+      } catch (_) {}
+      if (!img) {
+        img = textNode("span", prefix + "__avatar " + prefix + "__avatar--empty", "🤖");
+        img.setAttribute("aria-hidden", "true");
+      }
+      var body = document.createElement("div");
+      body.className = prefix + "__body";
+      body.appendChild(textNode("strong", prefix + "__title", title, "auto"));
+      body.appendChild(textNode("span", prefix + "__user", user, "ltr"));
+      body.appendChild(textNode("p", prefix + "__status", message));
+      parent.append(img, body);
+    }
+
     function renderPreview(payload) {
       if (!preview) return;
-      if (!payload) {
-        preview.hidden = true;
-        preview.innerHTML = "";
-        if (addBtn) addBtn.disabled = true;
-        return;
-      }
-      preview.hidden = false;
+      preview.replaceChildren();
+      preview.hidden = !payload;
+      if (addBtn) addBtn.disabled = true;
+      if (!payload) return;
       var bot = payload.bot || {};
-      var title = bot.title || payload.username || "";
-      var user = bot.username || (payload.username || "").replace(/^@/, "");
-      var img =
-        bot.photo_url
-          ? '<img class="bot-target-preview__avatar" src="' + bot.photo_url + '" alt="" loading="lazy">'
-          : '<span class="bot-target-preview__avatar bot-target-preview__avatar--empty" aria-hidden="true">🤖</span>';
+      var user = "@" + String(bot.username || payload.username || "").replace(/^@+/, "");
       var state = payload.eligibility || "unknown";
       preview.className = "bot-target-preview " + eligibilityClass(state);
-      preview.innerHTML =
-        img +
-        '<div class="bot-target-preview__body">' +
-        '<strong class="bot-target-preview__title" dir="auto">' +
-        title +
-        "</strong>" +
-        '<span class="bot-target-preview__user" dir="ltr">@' +
-        user +
-        "</span>" +
-        '<p class="bot-target-preview__status">' +
-        (payload.message_fa || "") +
-        "</p>" +
-        "</div>";
-      if (addBtn) {
-        addBtn.disabled =
-          payload.hard_block || state === "insufficient_audience" || state === "invalid_bot";
-      }
+      appendBotContent(preview, "bot-target-preview", bot.title || payload.username, user, payload.message_fa, bot.photo_url);
+      if (addBtn) addBtn.disabled = items.length >= 100 || !lastResolve ||
+        payload.hard_block || state === "insufficient_audience" || state === "invalid_bot";
     }
 
     function renderList() {
-      list.innerHTML = "";
+      list.replaceChildren();
       items.forEach(function (it, idx) {
         var li = document.createElement("li");
         li.className = "bot-target-card " + eligibilityClass(it.eligibility);
         var bot = it.bot || {};
-        var img = bot.photo_url
-          ? '<img class="bot-target-card__avatar" src="' + bot.photo_url + '" alt="" loading="lazy">'
-          : '<span class="bot-target-card__avatar bot-target-card__avatar--empty" aria-hidden="true">🤖</span>';
-        li.innerHTML =
-          img +
-          '<div class="bot-target-card__body">' +
-          '<strong dir="auto">' +
-          (bot.title || it.username) +
-          "</strong>" +
-          '<span class="bot-target-card__user" dir="ltr">' +
-          it.username +
-          "</span>" +
-          '<p class="bot-target-card__status">' +
-          (it.message_fa || "") +
-          "</p>" +
-          "</div>";
+        appendBotContent(li, "bot-target-card", bot.title || it.username, it.username, it.message_fa, bot.photo_url);
         var btn = document.createElement("button");
         btn.type = "button";
         btn.className = "bot-target-card__remove";
-        btn.setAttribute("aria-label", "حذف ربات");
+        btn.setAttribute("aria-label", "حذف " + it.username);
         btn.textContent = "×";
         btn.addEventListener("click", function () {
           items.splice(idx, 1);
@@ -510,21 +510,28 @@
         .then(function (j) {
           applyResolve(j, v);
         })
-        .catch(function () {
+        .catch(function (err) {
+          if (err && err.name === "AbortError") return;
           if (normalize(input.value) === v) {
-            renderPreview({
+            applyResolve({
               ok: false,
               username: v,
               eligibility: "api_unavailable",
               message_fa: "بررسی ربات در حال حاضر امکان‌پذیر نیست.",
               hard_block: false,
               verified: false,
-            });
+            }, v);
           }
         });
     }, 700);
 
-    input.addEventListener("input", resolveDebounced);
+    input.addEventListener("input", function () {
+      lastResolve = null;
+      if (inflight && inflight.abort) inflight.abort();
+      if (addBtn) addBtn.disabled = true;
+      renderPreview(input.value.trim() ? {eligibility: "unknown", username: normalize(input.value), message_fa: "در حال بررسی ربات…"} : null);
+      resolveDebounced();
+    });
 
     function addCurrent() {
       var v = normalize(input.value);
@@ -541,7 +548,7 @@
       if (!payload || !payload.eligibility) {
         return;
       }
-      if (payload.hard_block || payload.eligibility === "insufficient_audience") {
+      if (items.length >= 100 || payload.hard_block || payload.eligibility === "insufficient_audience" || payload.eligibility === "invalid_bot") {
         return;
       }
       items.push({
@@ -589,7 +596,6 @@
     syncHidden();
 
     items.forEach(function (it, idx) {
-      if (it.eligibility === "eligible" && it.verified) return;
       if (!resolveUrl) return;
       fetch(resolveUrl + "?username=" + encodeURIComponent(it.username), { credentials: "same-origin" })
         .then(function (r) {
@@ -597,7 +603,9 @@
         })
         .then(function (j) {
           if (!j || !j.username) return;
-          items[idx] = {
+          var currentIndex = items.indexOf(it);
+          if (currentIndex < 0) return;
+          items[currentIndex] = {
             username: normalize(j.username || it.username),
             eligibility: j.eligibility || it.eligibility,
             message_fa: j.message_fa || it.message_fa,

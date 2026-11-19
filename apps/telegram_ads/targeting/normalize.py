@@ -31,10 +31,23 @@ def parse_bot_peer_input(value: str) -> tuple[str | None, str | None]:
 
     ``api_peer`` is passed to telead as ``@username`` (official API format).
     """
-    at = normalize_username(value)
-    if not at or not re.fullmatch(r"@[A-Za-z0-9_]{4,32}", at):
-        return None, None
-    return at, at
+    raw = str(value or "").strip()
+    direct = re.fullmatch(r"@?([A-Za-z0-9_]{3,32})", raw)
+    if direct:
+        at = "@" + direct.group(1)
+        return at, at
+    try:
+        parsed = urlparse(raw if "://" in raw else "https://" + raw)
+        if (parsed.scheme not in {"http", "https"} or parsed.hostname not in {"t.me", "telegram.me"}
+                or parsed.username or parsed.password or parsed.port):
+            return None, None
+        name = re.fullmatch(r"/([A-Za-z0-9_]{3,32})/?", parsed.path)
+        if name:
+            at = "@" + name.group(1)
+            return at, at
+    except ValueError:
+        pass
+    return None, None
 
 
 def normalize_search_query(value: str) -> str:
