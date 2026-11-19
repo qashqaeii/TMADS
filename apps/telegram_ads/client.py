@@ -285,6 +285,23 @@ class TelegramAdsClient:
     def get_audiences(self, *, offset=0, limit=50, account_id=None):
         return self._run("audiences_list", lambda c: _model_to_dict(c.get_audiences_list(offset=offset,limit=limit,account_id=account_id)))
 
+    def get_audiences_by_ids(self, ids, *, account_id=None):
+        return self._run("audiences_by_ids",
+            lambda c: [_model_to_dict(item) for item in c.get_audiences_by_id(ids, account_id=account_id)])
+
+    def edit_audience_hashes(self, *, account_id, audience_id, action, hashes):
+        if not account_id or not (settings.TELEGRAM_ADS_WRITE_ENABLED
+                and settings.TELEGRAM_ADS_PAID_SUBMISSION_ENABLED
+                and getattr(settings, "TELEGRAM_ADS_CUSTOMER_ASSETS_ENABLED", False)):
+            raise TelegramAdsWriteDisabled("Audience management is disabled")
+        if action not in {"add", "remove"} or not 1 <= len(hashes) <= 10000:
+            raise ValueError("Invalid audience operation")
+        field = "add_phones" if action == "add" else "remove_phones"
+        return self._run("audience_hash_update",
+            lambda c: _model_to_dict(c.edit_audience(
+                audience_id, account_id=account_id, **{field: hashes},
+            )))
+
     def get_pixel_info(self, *, account_id=None):
         return self._run("pixel_info", lambda c: _model_to_dict(c.get_pixel(account_id=account_id)))
 

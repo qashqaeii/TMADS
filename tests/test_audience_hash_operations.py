@@ -1,0 +1,52 @@
+"""No phone numbers in persistence; exact identity and opt-in gates."""
+from unittest.mock import patch
+
+import pytest
+from django.utils import timezone
+from apps.telegram_ads.models import RelatedAccountRequest, AccountAssetOperation
+from apps.telegram_ads.services.customer_assets import _sha256_list, change_audience_contacts
+
+
+def test_only_sha256_values_are_accepted():
+    assert _sha256_list(("a"*64+"\n"+"b"*64)) == ["a"*64,"b"*64]
+    for value in ["+989123456789", "0123456789", "a"*64+"\n"+"a"*64, "x"*64]:
+        with pytest.raises(ValueError):
+            _sha256_list(value)
+
+
+@pytest.mark.django_db
+def test_no_contact_upload_when_gated(customer_user, settings):
+    row=RelatedAccountRequest.objects.create(customer=customer_user.customer_profile,
+        status="provisioned", title="Example", consent_at=timezone.now(),
+        main_account_id="main", remote_account_id="child")
+    settings.TELEGRAM_ADS_CUSTOMER_ASSETS_ENABLED = False
+    with patch("apps.telegram_ads.services.customer_assets.TelegramAdsClient") as api:
+        with pytest.raises(ValueError):
+            change_audience_contacts(customer_user, {
+                "action":"add", "audience_id":"1", "sha256_list":"a"*64,
+                "consent":"on", "data_rights":"on",
+            })
+        api.assert_not_called()
+
+
+@pytest.mark.django_db
+def test_successful_audience_edit_persists_only_metadata(customer_user):
+    from apps.telegram_ads.services.customer_assets import issue_nonce
+    row=RelatedAccountRequest.objects.create(customer=customer_user.customer_profile,
+        status="provisioned", title="Example", consent_at=timezone.now(),
+        main_account_id="main", remote_account_id="child")
+    secret_hash="a"*64
+    with patch("apps.telegram_ads.services.customer_assets.enabled", return_value=True), patch(
+        "apps.telegram_ads.services.customer_assets.verified_client"
+    ) as verified:
+        verified.return_value.get_audiences_by_ids.return_value=[{"audience_id":17}]
+        verified.return_value.edit_audience_hashes.return_value={"audience_id":17}
+        op=change_audience_contacts(customer_user,{
+            "action":"add","audience_id":"17","sha256_list":secret_hash,
+            "consent":"on","data_rights":"on","nonce":issue_nonce(row),
+        })
+        assert op.state == "executing" or op.state == "completed"
+        op.refresh_from_db()
+        assert op.state == "completed"
+        assert secret_hash not in str(op.__dict__)
+        verified.return_value.edit_audience_hashes.assert_called_once()

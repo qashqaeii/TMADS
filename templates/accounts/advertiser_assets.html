@@ -20,7 +20,27 @@
 <label><input type="checkbox" name="consent" required> ایجاد منبع در حساب اختصاصی تلگرام را تأیید می‌کنم.</label><button class="btn btn-primary" type="submit">ایجاد {% if section == 'audiences' %}گروه خالی{% elif section == 'pixel' %}پیکسل{% else %}رویداد{% endif %}</button></form>
 {% elif unresolved %}<p class="ui-studio-warning">یک عملیات نیازمند بررسی است؛ ایجاد مجدد مسدود است.</p>{% else %}<p class="ui-studio-warning">ایجاد زنده تا تأیید مجوز و فعال‌سازی قابلیت غیرفعال است.</p>{% endif %}
 </section>
-<section class="card card-pad form-stack"><h2 class="section-title">تاریخچه ایجاد منابع</h2>{% for op in operations %}<div class="finance-line"><span>{{ op.action }} · {{ op.created_at|date:"Y-m-d H:i" }}</span><span class="status {% if op.state == 'completed' %}status-active{% else %}status-warn{% endif %}">{% if op.state == 'completed' %}شناسه دریافت شد{% else %}نیازمند بررسی{% endif %}</span></div>{% empty %}<p class="muted">هنوز عملیاتی ثبت نشده است.</p>{% endfor %}</section>
+{% if section == 'audiences' %}
+<section class="card card-pad form-stack ui-audience-editor">
+  <div class="ui-form-intro"><span class="ui-target-symbol">{% include "includes/lucide_icon.html" with name="users" size="md" %}</span><div><h2>مدیریت اعضای مخاطبان اختصاصی</h2><p>فقط هش SHA-256 و حساب متعلق به شما؛ هیچ شماره خامی در TMADS ذخیره نمی‌شود.</p></div></div>
+  {% if enabled and not unresolved %}
+  <form method="post" action="{% url 'accounts:audience_update' %}" class="form-stack">{% csrf_token %}
+    <input type="hidden" name="nonce" value="{{ nonce }}">
+    <div class="field"><label for="audience-id">شناسه گروه مخاطب</label><input id="audience-id" name="audience_id" inputmode="numeric" pattern="[0-9]+" maxlength="10" required autocomplete="off" placeholder="شناسه گروه در حساب خودتان"></div>
+    <div class="field"><label for="audience-mode">نوع تغییر</label><select id="audience-mode" name="action"><option value="add">افزودن اعضا</option><option value="remove">حذف اعضا (درخواست عدم استفاده)</option></select></div>
+    <div class="field"><label for="audience-hashes">هش‌های SHA-256 — هر سطر یک هش</label>
+      <textarea id="audience-hashes" name="sha256_list" rows="6" maxlength="650000" dir="ltr" spellcheck="false" autocomplete="off" required placeholder="64 hex characters per line" aria-describedby="audience-hash-help"></textarea>
+      <p id="audience-hash-help" class="field-help">حداکثر ۱۰٬۰۰۰ هش یکتا در هر درخواست. الگوریتم استانداردسازی شماره پیش از هش‌کردن باید با داده‌های تلگرام سازگار باشد؛ هش‌کردن به معنی ناشناس‌شدن کامل اطلاعات نیست.</p>
+    </div>
+    <label class="choice-card"><input type="checkbox" name="data_rights" required> برای پردازش این داده‌ها مبنای قانونی و رضایت لازم دارم.</label>
+    <label class="choice-card"><input type="checkbox" name="consent" required> تغییر گروه مخاطبان در حساب اختصاصی خود را تأیید می‌کنم.</label>
+    <button class="btn btn-primary" type="submit" data-confirm-title="ویرایش مخاطبان" data-confirm-message="هش‌های واردشده به تلگرام ارسال می‌شوند؛ اگر نتیجه نامشخص شود، تکرار خودکار انجام نمی‌شود." data-confirm-label="تأیید و ارسال" data-confirm-tone="primary">ثبت تغییر مخاطبان</button>
+  </form>
+  {% elif unresolved %}<p class="ui-studio-warning">عملیات قبلی نیازمند تطبیق است و ارسال دوباره موقتاً مسدود شده است.</p>
+  {% else %}<p class="ui-studio-warning">مدیریت اعضای مخاطبان تا فعال‌شدن مجوز API و حساب اختصاصی غیرفعال است.</p>{% endif %}
+</section>
+{% endif %}
+<section class="card card-pad form-stack"><h2 class="section-title">تاریخچه عملیات منابع</h2>{% for op in operations %}<div class="finance-line"><span>{{ op.action }} · {{ op.created_at|date:"Y-m-d H:i" }}</span><span class="status {% if op.state == 'completed' %}status-active{% else %}status-warn{% endif %}">{% if op.state == 'completed' %}شناسه دریافت شد{% else %}نیازمند بررسی{% endif %}</span></div>{% empty %}<p class="muted">هنوز عملیاتی ثبت نشده است.</p>{% endfor %}</section>
 {% endif %}
 </div>
 {% endblock %}
