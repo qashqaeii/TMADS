@@ -1,4 +1,5 @@
 """Explicit operator recovery for redirected payments; dry run by default."""
+from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand, CommandError
 from apps.finance.models import Payment
 from apps.finance.zibal_views import verify_zibal
@@ -14,7 +15,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         try:
             payment = Payment.objects.get(pk=options["payment_id"], gateway="zibal", order__isnull=True)
-        except (Payment.DoesNotExist, ValueError):
+        except (Payment.DoesNotExist, ValueError, ValidationError):
             raise CommandError("Unknown Zibal top-up.")
         self.stdout.write(f"{payment.pk}: {payment.status}")
         if not options["apply"]:
