@@ -50,7 +50,9 @@ def test_pay_from_wallet_moves_to_pending_review_and_invoice(client, customer_us
     _create_quote(campaign)
     client.login(username=customer_user.username, password="pass1234")
     url = reverse("campaigns:wizard", kwargs={"campaign_id": campaign.id})
-    client.post(url, {"action": "pay", "terms_accepted": "1"})
+    from apps.finance.models import AdvertisingOrder
+    quote = AdvertisingOrder.objects.get(campaign_id=campaign.id).quote
+    client.post(url, {"action": "pay", "terms_accepted": "1", "quote_nonce": quote.payload["quote_nonce"]})
     campaign.refresh_from_db()
     assert campaign.status == Campaign.Status.PENDING_REVIEW
     assert Invoice.objects.filter(customer=customer_user.customer_profile).exists()

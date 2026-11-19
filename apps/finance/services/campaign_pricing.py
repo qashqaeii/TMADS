@@ -40,8 +40,8 @@ def build_campaign_quote(advertising_budget_irr: int) -> dict:
 
     rate_info = effective_rate_for_ton(est_ton, snapshot=snapshot)
     effective_rate = rate_info["effective_rate_irr"]
-    if rate_info.get("liquidity_limited") and rate_info["rate_type"] == "best_ask":
-        pass
+    if rate_info.get("liquidity_limited"):
+        raise InsufficientLiquidityError("عمق بازار یا نرخ قطعی در دسترس نیست؛ دوباره تلاش کنید.")
     if rate_info["rate_type"] == "vwap" and rate_info.get("total_irr_for_ton"):
         advertising_cost = ceil_irr(rate_info["total_irr_for_ton"])
     else:

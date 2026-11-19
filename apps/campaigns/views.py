@@ -1,10 +1,12 @@
 import copy
 import csv
 import json
+import uuid
 from decimal import Decimal
 
 from django.contrib import messages
 from django.core.cache import cache
+from django.db import transaction
 from django.db.models import Q
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
@@ -19,7 +21,8 @@ from apps.accounts.permissions import customer_required
 from apps.core.models import AuditLog
 from apps.finance.models import AdvertisingOrder, PriceQuote
 from apps.finance.invoice import issue_invoice_for_order
-from apps.finance.services import calculate_quote_totals, ensure_wallet, reserve_for_order, ton_allocation_for_budget
+from apps.finance.services import calculate_quote_totals, ensure_wallet, reserve_for_order
+from apps.finance.exceptions import PricingError
 from apps.finance.services.ton_equiv import resolve_ton_display_rate
 from apps.notifications.services import notify_customer
 
@@ -292,6 +295,7 @@ def campaign_duplicate(request, campaign_id):
 
 @login_required
 @customer_required
+@transaction.atomic
 def campaign_wizard(request, campaign_id=None):
     customer = request.user.customer_profile
 
@@ -304,6 +308,11 @@ def campaign_wizard(request, campaign_id=None):
         return redirect("campaigns:wizard", campaign_id=campaign.id)
 
     campaign = get_customer_campaign(customer, campaign_id)
+    if request.method == "POST":
+        campaign = Campaign.objects.select_for_update().get(pk=campaign.pk)
+    if not _campaign_editable(campaign):
+        messages.info(request, "این کمپین ثبت شده و قابل ویرایش در استودیو نیست. برای ساخت نسخه جدید از کپی کمپین استفاده کنید.")
+        return redirect("campaigns:detail", campaign_id=campaign.id)
     migrate_campaign_to_studio(campaign)
     step = ensure_studio_step(campaign)
     campaign.wizard_step = step
@@ -311,6 +320,13 @@ def campaign_wizard(request, campaign_id=None):
 
     if request.method == "POST":
         action = request.POST.get("action", "next")
+        if action == "refresh_quote" and step == max_step:
+            try:
+                _create_quote(campaign)
+                messages.success(request, "پیش‌فاکتور جدید آماده است. مبلغ را بررسی و سپس پرداخت کنید.")
+            except PricingError as exc:
+                messages.error(request, str(exc))
+            return redirect("campaigns:wizard", campaign_id=campaign.id)
         strict_next = action == "next"
         errors = validate_studio_step(campaign, step, request.POST, strict=strict_next)
         if not errors:
@@ -349,8 +365,11 @@ def campaign_wizard(request, campaign_id=None):
                             if finding.severity == FindingSeverity.BLOCKED:
                                 messages.error(request, finding.message_fa)
                     else:
-                        if campaign.status == Campaign.Status.DRAFT:
-                            _create_quote(campaign)
+                        if request.POST.get("terms_accepted") != "1":
+                            messages.error(request, "پذیرش قوانین برای پرداخت الزامی است.")
+                            return redirect("campaigns:wizard", campaign_id=campaign.id)
+                        if not _handle_payment_submission(request, campaign):
+                            return redirect("campaigns:wizard", campaign_id=campaign.id)
                         acceptance = (
                             "مشتری تأیید می‌کند حق تبلیغ مقصد را دارد، محتوا دقیق است، "
                             "بررسی نهایی با تلگرام است و تأیید TMADS تضمین نمایش نیست."
@@ -360,7 +379,6 @@ def campaign_wizard(request, campaign_id=None):
                             request=request,
                             acceptance_text=acceptance,
                         )
-                        _handle_payment_submission(request, campaign)
                         CampaignPolicyPreflight(campaign).run(
                             strict=True,
                             context="post_payment",
@@ -371,7 +389,10 @@ def campaign_wizard(request, campaign_id=None):
                 campaign.wizard_step = step + 1
                 campaign.save(update_fields=["wizard_step", "updated_at"])
                 if step == 4:
-                    _create_quote(campaign)
+                    try:
+                        _create_quote(campaign)
+                    except PricingError as exc:
+                        messages.error(request, str(exc))
             else:
                 messages.info(request, "تغییرات ذخیره شد.")
 
@@ -382,9 +403,14 @@ def campaign_wizard(request, campaign_id=None):
         _apply_creative_template(campaign, template_id)
 
     quote = None
-    order = AdvertisingOrder.objects.filter(campaign_id=campaign.id).first()
+    order = AdvertisingOrder.objects.filter(campaign_id=campaign.id, customer=customer).first()
     if order and hasattr(order, "quote"):
         quote = order.quote
+    quote_ready = bool(order and _quote_valid(campaign, order, quote))
+    quote_totals = (
+        quote.payload if step == max_step and quote_ready
+        else calculate_quote_totals(campaign.budget_irr) if step == 4 and campaign.budget_irr else None
+    )
 
     creative = campaign.creatives.first()
     wallet = ensure_wallet(customer)
@@ -442,7 +468,8 @@ def campaign_wizard(request, campaign_id=None):
         "studio_feedback": validation_preview,
         "dry_run_preview": dry_run,
         "quote": quote,
-        "quote_totals": calculate_quote_totals(campaign.budget_irr) if campaign.budget_irr else None,
+        "quote_totals": quote_totals,
+        "quote_ready": quote_ready,
         "creative_templates": CREATIVE_TEMPLATES,
         "creative": creative,
         "wallet": wallet,
@@ -477,9 +504,13 @@ def campaign_wizard(request, campaign_id=None):
 @login_required
 @customer_required
 @require_POST
+@transaction.atomic
 def campaign_autosave(request, campaign_id):
     customer = request.user.customer_profile
     campaign = get_customer_campaign(customer, campaign_id)
+    campaign = Campaign.objects.select_for_update().get(pk=campaign.pk)
+    if not _campaign_editable(campaign):
+        return JsonResponse({"ok": False, "message": "این کمپین دیگر قابل ویرایش نیست."}, status=409)
     migrate_campaign_to_studio(campaign)
     client_revision = request.POST.get("draft_revision")
     if client_revision is not None:
@@ -495,10 +526,12 @@ def campaign_autosave(request, campaign_id):
                     },
                     status=409,
                 )
-        except ValueError:
-            pass
+        except (TypeError, ValueError):
+            return JsonResponse({"ok": False, "message": "نسخه پیش‌نویس نامعتبر است."}, status=400)
 
     step = ensure_studio_step(campaign)
+    if request.POST.get("studio_step") not in (None, str(step)):
+        return JsonResponse({"ok": False, "conflict": True, "message": "مرحله تغییر کرده است؛ صفحه را تازه کنید."}, status=409)
     apply_studio_step(campaign, step, request.POST, files=request.FILES)
     campaign.wizard_data = {**campaign.wizard_data, **studio_payload_from_post(request.POST)}
     campaign.draft_revision += 1
@@ -602,28 +635,55 @@ def _targeting_from_post(data) -> dict:
     }
 
 
+def _campaign_editable(campaign):
+    if campaign.status not in {Campaign.Status.DRAFT, Campaign.Status.AWAITING_PAYMENT}:
+        return False
+    if campaign.remote_ads.exclude(remote_ad_id="").exists():
+        return False
+    return not AdvertisingOrder.objects.filter(
+        campaign_id=campaign.id,
+    ).exclude(status__in=[AdvertisingOrder.Status.DRAFT, AdvertisingOrder.Status.AWAITING_PAYMENT]).exists()
+
+
+def _quote_valid(campaign, order, quote):
+    if not quote or order.status != AdvertisingOrder.Status.AWAITING_PAYMENT:
+        return False
+    payload = quote.payload or {}
+    return bool(
+        order.total_irr > 0 and order.ton_allocation > 0
+        and order.quote_expires_at and order.quote_expires_at > timezone.now()
+        and quote.expires_at > timezone.now()
+        and quote.locked_total_irr == order.total_irr
+        and payload.get("quote_status") == "locked"
+        and payload.get("quote_nonce")
+        and payload.get("requested_budget_irr") == campaign.budget_irr
+        and payload.get("requested_daily_cap_irr") == campaign.daily_cap_irr
+        and str(order.ton_allocation) == str(Decimal(str(payload.get("ton_allocation", "0"))).quantize(Decimal("0.000000001")))
+    )
+
+
+@transaction.atomic
 def _create_quote(campaign: Campaign) -> None:
     from datetime import datetime
-
-    from apps.finance.exceptions import InsufficientLiquidityError, PricingError
     from apps.finance.services.campaign_pricing import build_campaign_quote
 
-    try:
-        totals = build_campaign_quote(campaign.budget_irr)
-    except (PricingError, InsufficientLiquidityError):
-        totals = calculate_quote_totals(campaign.budget_irr)
-
-    exp_raw = totals.get("expires_at")
-    if exp_raw:
-        quote_expires = datetime.fromisoformat(str(exp_raw).replace("Z", "+00:00"))
-        if timezone.is_naive(quote_expires):
-            quote_expires = timezone.make_aware(quote_expires)
-    else:
-        quote_expires = timezone.now() + timezone.timedelta(seconds=300)
-
-    ton = Decimal(str(totals.get("ton_allocation") or 0))
-    if not ton:
-        ton = ton_allocation_for_budget(totals["advertising_budget_irr"])
+    if not _campaign_editable(campaign):
+        raise PricingError("سفارش ثبت‌شده قابل بازقیمت‌گذاری نیست.")
+    totals = build_campaign_quote(campaign.budget_irr)
+    if totals.get("quote_status") != "locked":
+        raise PricingError("نرخ معتبر برای ساخت پیش‌فاکتور در دسترس نیست.")
+    totals = {
+        **totals,
+        "quote_nonce": uuid.uuid4().hex,
+        "requested_budget_irr": campaign.budget_irr,
+        "requested_daily_cap_irr": campaign.daily_cap_irr,
+    }
+    quote_expires = datetime.fromisoformat(str(totals["expires_at"]).replace("Z", "+00:00"))
+    if timezone.is_naive(quote_expires):
+        quote_expires = timezone.make_aware(quote_expires)
+    ton = Decimal(str(totals["ton_allocation"]))
+    if ton <= 0 or totals["total_irr"] <= 0:
+        raise PricingError("مبلغ پیش‌فاکتور معتبر نیست.")
 
     rate_id = totals.get("exchange_rate_id")
     order, _ = AdvertisingOrder.objects.update_or_create(
@@ -664,18 +724,22 @@ def _create_quote(campaign: Campaign) -> None:
     )
 
 
-def _handle_payment_submission(request, campaign: Campaign) -> None:
-    order = AdvertisingOrder.objects.filter(campaign_id=campaign.id).first()
-    if not order:
-        messages.error(request, "سفارش یافت نشد.")
-        return
-    if order.quote_expires_at and order.quote_expires_at < timezone.now():
-        messages.error(request, "اعتبار پیش‌فاکتور منقضی شده است. به مرحله بازبینی برگردید.")
-        return
-    quote = getattr(order, "quote", None)
-    if quote and quote.locked_total_irr != order.total_irr:
-        messages.error(request, "پیش‌فاکتور با سفارش هم‌خوانی ندارد. دوباره بازبینی کنید.")
-        return
+@transaction.atomic
+def _handle_payment_submission(request, campaign: Campaign) -> bool:
+    campaign = Campaign.objects.select_for_update().get(pk=campaign.pk)
+    if not _campaign_editable(campaign):
+        messages.error(request, "این سفارش قبلاً ثبت شده یا در وضعیت قابل پرداخت نیست.")
+        return False
+    order = AdvertisingOrder.objects.select_for_update().filter(
+        campaign_id=campaign.id, customer=campaign.customer,
+    ).first()
+    quote = getattr(order, "quote", None) if order else None
+    if not order or not _quote_valid(campaign, order, quote):
+        messages.error(request, "پیش‌فاکتور معتبر نیست یا منقضی شده؛ ابتدا آن را به‌روزرسانی کنید.")
+        return False
+    if request.POST.get("quote_nonce") != quote.payload.get("quote_nonce"):
+        messages.error(request, "مبلغ پیش‌فاکتور تغییر کرده؛ صفحه را تازه و دوباره بررسی کنید.")
+        return False
 
     wallet = ensure_wallet(campaign.customer)
     try:
@@ -687,7 +751,7 @@ def _handle_payment_submission(request, campaign: Campaign) -> None:
         )
     except ValueError as exc:
         messages.error(request, str(exc))
-        return
+        return False
 
     order.status = AdvertisingOrder.Status.PAID
     order.save(update_fields=["status", "updated_at"])
@@ -716,6 +780,7 @@ def _handle_payment_submission(request, campaign: Campaign) -> None:
         related_campaign_id=campaign.id,
     )
     messages.success(request, "پرداخت تأیید شد. سفارش در صف بررسی قرار گرفت.")
+    return True
 
 
 @login_required

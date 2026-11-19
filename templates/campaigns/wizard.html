@@ -20,6 +20,7 @@
           data-resolve-channel="{% url 'campaigns:catalog_resolve_channel' %}">
       {% csrf_token %}
       <input type="hidden" name="draft_revision" value="{{ campaign.draft_revision }}">
+      <input type="hidden" name="studio_step" value="{{ step }}">
 
       <fieldset class="studio-mode-toggle" aria-label="حالت ساخت تبلیغ">
         <legend class="sr-only">حالت ساخت</legend>
@@ -285,10 +286,22 @@
         </div>
         {% endif %}
       </div>
-      {% if quote_totals %}
-      <article class="card card-pad card-muted studio-finance-card">
-        <h3 class="section-title" style="font-size:.95rem;margin:0 0 .65rem">پرداخت و رزرو</h3>
-        <div class="finance-line"><span>مبلغ رزرو (شامل کارمزد)</span><strong class="tabnums">{{ quote_totals.total_irr|irr_to_toman|format_irr }} تومان</strong></div>
+      {% if quote_ready %}
+      <input type="hidden" name="quote_nonce" value="{{ quote.payload.quote_nonce }}">
+      <article class="card card-pad card-muted studio-finance-card" aria-label="پیش‌فاکتور معتبر">
+        <h3 class="section-title" style="font-size:.95rem;margin:0 0 .65rem">پیش‌فاکتور قطعی</h3>
+        <div class="finance-line"><span>بودجه تبلیغ</span><strong class="tabnums">{{ quote_totals.advertising_budget_irr|irr_to_toman|format_irr }} تومان</strong></div>
+        <div class="finance-line"><span>کارمزد</span><strong class="tabnums">{{ quote_totals.service_fee_irr|irr_to_toman|format_irr }} تومان</strong></div>
+        {% if quote_totals.risk_buffer_irr %}<div class="finance-line"><span>ذخیره ریسک نرخ</span><strong class="tabnums">{{ quote_totals.risk_buffer_irr|irr_to_toman|format_irr }} تومان</strong></div>{% endif %}
+        <div class="finance-line"><span>اعتبار خریداری‌شده</span><strong dir="ltr">{{ quote_totals.ton_allocation }} TON</strong></div>
+        <div class="finance-line"><span>مبلغ قابل پرداخت</span><strong class="tabnums">{{ quote_totals.total_irr|irr_to_toman|format_irr }} تومان</strong></div>
+        <p class="muted studio-hint">اعتبار پیش‌فاکتور تا {{ quote.expires_at|jalali_datetime }} است.</p>
+      </article>
+      {% else %}
+      <article class="card card-pad card-muted studio-finance-card" role="status">
+        <h3 class="section-title">پیش‌فاکتور نیازمند به‌روزرسانی</h3>
+        <p class="muted">برای پرداخت، ابتدا نرخ و مبلغ قطعی را دریافت و بررسی کنید. تا آن زمان از کیف پول کسر نمی‌شود.</p>
+        <button name="action" value="refresh_quote" type="submit" formnovalidate class="btn btn-primary">دریافت پیش‌فاکتور جدید</button>
       </article>
       {% endif %}
       {% if wallet %}<p class="muted studio-hint">موجودی کیف پول: <strong class="tabnums">{{ wallet.available_irr|irr_to_toman|format_irr }} تومان</strong></p>{% endif %}
@@ -312,10 +325,10 @@
       </p>
 
       <div class="hero-actions studio-actions-bar">
-        {% if step > 1 %}<button class="btn btn-ghost" name="action" value="back" type="submit">قبلی</button>{% endif %}
-        <button class="btn btn-ghost" name="action" value="save_draft" type="submit">ذخیره پیش‌نویس</button>
+        {% if step > 1 %}<button class="btn btn-ghost" name="action" value="back" type="submit" formnovalidate>قبلی</button>{% endif %}
+        <button class="btn btn-ghost" name="action" value="save_draft" type="submit" formnovalidate>ذخیره پیش‌نویس</button>
         {% if step == 5 %}
-          <button class="btn btn-primary" name="action" value="pay" type="submit">تأیید و پرداخت</button>
+          <button class="btn btn-primary" name="action" value="pay" type="submit" {% if not quote_ready %}disabled{% endif %}>تأیید و پرداخت</button>
           <button class="btn btn-ghost" name="action" value="next" type="submit">فقط ذخیره بازبینی</button>
         {% elif step < 5 %}
           <button class="btn btn-primary" name="action" value="next" type="submit">بعدی</button>
