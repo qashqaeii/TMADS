@@ -3,11 +3,11 @@
 {% block page_title %}فاکتورها{% endblock %}
 {% block container_class %}container-wide{% endblock %}
 {% block content %}
-<div class="app-stack finance-page ui-finance">
+<div class="app-stack finance-page ui-finance ga-invoices-workspace">
 {% url 'finance:wallet' as wallet_url %}
 {% include "includes/dash_header.html" with page_icon="file-text" eyebrow="مالی" title="فاکتورها" action_url=wallet_url action_label="کیف پول" %}
+<article class="ga-panel ga-data-panel"><header class="ga-panel-head"><div class="ga-panel-title"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="file-text" %}</span><div><h2>فاکتورهای حساب</h2><p>سوابق مالی و رسیدهای قابل پیگیری</p></div></div><small class="muted">{{ invoices|length|format_count }} فاکتور</small></header>
 {% if invoices %}
-<article class="card table-card card--lift">
   <div class="table-wrap" tabindex="0" role="region" aria-label="فاکتورهای حساب">
     <table class="data-table ui-finance-table">
       <caption class="sr-only">فاکتورهای حساب</caption>
@@ -15,7 +15,7 @@
       <tbody>
       {% for inv in invoices %}
       <tr>
-        <td dir="ltr"><a href="{% url 'finance:invoice_detail' inv.id %}">{{ inv.invoice_number }}</a></td>
+        <td><div class="ga-row-identity"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="file-text" %}</span><div><strong><a href="{% url 'finance:invoice_detail' inv.id %}"><bdi>{{ inv.invoice_number }}</bdi></a></strong></div></div></td>
         <td>{{ inv.description|default:"—" }}</td>
         <td class="tabnums">{{ inv.amount_irr|irr_to_toman|format_irr }} تومان</td>
         <td><time datetime="{{ inv.created_at|date:'c' }}">{{ inv.created_at|jalali_datetime }}</time></td><td><a class="btn btn-ghost btn-sm" href="{% url 'finance:invoice_detail' inv.id %}">مشاهده</a></td>
@@ -24,11 +24,9 @@
       </tbody>
     </table>
   </div>
-</article>
 {% else %}
-<article class="card card--lift">
   <div class="ui-empty"><span class="ui-empty__icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="receipt" size="md" %}</span><h2>فاکتوری ثبت نشده</h2><p>پس از شارژ یا پرداخت کمپین، فاکتور اینجا نمایش داده می‌شود.</p></div>
-</article>
 {% endif %}
+</article>
 </div>
 {% endblock %}

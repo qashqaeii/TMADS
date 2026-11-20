@@ -3,11 +3,11 @@
 {% block page_title %}بازپرداخت{% endblock %}
 {% block container_class %}container-wide{% endblock %}
 {% block content %}
-<div class="app-stack finance-page ui-finance">
+<div class="app-stack finance-page ui-finance ga-refunds-workspace">
 {% include "includes/dash_header.html" with page_icon="refresh-cw" eyebrow="مالی" title="بازپرداخت" %}
-<div class="ui-finance-flow"><section class="card card-pad form-stack">
-  <div class="ui-form-intro"><span class="ui-target-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="rotate-ccw" size="md" %}</span><div><h2>ثبت درخواست بازپرداخت</h2><p>سفارش واجد شرایط و دلیل درخواست را مشخص کنید.</p></div></div>
-  <form method="post" class="form-stack finance-form">{% csrf_token %}
+<div class="ga-split"><section class="ga-panel">
+  <header class="ga-panel-head"><div class="ga-panel-title"><span class="ui-target-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="rotate-ccw" size="md" %}</span><div><h2>ثبت درخواست بازپرداخت</h2><p>سفارش واجد شرایط و دلیل درخواست را مشخص کنید.</p></div></div></header>
+  <form method="post" class="finance-form">{% csrf_token %}<div class="ga-panel-body form-stack">
     <div class="field">
       <label for="refund-order">سفارش</label>
       <select id="refund-order" name="order_id" required>
@@ -20,12 +20,11 @@
       </select>
     </div>
     <div class="field"><label for="refund-reason">دلیل درخواست</label><textarea id="refund-reason" name="reason" rows="3" required></textarea></div>
-    <button class="btn btn-primary" type="submit" {% if not order_choices %}disabled{% endif %}>ثبت درخواست</button>
-    {% if not order_choices %}<p class="field-help">در حال حاضر سفارش واجد شرایط بازپرداخت ندارید.</p>{% endif %}
+    {% if not order_choices %}<p class="ga-inline-note">{% include "includes/gramads_workspace_icon.html" with name="info" %}<span>در حال حاضر سفارش واجد شرایط بازپرداخت ندارید.</span></p>{% endif %}</div><footer class="ga-panel-foot"><small class="muted">ثبت درخواست به معنی تأیید نیست.</small><button class="btn btn-primary" type="submit" {% if not order_choices %}disabled{% endif %}>ثبت درخواست</button></footer>
   </form>
-</section><aside class="card card-pad ui-finance-guide"><h2 class="section-title">شرایط بازپرداخت</h2><p>درخواست پس از بررسی وضعیت سفارش و اعتبار رزروشده تصمیم‌گیری می‌شود. ثبت درخواست به معنی تأیید بازپرداخت نیست.</p><a href="{% url 'support:list' %}">ارتباط با پشتیبانی</a></aside></div>
-<section class="card card--lift table-card">
-  <h2 class="section-title card-pad" style="padding-bottom:0">درخواست‌های من</h2>
+</section><aside class="ga-panel"><header class="ga-panel-head"><h2>روند بررسی بازپرداخت</h2></header><div class="ga-panel-body"><ol class="ga-steps"><li><span>۱</span><div><strong>ثبت درخواست</strong><p>انتخاب سفارش واجد شرایط و ثبت دلیل.</p></div></li><li><span>۲</span><div><strong>بررسی مالی</strong><p>وضعیت سفارش و اعتبار رزروشده بررسی می‌شود.</p></div></li><li><span>۳</span><div><strong>اعلام نتیجه</strong><p>وضعیت نهایی را در فهرست درخواست‌ها دنبال کنید.</p></div></li></ol></div><footer class="ga-panel-foot"><a href="{% url 'support:list' %}">ارتباط با پشتیبانی</a></footer></aside></div>
+<section class="ga-panel ga-data-panel">
+  <header class="ga-panel-head"><div class="ga-panel-title"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="refresh-cw" %}</span><h2>درخواست‌های من</h2></div><small class="muted">{{ refunds|length|format_count }} درخواست</small></header>
   {% if refunds %}
   <div class="table-wrap" tabindex="0" role="region" aria-label="درخواست‌های بازپرداخت">
     <table class="data-table ui-finance-table">

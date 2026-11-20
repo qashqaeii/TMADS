@@ -4,35 +4,30 @@
 {% block page_title %}کیف پول{% endblock %}
 {% block container_class %}container-wide{% endblock %}
 {% block content %}
-<div class="app-stack finance-page ui-finance pay-wallet">
+<div class="app-stack finance-page ui-finance pay-wallet ga-wallet-workspace">
 {% url 'finance:topup' as topup_url %}
-{% include "includes/dash_header.html" with page_icon="wallet" title="کیف پول" subtitle="مدیریت اعتبار، رزرو و گردش مالی" with_sub=1 %}
-<section class="ui-wallet-layout" aria-label="خلاصه کیف پول">
-  <article class="ui-wallet-feature">
-    <div class="ui-wallet-feature__head"><span>{% include "includes/lucide_icon.html" with name="wallet" size="md" %} موجودی قابل استفاده</span><span class="ui-wallet-currency">تومان</span></div>
-    <strong class="ui-wallet-amount tabnums">{{ wallet.available_irr|irr_to_toman|format_irr }}</strong>
-    <p>اعتبار قابل استفاده برای سفارش تبلیغات</p>
-    <a class="btn btn-primary" href="{% url 'finance:topup' %}">{% include "includes/lucide_icon.html" with name="plus" size="btn" %} شارژ کیف پول</a>
-  </article>
-  <article class="ui-finance-summary">
-    <header><span class="ui-target-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="lock" size="md" %}</span><h2>مبلغ رزروشده</h2></header>
-    <strong class="ui-finance-amount tabnums">{{ wallet.reserved_irr|irr_to_toman|format_irr }} <small>تومان</small></strong>
-    <p>رزرو مربوط به سفارش‌ها؛ با موجودی قابل استفاده متفاوت است.</p>
-    <div class="ui-finance-links"><a href="{% url 'finance:invoices' %}">فاکتورها {% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}</a><a href="{% url 'finance:refunds' %}">بازپرداخت {% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}</a></div>
-  </article>
+{% include "includes/dash_header.html" with page_icon="wallet" title="کیف پول" subtitle="مدیریت اعتبار و گردش مالی" action_url=topup_url action_label="شارژ کیف پول" action_primary=1 %}
+<section class="ga-wallet-summary" aria-label="خلاصه کیف پول">
+  <article class="ga-feature ga-wallet-balance"><div class="ga-feature-head"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="wallet" size="md" %}</span><small>موجودی قابل استفاده</small></div><div class="ga-amount"><bdi>{{ wallet.available_irr|irr_to_toman|format_irr }}</bdi> <span class="ga-unit">تومان</span></div><p>اعتبار قابل استفاده برای ثبت سفارش تبلیغاتی</p><a class="btn btn-primary" href="{{ topup_url }}">{% include "includes/gramads_workspace_icon.html" with name="plus" %} شارژ کیف پول</a></article>
+  <article class="ga-panel ga-wallet-reserved"><div class="ga-panel-body"><div class="ga-panel-title"><span class="ga-symbol">{% include "includes/lucide_icon.html" with name="lock" size="md" %}</span><h2>اعتبار رزروشده</h2></div><div class="ga-wallet-reserved-value ga-amount"><bdi>{{ wallet.reserved_irr|irr_to_toman|format_irr }}</bdi> <span class="ga-unit">تومان</span></div><p class="muted">اعتبار کنار گذاشته‌شده برای سفارش‌ها؛ بخشی از موجودی قابل استفاده نیست.</p></div></article>
+  <nav class="ga-panel ga-wallet-nav" aria-label="دسترسی مالی"><header class="ga-panel-head"><h2>دسترسی مالی</h2></header><div class="ga-panel-body">
+    <a class="ga-link-tile" href="{% url 'finance:transactions' %}"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="credit-card" %}</span><span>تراکنش‌ها</span>{% include "includes/gramads_workspace_icon.html" with name="chevron-left" %}</a>
+    <a class="ga-link-tile" href="{% url 'finance:invoices' %}"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="file-text" %}</span><span>فاکتورها</span>{% include "includes/gramads_workspace_icon.html" with name="chevron-left" %}</a>
+    <a class="ga-link-tile" href="{% url 'finance:refunds' %}"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="refresh-cw" %}</span><span>بازپرداخت</span>{% include "includes/gramads_workspace_icon.html" with name="chevron-left" %}</a>
+  </div></nav>
 </section>
-{% if recent_payments %}<article class="card card-pad pay-history" aria-labelledby="bank-payment-history"><header><div><h2 id="bank-payment-history" class="section-title">پرداخت‌های بانکی اخیر</h2><p class="muted">تلاش‌های شارژ و وضعیت تأیید آنها</p></div><a class="btn btn-ghost btn-sm" href="{% url 'finance:topup' %}">شارژ کیف پول</a></header><ul>{% for payment in recent_payments %}<li><div class="pay-history-amount"><strong><bdi>{{ payment.amount_irr|irr_to_toman|format_irr }}</bdi> تومان</strong><small><time datetime="{{ payment.created_at|date:'c' }}">{{ payment.created_at|jalali_datetime }}</time></small></div><span class="pay-state pay-state--{{ payment.status }}">{% if payment.status == 'redirected' or payment.status == 'created' %}در انتظار تأیید{% else %}{{ payment.get_status_display }}{% endif %}</span><a class="btn btn-ghost btn-sm" href="{% url 'finance:payment_result' payment.id %}">{% if payment.status == 'verified' %}رسید{% else %}پیگیری{% endif %} {% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}</a></li>{% endfor %}</ul></article>{% endif %}
-<article class="card table-card card--lift">
-  <header class="dash-panel__head" style="border-bottom:1px solid var(--border-default)">
-    <div class="dash-panel__title"><h2 class="section-title">تراکنش‌های اخیر</h2></div>
+<div class="ga-wallet-ledgers">{% if recent_payments %}<article class="card card-pad pay-history" aria-labelledby="bank-payment-history"><header><div><h2 id="bank-payment-history" class="section-title">پرداخت‌های بانکی اخیر</h2><p class="muted">تلاش‌های شارژ و وضعیت تأیید آنها</p></div><a class="btn btn-ghost btn-sm" href="{% url 'finance:topup' %}">شارژ کیف پول</a></header><ul>{% for payment in recent_payments %}<li><div class="pay-history-amount"><strong><bdi>{{ payment.amount_irr|irr_to_toman|format_irr }}</bdi> تومان</strong><small><time datetime="{{ payment.created_at|date:'c' }}">{{ payment.created_at|jalali_datetime }}</time></small></div><span class="pay-state pay-state--{{ payment.status }}">{% if payment.status == 'redirected' or payment.status == 'created' %}در انتظار تأیید{% else %}{{ payment.get_status_display }}{% endif %}</span><a class="btn btn-ghost btn-sm" href="{% url 'finance:payment_result' payment.id %}">{% if payment.status == 'verified' %}رسید{% else %}پیگیری{% endif %} {% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}</a></li>{% endfor %}</ul></article>{% endif %}
+<article class="ga-panel ga-data-panel ga-wallet-transactions">
+  <header class="ga-panel-head">
+    <div class="ga-panel-title"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="activity" %}</span><h2>تراکنش‌های اخیر</h2></div>
     <a class="btn btn-ghost btn-sm" href="{% url 'finance:transactions' %}">همه تراکنش‌ها</a>
   </header>
   <ul class="wallet-ledger">
     {% for e in recent_entries %}
-    <li class="finance-line"><span class="finance-entry"><span>{{ e.get_entry_type_display }}</span><time class="muted" datetime="{{ e.created_at|date:'c' }}">{{ e.created_at|jalali_datetime }}</time></span><strong class="tabnums"><bdi>{{ e.amount_irr|irr_to_toman|format_irr }}</bdi> تومان</strong></li>
+    <li class="finance-line"><div class="ga-row-identity"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="wallet" %}</span><div><strong>{{ e.get_entry_type_display }}</strong><small><time datetime="{{ e.created_at|date:'c' }}">{{ e.created_at|jalali_datetime }}</time></small></div></div><strong class="tabnums"><bdi>{{ e.amount_irr|irr_to_toman|format_irr }}</bdi> تومان</strong></li>
     {% empty %}<li><div class="ui-empty"><span class="ui-empty__icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="wallet" size="md" %}</span><h2>تراکنشی ثبت نشده</h2><p>گردش اعتبار پس از ثبت تراکنش در این بخش نمایش داده می‌شود.</p></div></li>{% endfor %}
   </ul>
 
-</article>
+</article></div>
 </div>
 {% endblock %}

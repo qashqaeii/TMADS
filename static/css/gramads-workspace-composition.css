@@ -93,3 +93,28 @@
 .is-app .ga-asset-top .ui-assets-toolbar{border-block:1px solid #eaf0f6;padding-block:10px}
 .is-app .ga-assets-workspace .ui-sensitive-panel summary{font-size:.85rem}
 @media(max-width:800px){.is-app .ga-account-top{grid-template-columns:minmax(0,1fr)}}
+
+/* Finance composition: balances, navigation and ledger independent of payment state. */
+.is-app .ga-wallet-summary{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr) minmax(190px,.78fr);gap:12px;align-items:stretch}
+.is-app .ga-wallet-balance{gap:10px;min-height:196px}
+.is-app .ga-wallet-balance .btn{justify-self:start}
+.is-app .ga-wallet-reserved .ga-panel-body{display:grid;gap:15px;height:100%;align-content:start}
+.is-app .ga-wallet-reserved h2{font-size:.87rem;margin:0}
+.is-app .ga-wallet-reserved .ga-amount{font-size:clamp(1.35rem,2.5vw,2rem);color:#142c46}
+.is-app .ga-wallet-reserved p{font-size:.76rem;line-height:1.8;margin:0}
+.is-app .ga-wallet-nav .ga-panel-body{display:grid;gap:6px;padding:8px}
+.is-app .ga-wallet-nav .ga-panel-head{padding:11px 12px}
+.is-app .ga-wallet-nav .ga-link-tile{padding:6px 8px}
+.is-app .ga-wallet-ledgers{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;align-items:start}
+.is-app .ga-wallet-ledgers:has(.pay-history){grid-template-columns:minmax(0,1fr) minmax(0,1.35fr)}
+.is-app .ga-wallet-transactions .wallet-ledger{padding:0 14px}
+.is-app .ga-wallet-transactions .wallet-ledger .finance-line{gap:9px;padding:10px 0}
+.is-app .ga-wallet-transactions .finance-line>strong{font-size:.84rem;flex-shrink:0}
+.is-app .ga-wallet-transactions .ga-symbol{width:32px;height:32px}
+.is-app .ga-payment-workspace .pay-rail{padding:7px;margin:0;border-radius:12px}
+.is-app .ga-payment-workspace .pay-balance{background:linear-gradient(135deg,#103c77,#1769c5);color:#fff}
+.is-app .ga-payment-workspace .pay-balance :is(strong,small){color:#fff}
+.is-app .ga-payment-workspace .pay-result-card{border-radius:15px}
+.is-app .ga-invoice-workspace .finance-invoice{max-width:760px;margin-inline:auto}
+@media(max-width:1200px){.is-app .ga-wallet-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.is-app .ga-wallet-nav{grid-column:1/-1}.is-app .ga-wallet-nav .ga-panel-body{grid-template-columns:repeat(3,minmax(0,1fr))}.is-app .ga-wallet-ledgers:has(.pay-history){grid-template-columns:minmax(0,1fr)}}
+@media(max-width:600px){.is-app .ga-wallet-summary{grid-template-columns:minmax(0,1fr)}.is-app .ga-wallet-nav .ga-panel-body{grid-template-columns:minmax(0,1fr)}.is-app .ga-wallet-balance{min-height:0}}

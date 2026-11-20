@@ -3,10 +3,10 @@
 {% block page_title %}تراکنش‌ها{% endblock %}
 {% block container_class %}container-wide{% endblock %}
 {% block content %}
-<div class="app-stack finance-page ui-finance">
+<div class="app-stack finance-page ui-finance ga-transactions-workspace">
 {% url 'finance:wallet' as wallet_url %}
 {% include "includes/dash_header.html" with page_icon="credit-card" eyebrow="مالی" title="تراکنش‌ها" action_url=wallet_url action_label="کیف پول" %}
-<article class="card table-card card--lift">
+<article class="ga-panel ga-data-panel"><header class="ga-panel-head"><div class="ga-panel-title"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="activity" %}</span><div><h2>گردش اعتبار</h2><p>تغییرات ثبت‌شده موجودی حساب</p></div></div><small class="muted">{{ entries|length|format_count }} تراکنش</small></header>
   <div class="table-wrap" tabindex="0" role="region" aria-label="تاریخچه تراکنش‌ها">
     <table class="data-table ui-finance-table">
       <caption class="sr-only">تاریخچه تراکنش‌ها</caption>

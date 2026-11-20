@@ -4,7 +4,7 @@
 {% block container_class %}container-wide{% endblock %}
 {% block page_title %}نتیجه پرداخت{% endblock %}
 {% block content %}
-<div class="pay-flow pay-flow--result">
+<div class="pay-flow pay-flow--result ga-payment-workspace">
   {% include "includes/dash_header.html" with page_icon="shield-check" eyebrow="کیف پول" title="نتیجه پرداخت" subtitle="وضعیت درخواست شارژ و جزئیات قابل پیگیری" with_sub=1 %}
   {% if payment.status == 'verified' %}{% include "finance/includes/payment_rail.html" with stage=3 verified=True %}{% else %}{% include "finance/includes/payment_rail.html" with stage=3 %}{% endif %}
   <section class="pay-result-grid" aria-label="نتیجه و جزئیات پرداخت">
@@ -32,7 +32,7 @@
       {% endif %}
       {% if payment.status != 'failed' %}<a class="pay-secondary" href="{% url 'support:create' %}">نیاز به راهنمایی دارید؟</a>{% endif %}
     </article>
-    <aside class="pay-receipt" aria-labelledby="pay-receipt-heading">
+    <aside class="pay-receipt ga-panel" aria-labelledby="pay-receipt-heading">
       <div class="pay-heading"><span class="pay-heading-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="receipt" size="md" %}</span><div><h2 id="pay-receipt-heading">جزئیات تراکنش</h2><p>اطلاعات لازم برای پیگیری</p></div></div>
       <dl>
         <div><dt>وضعیت</dt><dd><span class="pay-state pay-state--{{ payment.status }}">{% if payment.status == 'redirected' or payment.status == 'created' %}در انتظار تأیید{% else %}{{ payment.get_status_display }}{% endif %}</span></dd></div>

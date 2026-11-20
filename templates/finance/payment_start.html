@@ -4,7 +4,7 @@
 {% block container_class %}container-wide{% endblock %}
 {% block page_title %}آماده پرداخت{% endblock %}
 {% block content %}
-<div class="pay-flow pay-flow--handoff">
+<div class="pay-flow pay-flow--handoff ga-payment-workspace">
   {% include "includes/dash_header.html" with page_icon="credit-card" eyebrow="کیف پول" title="انتقال به درگاه پرداخت" subtitle="مبلغ و اطلاعات درخواست را پیش از پرداخت مرور کنید." with_sub=1 %}
   {% include "finance/includes/payment_rail.html" with stage=2 %}
   <section class="pay-result-grid">
@@ -15,7 +15,7 @@
       <a class="btn btn-primary pay-main-action" href="{{ gateway_url }}" referrerpolicy="origin">ورود به درگاه زیبال {% include "includes/lucide_icon.html" with name="arrow-left" size="btn" %}</a>
       <a class="pay-secondary" href="{% url 'finance:payment_result' payment.id %}">مشاهده وضعیت درخواست</a>
     </article>
-    <aside class="pay-receipt"><div class="pay-heading"><span class="pay-heading-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="receipt" size="md" %}</span><div><h2>اطلاعات درخواست</h2><p>جزئیات قبل از پرداخت</p></div></div>
+    <aside class="pay-receipt ga-panel"><div class="pay-heading"><span class="pay-heading-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="receipt" size="md" %}</span><div><h2>اطلاعات درخواست</h2><p>جزئیات قبل از پرداخت</p></div></div>
       <dl><div><dt>درگاه</dt><dd>زیبال</dd></div><div><dt>مبلغ</dt><dd>{{ payment.amount_irr|irr_to_toman|format_irr }} تومان</dd></div><div><dt>شناسه پیگیری درگاه</dt><dd><bdi>{{ payment.provider_reference }}</bdi></dd></div><div><dt>زمان ثبت</dt><dd><time datetime="{{ payment.created_at|date:'c' }}">{{ payment.created_at|jalali_datetime }}</time></dd></div></dl>
       <div class="pay-note"><span aria-hidden="true">{% include "includes/lucide_icon.html" with name="lock" size="sm" %}</span><span>اطلاعات کارت را فقط در صفحه بانکی وارد کنید. اعتبار کیف پول پس از تأیید سمت سرور ثبت می‌شود.</span></div>
       <a class="pay-inline-link" href="{% url 'finance:wallet' %}">بازگشت به کیف پول {% include "includes/lucide_icon.html" with name="arrow-left" size="sm" %}</a>
