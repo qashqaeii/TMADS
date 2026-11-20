@@ -7,6 +7,7 @@ from xml.etree import ElementTree as ET
 from django.conf import settings
 from django.http import HttpResponse, HttpResponseNotFound
 from django.urls import reverse
+from django.templatetags.static import static
 from django.utils.safestring import mark_safe
 
 
@@ -71,7 +72,12 @@ def structured_data(name, canonical):
     graph = []
     if name == "home":
         graph.append({"@type": "WebSite", "@id": site_id, "url": canonical,
-                      "name": settings.PRODUCT_NAME, "alternateName": settings.PRODUCT_NAME_EN, "inLanguage": "fa"})
+                      "name": settings.PRODUCT_NAME, "alternateName": settings.PRODUCT_NAME_EN, "inLanguage": "fa",
+                      "publisher": {"@id": origin + "/#brand"}})
+        logo = static("img/logo/gramads-logo-full.webp")
+        graph.append({"@type": "Organization", "@id": origin + "/#brand",
+                      "name": settings.PRODUCT_NAME, "alternateName": settings.PRODUCT_NAME_EN,
+                      "url": canonical, "logo": logo if logo.startswith("https://") else origin + logo})
     elif name in BREADCRUMB_NAMES:
         graph.append({"@type": "BreadcrumbList", "itemListElement": [
             {"@type": "ListItem", "position": 1, "name": "صفحه اصلی", "item": origin + reverse("public:home")},

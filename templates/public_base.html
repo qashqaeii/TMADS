@@ -4,7 +4,7 @@
 {% block body_class %}is-public public-premium{% block public_page_class %}{% endblock %}{% endblock %}
 {% block body %}
 {% if request.resolver_match.url_name == "login" or request.resolver_match.url_name == "register" %}
-<header class="studio-auth-header"><div class="container studio-auth-nav"><a href="{% url 'public:home' %}" class="brand brand-lockup">{% include "includes/brand_full.html" %}</a><a class="studio-back" href="{% url 'public:home' %}">بازگشت به سایت {% include "includes/lucide_icon.html" with name="arrow-left" size="sm" %}</a></div></header>
+<header class="studio-auth-header"><div class="container studio-auth-nav"><a href="{% url 'public:home' %}" class="brand brand-lockup">{% include "includes/brand_inline.html" %}</a><a class="studio-back" href="{% url 'public:home' %}">بازگشت به سایت {% include "includes/lucide_icon.html" with name="arrow-left" size="sm" %}</a></div></header>
 {% else %}
 <header class="site-header site-header--exec ui-public-header">
   <div
@@ -15,7 +15,7 @@
   >
     <nav class="nav-bar nav-bar--exec public-nav-bar" aria-label="ناوبری اصلی">
       <a href="{% url 'public:home' %}" class="brand brand-lockup">
-        {% include "includes/brand_full.html" %}
+        {% include "includes/brand_inline.html" %}
       </a>
       <div class="nav-links nav-links--desktop">
         <a href="{% url 'public:features' %}" {% if request.resolver_match.namespace == 'public' and request.resolver_match.url_name == 'features' %}aria-current="page"{% endif %}>امکانات</a>
@@ -129,7 +129,7 @@
   {% if request.resolver_match.namespace == "public" and request.resolver_match.url_name == "home" %}<img class="orbit-footer-art" src="{% landing_asset 'orbit-dark' %}" width="1440" height="810" alt="" loading="lazy" decoding="async" data-landing-art>{% elif request.resolver_match.namespace == 'public' and request.resolver_match.url_name == 'features' %}<img class="fx-footer-art" src="{% feature_asset 'features-bg-wave' %}" width="470" height="260" alt="" loading="lazy" decoding="async" data-feature-art="features-bg-wave">{% endif %}
   <div class="container footer-grid footer-grid--rich footer-grid--public">
     <div class="footer-col">
-      <a href="{% url 'public:home' %}" class="brand brand-lockup">{% include "includes/brand_mark.html" %}<span>{{ PRODUCT_NAME }}</span></a>
+      <a href="{% url 'public:home' %}" class="brand brand-lockup gramads-footer-lockup">{% include "includes/brand_full.html" %}<span class="gramads-footer-name">{{ PRODUCT_NAME }}<small>تبلیغات تلگرام</small></span></a>
       <p class="footer-tagline muted">گرام‌ادز؛ محیط فارسی طراحی کمپین، برنامه‌ریزی بودجه و گزارش تبلیغات تلگرام.</p>
     </div>
     <div class="footer-col">

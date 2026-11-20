@@ -7,3 +7,15 @@
 .ui-final .ui-public-footer .gramads-mark{width:42px;height:42px;flex-basis:42px}
 .ui-product-brand .gramads-mark{width:24px;height:24px;flex-basis:24px}
 @media(max-width:560px){.gramads-full{width:112px;height:36px}.gramads-mark{width:34px;height:34px;flex-basis:34px}}
+
+/* The supplied lockup is portrait; never squeeze it into a horizontal slot. */
+.ui-final .brand-lockup .gramads-wordmark{display:grid;gap:2px;line-height:1.1;text-align:start}
+.gramads-wordmark strong{font-size:1.03rem;font-weight:800;white-space:nowrap}
+.gramads-wordmark small{font-size:.65rem;font-weight:650;letter-spacing:.035em;color:#456683}
+.gramads-mark{overflow:hidden}
+.gramads-mark img{transform:scale(1.42)}
+.ui-final .ui-public-footer .gramads-footer-lockup{gap:13px;align-items:center}
+.gramads-footer-lockup .gramads-full{width:98px;height:103px;object-fit:contain;padding:5px;border-radius:15px;background:#f5faff;border:1px solid #fff;box-shadow:0 8px 22px #041b3c40}
+.gramads-footer-name{display:grid;gap:5px;line-height:1.4;color:#fff}
+.gramads-footer-name small{font-size:.72rem;color:#c4d8ee;font-weight:400}
+@media(max-width:560px){.gramads-wordmark strong{font-size:.92rem}.gramads-wordmark small{font-size:.61rem}.gramads-footer-lockup .gramads-full{width:82px;height:86px}}

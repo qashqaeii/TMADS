@@ -578,3 +578,25 @@ test.describe('Orbit Access without JavaScript',()=>{
     await expect(page.locator('#id_password2')).toBeVisible();
   });
 });
+
+
+test('GramAds brand renders without distortion across public and auth screens',async({page})=>{
+  test.setTimeout(60000);
+  for(const width of [320,768,1440]){
+    await page.setViewportSize({width,height:900});
+    for(const path of ['/','/accounts/login/','/about/']){
+      await assertPage(page,path);
+      const mark=page.locator('header .brand-lockup .gramads-mark img').first();
+      await expect(mark).toBeVisible();
+      await expect.poll(()=>mark.evaluate(el=>el.complete&&el.naturalWidth>0)).toBe(true);
+      await expect(page.locator('header .gramads-wordmark').first()).toContainText('گرام‌ادز');
+      if(path!='/accounts/login/'){
+        const full=page.locator('.gramads-footer-lockup .gramads-full');
+        await full.scrollIntoViewIfNeeded();
+        await expect.poll(()=>full.evaluate(el=>el.complete&&el.naturalWidth>0)).toBe(true);
+        expect(await full.evaluate(el=>getComputedStyle(el).objectFit)).toBe('contain');
+      }
+      expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+2)).toBe(true);
+    }
+  }
+});

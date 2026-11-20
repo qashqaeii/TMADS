@@ -57,7 +57,7 @@ def test_legal_document_content_and_navigation(client, route, slug, count):
     expected = [part for b in blocks for part in (b["items"] if b["kind"] == "list" else [b["text"]])]
     parser = LegalDocument()
     parser.feed(html)
-    assert parser.parts == ["سند حقوقی تی‌ام‌ادز"] + expected
+    assert parser.parts == ["سند حقوقی گرام‌ادز"] + expected
     assert doc["heading"] in html
     for section in doc["sections"]:
         assert f'id="{section["id"]}"' in html
