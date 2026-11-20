@@ -16,7 +16,7 @@
     </div><footer class="ga-panel-foot"><small class="muted">تغییرات اطلاعات نمایشی</small><button class="btn btn-primary" type="submit">ذخیره تغییرات</button></footer>
   </form>
   <section class="ga-panel">
-    <div class="ui-form-intro"><span class="ui-target-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="shield-check" size="md" %}</span><div><h2>امنیت حساب</h2><p>تغییر رمز عبور</p></div></div></header><div class="ga-panel-body">
+    <header class="ga-panel-head"><div class="ga-panel-title"><span class="ui-target-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="shield-check" size="md" %}</span><div><h2>امنیت حساب</h2><p>تغییر رمز عبور</p></div></div></header><div class="ga-panel-body">
     <p class="section-description">برای امنیت حساب، رمزی انتخاب کنید که در سرویس دیگری استفاده نمی‌کنید.</p>
     <form method="post" class="form-stack">{% csrf_token %}<input type="hidden" name="action" value="password">
       {% if password_form.non_field_errors %}<div class="form-error" role="alert">{{ password_form.non_field_errors }}</div>{% endif %}

@@ -2,6 +2,7 @@
 (function(){
   "use strict";
   document.addEventListener("keydown",function(event){
+    if(!(event.target instanceof Element))return;
     const source=event.target.closest('[role="tab"]');
     const list=source&&source.closest("[data-ga-keyboard-tabs]");
     if(!list||!["ArrowLeft","ArrowRight","Home","End"].includes(event.key))return;

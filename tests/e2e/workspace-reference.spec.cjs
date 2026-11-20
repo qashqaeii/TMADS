@@ -4,7 +4,7 @@ const users = {
   ops: [process.env.TMADS_E2E_OPS_USERNAME, process.env.TMADS_E2E_OPS_PASSWORD],
 };
 const routes = {
-  customer: ['/app/','/campaigns/','/accounts/advertiser-account/','/accounts/advertiser-assets/','/finance/wallet/','/finance/invoices/','/finance/refunds/','/finance/transactions/','/finance/wallet/topup/','/app/ad-policies/','/support/','/support/new/','/accounts/profile/','/app/notifications/'],
+  customer: ['/app/','/campaigns/','/accounts/advertiser-account/','/accounts/advertiser-assets/','/finance/wallet/','/finance/invoices/','/finance/refunds/','/finance/transactions/','/finance/wallet/topup/','/app/ad-policies/','/support/','/support/new/','/accounts/profile/','/accounts/profile/sms/','/app/notifications/'],
   ops: ['/ops/','/ops/campaigns/','/ops/remote-operations/','/ops/related-accounts/','/ops/telegram-account/','/ops/refunds/','/ops/exchange-rates/','/ops/sms/','/ops/api-status/','/ops/release-readiness/','/ops/audit/'],
 };
 async function login(page, credentials) {
@@ -15,15 +15,15 @@ async function login(page, credentials) {
   await expect(page.locator('.ui-shell')).toBeVisible();
 }
 for (const role of Object.keys(routes)) {
-  test(role+' workspace reference — responsive route sweep', async ({page}) => {
+  test(role+' workspace reference — responsive route sweep', async ({page},testInfo) => {
     test.skip(!users[role].every(Boolean),'Requires disposable local '+role+' credentials');
-    test.setTimeout(180000);
+    test.setTimeout(300000);
     await login(page,users[role]);
     await page.emulateMedia({reducedMotion:'reduce'});
     for(const width of [375,768,1440]){
       await page.setViewportSize({width,height:900});
       for(const route of routes[role]){
-        const response=await page.goto(route);
+        const response=await page.goto(route,{waitUntil:'domcontentloaded'});
         expect(response.status(),route).toBe(200);
         expect(new URL(page.url()).pathname,route).toBe(route);
         await expect(page.locator('body')).toHaveClass(/ga-workspace-system/);
@@ -32,6 +32,11 @@ for (const role of Object.keys(routes)) {
         expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),route+' @ '+width).toBe(true);
         const css=await page.locator('body').evaluate(el=>getComputedStyle(el).getPropertyValue('--gw-radius').trim());
         expect(css).toBe('15px');
+        if (process.env.TMADS_E2E_CAPTURE === '1') {
+          await page.evaluate(()=>document.fonts.ready);
+          const file=route.replace(/^\/|\/$/g,'').replaceAll('/','-')||'root';
+          await page.screenshot({path:testInfo.outputPath(role+'-'+width+'-'+file+'.png'),fullPage:true,animations:'disabled'});
+        }
       }
     }
   });

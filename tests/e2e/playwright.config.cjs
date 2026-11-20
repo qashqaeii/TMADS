@@ -6,12 +6,12 @@ if (!['127.0.0.1', 'localhost', '[::1]'].includes(target.hostname)) {
 }
 module.exports = defineConfig({
   testDir: '.',
-  testMatch: 'polish.spec.cjs',
   timeout: 30000,
   use: { baseURL, browserName: 'chromium', screenshot: 'only-on-failure', trace: 'retain-on-failure' },
   projects: [
-    { name: 'mobile', use: { viewport: { width: 390, height: 844 } } },
-    { name: 'tablet', use: { viewport: { width: 768, height: 1024 } } },
-    { name: 'desktop', use: { viewport: { width: 1440, height: 900 } } },
+    { name: 'mobile', testMatch: 'polish.spec.cjs', use: { viewport: { width: 390, height: 844 } } },
+    { name: 'tablet', testMatch: 'polish.spec.cjs', use: { viewport: { width: 768, height: 1024 } } },
+    { name: 'desktop', testMatch: 'polish.spec.cjs', use: { viewport: { width: 1440, height: 900 } } },
+    { name: 'workspace', testMatch: 'workspace-reference.spec.cjs', use: { viewport: { width: 1440, height: 900 } } },
   ],
 });

@@ -1,0 +1,93 @@
+name: GramAds workspace browser review
+on:
+  push:
+    branches: [main]
+    paths: ['templates/**', 'static/css/**', 'static/js/**', 'tests/e2e/**', '.github/workflows/workspace-visual.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: workspace-visual-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  visual:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: tmads
+          POSTGRES_PASSWORD: ci-only
+          POSTGRES_DB: tmads_visual
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U tmads -d tmads_visual"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DJANGO_SETTINGS_MODULE: config.settings.local
+      APP_ENV: LOCAL
+      SECRET_KEY: ci-only-not-a-production-secret
+      DATABASE_URL: postgresql://tmads:ci-only@127.0.0.1:5432/tmads_visual
+      TELEGRAM_ADS_API_TOKEN: ""
+      TELEGRAM_ADS_WRITE_ENABLED: "false"
+      TELEGRAM_ADS_PAID_SUBMISSION_ENABLED: "false"
+      TELEGRAM_ADS_MEDIA_UPLOAD_ENABLED: "false"
+      TELEGRAM_ADS_RELATED_ACCOUNTS_ENABLED: "false"
+      TELEGRAM_ADS_CUSTOMER_ASSETS_ENABLED: "false"
+      TELEGRAM_ADS_WEBSITE_ENABLED: "false"
+      PAYMENT_GATEWAY: fake
+      PAYMENT_FAKE_ENABLED: "true"
+      SMS_ENABLED: "false"
+      NOBITEX_API_BASE_URL: http://127.0.0.1:1
+      NOBITEX_HTTP_TIMEOUT_SECONDS: "1"
+      NOBITEX_HTTP_RETRIES: "0"
+      TMADS_E2E_URL: http://127.0.0.1:8000
+      TMADS_E2E_USERNAME: visual_customer
+      TMADS_E2E_OPS_USERNAME: visual_operator
+      TMADS_E2E_PASSWORD: ci-local-only-visual-password
+      TMADS_E2E_OPS_PASSWORD: ci-local-only-visual-admin-password
+      TMADS_E2E_CAPTURE: "1"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: pip install -r requirements.txt
+      - name: Prepare disposable database
+        run: |
+          python manage.py migrate --noinput
+          python manage.py seed_demo
+          python manage.py shell < tests/e2e/seed_workspace.py
+      - name: Install browser
+        working-directory: tests/e2e
+        run: |
+          npm install
+          npx playwright install --with-deps chromium
+      - name: Start local Django server
+        run: |
+          python manage.py runserver 127.0.0.1:8000 --noreload > /tmp/gramads-visual-server.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:8000/accounts/login/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/gramads-visual-server.log
+          exit 1
+      - name: Run responsive workspace project
+        working-directory: tests/e2e
+        run: npx playwright test --project=workspace --workers=1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gramads-workspace-screenshots
+          path: |
+            tests/e2e/test-results/
+            /tmp/gramads-visual-server.log
+          retention-days: 7
+          if-no-files-found: warn

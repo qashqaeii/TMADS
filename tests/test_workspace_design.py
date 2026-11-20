@@ -27,6 +27,7 @@ def test_workspace_visual_contract(client, customer_user, path, marker):
     html = response.content.decode()
     assert marker in html
     assert static("css/gramads-workspace-pages.css") in html
+    assert static("css/gramads-workspace-composition.css") in html
     assert 'is-app ga-workspace-system' in html
     assert html.count('id="ui-confirmation"') == 1
     assert "ga-confirm-dialog" in html
@@ -43,3 +44,22 @@ def test_workspace_summary_preserves_real_data(client, customer_user):
 def test_public_page_does_not_opt_in_to_workspace(client):
     html = client.get("/").content.decode()
     assert 'is-app ga-workspace-system' not in html
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("path,marker", [
+    ("/accounts/profile/", "ga-profile-identity"),
+    ("/accounts/advertiser-account/", "ga-account-top"),
+    ("/accounts/advertiser-assets/", "ga-assets-workspace"),
+    ("/finance/wallet/", "ga-wallet-summary"),
+    ("/finance/refunds/", "ga-steps"),
+    ("/finance/invoices/", "ga-data-panel"),
+    ("/campaigns/", "ga-campaign-filter"),
+    ("/support/", "ga-help-layout"),
+    ("/app/ad-policies/", "ga-policy-layout"),
+])
+def test_dedicated_compositions(client, customer_user, path, marker):
+    client.force_login(customer_user)
+    response = client.get(path)
+    assert response.status_code == 200
+    assert marker in response.content.decode()

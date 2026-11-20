@@ -218,3 +218,28 @@
 .is-app .ga-sms-log .ga-panel-body{margin:0}
 @media(max-width:900px){.is-app .ga-api-facts{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:600px){.is-app .ga-api-facts{grid-template-columns:minmax(0,1fr)}.is-app .ga-queue-item>div small{line-height:1.6}.is-app .ga-queue-number{font-size:1rem}.is-app .ga-ops-center-metrics .kpi-exec{padding:10px}.is-app .ga-release-status{padding:12px}}
+
+/* Final detail pass: stronger scoping against legacy cascading styles. */
+.ui-final.is-app .page-frame:not(:has(.ga-command)) .ga-feature .btn-primary{background:#fff;color:#164b89;border-color:#fff;box-shadow:0 3px 10px #10294d25}
+.ui-final.is-app .page-frame:not(:has(.ga-command)) .ga-feature .btn-primary:not(:disabled):hover{background:#eef6ff;color:#164b89;border-color:#d7e8fc}
+.ui-final.is-app .ga-profile-workspace .ga-profile-identity :is(h2,p){color:#fff}
+.ui-final.is-app .ga-profile-workspace .ga-profile-identity .ui-profile-avatar{background:#ffffff22;color:#fff}
+.ui-final.is-app .ga-panel :is(input,textarea,select):not([type="checkbox"],[type="radio"],[type="hidden"]){max-inline-size:100%;box-sizing:border-box}
+.ui-final.is-app .ga-panel :is(code,pre,bdi){overflow-wrap:anywhere}
+.ui-final.is-app .ga-panel .ga-panel-head>small{font-size:.72rem;flex-shrink:0}
+.ui-final.is-app .ga-panel .ga-panel-title>div{min-width:0}
+.ui-final.is-app .ga-panel .ga-panel-title h2{overflow-wrap:anywhere}
+.ui-final.is-app .ga-data-panel .data-table td a:focus-visible{outline-offset:2px}
+.ui-final.is-app .ga-panel .ga-link-tile:focus-visible,.ui-final.is-app .ga-budget-summary:focus-visible,.ui-final.is-app .ga-refund-decision summary:focus-visible{outline:2px solid #145eb6;outline-offset:2px}
+.ui-final.is-app .ga-panel .ga-steps li p{overflow-wrap:anywhere}
+.ui-final.is-app .ga-help-workspace .ui-conversation .msg-bubble{border:1px solid #e0eaf6;background:#fff}
+.ui-final.is-app .ga-help-workspace .ui-conversation .msg-bubble.is-staff{background:#eaf4ff;border-color:#d6e8fb}
+.ui-final.is-app .ga-ops-workspace .ga-data-panel .data-table{min-width:min(560px,100%)}
+.ui-final.is-app .ga-invoices-workspace .data-table,.ui-final.is-app .ga-transactions-workspace .data-table{min-width:540px}
+@media(max-width:600px){
+ .ui-final.is-app .ga-panel .ga-panel-foot>small{font-size:.72rem;line-height:1.6}
+ .ui-final.is-app .ga-panel .ga-panel-foot>.btn{min-height:44px}
+ .ui-final.is-app .ga-panel .ga-panel-head{flex-wrap:wrap;gap:7px}
+ .ui-final.is-app .ga-panel .ga-link-tile{min-height:44px}
+ .ui-final.is-app .ga-panel .ga-row-identity .ga-symbol{width:30px;height:30px}
+}
