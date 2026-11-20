@@ -483,3 +483,49 @@ test.describe('About without JavaScript',()=>{
     await expect(page.locator('#ab-independence-heading')).toBeVisible();
   });
 });
+
+
+test('Contact Orbit help center at three viewport widths',async({page})=>{
+  test.setTimeout(60000);
+  for(const width of [320,768,1440]){
+    await page.setViewportSize({width,height:900});
+    await page.emulateMedia({reducedMotion:'reduce'});
+    await assertPage(page,'/contact/');
+    await expect(page.locator('.ct-topic')).toHaveCount(3);
+    await expect(page.locator('.ct-guide-card')).toHaveCount(3);
+    await expect(page.locator('.ct-hero-copy .btn-primary')).toHaveAttribute('href','/support/new/');
+    for(const image of await page.locator('[data-contact-art]').all()){
+      await image.scrollIntoViewIfNeeded();
+      await expect.poll(()=>image.evaluate(el=>el.complete&&el.naturalWidth>0)).toBe(true);
+      expect(await image.evaluate(el=>getComputedStyle(el).objectFit)).toBe('contain');
+    }
+    await page.locator('.ct-section-nav a[href="#support-guide"]').click();
+    await expect(page).toHaveURL(/#support-guide$/);
+    await expect(page.locator('#support-guide-heading')).toBeVisible();
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+2)).toBe(true);
+  }
+  await page.locator('.ct-hero-copy .btn-primary').click();
+  await expect(page).toHaveURL(/\/accounts\/login\/\?next=/);
+});
+test('Contact motion and reduced motion preference',async({page})=>{
+  await page.setViewportSize({width:1440,height:900});
+  await page.emulateMedia({reducedMotion:'no-preference'});
+  await assertPage(page,'/contact/');
+  await expect(page.locator('body')).toHaveClass(/ct-motion-ready/);
+  const card=page.locator('.ct-topic').first();
+  await card.scrollIntoViewIfNeeded();
+  await card.hover();
+  await expect(card).toHaveClass(/ct-spot-active/);
+  await page.emulateMedia({reducedMotion:'reduce'});
+  await expect(card).not.toHaveClass(/ct-spot-active/);
+});
+test.describe('Contact without JavaScript',()=>{
+  test.use({javaScriptEnabled:false});
+  test('guides and ticket links remain available',async({page})=>{
+    await page.goto('/contact/');
+    await expect(page.locator('.ct-topic')).toHaveCount(3);
+    await page.locator('.ct-section-nav a[href="#contact-ticket"]').click();
+    await expect(page).toHaveURL(/#contact-ticket$/);
+    await expect(page.locator('.ct-ticket-actions .ct-light-button')).toHaveAttribute('href','/support/new/');
+  });
+});
