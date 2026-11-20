@@ -99,3 +99,56 @@ test('Orbit landing artwork, CTA and FAQ work across viewports', async ({page}) 
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 2)).toBe(true);
   }
 });
+
+
+test('Orbit glass surfaces, pointer lighting and motion preferences', async ({page}) => {
+  await page.setViewportSize({width: 1440, height: 900});
+  await page.emulateMedia({reducedMotion: 'no-preference'});
+  await assertPage(page, '/');
+  await expect(page.locator('body')).toHaveClass(/orbit-motion-ready/);
+  await expect(page.locator('.orbit-hero-art')).toBeVisible();
+  const card = page.locator('.orbit-target').first();
+  await card.scrollIntoViewIfNeeded();
+  await card.hover();
+  await expect(card).toHaveClass(/orbit-spot-active/);
+  await expect.poll(() => card.evaluate(el => el.style.getPropertyValue('--spot-x'))).not.toBe('');
+  const header = page.locator('.ui-public-header');
+  await expect(header).toHaveClass(/orbit-nav-scrolled/);
+  await expect.poll(() => header.evaluate(el => Number(el.style.getPropertyValue('--orbit-scroll')))).toBeGreaterThan(0);
+  await page.emulateMedia({reducedMotion: 'reduce'});
+  await expect(card).not.toHaveClass(/orbit-spot-active/);
+  await expect.poll(() => header.evaluate(el => el.style.getPropertyValue('--orbit-scroll'))).toBe('');
+  await expect(page.locator('.orbit-hero-copy h1')).toBeVisible();
+  await page.goto('/features/');
+  await expect(page.locator('body')).not.toHaveClass(/orbit-motion-ready/);
+});
+
+test('Orbit compact layout at 320px with native FAQ keyboard interaction', async ({page}) => {
+  await page.setViewportSize({width: 320, height: 740});
+  await page.emulateMedia({reducedMotion: 'reduce'});
+  await assertPage(page, '/');
+  await expect(page.locator('.orbit-target')).toHaveCount(4);
+  for (const art of await page.locator('[data-landing-art]:visible').all()) {
+    await art.scrollIntoViewIfNeeded();
+    await expect.poll(() => art.evaluate(img => img.complete && img.naturalWidth > 0)).toBe(true);
+  }
+  const summary = page.locator('#home-faq summary').first();
+  await summary.focus();
+  await summary.press('Enter');
+  await expect(page.locator('#home-faq details').first()).toHaveAttribute('open', '');
+  await summary.press('Enter');
+  await expect(page.locator('#home-faq details').first()).not.toHaveAttribute('open', '');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 2)).toBe(true);
+});
+
+test.describe('Orbit progressive fallback', () => {
+  test.use({javaScriptEnabled: false});
+  test('headings, conversion links and FAQ work without scripts', async ({page}) => {
+    await page.goto('/');
+    await expect(page.locator('.orbit-hero h1')).toBeVisible();
+    await expect(page.locator('.orbit-actions .btn-primary')).toHaveAttribute('href', /accounts\/register/);
+    await expect(page.locator('.orbit-cta-button')).toBeVisible();
+    await page.locator('#home-faq summary').first().click();
+    await expect(page.locator('#home-faq details').first()).toHaveAttribute('open', '');
+  });
+});

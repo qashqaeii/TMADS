@@ -29,3 +29,20 @@ def test_landing_styles_are_home_only(client):
     html = client.get(reverse("public:features")).content.decode()
     assert "landing-orbit.css" not in html
     assert "orbit-footer-art" not in html
+
+
+@pytest.mark.django_db
+def test_glass_hero_cards_and_motion_are_home_only(client):
+    from django.templatetags.static import static
+
+    html = client.get(reverse("public:home")).content.decode()
+    assert static("js/landing-orbit.js") in html
+    assert 'class="orbit-page orbit-glass"' in html
+    assert html.count('class="orbit-link orbit-target-link"') == 4
+    assert html.count('class="orbit-card-visual"') == 6
+    assert html.count('class="orbit-guide-visual"') == 4
+    assert 'class="orbit-cta-scene"' in html
+    assert 'class="orbit-faq-bubble"' in html
+    assert reverse("public:features") + "#features-advanced" in html
+    assert static("js/landing-orbit.js") not in client.get(reverse("public:features")).content.decode()
+    assert static("js/landing-orbit.js") not in client.get(reverse("accounts:login")).content.decode()
