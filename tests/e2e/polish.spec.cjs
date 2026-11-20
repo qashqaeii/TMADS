@@ -152,3 +152,51 @@ test.describe('Orbit progressive fallback', () => {
     await expect(page.locator('#home-faq details').first()).toHaveAttribute('open', '');
   });
 });
+
+test('Features Orbit hierarchy, image loading and native section navigation', async ({page}) => {
+  test.setTimeout(60000);
+  for (const width of [320, 768, 1440]) {
+    await page.setViewportSize({width,height:900});
+    await page.emulateMedia({reducedMotion:'reduce'});
+    await assertPage(page,'/features/');
+    await expect(page.locator('.fx-core-card')).toHaveCount(6);
+    await expect(page.locator('.fx-advanced-card')).toHaveCount(4);
+    await expect(page.locator('.fx-guide-card')).toHaveCount(4);
+    await expect(page.locator('.fx-actions .btn-primary')).toHaveAttribute('href',/accounts\/register/);
+    for (const art of await page.locator('[data-feature-art]:visible').all()) {
+      await art.scrollIntoViewIfNeeded();
+      await expect.poll(() => art.evaluate(el => el.complete && el.naturalWidth > 0)).toBe(true);
+    }
+    await page.locator('.fx-section-nav a[href="#features-advanced"]').click();
+    await expect(page).toHaveURL(/#features-advanced$/);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth+2)).toBe(true);
+  }
+});
+
+test('Features Orbit motion and reduced motion cleanup', async ({page}) => {
+  await page.setViewportSize({width:1440,height:900});
+  await page.emulateMedia({reducedMotion:'no-preference'});
+  await assertPage(page,'/features/');
+  await expect(page.locator('body')).toHaveClass(/fx-motion-ready/);
+  const card=page.locator('.fx-core-card').first();
+  await card.scrollIntoViewIfNeeded();
+  await card.hover();
+  await expect(card).toHaveClass(/fx-spot-active/);
+  await expect.poll(() => card.evaluate(el=>el.style.getPropertyValue('--fx-x'))).not.toBe('');
+  await page.emulateMedia({reducedMotion:'reduce'});
+  await expect(card).not.toHaveClass(/fx-spot-active/);
+  await expect(page.locator('.fx-hero h1')).toBeVisible();
+  await page.goto('/');
+  await expect(page.locator('body')).not.toHaveClass(/fx-motion-ready/);
+});
+
+test.describe('Features no-script experience',()=>{
+  test.use({javaScriptEnabled:false});
+  test('copy, section links and CTAs remain available',async ({page})=>{
+    await page.goto('/features/');
+    await expect(page.locator('.fx-hero h1')).toBeVisible();
+    await page.locator('.fx-section-nav a[href="#advertiser-toolkit"]').click();
+    await expect(page).toHaveURL(/#advertiser-toolkit$/);
+    await expect(page.locator('.fx-cta-button')).toBeVisible();
+  });
+});

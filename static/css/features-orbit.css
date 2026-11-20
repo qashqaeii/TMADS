@@ -107,3 +107,40 @@
 @media(max-width:600px){.ui-final.orbit-features .container{width:calc(100% - 28px)}.ui-final.orbit-features .ui-public-header{padding-top:8px}.fx-hero{margin-top:-66px;padding:92px 0 34px}.fx-hero-copy{gap:14px}.fx-page h1{font-size:clamp(1.8rem,7vw,2.6rem)}.fx-page h2{font-size:1.45rem}.fx-float{display:none}.fx-hero-visual{padding:0}.fx-hero-visual figcaption{margin-top:8px}.fx-hero-image{border-radius:20px}.fx-actions{display:grid;width:min(100%,400px)}.fx-actions .btn{width:100%}.fx-proof{font-size:.72rem;gap:6px 10px}.fx-section-nav{width:100%;gap:3px;padding:5px}.fx-section-nav a{padding:6px 8px;font-size:.72rem;gap:4px}.fx-section{padding-top:37px;scroll-margin-top:92px}.fx-centered{margin-bottom:17px}.fx-core-grid,.fx-advanced-grid,.fx-guide-grid{grid-template-columns:minmax(0,1fr);gap:10px}.fx-core-1{grid-column:auto}.fx-core-card,.fx-core-1{display:grid;grid-template-columns:minmax(0,1fr) 95px;min-height:0;padding:15px;gap:10px;align-items:center}.fx-core-card .fx-core-visual{grid-column:2;grid-row:1;height:105px}.fx-core-card .fx-card-copy{grid-column:1;grid-row:1}.fx-card-index{top:-3px;font-size:.68rem}.fx-card-copy p,.fx-guide-card p{font-size:.8rem}.fx-advanced-card{padding:15px;grid-template-columns:minmax(0,1fr) 85px;min-height:0;gap:10px}.fx-guide-card{padding:17px}.fx-toolkit-back{inset:20% 0 0}.fx-cta{grid-template-columns:minmax(0,1fr);min-height:0}.fx-cta-copy{padding:22px}.fx-cta-art{height:142px}.fx-page .fx-cta-illustration{mask-image:linear-gradient(180deg,transparent,#000 40%)}.fx-cta-button{width:100%}.ui-final.orbit-features .ui-public-footer .footer-col:not(:first-child){padding-inline-start:10px}}
 @media(max-width:360px){.fx-core-card,.fx-core-1,.fx-advanced-card{grid-template-columns:minmax(0,1fr) 73px}.fx-section-nav a{font-size:.68rem;padding-inline:5px}}
 @media(prefers-reduced-motion:reduce){.orbit-features *,.orbit-features *::before,.orbit-features *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+/* Responsive bento: two hero modules, four equally weighted supporting modules. */
+@media(min-width:1001px){
+ .fx-core-grid{grid-template-columns:repeat(12,minmax(0,1fr))}
+ .fx-core-card{grid-column:span 3}
+ .fx-core-1{grid-column:span 8}
+ .fx-core-2{grid-column:span 4}
+ .fx-core-card:not(.fx-core-1):not(.fx-core-2) .fx-card-copy{flex:1}
+}
+@media(min-width:601px) and (max-width:1000px){.fx-core-6{grid-column:span 2;display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr);align-items:center;min-height:190px}.fx-core-6 .fx-core-visual{grid-column:2;grid-row:1}.fx-core-6 .fx-card-copy{grid-column:1;grid-row:1}}
+.ui-final.orbit-features .ui-public-header .public-nav-bar{position:relative;transition:background-color .32s,box-shadow .32s}
+.ui-final.orbit-features .fx-nav-scrolled .public-nav-bar{background:#edf7ffe5;box-shadow:0 7px 26px #143b7128,inset 0 1px 1px #fff}
+.fx-motion-ready .public-nav-bar::after{content:"";position:absolute;inset-inline:18px;bottom:0;height:2px;border-radius:9px;background:linear-gradient(90deg,#61d6ff,#0868dc);transform:scaleX(var(--fx-scroll,0));transform-origin:right;pointer-events:none}
+.fx-section-nav a[aria-current=location]{background:#d8eaff;color:#0759b7}
+.fx-card::after{content:"";position:absolute;z-index:-1;inset:0;pointer-events:none;opacity:0;background:radial-gradient(ellipse at var(--fx-x,50%) var(--fx-y,50%),#fff9,transparent 65%);transition:opacity .3s}
+.fx-card.fx-spot-active::after{opacity:1}
+.fx-core-1::after{background:radial-gradient(ellipse at var(--fx-x,50%) var(--fx-y,50%),#84c6ff55,transparent 65%)}
+.fx-hero-visual{--fx-scene-x:0px;--fx-scene-y:0px}
+.fx-hero-image{transform:translate3d(var(--fx-scene-x),var(--fx-scene-y),0);transition:transform .6s cubic-bezier(.2,.8,.2,1)}
+.fx-float{transition:transform .65s cubic-bezier(.2,.8,.2,1)}
+.fx-float-top{transform:translate3d(calc(var(--fx-scene-x) * -.65),calc(var(--fx-scene-y) * -.65),0)}
+.fx-float-bottom{transform:translate3d(calc(var(--fx-scene-x) * .8),calc(var(--fx-scene-y) * .8),0)}
+@media(hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){
+ .fx-card{transition:transform .45s cubic-bezier(.2,.8,.2,1),box-shadow .35s,border-color .35s}
+ .fx-card:hover{transform:translateY(-5px);box-shadow:0 24px 44px #1a66b929,inset 0 1px 2px white}
+ .fx-card :is(.fx-card-art,.fx-advanced-art){transition:transform .55s cubic-bezier(.2,.8,.2,1)}
+ .fx-card:hover :is(.fx-card-art,.fx-advanced-art){transform:translateY(-3px) scale(1.045)}
+ .fx-link .icon-shell{transition:transform .25s}.fx-link:hover .icon-shell{transform:translateX(-4px)}
+ .fx-cta-button{transition:transform .3s,box-shadow .3s}.fx-cta-button:hover{transform:translateY(-3px)}
+}
+@media(prefers-reduced-motion:no-preference){
+ .fx-orbit-ring{animation:fx-ring-in 1.4s cubic-bezier(.2,.8,.2,1) both}
+ @keyframes fx-ring-in{from{opacity:.2;transform:rotate(-22deg) scale(.94)}to{opacity:1;transform:rotate(-14deg) scale(1)}}
+}
+@media(prefers-reduced-motion:reduce){.fx-motion-ready .public-nav-bar::after{display:none}.fx-card::after{opacity:0!important}.fx-hero-image,.fx-float{transform:none!important}}
+.fx-card:focus-within{border-color:#75b6f5;box-shadow:0 0 0 2px #75b8f542,var(--fx-shadow)}
+.fx-core-1 a:focus-visible,.fx-cta a:focus-visible{outline-color:#a8e0ff}
