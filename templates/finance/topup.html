@@ -5,7 +5,7 @@
 {% block page_title %}شارژ کیف پول{% endblock %}
 {% block content %}
 <div class="app-stack finance-page ui-finance pay-flow pay-flow--checkout">
-  {% include "includes/dash_header.html" with eyebrow="مالی" title="شارژ کیف پول" subtitle="به اندازه نیاز کمپین‌هایتان اعتبار اضافه کنید." with_sub=1 %}
+  {% include "includes/dash_header.html" with page_icon="wallet" eyebrow="مالی" title="شارژ کیف پول" subtitle="به اندازه نیاز کمپین‌هایتان اعتبار اضافه کنید." with_sub=1 %}
   {% include "finance/includes/payment_rail.html" with stage=1 %}
   <div class="pay-checkout-grid">
     <form method="post" class="pay-checkout-form" data-topup-form>

@@ -6,7 +6,7 @@
 {% block content %}
 <div class="app-stack finance-page ui-finance pay-wallet">
 {% url 'finance:topup' as topup_url %}
-{% include "includes/dash_header.html" with title="کیف پول" subtitle="مدیریت اعتبار، رزرو و گردش مالی" with_sub=1 %}
+{% include "includes/dash_header.html" with page_icon="wallet" title="کیف پول" subtitle="مدیریت اعتبار، رزرو و گردش مالی" with_sub=1 %}
 <section class="ui-wallet-layout" aria-label="خلاصه کیف پول">
   <article class="ui-wallet-feature">
     <div class="ui-wallet-feature__head"><span>{% include "includes/lucide_icon.html" with name="wallet" size="md" %} موجودی قابل استفاده</span><span class="ui-wallet-currency">تومان</span></div>

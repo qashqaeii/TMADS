@@ -5,7 +5,7 @@
 {% block page_title %}آماده پرداخت{% endblock %}
 {% block content %}
 <div class="pay-flow pay-flow--handoff">
-  {% include "includes/dash_header.html" with eyebrow="کیف پول" title="انتقال به درگاه پرداخت" subtitle="مبلغ و اطلاعات درخواست را پیش از پرداخت مرور کنید." with_sub=1 %}
+  {% include "includes/dash_header.html" with page_icon="credit-card" eyebrow="کیف پول" title="انتقال به درگاه پرداخت" subtitle="مبلغ و اطلاعات درخواست را پیش از پرداخت مرور کنید." with_sub=1 %}
   {% include "finance/includes/payment_rail.html" with stage=2 %}
   <section class="pay-result-grid">
     <article class="pay-result-card pay-result-card--ready">

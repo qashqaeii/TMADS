@@ -4,7 +4,7 @@
 {% block container_class %}container-wide{% endblock %}
 {% block content %}
 <div class="app-stack finance-page ui-finance">
-{% include "includes/dash_header.html" with eyebrow="مالی" title="بازپرداخت" %}
+{% include "includes/dash_header.html" with page_icon="refresh-cw" eyebrow="مالی" title="بازپرداخت" %}
 <div class="ui-finance-flow"><section class="card card-pad form-stack">
   <div class="ui-form-intro"><span class="ui-target-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="rotate-ccw" size="md" %}</span><div><h2>ثبت درخواست بازپرداخت</h2><p>سفارش واجد شرایط و دلیل درخواست را مشخص کنید.</p></div></div>
   <form method="post" class="form-stack finance-form">{% csrf_token %}

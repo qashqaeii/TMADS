@@ -5,7 +5,7 @@
 {% block page_title %}نتیجه پرداخت{% endblock %}
 {% block content %}
 <div class="pay-flow pay-flow--result">
-  {% include "includes/dash_header.html" with eyebrow="کیف پول" title="نتیجه پرداخت" subtitle="وضعیت درخواست شارژ و جزئیات قابل پیگیری" with_sub=1 %}
+  {% include "includes/dash_header.html" with page_icon="shield-check" eyebrow="کیف پول" title="نتیجه پرداخت" subtitle="وضعیت درخواست شارژ و جزئیات قابل پیگیری" with_sub=1 %}
   {% if payment.status == 'verified' %}{% include "finance/includes/payment_rail.html" with stage=3 verified=True %}{% else %}{% include "finance/includes/payment_rail.html" with stage=3 %}{% endif %}
   <section class="pay-result-grid" aria-label="نتیجه و جزئیات پرداخت">
     <article class="pay-result-card {% if payment.status == 'verified' %}pay-result-card--success{% elif payment.status == 'failed' %}pay-result-card--failed{% else %}pay-result-card--pending{% endif %}" aria-labelledby="payment-outcome">

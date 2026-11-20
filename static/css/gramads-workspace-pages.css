@@ -164,3 +164,37 @@
 .ui-final.is-app .ui-account-page .account-settings .card{padding:16px;gap:13px}
 .ui-final.is-app .ui-account-page .ui-form-intro{gap:9px}
 @media(max-width:600px){.ui-final.is-app .ui-account-page .account-settings .card{padding:12px}.ui-final.is-app .ui-assets .ui-assets-toolbar{align-items:stretch}.ui-final.is-app .ui-profile-summary{padding:12px}.ui-final.is-app .ui-account-page .ui-section-tabs{overflow:auto;max-width:100%}.ui-final.is-app .ui-account-page .ui-section-tabs a{flex:none}}
+
+/* Finance: wallet, ledger, invoices, refund and checkout journey. */
+.ui-final.is-app .ui-finance{gap:12px}
+.ui-final.is-app :is(.ui-finance .ui-wallet-layout,.ui-finance .ui-finance-flow,.pay-checkout-grid,.pay-result-grid){gap:12px}
+.ui-final.is-app .ui-wallet-feature{position:relative;isolation:isolate;overflow:hidden;min-height:176px;padding:18px;gap:10px;border:1px solid #245fa2;border-radius:var(--gw-radius);background:radial-gradient(ellipse at 5% 0%,#398ddd70,transparent 65%),linear-gradient(125deg,#113b77,#1769c5);box-shadow:0 6px 18px #165cb323}
+.ui-final.is-app .ui-wallet-feature::after{content:"";position:absolute;z-index:-1;inset-inline-end:-35px;inset-block-end:-112px;width:220px;height:220px;border:1px solid #ffffff24;border-radius:50%;box-shadow:0 0 0 18px #ffffff08,0 0 0 37px #ffffff06;pointer-events:none}
+.ui-final.is-app .ui-wallet-feature__head{font-size:.84rem}
+.ui-final.is-app .ui-wallet-amount{font-weight:750;font-size:clamp(1.7rem,3.3vw,2.55rem);font-variant-numeric:tabular-nums;letter-spacing:0}
+.ui-final.is-app .ui-wallet-feature>.btn-primary{background:#f5faff;color:#164f91;border-color:#e8f1fc;box-shadow:0 3px 12px #0c376e33}
+.ui-final.is-app .ui-wallet-feature>.btn-primary:hover{background:#e0efff;color:#153e75}
+.ui-final.is-app .ui-finance-summary{padding:16px;gap:10px;box-shadow:var(--gw-shadow);border-radius:var(--gw-radius)}
+.ui-final.is-app .ui-finance-amount{font-size:1.6rem;letter-spacing:0;font-variant-numeric:tabular-nums}
+.ui-final.is-app .ui-finance .wallet-ledger .finance-line{padding:11px 0}
+.ui-final.is-app .ui-finance .dash-panel__head{padding:12px 14px}
+.ui-final.is-app .ui-finance .ui-finance-table :is(th,td){padding:10px 13px}
+.ui-final.is-app .ui-finance .ui-finance-guide{background:linear-gradient(150deg,#fff,#f4f8fd);border-radius:var(--gw-radius)}
+.ui-final.is-app .ui-finance .finance-form{gap:12px}
+.ui-final.is-app .ui-finance .ui-invoice-total{background:linear-gradient(135deg,#f0f7ff,#e4efff);border-color:#d5e6f8;border-radius:12px;color:var(--gw-ink)}
+.ui-final.is-app .ui-finance .ui-invoice-total strong{font-variant-numeric:tabular-nums}
+.ui-final.is-app .ui-finance .ui-quote-total{background:#edf5fe;border-radius:9px;padding:12px}
+.ui-final.is-app .ui-finance .pay-history{gap:10px}
+.ui-final.is-app :is(.pay-checkout-form,.pay-summary-card,.pay-result-card,.pay-receipt){border:1px solid var(--gw-stroke);border-radius:var(--gw-radius);box-shadow:var(--gw-shadow)}
+.ui-final.is-app :is(.pay-heading,.pay-history) h2{font-size:1rem}
+.ui-final.is-app .pay-flow{gap:12px;min-width:0}
+.ui-final.is-app .pay-heading-icon{border-radius:10px;background:#e9f2fd;color:var(--gw-accent)}
+.ui-final.is-app .pay-amount{font-variant-numeric:tabular-nums;letter-spacing:0}
+.ui-final.is-app .pay-input-wrap{border-radius:11px}
+.ui-final.is-app .ui-quick-amounts button[aria-pressed=true]{background:#e7f1ff;color:#145eb6;border-color:#90b8e8;box-shadow:inset 0 0 0 1px #90b8e833}
+.ui-final.is-app .pay-balance,.ui-final.is-app .ui-topup-total{border-radius:11px;background:#eef5fe}
+.ui-final.is-app .pay-main-action{min-height:44px}
+.ui-final.is-app .pay-reference-row{gap:8px;min-width:0}
+.ui-final.is-app .pay-copy{border-radius:9px}
+.ui-final.is-app .pay-note{line-height:1.8}
+@media(max-width:600px){.ui-final.is-app .ui-wallet-feature{padding:14px;min-height:156px}.ui-final.is-app .ui-finance-summary{padding:12px}.ui-final.is-app .pay-reference-row{flex-wrap:wrap}}

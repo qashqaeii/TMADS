@@ -5,7 +5,7 @@
 {% block content %}
 <div class="app-stack finance-page ui-finance">
 {% url 'finance:wallet' as wallet_url %}
-{% include "includes/dash_header.html" with eyebrow="مالی" title="فاکتورها" action_url=wallet_url action_label="کیف پول" %}
+{% include "includes/dash_header.html" with page_icon="file-text" eyebrow="مالی" title="فاکتورها" action_url=wallet_url action_label="کیف پول" %}
 {% if invoices %}
 <article class="card table-card card--lift">
   <div class="table-wrap" tabindex="0" role="region" aria-label="فاکتورهای حساب">
