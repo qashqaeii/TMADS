@@ -3,7 +3,11 @@ from html.parser import HTMLParser
 from unittest.mock import patch
 
 import pytest
+from django.contrib.staticfiles import finders
 from django.templatetags.static import static
+from PIL import Image
+
+from scripts.optimize_features_assets import TRANSPARENT_ART, optimize
 from django.urls import reverse
 
 from apps.core.templatetags.features_assets import FEATURE_ART, feature_asset
@@ -64,4 +68,38 @@ def test_feature_art_fallback_and_download_path():
             patch("apps.core.templatetags.features_assets.finders.find", return_value="present"),
             patch("apps.core.templatetags.features_assets.static", side_effect=lambda path: path),
         ):
-            assert feature_asset(name) == f"img/features/{name}.webp"
+            preferred = TRANSPARENT_ART.get(name)
+            expected = f"{preferred}.optimized.webp" if preferred else f"{name}.webp"
+            assert feature_asset(name) == f"img/features/{expected}"
+
+
+def test_transparent_masters_and_optimizer(tmp_path):
+    from shutil import copyfile
+
+    for stem in set(TRANSPARENT_ART.values()):
+        filename = f"{stem}.webp"
+        source = finders.find(f"img/features/{filename}")
+        assert source, filename
+        with Image.open(source) as image:
+            assert image.format == "WEBP"
+            assert "A" in image.getbands()
+            assert image.getchannel("A").getextrema() == (0, 255)
+        copyfile(source, tmp_path / filename)
+    optimize(tmp_path)
+    for stem in set(TRANSPARENT_ART.values()):
+        target = tmp_path / f"{stem}.optimized.webp"
+        with Image.open(target) as image:
+            assert image.format == "WEBP"
+            assert image.getchannel("A").getextrema() == (0, 255)
+            assert max(image.size) <= (1200 if stem == TRANSPARENT_ART["features-hero"] else 480)
+        assert target.stat().st_size < (tmp_path / f"{stem}.webp").stat().st_size
+
+
+def test_transparent_master_used_when_derivative_absent():
+    role = "feature-campaign"
+    expected = f"img/features/{TRANSPARENT_ART[role]}.webp"
+    with (
+        patch("apps.core.templatetags.features_assets.finders.find", side_effect=lambda path: path if path == expected else None),
+        patch("apps.core.templatetags.features_assets.static", side_effect=lambda path: path),
+    ):
+        assert feature_asset(role) == expected

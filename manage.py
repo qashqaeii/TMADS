@@ -14,7 +14,10 @@ def main() -> None:
     if len(sys.argv) > 1 and sys.argv[1] in {"runserver", "collectstatic"}:
         from scripts.optimize_landing_assets import optimize
 
+        from scripts.optimize_features_assets import optimize as optimize_features
+
         optimize()
+        optimize_features()
     execute_from_command_line(sys.argv)
 
 

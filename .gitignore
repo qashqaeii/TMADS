@@ -13,3 +13,7 @@ media/
 # Generated from landing PNG masters before serving/collecting static files.
 /static/img/landing/*.webp
 /static/img/landing/*.webp.tmp
+
+# Generated transparent feature derivatives.
+/static/img/features/*.optimized.webp
+/static/img/features/*.webp.tmp

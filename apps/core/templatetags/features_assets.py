@@ -1,7 +1,9 @@
-"""Feature artwork: use downloaded WebP files, or the existing Orbit artwork."""
+"""Prefer transparent feature artwork; keep existing backgrounds and fallbacks."""
 from django import template
 from django.contrib.staticfiles import finders
 from django.templatetags.static import static
+
+from scripts.optimize_features_assets import TRANSPARENT_ART
 
 from .landing_assets import landing_asset
 
@@ -28,5 +30,10 @@ FEATURE_ART = {
 @register.simple_tag
 def feature_asset(name):
     fallback = FEATURE_ART[name]
+    if name in TRANSPARENT_ART:
+        stem = f"img/features/{TRANSPARENT_ART[name]}"
+        for candidate in (f"{stem}.optimized.webp", f"{stem}.webp"):
+            if finders.find(candidate):
+                return static(candidate)
     path = f"img/features/{name}.webp"
     return static(path) if finders.find(path) else landing_asset(fallback)
