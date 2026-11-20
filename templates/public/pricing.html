@@ -51,6 +51,20 @@
             <div><span>بودجه خالص (فرضی)</span><strong>۲۰ واحد</strong></div><div><span>CPM (فرضی)</span><strong>۲ واحد</strong></div>
             <div class="pr-result"><span>تخمین نظری نمایش</span><strong>۱۰٬۰۰۰</strong></div>
           </div>
+          <div class="pr-calculator" data-pr-calculator hidden>
+            <div class="pr-fields">
+              <label for="pr-budget">بودجه خالص (واحد ارز تبلیغاتی)<input id="pr-budget" type="text" inputmode="decimal" dir="ltr" value="۲۰" maxlength="25" autocomplete="off" aria-describedby="pr-input-hint"></label>
+              <label for="pr-cpm">CPM فرضی (واحد ارز تبلیغاتی)<input id="pr-cpm" type="text" inputmode="decimal" dir="ltr" value="۲" maxlength="25" autocomplete="off" aria-describedby="pr-input-hint"></label>
+              <label class="pr-target-field" for="pr-impressions">تعداد نمایش مورد نظر<input id="pr-impressions" type="text" inputmode="numeric" dir="ltr" value="۱۰٬۰۰۰" maxlength="25" autocomplete="off" aria-describedby="pr-input-hint"></label>
+            </div>
+            <p id="pr-input-hint" class="pr-input-hint">ورودی‌ها فرضی هستند؛ اعداد فارسی یا انگلیسی، اعشار تا ۶ رقم و مقادیر تا یک میلیارد. CPM باید بزرگ‌تر از صفر باشد.</p>
+            <p class="pr-input-error" data-pr-error role="status" hidden></p>
+            <div class="pr-live-results">
+              <div class="pr-live-result"><span>تخمین نظری نمایش با بودجه شما</span><output id="pr-view-result" for="pr-budget pr-cpm" aria-live="polite">۱۰٬۰۰۰</output><small>نمایش</small></div>
+              <div class="pr-live-result pr-cost-result"><span>هزینه نظری نمایش مورد نظر</span><output id="pr-cost-result" for="pr-impressions pr-cpm" aria-live="polite">۲۰</output><small>واحد ارز تبلیغاتی</small></div>
+            </div>
+            <button type="button" class="pr-reset" data-pr-reset>بازنشانی مثال آموزشی {% include "includes/lucide_icon.html" with name="rotate-ccw" size="sm" %}</button>
+          </div>
           <p class="pr-calc-note">{% include "includes/lucide_icon.html" with name="info" size="sm" %} این محاسبه آموزشی است؛ کارمزد، نرخ تبدیل و ذخیره ریسک در آن لحاظ نشده‌اند و نمایش واقعی تضمین نمی‌شود.</p>
         </article>
         <article class="pr-glass pr-cpm-guide" data-pr-reveal>

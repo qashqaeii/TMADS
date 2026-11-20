@@ -227,3 +227,61 @@ test('Transparent feature artwork has no masks or frames and stays clear of text
     expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+2)).toBe(true);
   }
 });
+
+
+test('Pricing Orbit renders transparent art and calculator at mobile, tablet and desktop widths', async ({page})=>{
+  test.setTimeout(60000);
+  for(const width of [320,768,1440]){
+    await page.setViewportSize({width,height:900});
+    await page.emulateMedia({reducedMotion:'reduce'});
+    await assertPage(page,'/pricing/');
+    await expect(page.locator('.pr-calculator')).toBeVisible();
+    await expect(page.locator('#pr-calc-example')).toBeHidden();
+    for(const art of await page.locator('[data-pricing-art]').all()){
+      await art.scrollIntoViewIfNeeded();
+      await expect.poll(()=>art.evaluate(img=>img.complete&&img.naturalWidth>0)).toBe(true);
+      const style=await art.evaluate(img=>({mask:getComputedStyle(img).maskImage,fit:getComputedStyle(img).objectFit}));
+      expect(style).toEqual({mask:'none',fit:'contain'});
+    }
+    await page.locator('#pr-budget').fill('۱۲٫۵');
+    await page.locator('#pr-cpm').fill('۰٫۵');
+    await page.locator('#pr-impressions').fill('۱۰٬۰۰۰');
+    await expect(page.locator('#pr-view-result')).toHaveText('۲۵٬۰۰۰');
+    await expect(page.locator('#pr-cost-result')).toHaveText('۵');
+    await page.locator('#pr-cpm').fill('0');
+    await expect(page.locator('#pr-view-result')).toHaveText('—');
+    await expect(page.locator('#pr-cost-result')).toHaveText('—');
+    await expect(page.locator('#pr-cpm')).toHaveAttribute('aria-invalid','true');
+    await page.locator('[data-pr-reset]').click();
+    await expect(page.locator('#pr-view-result')).toHaveText('۱۰٬۰۰۰');
+    await expect(page.locator('#pr-cost-result')).toHaveText('۲۰');
+    await page.locator('.pr-section-nav a[href="#budget-decisions"]').click();
+    await expect(page).toHaveURL(/#budget-decisions$/);
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+2)).toBe(true);
+  }
+});
+
+test('Pricing Orbit spotlight respects reduced motion',async ({page})=>{
+  await page.setViewportSize({width:1440,height:900});
+  await page.emulateMedia({reducedMotion:'no-preference'});
+  await assertPage(page,'/pricing/');
+  await expect(page.locator('body')).toHaveClass(/pr-motion-ready/);
+  const card=page.locator('.pr-fee');
+  await card.scrollIntoViewIfNeeded();
+  await card.hover();
+  await expect(card).toHaveClass(/pr-spot-active/);
+  await page.emulateMedia({reducedMotion:'reduce'});
+  await expect(card).not.toHaveClass(/pr-spot-active/);
+});
+
+test.describe('Pricing no-script experience',()=>{
+  test.use({javaScriptEnabled:false});
+  test('educational example and CTAs remain available',async({page})=>{
+    await page.goto('/pricing/');
+    await expect(page.locator('#pr-calc-example')).toBeVisible();
+    await expect(page.locator('[data-pr-calculator]')).toBeHidden();
+    await expect(page.locator('.pr-actions .btn-primary')).toHaveAttribute('href',/accounts\/register/);
+    await page.locator('.pr-detail summary').first().click();
+    await expect(page.locator('.pr-detail').first()).toHaveAttribute('open','');
+  });
+});
