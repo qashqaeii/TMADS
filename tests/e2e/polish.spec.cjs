@@ -200,3 +200,30 @@ test.describe('Features no-script experience',()=>{
     await expect(page.locator('.fx-cta-button')).toBeVisible();
   });
 });
+
+
+test('Transparent feature artwork has no masks or frames and stays clear of text', async ({page}) => {
+  test.setTimeout(60000);
+  for (const width of [320, 768, 1440]) {
+    await page.setViewportSize({width,height:900});
+    await page.emulateMedia({reducedMotion:'reduce'});
+    await assertPage(page,'/features/');
+    await expect(page.locator('.fx-hero-art')).toHaveAttribute('src', /telegram_glassmorphism_analytics_hero(?:\.optimized)?\.webp/);
+    const art=page.locator('.fx-page :is(.fx-hero-art,.fx-card-art,.fx-advanced-art,.fx-guide-art,.fx-cta-illustration)');
+    for (const image of await art.all()) {
+      await image.scrollIntoViewIfNeeded();
+      await expect.poll(() => image.evaluate(el=>el.complete && el.naturalWidth>0)).toBe(true);
+      const style=await image.evaluate(el=>({mask:getComputedStyle(el).maskImage,fit:getComputedStyle(el).objectFit}));
+      expect(style.mask).toBe('none');
+      expect(style.fit).toBe('contain');
+    }
+    const collisions=await page.locator('.fx-core-card').evaluateAll(cards=>cards.map(card=>{
+      const a=card.querySelector('.fx-core-visual').getBoundingClientRect();
+      const b=card.querySelector('.fx-card-copy').getBoundingClientRect();
+      return Math.max(0,Math.min(a.right,b.right)-Math.max(a.left,b.left))*Math.max(0,Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top));
+    }));
+    expect(collisions.every(area=>area<2)).toBe(true);
+    await expect(page.locator('.fx-hero-image')).toHaveCSS('background-color','rgba(0, 0, 0, 0)');
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+2)).toBe(true);
+  }
+});

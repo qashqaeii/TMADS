@@ -103,3 +103,14 @@ def test_transparent_master_used_when_derivative_absent():
         patch("apps.core.templatetags.features_assets.static", side_effect=lambda path: path),
     ):
         assert feature_asset(role) == expected
+
+
+@pytest.mark.django_db
+def test_features_render_transparent_art_in_all_scenes(client):
+    html = client.get(reverse("public:features")).content.decode()
+    for stem in set(TRANSPARENT_ART.values()):
+        assert f"img/features/{stem}." in html
+    assert 'class="fx-hero-halo"' in html
+    assert html.count('class="fx-guide-art"') == 4
+    assert 'class="fx-cta-orbit"' in html
+    assert html.count('class="fx-audience-chip"') == 2
