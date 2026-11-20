@@ -2,8 +2,7 @@
 {% load core_filters humanize static %}
 {% block container_class %}container-wide{% endblock %}
 {% block page_title %}داشبورد{% endblock %}
-{% block extra_head %}<link rel="stylesheet" href="{% static 'css/gramads-workspace-system.css' %}">
-<link rel="stylesheet" href="{% static 'css/gramads-overview.css' %}">{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/gramads-overview.css' %}">{% endblock %}
 {% block charts_head %}
 {% if has_chart %}{% include "includes/charts_exec_scripts.html" %}{% endif %}
 {% endblock %}

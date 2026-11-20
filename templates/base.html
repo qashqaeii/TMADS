@@ -30,6 +30,8 @@
   <script defer src="{% static 'js/tmads-tooltips.js' %}"></script>
   {% block extra_head %}{% endblock %}
   <link rel="stylesheet" href="{% static 'css/gramads-brand.css' %}">
+  <link rel="stylesheet" href="{% static 'css/gramads-workspace-system.css' %}">
+  <link rel="stylesheet" href="{% static 'css/gramads-workspace-pages.css' %}">
   {% block charts_head %}{% endblock %}
 </head>
 <body class="app-body ui-final {% block body_class %}{% endblock %}">
@@ -46,11 +48,11 @@
     {% endfor %}
   </div>
   {% endif %}
-  <dialog class="ui-dialog" id="ui-confirmation" aria-labelledby="ui-confirm-title" aria-describedby="ui-confirm-description">
+  <dialog class="ui-dialog ga-confirm-dialog" id="ui-confirmation" aria-labelledby="ui-confirm-title" aria-describedby="ui-confirm-description">
     <form method="dialog" class="ui-dialog__inner">
       <header class="ui-dialog__header">
-        <span class="ui-dialog__symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="alert-triangle" size="md" %}</span>
-        <button type="submit" value="cancel" class="ui-icon-button" aria-label="بستن">{% include "includes/lucide_icon.html" with name="x" size="sm" %}</button>
+        <span class="ui-dialog__symbol" aria-hidden="true">{% include "includes/gramads_workspace_icon.html" with name="alert-triangle" size="md" %}</span>
+        <button type="submit" value="cancel" class="ui-icon-button" aria-label="بستن">{% include "includes/gramads_workspace_icon.html" with name="x" size="sm" %}</button>
       </header>
       <h2 id="ui-confirm-title">تأیید عملیات</h2>
       <p id="ui-confirm-description"></p>

@@ -1,0 +1,73 @@
+/* GramAds workspace rollout. Internal pages only. Reference: /app/. */
+.ui-final.is-app.ga-workspace-system{
+ --ui-action:var(--gw-accent);--ui-action-hover:var(--gw-accent-deep);
+ --ui-ink:var(--gw-ink);--ui-muted:var(--gw-muted);--ui-border:var(--gw-stroke);
+ --ui-panel:var(--gw-surface);--ui-canvas:var(--gw-canvas);--ui-soft:var(--gw-soft);
+ --ui-focus:var(--gw-accent);--ui-radius:var(--gw-radius);--ui-control-radius:var(--gw-radius-control);
+ --ui-shadow:var(--gw-shadow);--ui-motion:var(--gw-fast) var(--gw-ease);
+ --ui-danger:var(--gw-danger);--ui-success:var(--gw-success);--ui-warning:var(--gw-warning);
+}
+.ui-final.is-app .app-main{background:var(--gw-canvas)}
+.ui-final.is-app .topbar--premium{background:#ffffffef;border-bottom:1px solid var(--gw-stroke);box-shadow:0 2px 12px #19395b05}
+.ui-final.is-app .sidebar-link{transition:background var(--gw-fast) var(--gw-ease),color var(--gw-fast) var(--gw-ease)}
+.ui-final.is-app .sidebar-link.active{box-shadow:inset -2px 0 0 #79c9ff;background:#ffffff0e}
+.ui-final.is-app .app-content:not(:has(.ga-command)){padding-block:14px 26px}
+.ui-final.is-app .page-frame:not(:has(.ga-command)){max-inline-size:1480px;min-inline-size:0}
+.ui-final.is-app .page-frame:not(:has(.ga-command)) :is(.app-stack,.wizard-shell){gap:var(--gw-gap);min-width:0}
+.ui-final.is-app .page-frame .ga-page-heading-icon{display:grid;place-items:center;width:34px;height:34px;flex:none;border:1px solid #d9e6f5;border-radius:10px;background:linear-gradient(145deg,#fff,#e7f1fd);color:var(--gw-accent)}
+.ui-final.is-app .page-frame :is(.dash-header,.ui-page-heading){min-height:44px;padding-block:0 3px;margin-block:0 2px;gap:8px 14px;align-items:center;background:none;box-shadow:none;border:0}
+.ui-final.is-app .dash-header__main{min-width:0;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.ui-final.is-app .dash-header__title-row{gap:7px;align-items:center}
+.ui-final.is-app .dash-header h1{font-size:clamp(1.22rem,1.8vw,1.55rem);line-height:1.4;font-weight:750;margin:0;color:var(--gw-ink);letter-spacing:0;overflow-wrap:anywhere}
+.ui-final.is-app .dash-header .dash-header__kicker{display:none}
+.ui-final.is-app .dash-header :is(.page-sub,.dash-header__hint){font-size:.77rem;line-height:1.6;margin:0;color:var(--gw-muted)}
+.ui-final.is-app .dash-header .page-sub{border-inline-start:1px solid var(--gw-stroke);padding-inline-start:9px;max-width:100%}
+.ui-final.is-app .page-frame:not(:has(.ga-command)) :is(.card,.table-card,.filter-exec-shell,.info-module,.detail-panel){border:1px solid var(--gw-stroke);border-radius:var(--gw-radius);box-shadow:var(--gw-shadow)}
+.ui-final.is-app .page-frame:not(:has(.ga-command)) :is(.card-pad,.card--lift:not(.table-card)){padding:16px}
+.ui-final.is-app .page-frame:not(:has(.ga-command)) :is(.section-title,.dash-panel__title){font-size:.97rem;line-height:1.5;letter-spacing:0;font-weight:700;color:var(--gw-ink)}
+.ui-final.is-app .page-frame:not(:has(.ga-command)) .btn{min-height:38px;border-radius:var(--gw-radius-control);font-size:.82rem;font-weight:650}
+.ui-final.is-app .page-frame:not(:has(.ga-command)) .btn-sm{min-height:34px;padding:6px 10px}
+.ui-final.is-app .page-frame:not(:has(.ga-command)) .btn-primary{background:linear-gradient(120deg,#0b79c9,#155bb8);border-color:#1768bb;box-shadow:0 3px 8px #155cb51c}
+.ui-final.is-app .page-frame:not(:has(.ga-command)) .btn-primary:disabled{opacity:.6}
+.ui-final.is-app .page-frame:not(:has(.ga-command)) :is(input:not([type=checkbox],[type=radio],[type=hidden],[type=file],[type=range]),select,textarea){border-color:var(--gw-stroke);border-radius:var(--gw-radius-control);min-width:0}
+.ui-final.is-app .page-frame:not(:has(.ga-command)) :is(input,select,textarea):focus-visible{outline:2px solid #1768bb;outline-offset:2px;box-shadow:none}
+.ui-final.is-app .page-frame:not(:has(.ga-command)) .field label{font-size:.79rem;font-weight:650}
+.ui-final.is-app .page-frame:not(:has(.ga-command)) .field-help{font-size:.72rem;line-height:1.7}
+.ui-final.is-app .page-frame:not(:has(.ga-command)) .table-wrap,.ui-final.is-app .page-frame:not(:has(.ga-command)) .table-scroll{max-width:100%;overflow-x:auto;overscroll-behavior-inline:contain;scrollbar-width:thin}
+.ui-final.is-app .page-frame:not(:has(.ga-command)) .data-table{font-size:.81rem;font-variant-numeric:tabular-nums}
+.ui-final.is-app .page-frame:not(:has(.ga-command)) .data-table :is(th,td){padding:10px 12px;vertical-align:middle}
+.ui-final.is-app .page-frame:not(:has(.ga-command)) .data-table th{background:#f1f5fa;color:var(--gw-muted);font-size:.73rem;letter-spacing:0}
+.ui-final.is-app .page-frame:not(:has(.ga-command)) .data-table tbody tr>td{border-bottom:1px solid #eaf0f6;transition:background-color var(--gw-fast) var(--gw-ease)}
+.ui-final.is-app .page-frame:not(:has(.ga-command)) .data-table tbody tr:last-child>td{border-bottom:0}
+.ui-final.is-app .page-frame:not(:has(.ga-command)) .status{border-radius:6px;font-weight:650;line-height:1.5;white-space:normal}
+.ui-final.is-app .page-frame:not(:has(.ga-command)) .ui-target-symbol{background:linear-gradient(145deg,#eef4fc,#e1edfb);border:1px solid #e0eaf6;border-radius:10px;color:var(--gw-accent)}
+.ui-final.is-app .page-frame:not(:has(.ga-command)) .ui-empty{padding:24px 16px;gap:9px;text-align:center}
+.ui-final.is-app :is(.topbar-account-menu,.campaign-actions-menu__panel){border:1px solid var(--gw-stroke);border-radius:12px;box-shadow:0 12px 35px #19395b19}
+.ui-final.is-app .ga-confirm-dialog{width:min(440px,calc(100% - 28px));border:1px solid #d9e6f5;border-radius:18px;box-shadow:0 24px 80px #10294d38;background:#fff}
+.ui-final.is-app .ga-confirm-dialog::backdrop{background:#10243d75;backdrop-filter:blur(5px)}
+.ui-final.is-app .ga-confirm-dialog .ui-dialog__inner{padding:22px;gap:12px}
+.ui-final.is-app .ga-confirm-dialog h2{font-size:1.15rem;color:var(--gw-ink)}
+.ui-final.is-app .ga-confirm-dialog .ui-dialog__symbol{border-radius:12px}
+.ui-final.is-app .ga-confirm-dialog .ui-dialog__actions{padding-top:12px;margin-top:5px;gap:8px;border-color:var(--gw-stroke)}
+.ui-final.is-app .ga-confirm-dialog .ui-dialog__actions>.btn{min-height:42px;min-width:96px;border-radius:9px}
+.ui-final.is-app .ga-confirm-dialog .ui-icon-button .ga-ws-icon{width:18px;height:18px}
+.ui-final.is-app .toast-stack .ui-notice{border-radius:12px;box-shadow:0 8px 25px #19395b18}
+@media(hover:hover) and (pointer:fine){
+ .ui-final.is-app .page-frame:not(:has(.ga-command)) .btn:not(:disabled):hover{box-shadow:0 3px 10px #19395b10}
+ .ui-final.is-app .page-frame:not(:has(.ga-command)) .data-table tbody tr:hover>td{background:#f2f7fd}
+}
+@media(prefers-reduced-motion:no-preference){
+ @keyframes gwDialogEnter{from{opacity:0;transform:translateY(6px) scale(.985)}to{opacity:1;transform:none}}
+ .ui-final.is-app .ga-confirm-dialog[open]{animation:gwDialogEnter 220ms var(--gw-ease)}
+ .ui-final.is-app .page-frame:not(:has(.ga-command)) :is(.btn,.ui-ticket-arrow,.ui-policy-chevron){transition:background var(--gw-fast) var(--gw-ease),border-color var(--gw-fast) var(--gw-ease),box-shadow var(--gw-normal) var(--gw-ease),transform var(--gw-fast) var(--gw-ease)}
+ .ui-final.is-app .page-frame:not(:has(.ga-command)) .btn:active:not(:disabled){transform:scale(.985)}
+}
+@media(prefers-reduced-motion:reduce){.ui-final.is-app :is(.ga-confirm-dialog,.ga-confirm-dialog::backdrop,.sidebar-link,.btn,.data-table td){animation:none!important;transition:none!important;transform:none!important}}
+@media(max-width:600px){
+ .ui-final.is-app .app-content:not(:has(.ga-command)){padding-block:10px 20px}
+ .ui-final.is-app .dash-header .page-sub{border:0;padding:0}
+ .ui-final.is-app .page-frame:not(:has(.ga-command)) :is(.card-pad,.card--lift:not(.table-card)){padding:12px}
+ .ui-final.is-app .page-frame:not(:has(.ga-command)) .btn{min-height:44px}
+ .ui-final.is-app .ga-confirm-dialog .ui-dialog__inner{padding:16px}
+ .ui-final.is-app .ga-confirm-dialog .ui-dialog__actions>.btn{flex:1}
+}
