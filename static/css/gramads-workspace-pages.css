@@ -19,7 +19,7 @@
 .ui-final.is-app .dash-header__main{min-width:0;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
 .ui-final.is-app .dash-header__title-row{gap:7px;align-items:center}
 .ui-final.is-app .dash-header h1{font-size:clamp(1.22rem,1.8vw,1.55rem);line-height:1.4;font-weight:750;margin:0;color:var(--gw-ink);letter-spacing:0;overflow-wrap:anywhere}
-.ui-final.is-app .dash-header .dash-header__kicker{display:none}
+.ui-final.is-app .dash-header .dash-header__kicker{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;margin:0;padding:0}
 .ui-final.is-app .dash-header :is(.page-sub,.dash-header__hint){font-size:.77rem;line-height:1.6;margin:0;color:var(--gw-muted)}
 .ui-final.is-app .dash-header .page-sub{border-inline-start:1px solid var(--gw-stroke);padding-inline-start:9px;max-width:100%}
 .ui-final.is-app .page-frame:not(:has(.ga-command)) :is(.card,.table-card,.filter-exec-shell,.info-module,.detail-panel){border:1px solid var(--gw-stroke);border-radius:var(--gw-radius);box-shadow:var(--gw-shadow)}
@@ -42,7 +42,7 @@
 .ui-final.is-app .page-frame:not(:has(.ga-command)) .status{border-radius:6px;font-weight:650;line-height:1.5;white-space:normal}
 .ui-final.is-app .page-frame:not(:has(.ga-command)) .ui-target-symbol{background:linear-gradient(145deg,#eef4fc,#e1edfb);border:1px solid #e0eaf6;border-radius:10px;color:var(--gw-accent)}
 .ui-final.is-app .page-frame:not(:has(.ga-command)) .ui-empty{padding:24px 16px;gap:9px;text-align:center}
-.ui-final.is-app :is(.topbar-account-menu,.campaign-actions-menu__panel){border:1px solid var(--gw-stroke);border-radius:12px;box-shadow:0 12px 35px #19395b19}
+.ui-final.is-app :is(.topbar-account-menu,.exec-menu__panel,.row-actions__menu){border:1px solid var(--gw-stroke);border-radius:12px;box-shadow:0 12px 35px #19395b19}
 .ui-final.is-app .ga-confirm-dialog{width:min(440px,calc(100% - 28px));border:1px solid #d9e6f5;border-radius:18px;box-shadow:0 24px 80px #10294d38;background:#fff}
 .ui-final.is-app .ga-confirm-dialog::backdrop{background:#10243d75;backdrop-filter:blur(5px)}
 .ui-final.is-app .ga-confirm-dialog .ui-dialog__inner{padding:22px;gap:12px}
@@ -62,7 +62,7 @@
  .ui-final.is-app .page-frame:not(:has(.ga-command)) :is(.btn,.ui-ticket-arrow,.ui-policy-chevron){transition:background var(--gw-fast) var(--gw-ease),border-color var(--gw-fast) var(--gw-ease),box-shadow var(--gw-normal) var(--gw-ease),transform var(--gw-fast) var(--gw-ease)}
  .ui-final.is-app .page-frame:not(:has(.ga-command)) .btn:active:not(:disabled){transform:scale(.985)}
 }
-@media(prefers-reduced-motion:reduce){.ui-final.is-app :is(.ga-confirm-dialog,.ga-confirm-dialog::backdrop,.sidebar-link,.btn,.data-table td){animation:none!important;transition:none!important;transform:none!important}}
+@media(prefers-reduced-motion:reduce){.ui-final.is-app :is(.ga-confirm-dialog,.sidebar-link,.btn,.data-table td){animation:none!important;transition:none!important;transform:none!important}}
 @media(max-width:600px){
  .ui-final.is-app .app-content:not(:has(.ga-command)){padding-block:10px 20px}
  .ui-final.is-app .dash-header .page-sub{border:0;padding:0}
@@ -283,3 +283,24 @@
 }
 @media(prefers-reduced-motion:reduce){.ui-final.is-app :is(.kpi-exec,.sms-kpi){animation:none!important;transition:none!important;transform:none!important}}
 @media(max-width:600px){.ui-final.is-app .ui-ops .kpi-exec{padding:10px;min-height:88px}.ui-final.is-app .ui-ops .filter-exec-shell{padding:10px}.ui-final.is-app .ui-ops .ui-release-summary{padding:12px}.ui-final.is-app .ui-ops .ui-release-numbers{width:100%}.ui-final.is-app .ui-ops .ui-release-numbers>span{flex:1}.ui-final.is-app .ui-ops .ui-remote-ops-card{padding:12px}}
+
+/* Overlay finishing: existing disclosure and native dialog semantics stay intact. */
+.ui-final.is-app :is(.exec-menu__panel,.row-actions__menu,.topbar-account-menu){padding:5px;border:1px solid var(--gw-stroke);border-radius:12px;background:#fff;box-shadow:0 12px 32px #182f5224;max-inline-size:calc(100vw - 24px)}
+.ui-final.is-app :is(.exec-menu__item,.topbar-account-menu__item){border-radius:8px;min-height:38px;font-size:.8rem}
+.ui-final.is-app .row-actions__more{width:34px;min-width:34px;padding:5px;display:inline-grid;place-items:center}
+.ui-final.is-app .row-actions__more .ga-ws-icon{width:18px;height:18px}
+.ui-final.is-app .exec-menu__item--danger{color:var(--gw-danger)}
+.ui-final.is-app .exec-menu__item--danger button{color:inherit}
+.ui-final.is-app .ga-confirm-dialog.ui-dialog--primary .ui-dialog__symbol{color:var(--gw-accent);background:#e9f2ff}
+.ui-final.is-app .ga-confirm-dialog .ui-dialog__actions>.btn-primary{background:linear-gradient(120deg,#0b79c9,#155bb8);color:#fff}
+.ui-final.is-app .ui-ops .kpi-exec--focus{background:radial-gradient(ellipse at 15% 0%,#3889dd53,transparent 65%),linear-gradient(125deg,#113b77,#1769c5);border-color:#245fa2;color:#fff}
+.ui-final.is-app .ui-ops .kpi-exec--focus :is(.kpi-exec__value,.kpi-exec__label){color:#fff}
+.ui-final.is-app .ui-ops .kpi-exec--focus .kpi-exec__icon{color:#fff;background:#ffffff20}
+@media (prefers-reduced-motion:no-preference){
+ @keyframes gwMenuEnter{from{opacity:0;translate:0 -3px}to{opacity:1;translate:0 0}}
+ .ui-final.is-app details[open] > :is(.exec-menu__panel,.row-actions__menu){animation:gwMenuEnter 150ms var(--gw-ease)}
+}
+@media(prefers-reduced-motion:reduce){
+ .ui-final.is-app .ga-confirm-dialog::backdrop,.ui-final.is-app :is(.exec-menu__panel,.row-actions__menu){animation:none!important;transition:none!important}
+}
+@media(max-width:600px){.ui-final.is-app .row-actions__more,.ui-final.is-app :is(.exec-menu__item,.topbar-account-menu__item){min-height:44px}.ui-final.is-app .row-actions__more{min-width:44px}}

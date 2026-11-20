@@ -13,3 +13,10 @@ npm test
 ```
 
 Public pages, password visibility, customer navigation, local amount selection and draft dialog cancellation at 390, 768 and 1440px. No actual financial or Telegram write is performed by these tests. The customer and draft tests explicitly skip when their required fixture is absent. Screenshots and traces are generated on failure. Manual visual review, staff review, all wizard stages, accessibility, populated/empty/error and real sandbox-provider paths remain necessary. Run Django regression tests separately with pytest.
+
+## GramAds workspace reference
+The responsive route sweep covers all requested customer and operator sections at 375, 768 and 1440px. Set `TMADS_E2E_OPS_USERNAME` and `TMADS_E2E_OPS_PASSWORD` for a disposable authorized operator. The synthetic confirmation test opens and cancels a local form without submitting any server action. Existing browser checks require an isolated running Django instance; the quality CI does not execute them.
+
+```powershell
+npx playwright test workspace-reference.spec.cjs
+```
