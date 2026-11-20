@@ -150,11 +150,11 @@
 .ui-final .gramads-overview .dash-campaign-card__head{display:flex;align-items:center;justify-content:flex-start;gap:7px;flex-wrap:wrap}
 .ui-final .gramads-overview .dash-campaign-card__name{font-size:.88rem;font-weight:700}
 .ui-final .gramads-overview .dash-campaign-card__dest{margin:0;justify-content:flex-start;width:fit-content;max-width:100%}
-.ui-final .ui-dashboard.gramads-overview .dash-campaign-card__stats{grid-area:stats;grid-row:auto;grid-column:auto;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0;padding:0;align-items:center}
+.ui-final .ui-dashboard.gramads-overview .dash-campaign-card__stats{grid-row:auto;grid-column:auto;grid-area:stats;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0;padding:0;align-items:center}
 .ui-final .gramads-overview .dash-campaign-stat{border:0;padding:0;text-align:center;min-width:0}
-.ui-final .gramads-overview .dash-campaign-stat__label{display:none}
+.ui-final .gramads-overview .dash-campaign-stat__label{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 .ui-final .gramads-overview .dash-campaign-stat__value{font-size:.91rem}
-.ui-final .ui-dashboard.gramads-overview .dash-campaign-card__meta{grid-area:meta;grid-row:auto;grid-column:auto;display:flex;flex-direction:row;justify-content:flex-end;align-items:center;gap:7px;max-width:none;min-width:0}
+.ui-final .ui-dashboard.gramads-overview .dash-campaign-card__meta{grid-row:auto;grid-column:auto;grid-area:meta;display:flex;flex-direction:row;justify-content:flex-end;align-items:center;gap:7px;max-width:none;min-width:0}
 .ui-final .gramads-overview .dash-campaign-card__when{font-size:.69rem;white-space:normal;line-height:1.7}
 .ga-bottom-rail{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:14px;align-items:start}
 .ga-activity-empty{display:flex;gap:12px;align-items:center;margin:0 16px 16px;padding:16px;border-radius:12px;background:#f5f9fe}
@@ -165,6 +165,26 @@
 .ga-quick-nav a{display:flex;align-items:center;gap:7px;min-width:0;padding:10px 9px;border:1px solid #e2ebf5;border-radius:10px;font-size:.78rem;color:#204b76;background:#f9fbfe}
 .ga-quick-nav a span:not(.icon-shell){flex:1;overflow-wrap:anywhere}
 .ga-quick-nav a:hover{background:#eaf3ff;border-color:#b4d8fe}
-@container ga-overview (max-width:800px){.ui-final .ui-dashboard.gramads-overview .dash-workspace.ui-dashboard-workspace{grid-template-columns:minmax(0,1fr)}.ui-final .ui-dashboard.gramads-overview .dash-kpi-board__grid{grid-template-columns:repeat(2,minmax(0,1fr))}.ga-campaign-columns{display:none}.ui-final .ui-dashboard.gramads-overview .dash-campaign-card{grid-template-areas:"body meta" "stats stats";grid-template-columns:minmax(0,1fr) minmax(75px,auto);gap:9px;padding:12px 7px}.ui-final .gramads-overview .dash-campaign-stat__label{display:block}.ui-final .ui-dashboard.gramads-overview .dash-campaign-card__stats{grid-area:stats;border-top:1px solid #edf2f8;padding-top:8px}.ga-bottom-rail{grid-template-columns:minmax(0,1fr)}}
+@container ga-overview (max-width:800px){.ui-final .ui-dashboard.gramads-overview .dash-workspace.ui-dashboard-workspace{grid-template-columns:minmax(0,1fr)}.ui-final .ui-dashboard.gramads-overview .dash-kpi-board__grid{grid-template-columns:repeat(2,minmax(0,1fr))}.ga-campaign-columns{display:none}.ui-final .ui-dashboard.gramads-overview .dash-campaign-card{grid-template-areas:"body meta" "stats stats";grid-template-columns:minmax(0,1fr) minmax(75px,auto);gap:9px;padding:12px 7px}.ui-final .gramads-overview .dash-campaign-stat__label{display:block;position:static;width:auto;height:auto;margin:0;overflow:visible;clip-path:none;white-space:normal}.ui-final .ui-dashboard.gramads-overview .dash-campaign-card__stats{grid-area:stats;border-top:1px solid #edf2f8;padding-top:8px}.ga-bottom-rail{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:520px){.ui-final .ui-dashboard.gramads-overview .dash-kpi-tile{min-height:110px;padding:11px;gap:8px}.ui-final .gramads-overview .dash-kpi-tile__glyph{width:29px;height:29px}.ui-final .gramads-overview .dash-kpi-tile__head .dash-kpi-tile__name{font-size:.72rem}.ui-final .gramads-overview .dash-hero__toolbar{width:100%}.ui-final .gramads-overview .dash-hero__cta{flex:1}.ui-final .gramads-overview .dash-hero__chip{font-size:.7rem}.ui-final .gramads-overview .dash-campaign-card__meta{flex-direction:column;align-items:flex-end}.ga-campaign-icon{width:32px;height:32px}.ui-final .gramads-overview .dash-campaign-card__name{font-size:.81rem}}
 @media(prefers-reduced-motion:reduce){.ui-final .ui-dashboard.gramads-overview .dash-kpi-tile{transition:none}.ui-final .ui-dashboard.gramads-overview .dash-kpi-tile:hover{transform:none}}
+
+/* Notification centre shares the overview surface and density. */
+.ui-final .ga-notifications{max-width:1040px;margin-inline:auto;width:100%}
+.ga-notifications__hero{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;padding:0 0 8px}
+.ga-notifications__lead{display:flex;align-items:center;gap:12px;min-width:0}
+.ga-notifications__symbol{width:52px;height:52px;display:grid;place-items:center;flex:none;background:linear-gradient(145deg,#e3f1ff,#f1f7ff);border:1px solid #d4e7fc;border-radius:16px;color:#1769bc}
+.ga-notifications__lead h1{font-size:clamp(1.45rem,2vw,1.8rem);line-height:1.4;margin:0;color:#12304f}
+.ga-notifications__lead p{font-size:.82rem;color:#536e87;margin:4px 0 0;line-height:1.8}
+.ga-notifications__hero .btn{border-radius:11px;min-height:42px;gap:6px}
+.ui-final .ga-notifications .notification-panel{border:1px solid #dbe7f3;border-radius:18px;box-shadow:0 5px 17px #173d600c;background:#fff}
+.ga-notifications__panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:15px 18px;border-bottom:1px solid #e8eff7}
+.ga-notifications__panel-head h2{font-size:.95rem;color:#193c5e;margin:0}
+.ga-notifications__panel-head span{font-size:.74rem;color:#536e87}
+.ui-final .ga-notifications .notification-item{display:flex;align-items:flex-start;gap:13px;padding:17px 18px;border-color:#e8eff7}
+.ui-final .ga-notifications .notification-item.is-unread{background:#f0f7ff;border-inline-start:3px solid #2785ce}
+.ga-notification-icon{width:38px;height:38px;flex:none;display:grid;place-items:center;border-radius:11px;color:#286db5;background:#e6effa}
+.ga-notifications .activity-feed__body{min-width:0;flex:1}
+.ga-notifications .ui-notification-heading strong{overflow-wrap:anywhere}
+.ui-final .ga-notifications .activity-feed__empty{padding:44px 16px;min-height:245px}
+@media(max-width:520px){.ga-notifications__hero form{width:100%}.ga-notifications__hero .btn{width:100%}.ui-final .ga-notifications .notification-item{padding:14px 12px}}

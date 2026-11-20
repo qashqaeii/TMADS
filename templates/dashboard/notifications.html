@@ -3,18 +3,14 @@
 {% block page_title %}اعلان‌ها{% endblock %}
 {% block container_class %}container-wide{% endblock %}
 {% block content %}
-<div class="app-stack ui-notifications">
-{% include "includes/dash_header.html" with eyebrow="پیام" title="اعلان‌ها" %}
-{% if notifications %}
-<div class="dash-toolbar">
-  <form method="post">{% csrf_token %}<button class="btn btn-ghost btn-sm" type="submit">خواندن همهٔ اعلان‌ها</button></form>
-</div>
-{% endif %}
-<article class="card card--lift notification-panel">
+<div class="app-stack ui-notifications ga-notifications">
+<header class="ga-notifications__hero"><div class="ga-notifications__lead"><span class="ga-notifications__symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="bell" size="md" %}</span><div><h1>اعلان‌ها</h1><p>به‌روزرسانی کمپین‌ها و پیام‌های حساب در یک نگاه</p></div></div>
+{% if notifications %}<form method="post">{% csrf_token %}<button class="btn btn-ghost btn-sm" type="submit">{% include "includes/lucide_icon.html" with name="check-check" size="sm" %} خواندن همهٔ اعلان‌ها</button></form>{% endif %}</header>
+<article class="card card--lift notification-panel"><header class="ga-notifications__panel-head"><h2>آخرین اعلان‌ها</h2><span>{{ notifications|length|format_count }} اعلان</span></header>
   <ul class="activity-feed">
     {% for n in notifications %}
     <li class="activity-feed__item notification-item {% if not n.is_read %}is-unread{% endif %}">
-      <span class="activity-feed__dot" aria-hidden="true"></span>
+      <span class="ga-notification-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="bell" size="sm" %}</span>
       <div class="activity-feed__body">
         <div class="ui-notification-heading"><strong>{{ n.title }}</strong>{% if not n.is_read %}<span class="status status-info">جدید</span>{% endif %}</div>
         {% if n.body %}<p class="ui-notification-message">{{ n.body }}</p>{% endif %}

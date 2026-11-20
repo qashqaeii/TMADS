@@ -600,3 +600,24 @@ test('GramAds brand renders without distortion across public and auth screens',a
     }
   }
 });
+
+test('GramAds overview responsive composition', async ({page}) => {
+  test.skip(!username || !password, 'Set isolated local customer credentials.');
+  await page.goto('/accounts/login/');
+  await page.locator('#id_username').fill(username);
+  await page.locator('#id_password').fill(password);
+  await page.locator('form button[type="submit"]').click();
+  await expect(page.locator('.ui-shell')).toBeVisible();
+  for (const width of [375, 768, 1440]) {
+    await page.setViewportSize({width,height:900});
+    await assertPage(page,'/app/');
+    await expect(page.locator('.gramads-overview .dash-kpi-tile')).toHaveCount(4);
+    await expect(page.locator('.dash-board--campaigns')).toBeVisible();
+    await expect(page.locator('.ga-quick-nav a')).toHaveCount(4);
+    const campaign = await page.locator('.dash-board--campaigns').boundingBox();
+    const overview = await page.locator('.gramads-overview').boundingBox();
+    expect(campaign.width).toBeGreaterThan(overview.width * .95);
+    await assertPage(page,'/app/notifications/');
+    await expect(page.locator('.ga-notifications__hero')).toBeVisible();
+  }
+});
