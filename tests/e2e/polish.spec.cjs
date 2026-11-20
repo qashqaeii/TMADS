@@ -399,3 +399,45 @@ test.describe('FAQ without JavaScript',()=>{
     await expect(page.locator('.fq-support a')).toHaveAttribute('href',/contact/);
   });
 });
+
+
+test('Orbit legal documents retain semantic sections and responsive navigation', async ({page})=>{
+  test.setTimeout(60000);
+  for(const width of [320,768,1440]){
+    await page.setViewportSize({width,height:900});
+    await page.emulateMedia({reducedMotion:'reduce'});
+    for(const path of ['/legal/terms/','/legal/privacy/','/legal/refund/','/legal/content-policy/']){
+      await assertPage(page,path);
+      await expect(page.locator('.lg-tabs a[aria-current="page"]')).toHaveCount(1);
+      await expect(page.locator('#legal-document')).toBeVisible();
+      await expect(page.locator('[data-legal-print]')).toBeVisible();
+      const art=page.locator('.lg-hero-scene img');
+      await expect.poll(()=>art.evaluate(img=>img.complete&&img.naturalWidth>0)).toBe(true);
+      const toc=page.locator('[data-legal-section-link]').last();
+      const hash=await toc.getAttribute('href');
+      await toc.click();
+      expect(new URL(page.url()).hash).toBe(hash);
+      await expect(page.locator(hash)).toBeVisible();
+      expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+2)).toBe(true);
+    }
+  }
+});
+
+test('Legal print is invoked without requesting a server action', async ({page})=>{
+  await page.addInitScript(()=>{window.print=()=>{window.__legalPrintCalled=true;};});
+  await page.goto('/legal/terms/');
+  await page.locator('[data-legal-print]').click();
+  expect(await page.evaluate(()=>window.__legalPrintCalled)).toBe(true);
+});
+
+test.describe('Legal content without JavaScript',()=>{
+  test.use({javaScriptEnabled:false});
+  test('native contents links and visible clauses',async({page})=>{
+    await page.goto('/legal/terms/');
+    await expect(page.locator('.lg-clause')).toHaveCount(4);
+    await expect(page.locator('[data-legal-print]')).toBeHidden();
+    await page.locator('a[href="#legal-clause-4"]').click();
+    await expect(page).toHaveURL(/#legal-clause-4$/);
+    await expect(page.locator('#legal-clause-4')).toBeVisible();
+  });
+});
