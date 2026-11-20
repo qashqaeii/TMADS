@@ -5,6 +5,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#146CA8">
+  <meta name="application-name" content="GramAds">
+  <link rel="icon" type="image/webp" href="{% static 'img/logo/gramads-logo-mark.webp' %}">
   <title>{% if seo.title %}{{ seo.title }}{% else %}{% block title %}{{ PRODUCT_NAME }}{% endblock %}{% endif %}</title>
   {% include "includes/seo_meta.html" %}
   <link rel="stylesheet" href="{% static 'css/app.css' %}">
@@ -27,6 +29,7 @@
   <script defer src="{% static 'js/ui-auth.js' %}"></script>
   <script defer src="{% static 'js/tmads-tooltips.js' %}"></script>
   {% block extra_head %}{% endblock %}
+  <link rel="stylesheet" href="{% static 'css/gramads-brand.css' %}">
   {% block charts_head %}{% endblock %}
 </head>
 <body class="app-body ui-final {% block body_class %}{% endblock %}">

@@ -14,7 +14,7 @@
         <p class="orbit-hero-description">از انتخاب مخاطب تا بررسی بودجه و تحلیل عملکرد؛ کمپین‌های <bdi>Telegram Ads</bdi> را در یک فضای کاری فارسی مدیریت کنید.</p>
         <div class="orbit-actions">
           {% if user.is_authenticated %}<a class="btn btn-primary btn-lg" href="{% url 'dashboard:home' %}">ورود به داشبورد {% include "includes/lucide_icon.html" with name="arrow-left" size="btn" %}</a>{% else %}<a class="btn btn-primary btn-lg" href="{% url 'accounts:register' %}">ساخت اولین کمپین {% include "includes/lucide_icon.html" with name="arrow-left" size="btn" %}</a>{% endif %}
-          <a class="btn btn-ghost btn-lg" href="{% url 'public:how_it_works' %}">{% include "includes/lucide_icon.html" with name="play-circle" size="btn" %} آشنایی با تی‌ام‌ادز</a>
+          <a class="btn btn-ghost btn-lg" href="{% url 'public:how_it_works' %}">{% include "includes/lucide_icon.html" with name="play-circle" size="btn" %} آشنایی با گرام‌ادز</a>
         </div>
         <div class="orbit-proof">
           <div><span>{% include "includes/lucide_icon.html" with name="wallet" size="md" %}</span><strong>پیش‌فاکتور شفاف</strong></div>
@@ -24,7 +24,7 @@
       </div>
       <figure class="orbit-hero-figure">
         <div class="orbit-hero-scene" data-orbit-scene><div class="orbit-hero-halo" aria-hidden="true"></div><div class="orbit-hero-ring" aria-hidden="true"></div><img class="orbit-hero-art" src="{% landing_asset 'hero-dashboard' %}" width="1200" height="900" alt="" fetchpriority="high" decoding="async" data-landing-art><div class="orbit-hero-float orbit-float-top" aria-hidden="true">{% include "includes/lucide_icon.html" with name="target" size="md" %}<span>هدف‌گیری کمپین<small>انتخاب مخاطب</small></span></div><div class="orbit-hero-float orbit-float-bottom" aria-hidden="true">{% include "includes/lucide_icon.html" with name="line-chart" size="md" %}<span>تحلیل عملکرد<small>گزارش کمپین</small></span></div></div>
-        <figcaption>نمای مفهومی فضای کاری تی‌ام‌ادز؛ داده واقعی نیست.</figcaption>
+        <figcaption>نمای مفهومی فضای کاری گرام‌ادز؛ داده واقعی نیست.</figcaption>
       </figure>
     </div>
     <div class="orbit-hero-wave" aria-hidden="true"></div>
@@ -60,7 +60,7 @@
         <p class="orbit-kicker">{% include "includes/lucide_icon.html" with name="info" size="sm" %} Telegram Ads چیست؟</p>
         <h2 id="why-tmads">تبلیغات رسمی تلگرام، <em>با مدیریت فارسی</em></h2>
         <p>در پلتفرم تبلیغاتی تلگرام، پیام‌های اسپانسری در جایگاه‌های واجد شرایط نمایش داده می‌شوند. برخلاف خرید مستقیم پست، می‌توانید بودجه، هدف‌گیری و نرخ پیشنهاد نمایش (CPM) را مشخص کنید و آمار تبلیغ را بررسی کنید.</p>
-        <p>تی‌ام‌ادز مراحل برنامه‌ریزی، آماده‌سازی سفارش و مدیریت کمپین را در یک محیط یکپارچه فراهم می‌کند. انتشار به قابلیت‌های حساب و تأییدهای لازم وابسته است.</p>
+        <p>گرام‌ادز مراحل برنامه‌ریزی، آماده‌سازی سفارش و مدیریت کمپین را در یک محیط یکپارچه فراهم می‌کند. انتشار به قابلیت‌های حساب و تأییدهای لازم وابسته است.</p>
         <div class="orbit-banner-links"><a class="orbit-link" href="{% url 'public:how_it_works' %}">راهنمای شروع تبلیغات {% include "includes/lucide_icon.html" with name="arrow-left" size="sm" %}</a> <a class="orbit-link" href="{% url 'public:pricing' %}">نحوه محاسبه هزینه {% include "includes/lucide_icon.html" with name="arrow-left" size="sm" %}</a></div>
       </div>
       <div class="orbit-official-scene"><img class="orbit-official-art" src="{% landing_asset 'telegram-banner' %}" width="1100" height="619" alt="" loading="lazy" decoding="async" data-landing-art></div>

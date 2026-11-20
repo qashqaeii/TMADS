@@ -6,9 +6,9 @@
   <section class="container lg-hero" aria-labelledby="lg-title">
     <div class="lg-hero-copy">
       <nav class="lg-crumb" aria-label="مسیر صفحه"><a href="{% url 'public:home' %}">صفحه اصلی</a>{% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}<span aria-current="page">{{ title }}</span></nav>
-      <p class="lg-kicker">{% include "includes/lucide_icon.html" with name="shield-check" size="sm" %} مرکز حقوقی تی‌ام‌ادز</p>
+      <p class="lg-kicker">{% include "includes/lucide_icon.html" with name="shield-check" size="sm" %} مرکز حقوقی گرام‌ادز</p>
       <h1 id="lg-title">{{ title }}</h1>
-      <p>اسناد و سیاست‌های استفاده از پلتفرم تبلیغات تلگرام تی‌ام‌ادز</p>
+      <p>اسناد و سیاست‌های استفاده از پلتفرم تبلیغات تلگرام گرام‌ادز</p>
     </div>
     <figure class="lg-hero-scene"><div class="lg-ring" aria-hidden="true"></div><img src="{{ legal_art }}" alt="" width="400" height="400" fetchpriority="high" decoding="async" data-legal-art></figure>
   </section>
@@ -31,7 +31,7 @@
       <div class="lg-main">
         <div class="lg-notice">{% include "includes/lucide_icon.html" with name="info" size="md" %}<p><strong>در مرحله بررسی حقوقی</strong><br>این متن در مرحله بررسی حقوقی است. برای ابهام درباره شرایط یک سفارش، از مسیر پشتیبانی پیگیری کنید.</p></div>
         <article id="legal-document" class="lg-glass lg-document" aria-labelledby="legal-document-title">
-          <header class="lg-document-head"><span class="lg-document-icon">{% include "includes/lucide_icon.html" with name="file-text" size="md" %}</span><div><h2 id="legal-document-title">{{ legal_document.heading|default:title }}</h2><p>سند حقوقی تی‌ام‌ادز</p></div><button class="lg-print" type="button" data-legal-print hidden>{% include "includes/lucide_icon.html" with name="file-text" size="sm" %} چاپ سند</button></header>
+          <header class="lg-document-head"><span class="lg-document-icon">{% include "includes/lucide_icon.html" with name="file-text" size="md" %}</span><div><h2 id="legal-document-title">{{ legal_document.heading|default:title }}</h2><p>سند حقوقی گرام‌ادز</p></div><button class="lg-print" type="button" data-legal-print hidden>{% include "includes/lucide_icon.html" with name="file-text" size="sm" %} چاپ سند</button></header>
           {% if body_text %}
             {% if legal_document.intro %}<div class="lg-intro">{% include "includes/legal_blocks.html" with blocks=legal_document.intro only %}</div>{% endif %}
             {% for clause in legal_document.sections %}
@@ -40,7 +40,7 @@
           {% else %}<p>متن این صفحه در حال آماده‌سازی است.</p>{% endif %}
         </article>
         <div class="lg-support lg-glass">
-          <div><h2>برای درک شرایط نیاز به راهنمایی دارید؟</h2><p>برای پرسش درباره متن این صفحه یا وضعیت سفارش، از <a href="{% url 'public:contact' %}">پشتیبانی تی‌ام‌ادز</a> راهنمایی بگیرید.</p><a class="btn btn-primary" href="{% url 'public:contact' %}">ارتباط با پشتیبانی {% include "includes/lucide_icon.html" with name="arrow-left" size="sm" %}</a></div>
+          <div><h2>برای درک شرایط نیاز به راهنمایی دارید؟</h2><p>برای پرسش درباره متن این صفحه یا وضعیت سفارش، از <a href="{% url 'public:contact' %}">پشتیبانی گرام‌ادز</a> راهنمایی بگیرید.</p><a class="btn btn-primary" href="{% url 'public:contact' %}">ارتباط با پشتیبانی {% include "includes/lucide_icon.html" with name="arrow-left" size="sm" %}</a></div>
           <img src="{{ legal_support_art }}" alt="" width="150" height="150" loading="lazy" decoding="async" data-legal-art>
         </div>
       </div>

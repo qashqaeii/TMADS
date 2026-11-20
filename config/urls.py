@@ -1,5 +1,10 @@
+from django.conf import settings
 from django.contrib import admin
 from django.urls import include, path
+
+admin.site.site_header = f"مدیریت {settings.PRODUCT_NAME}"
+admin.site.site_title = settings.PRODUCT_NAME
+admin.site.index_title = "مدیریت سامانه"
 
 urlpatterns = [
     path("admin/", admin.site.urls),

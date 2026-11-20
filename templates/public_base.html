@@ -4,7 +4,7 @@
 {% block body_class %}is-public public-premium{% block public_page_class %}{% endblock %}{% endblock %}
 {% block body %}
 {% if request.resolver_match.url_name == "login" or request.resolver_match.url_name == "register" %}
-<header class="studio-auth-header"><div class="container studio-auth-nav"><a href="{% url 'public:home' %}" class="brand brand-lockup">{% include "includes/brand_mark.html" %}<span>{{ PRODUCT_NAME }}</span></a><a class="studio-back" href="{% url 'public:home' %}">بازگشت به سایت {% include "includes/lucide_icon.html" with name="arrow-left" size="sm" %}</a></div></header>
+<header class="studio-auth-header"><div class="container studio-auth-nav"><a href="{% url 'public:home' %}" class="brand brand-lockup">{% include "includes/brand_full.html" %}</a><a class="studio-back" href="{% url 'public:home' %}">بازگشت به سایت {% include "includes/lucide_icon.html" with name="arrow-left" size="sm" %}</a></div></header>
 {% else %}
 <header class="site-header site-header--exec ui-public-header">
   <div
@@ -15,8 +15,7 @@
   >
     <nav class="nav-bar nav-bar--exec public-nav-bar" aria-label="ناوبری اصلی">
       <a href="{% url 'public:home' %}" class="brand brand-lockup">
-        {% include "includes/brand_mark.html" %}
-        <span>{{ PRODUCT_NAME }}</span>
+        {% include "includes/brand_full.html" %}
       </a>
       <div class="nav-links nav-links--desktop">
         <a href="{% url 'public:features' %}" {% if request.resolver_match.namespace == 'public' and request.resolver_match.url_name == 'features' %}aria-current="page"{% endif %}>امکانات</a>
@@ -131,7 +130,7 @@
   <div class="container footer-grid footer-grid--rich footer-grid--public">
     <div class="footer-col">
       <a href="{% url 'public:home' %}" class="brand brand-lockup">{% include "includes/brand_mark.html" %}<span>{{ PRODUCT_NAME }}</span></a>
-      <p class="footer-tagline muted">تی‌ام‌ادز؛ محیط فارسی طراحی کمپین، برنامه‌ریزی بودجه و گزارش تبلیغات تلگرام.</p>
+      <p class="footer-tagline muted">گرام‌ادز؛ محیط فارسی طراحی کمپین، برنامه‌ریزی بودجه و گزارش تبلیغات تلگرام.</p>
     </div>
     <div class="footer-col">
       <h2>محصول</h2>
@@ -147,7 +146,7 @@
       <a href="{% url 'public:refund' %}">بازپرداخت</a>
       <a href="{% url 'public:content_policy' %}">سیاست محتوا</a>
     </div>
-    <div class="footer-col"><h2>تی‌ام‌ادز</h2>
+    <div class="footer-col"><h2>گرام‌ادز</h2>
       <a href="{% url 'public:about' %}">درباره ما</a>
       <a href="{% url 'public:contact' %}" {% if request.resolver_match.namespace == 'public' and request.resolver_match.url_name == 'contact' %}aria-current="page"{% endif %}>تماس</a>
     </div>

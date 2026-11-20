@@ -177,7 +177,7 @@ TELEGRAM_ADS_RELATED_ACCOUNTS_ENABLED = env.bool("TELEGRAM_ADS_RELATED_ACCOUNTS_
 TELEGRAM_ADS_WEBSITE_ENABLED = env.bool("TELEGRAM_ADS_WEBSITE_ENABLED", default=False)
 TELEGRAM_ADS_CUSTOMER_ASSETS_ENABLED = env.bool("TELEGRAM_ADS_CUSTOMER_ASSETS_ENABLED", default=False)
 
-# Transactional SMS — off until separate TMADS credentials/patterns are approved.
+# Transactional SMS — off until separate GramAds credentials/patterns are approved.
 SMS_ENABLED = env.bool("SMS_ENABLED", default=False)
 SMS_PROVIDER = env("SMS_PROVIDER", default="console").strip().lower()
 FARAZSMS_API_KEY = env("FARAZSMS_API_KEY", default="")
@@ -221,7 +221,11 @@ QUOTE_VALIDITY_SECONDS = env.int("QUOTE_VALIDITY_SECONDS", default=300)
 TON_PRICING_RISK_BUFFER_PERCENT = env.int("TON_PRICING_RISK_BUFFER_PERCENT", default=2)
 
 # Product branding (override via env when brand is finalized)
-PRODUCT_NAME = env("PRODUCT_NAME", default="تی‌ام‌ادز")
+PRODUCT_NAME = env("PRODUCT_NAME", default="گرام‌ادز")
+# Preserve deployment overrides, but migrate the legacy public brand automatically.
+if PRODUCT_NAME.strip() in {"تی‌ام‌ادز", "تی ام ادز", "TMADS", "tmads"}:
+    PRODUCT_NAME = "گرام‌ادز"
+PRODUCT_NAME_EN = "GramAds"
 PRODUCT_TAGLINE = env(
     "PRODUCT_TAGLINE",
     default="تبلیغات تلگرام، ساده‌تر و هوشمندتر از همیشه",
