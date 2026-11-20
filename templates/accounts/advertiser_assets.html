@@ -2,11 +2,11 @@
 {% load core_filters %}
 {% block page_title %}مخاطبان و تبدیل{% endblock %}
 {% block content %}
-<div class="app-stack ui-account-page ui-assets">
+<div class="app-stack ui-account-page ui-assets ga-assets-workspace">
 {% include "includes/dash_header.html" with page_icon="users" title="مخاطبان و رهگیری تبدیل" subtitle="منابع اختصاصی حساب تبلیغاتی شما" with_sub=1 %}
-{% if not row %}<section class="card card-pad form-stack"><h2 class="section-title">ابتدا حساب اختصاصی را فعال کنید</h2><p class="muted">منابع حساب مرکزی در اختیار مشتریان قرار نمی‌گیرند.</p><a class="btn btn-primary" href="{% url 'accounts:related_account' %}">وضعیت حساب تبلیغاتی</a></section>
+{% if not row %}<div class="ga-split"><section class="ga-panel ga-empty-state"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="users" size="md" %}</span><h2>ابتدا حساب اختصاصی را فعال کنید</h2><p>منابع حساب مرکزی در اختیار مشتریان قرار نمی‌گیرند. پس از تأیید حساب، از این بخش منابع خود را مدیریت کنید.</p><a class="btn btn-primary" href="{% url 'accounts:related_account' %}">وضعیت حساب تبلیغاتی {% include "includes/gramads_workspace_icon.html" with name="arrow-left" %}</a></section><aside class="ga-panel"><header class="ga-panel-head"><h2>منابع تبلیغاتی</h2></header><div class="ga-panel-body"><ul class="ga-facts"><li><span>گروه‌های مخاطبان</span>{% include "includes/gramads_workspace_icon.html" with name="users" %}</li><li><span>پیکسل رهگیری</span>{% include "includes/gramads_workspace_icon.html" with name="chart-no-axes-combined" %}</li><li><span>رویدادهای تبدیل</span>{% include "includes/gramads_workspace_icon.html" with name="activity" %}</li></ul></div></aside></div>
 {% else %}
-<section class="card card-pad form-stack">
+<div class="ga-split ga-asset-top"><section class="ga-panel ga-panel-body form-stack">
 <div class="ui-remote-summary"><h2 class="section-title">{{ row.title }}</h2><span class="status status-active">حساب تأیید شده</span></div>
 <div class="ui-assets-toolbar"><nav class="ui-section-tabs" aria-label="منابع حساب"><a href="?section=audiences" {% if section == 'audiences' %}aria-current="page"{% endif %}>مخاطبان</a><a href="?section=pixel" {% if section == 'pixel' %}aria-current="page"{% endif %}>پیکسل</a><a href="?section=events" {% if section == 'events' %}aria-current="page"{% endif %}>رویدادها</a></nav><a class="btn btn-primary" href="?section={{ section }}&amp;load=1">{% include "includes/lucide_icon.html" with name="refresh-cw" size="sm" %} دریافت از تلگرام</a></div>
 <p class="muted"><a class="btn btn-ghost btn-sm" href="{% url 'accounts:related_ads' %}">مشاهده تبلیغات حساب</a></p>
@@ -15,16 +15,16 @@
 {% if loaded %}{% if section == 'pixel' %}<div class="finance-line"><span>شناسه پیکسل</span><bdi>{{ pixel.pixel_id|default:"—" }}</bdi></div>{% if pixel.code_snippet %}<div class="field"><label for="pixel-code">کد دریافتی (فقط متن)</label><textarea id="pixel-code" readonly dir="ltr">{{ pixel.code_snippet }}</textarea></div>{% endif %}
 {% else %}<div class="table-scroll" tabindex="0" role="region" aria-label="منابع تبلیغاتی"><table class="data-table"><thead><tr><th scope="col">عنوان</th><th scope="col">شناسه</th><th scope="col">اندازه یا نوع</th></tr></thead><tbody>{% for item in items %}<tr><td>{{ item.title }}</td><td><bdi>{% if section == 'audiences' %}{{ item.audience_id }}{% else %}{{ item.event_id }}{% endif %}</bdi></td><td>{% if section == 'audiences' %}{{ item.size|default_if_none:"—" }}{% else %}{{ item.type }}{% endif %}</td></tr>{% empty %}<tr><td colspan="3">منبعی در این صفحه یافت نشد.</td></tr>{% endfor %}</tbody></table></div><div class="hero-actions">{% if previous != None %}<a class="btn btn-ghost" href="?section={{ section }}&load=1&offset={{ previous }}">صفحه قبل</a>{% endif %}{% if next_offset != None %}<a class="btn btn-ghost" href="?section={{ section }}&load=1&offset={{ next_offset }}">صفحه بعد</a>{% endif %}</div>{% endif %}{% endif %}
 </section>
-<section class="card card-pad form-stack"><h2 class="section-title">ایجاد منبع جدید</h2>
+<section class="ga-panel ga-panel-body form-stack"><div class="ga-panel-title"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="plus" %}</span><h2 class="section-title">ایجاد منبع جدید</h2></div>
 {% if enabled and not unresolved %}<form method="post" class="form-stack">{% csrf_token %}<input type="hidden" name="nonce" value="{{ nonce }}"><input type="hidden" name="action" value="{% if section == 'audiences' %}audience{% elif section == 'pixel' %}pixel{% else %}event{% endif %}">
 {% if section != 'pixel' %}<div class="field"><label for="asset-title">عنوان</label><input id="asset-title" name="title" maxlength="64" required></div>{% endif %}
 {% if section == 'events' %}<div class="field"><label for="event-type">نوع رویداد</label><select id="event-type" name="event_type">{% for kind in event_types %}<option value="{{ kind }}">{{ kind }}</option>{% endfor %}</select></div>{% endif %}
 <label><input type="checkbox" name="consent" required> ایجاد منبع در حساب اختصاصی تلگرام را تأیید می‌کنم.</label><button class="btn btn-primary" type="submit">ایجاد {% if section == 'audiences' %}گروه خالی{% elif section == 'pixel' %}پیکسل{% else %}رویداد{% endif %}</button></form>
 {% elif unresolved %}<p class="ui-studio-warning">یک عملیات نیازمند بررسی است؛ ایجاد مجدد مسدود است.</p>{% else %}<p class="ui-studio-warning">ایجاد زنده تا تأیید مجوز و فعال‌سازی قابلیت غیرفعال است.</p>{% endif %}
 </section>
-{% if section == 'audiences' %}
+</div>{% if section == 'audiences' %}
 <section class="card card-pad form-stack ui-audience-editor">
-  <div class="ui-form-intro"><span class="ui-target-symbol">{% include "includes/lucide_icon.html" with name="users" size="md" %}</span><div><h2>مدیریت اعضای مخاطبان اختصاصی</h2><p>فقط هش SHA-256 و حساب متعلق به شما؛ هیچ شماره خامی در TMADS ذخیره نمی‌شود.</p></div></div>
+  <div class="ui-form-intro"><span class="ui-target-symbol">{% include "includes/lucide_icon.html" with name="users" size="md" %}</span><div><h2>مدیریت اعضای مخاطبان اختصاصی</h2><p>فقط هش SHA-256 و حساب متعلق به شما؛ هیچ شماره خامی در گرام‌ادز ذخیره نمی‌شود.</p></div></div>
   {% if enabled and not unresolved %}
   <form method="post" action="{% url 'accounts:audience_update' %}" class="form-stack">{% csrf_token %}
     <input type="hidden" name="nonce" value="{{ nonce }}">

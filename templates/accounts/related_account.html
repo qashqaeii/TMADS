@@ -2,19 +2,47 @@
 {% load core_filters %}
 {% block page_title %}حساب تبلیغاتی{% endblock %}
 {% block content %}
-<div class="app-stack ui-account-page">
-{% include "includes/dash_header.html" with page_icon="building-2" title="حساب تبلیغاتی" subtitle="درخواست حساب مرتبط با تلگرام" with_sub=1 %}
-{% if row %}<section class="card card-pad form-stack"><div class="ui-remote-summary"><h2 class="section-title">{{ row.title }}</h2><span class="status {% if row.status == 'provisioned' %}status-active{% elif row.status == 'rejected' %}status-danger{% else %}status-warn{% endif %}">{{ row.get_status_display }}</span></div>{% if row.remote_account_id %}<div class="finance-line"><span>شناسه حساب</span><bdi>{{ row.remote_account_id }}</bdi></div>{% endif %}{% if row.note %}<p class="muted">{{ row.note }}</p>{% endif %}</section>{% endif %}
-{% if not row or row.status == "rejected" %}
-<div class="ui-finance-flow"><form method="post" class="card card-pad form-stack">{% csrf_token %}
-<div class="ui-form-intro"><span class="ui-target-symbol">{% include "includes/lucide_icon.html" with name="building-2" size="md" %}</span><div><h2>مشخصات حساب</h2><p>اطلاعات واقعی کسب‌وکار را وارد کنید.</p></div></div>
-{% for field in form %}<div class="field"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% if field.errors %}<div class="form-error" role="alert">{{ field.errors }}</div>{% endif %}</div>{% endfor %}
-<button class="btn btn-primary" type="submit">ثبت درخواست</button></form>
-<aside class="card card-pad ui-finance-guide"><h2 class="section-title">درباره حساب مرتبط</h2><p>ایجاد حساب منوط به مجوز تلگرام و بررسی اپراتور است. اطلاعات در صورت اجرای درخواست برای تلگرام ارسال می‌شوند. ایجاد حساب به معنی فعال شدن انتقال اعتبار یا انتشار کمپین نیست.</p></aside></div>
-{% else %}{% if row.status == "provisioned" %}
-<div class="ui-account-shortcuts hero-actions">
-<a class="btn btn-primary" href="{% url 'accounts:advertiser_assets' %}">{% include "includes/lucide_icon.html" with name="users" size="sm" %} مخاطبان و رهگیری تبدیل</a>
-<a class="btn btn-ghost" href="{% url 'accounts:related_ads' %}">تبلیغات حساب اختصاصی</a>
-</div>{% endif %}<p class="ui-studio-warning">مسیردهی کمپین و انتقال اعتبار به حساب‌های مرتبط هنوز فعال نیست؛ حساب مرکزی و تبلیغات موجود بدون تغییر باقی می‌مانند.</p>{% endif %}
+<div class="app-stack ui-account-page ga-account-workspace">
+  {% include "includes/dash_header.html" with page_icon="building-2" title="حساب تبلیغاتی" subtitle="مدیریت حساب اختصاصی تلگرام" %}
+  <div class="ga-account-top">
+    <section class="ga-feature" aria-label="وضعیت حساب اختصاصی">
+      <div class="ga-feature-head"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="building-2" size="md" %}</span><span class="ga-account-label">حساب اختصاصی</span></div>
+      <div><small>وضعیت درخواست</small><h2>{% if row %}{{ row.get_status_display }}{% else %}هنوز ایجاد نشده{% endif %}</h2></div>
+      {% if row %}<div class="ga-account-facts"><span>نام حساب <strong>{{ row.title }}</strong></span>{% if row.remote_account_id %}<span>شناسه حساب <strong><bdi>{{ row.remote_account_id }}</bdi></strong></span>{% endif %}</div>{% else %}<p>برای دریافت حساب مرتبط، مشخصات کسب‌وکار خود را ثبت کنید.</p>{% endif %}
+      {% if row and row.note %}<p class="ga-account-note">{{ row.note }}</p>{% endif %}
+    </section>
+    <section class="ga-panel">
+      <header class="ga-panel-head"><div class="ga-panel-title"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="shield-check" size="md" %}</span><h2>دسترسی و قابلیت‌ها</h2></div></header>
+      <div class="ga-panel-body">
+        <ul class="ga-facts"><li><span>حساب اختصاصی</span>{% if row and row.status == 'provisioned' %}<span class="status status-active">فعال</span>{% else %}<span class="status status-draft">نیازمند تأیید</span>{% endif %}</li><li><span>مخاطبان و تبدیل</span>{% if row and row.status == 'provisioned' %}<a href="{% url 'accounts:advertiser_assets' %}">مشاهده</a>{% else %}<span class="muted">پس از تأیید</span>{% endif %}</li><li><span>انتقال اعتبار و مسیردهی کمپین</span><span class="status status-draft">غیرفعال</span></li></ul>
+      </div>
+    </section>
+  </div>
+  {% if not row or row.status == "rejected" %}
+  <div class="ga-split">
+    <form method="post" class="ga-panel">{% csrf_token %}
+      <header class="ga-panel-head"><div class="ga-panel-title"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="file-text" size="md" %}</span><div><h2>مشخصات کسب‌وکار</h2><p>اطلاعات واقعی حساب را ثبت کنید.</p></div></div></header>
+      <div class="ga-panel-body form-stack">
+        {% if form.non_field_errors %}<div class="form-error" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+        {% for field in form %}<div class="field"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% if field.help_text %}<p class="field-help">{{ field.help_text }}</p>{% endif %}{% if field.errors %}<div class="form-error" role="alert">{{ field.errors }}</div>{% endif %}</div>{% endfor %}
+      </div>
+      <footer class="ga-panel-foot"><small class="muted">ثبت درخواست به معنی ایجاد فوری حساب نیست.</small><button class="btn btn-primary" type="submit">{% include "includes/gramads_workspace_icon.html" with name="arrow-left" size="sm" %} ثبت درخواست</button></footer>
+    </form>
+    <aside class="ga-panel"><header class="ga-panel-head"><h2>مسیر ایجاد حساب</h2></header><div class="ga-panel-body"><ol class="ga-steps">
+      <li><span>۱</span><div><strong>ثبت مشخصات</strong><p>اطلاعات کسب‌وکار برای بررسی آماده می‌شود.</p></div></li>
+      <li><span>۲</span><div><strong>بررسی درخواست</strong><p>ایجاد حساب منوط به مجوز تلگرام و بررسی اپراتور است.</p></div></li>
+      <li><span>۳</span><div><strong>دسترسی به منابع</strong><p>پس از ایجاد حساب می‌توانید منابع اختصاصی را مشاهده کنید.</p></div></li>
+    </ol></div></aside>
+  </div>
+  <p class="ga-inline-note">{% include "includes/gramads_workspace_icon.html" with name="info" size="sm" %}<span>اطلاعات در صورت اجرای درخواست برای تلگرام ارسال می‌شوند. ایجاد حساب به معنی فعال شدن انتقال اعتبار یا انتشار کمپین نیست.</span></p>
+  {% else %}
+    {% if row.status == "provisioned" %}
+    <section class="ga-panel"><header class="ga-panel-head"><h2>مدیریت منابع حساب</h2></header><div class="ga-panel-body ga-link-tiles">
+      <a class="ga-link-tile" href="{% url 'accounts:advertiser_assets' %}"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="users" %}</span><span>مخاطبان و رهگیری تبدیل</span>{% include "includes/gramads_workspace_icon.html" with name="chevron-left" %}</a>
+      <a class="ga-link-tile" href="{% url 'accounts:related_ads' %}"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="megaphone" %}</span><span>تبلیغات حساب اختصاصی</span>{% include "includes/gramads_workspace_icon.html" with name="chevron-left" %}</a>
+    </div></section>
+    {% endif %}
+    <p class="ga-inline-note">{% include "includes/gramads_workspace_icon.html" with name="info" %}<span>مسیردهی کمپین و انتقال اعتبار به حساب‌های مرتبط هنوز فعال نیست؛ حساب مرکزی و تبلیغات موجود بدون تغییر باقی می‌مانند.</span></p>
+  {% endif %}
 </div>
 {% endblock %}

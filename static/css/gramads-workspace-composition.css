@@ -73,3 +73,23 @@
 @media(max-width:1050px){.is-app .ga-split{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:600px){.is-app .ga-page-head{flex-wrap:wrap}.is-app .ga-page-head h1{font-size:1.23rem}.is-app .ga-panel-body,.is-app .ga-panel-head,.is-app .ga-panel-foot{padding:12px}.is-app .ga-form-grid,.is-app .ga-link-tiles{grid-template-columns:minmax(0,1fr)}.is-app .ga-feature{padding:15px}.is-app .ga-data-panel .table-wrap{padding:0 6px 4px}}
 @media(prefers-reduced-motion:reduce){.is-app .ga-link-tile{transition:none;transform:none}}
+
+/* Advertiser workspace compositions. */
+.is-app .ga-account-top{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:14px;align-items:stretch}
+.is-app .ga-account-top .ga-feature h2{font-size:1.65rem;font-weight:800;line-height:1.45;margin-top:5px}
+.is-app .ga-account-top .ga-account-label{font-size:.73rem;color:#e3efff}
+.is-app .ga-account-facts{display:flex;gap:12px 20px;flex-wrap:wrap;border-top:1px solid #ffffff27;padding-top:12px}
+.is-app .ga-account-facts>span{display:grid;gap:5px;color:#e0eeff;font-size:.75rem;min-width:0}
+.is-app .ga-account-facts strong{font-size:.92rem}
+.is-app .ga-account-note{padding:8px;background:#ffffff15;border-radius:8px}
+.is-app .ga-account-workspace .ga-panel-foot>.btn{min-width:120px}
+.is-app .ga-profile-workspace .ga-profile-identity{background:linear-gradient(115deg,#103c77,#1769c5);color:#fff;padding:20px;min-height:100px}
+.is-app .ga-profile-identity :is(h2,p){color:#fff}
+.is-app .ga-profile-identity .ui-profile-avatar{background:#ffffff22;color:#fff;border:1px solid #ffffff40;box-shadow:none}
+.is-app .ga-profile-identity .ui-profile-handle{background:#ffffff18;color:#fff;border-color:#ffffff30}
+.is-app .ga-profile-settings .field a{font-size:.75rem;line-height:1.8}
+.is-app .ga-profile-settings .section-description{margin:0 0 12px;font-size:.8rem}
+.is-app .ga-profile-settings .form-stack .btn{justify-self:start}
+.is-app .ga-asset-top .ui-assets-toolbar{border-block:1px solid #eaf0f6;padding-block:10px}
+.is-app .ga-assets-workspace .ui-sensitive-panel summary{font-size:.85rem}
+@media(max-width:800px){.is-app .ga-account-top{grid-template-columns:minmax(0,1fr)}}
