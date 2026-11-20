@@ -327,3 +327,43 @@
  .orbit-cta-scene{height:145px}
 }
 @media(max-width:360px){.orbit-target{padding:10px}.orbit-target p{font-size:.73rem}.orbit-guide-visual{display:none}.ui-final.orbit-landing .orbit-guide-card{grid-template-columns:minmax(0,1fr)}}
+
+/* Motion system: composited transitions, a finite entrance, and pointer-driven light. */
+.ui-final.orbit-landing .ui-public-header .public-nav-bar{position:relative;transition:background-color .32s,box-shadow .32s,border-color .32s}
+.ui-final.orbit-landing .orbit-nav-scrolled .public-nav-bar{background:rgba(236,247,255,.89);box-shadow:0 7px 26px #143b7128,inset 0 1px 1px #fff}
+.orbit-motion-ready .public-nav-bar::after{content:"";position:absolute;inset-inline:18px;bottom:0;height:2px;border-radius:10px;background:linear-gradient(90deg,#61d6ff,#0868dc);transform:scaleX(var(--orbit-scroll,0));transform-origin:right;pointer-events:none}
+.orbit-glass :is(.orbit-target,.orbit-mini-card,.orbit-step,.orbit-guide-card)::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:-1;opacity:0;background:radial-gradient(ellipse at var(--spot-x,50%) var(--spot-y,50%),#fff9,transparent 66%);transition:opacity .35s}
+.orbit-glass .orbit-step::after{content:none} /* preserve a separate process connector below */
+.orbit-glass .orbit-step:not(:last-child)::after{content:"‹";position:absolute;z-index:2;inset:auto;inset-inline-end:-21px;top:50%;bottom:auto;width:23px;height:29px;display:grid;place-items:center;transform:translateY(-50%);border-radius:50%;background:#eaf5ffe8;color:#1260be;opacity:1;border:1px solid white;box-shadow:0 4px 10px #3070ad2b;font:700 21px/1 sans-serif}
+.orbit-glass :is(.orbit-target,.orbit-mini-card,.orbit-guide-card).orbit-spot-active::after{opacity:1}
+.orbit-glass .orbit-step.orbit-spot-active::before{background:radial-gradient(ellipse at var(--spot-x,50%) var(--spot-y,50%),#fff9,transparent 72%)}
+.orbit-hero-scene{--scene-x:0px;--scene-y:0px}
+.orbit-page .orbit-hero-art{transform:translate3d(var(--scene-x),var(--scene-y),0);transition:transform .6s cubic-bezier(.2,.8,.2,1)}
+.orbit-hero-float{transition:transform .7s cubic-bezier(.2,.8,.2,1)}
+.orbit-float-top{transform:translate3d(calc(var(--scene-x) * -.65),calc(var(--scene-y) * -.65),0)}
+.orbit-float-bottom{transform:translate3d(calc(var(--scene-x) * .75),calc(var(--scene-y) * .75),0)}
+.ui-final.orbit-landing .orbit-faq-list summary::after{display:grid;place-items:center;width:30px;height:30px;background:#e3f1ff;border:1px solid #fff;border-radius:10px;line-height:1;transition:background-color .25s,color .25s}
+.ui-final.orbit-landing .orbit-faq-list details[open] summary::after{background:#0a5fc6;color:#fff}
+.ui-final.orbit-landing .orbit-faq-list details[open]{border-color:#aad1fc;box-shadow:0 9px 25px #3166a322,inset 0 1px 1px #fff}
+@media(hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){
+ .orbit-glass :is(.orbit-target,.orbit-mini-card,.orbit-step,.orbit-guide-card){transition:transform .45s cubic-bezier(.2,.8,.2,1),box-shadow .35s,border-color .35s}
+ .orbit-glass :is(.orbit-target,.orbit-mini-card,.orbit-step,.orbit-guide-card):hover{transform:translateY(-6px);border-color:#fff;box-shadow:0 20px 45px #1b61ab2a,inset 0 1px 2px white}
+ .orbit-glass :is(.orbit-card-art,.orbit-target-art,.orbit-step-art){transition:transform .6s cubic-bezier(.2,.8,.2,1)}
+ .orbit-glass :is(.orbit-target,.orbit-mini-card,.orbit-step,.orbit-guide-card):hover :is(.orbit-card-art,.orbit-target-art,.orbit-step-art){transform:translateY(-4px) scale(1.045)}
+ .orbit-glass .orbit-link .icon-shell{transition:transform .3s}
+ .orbit-glass .orbit-link:hover .icon-shell{transform:translateX(-4px)}
+ .orbit-cta-button{transition:transform .3s,box-shadow .3s}
+ .orbit-cta-button:hover{transform:translateY(-3px)}
+}
+@media(prefers-reduced-motion:no-preference){
+ .orbit-hero-ring{animation:orbit-ring-arrive 1.6s cubic-bezier(.2,.8,.2,1) both}
+ .orbit-hero-halo{animation:orbit-halo-arrive 1.4s ease-out both}
+ @keyframes orbit-ring-arrive{from{opacity:.15;transform:rotate(-25deg) scale(.9)}to{opacity:1;transform:rotate(-18deg) scale(1)}}
+ @keyframes orbit-halo-arrive{from{opacity:.3;transform:scale(.94)}to{opacity:1;transform:scale(1)}}
+}
+@media(max-width:600px){.orbit-glass .orbit-step:not(:last-child)::after{display:none}}
+@media(prefers-reduced-motion:reduce){
+ .orbit-motion-ready .public-nav-bar::after{display:none}
+ .orbit-glass :is(.orbit-target,.orbit-mini-card,.orbit-step,.orbit-guide-card,.orbit-hero-art,.orbit-hero-float){transform:none!important;transition:none!important}
+ .orbit-glass .orbit-spot-active::after{opacity:0!important}
+}
