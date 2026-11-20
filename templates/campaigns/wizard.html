@@ -4,13 +4,14 @@
 {% block container_class %}container-wide{% endblock %}
 {% block extra_head %}{{ block.super }}{% if ai_available %}<link rel="stylesheet" href="{% static 'css/ui-ai.css' %}">{% endif %}{% endblock %}
 {% block content %}
-<div class="wizard-shell studio-shell ui-studio">
+<div class="wizard-shell studio-shell ui-studio ga-studio-workspace">
   {% include "includes/dash_header.html" with page_icon="megaphone" title="استودیو ساخت تبلیغ" subtitle=campaign.name|default:"پیش‌نویس جدید" with_sub=1 %}
+  <section class="ga-panel ga-studio-progress"><header class="ga-panel-head"><div class="ga-panel-title"><h2>مسیر ساخت تبلیغ</h2><span class="muted">مرحله {{ step|persian_digits }} از {{ steps|length|persian_digits }}</span></div><span class="ga-step-indicator" aria-hidden="true">{% widthratio step steps|length 100 %}٪</span></header><div class="ga-progress-line" aria-hidden="true"><span style="width:{% widthratio step steps|length 100 %}%"></span></div>
   <nav class="wizard-progress wizard-progress--exec" aria-label="مراحل">
     {% for key, label in steps %}
       <span {% if forloop.counter == step %}aria-current="step"{% endif %} class="wizard-step {% if forloop.counter == step %}is-active{% elif forloop.counter < step %}is-complete{% endif %}"><span class="ui-step-number">{% if forloop.counter < step %}{% include "includes/lucide_icon.html" with name="check" size="sm" %}{% else %}{{ forloop.counter|persian_digits }}{% endif %}</span><span class="ui-step-label">{{ label }}</span></span>
     {% endfor %}
-  </nav>
+  </nav></section>
   <div class="studio-layout">
     <form method="post" enctype="multipart/form-data" class="card card--lift wizard-form studio-form form-stack"
           data-autosave-url="{% url 'campaigns:autosave' campaign.id %}"
@@ -356,9 +357,9 @@
       {% include "campaigns/includes/policy_panel.html" %}
       <div class="ui-terms-panel" id="field-terms">
         <label class="choice-card"><input type="checkbox" name="terms_accepted" value="1" required aria-describedby="ui-terms-links"> شرایط استفاده و مسئولیت بررسی نهایی تلگرام را می‌پذیرم.</label>
-        <p id="ui-terms-links"><a href="{% url 'public:terms' %}" target="_blank" rel="noopener">شرایط TMADS</a> · <a href="{% url 'policies:ad_policies' %}" target="_blank" rel="noopener">راهنمای تبلیغ تلگرام</a></p>
+        <p id="ui-terms-links"><a href="{% url 'public:terms' %}" target="_blank" rel="noopener">شرایط گرام‌ادز</a> · <a href="{% url 'policies:ad_policies' %}" target="_blank" rel="noopener">راهنمای تبلیغ تلگرام</a></p>
       </div>
-      <p class="muted" style="font-size:.8rem">ذخیره پیش‌نویس هیچ تبلیغی در تلگرام ایجاد نمی‌کند. پذیرش TMADS به معنی قرارداد مستقیم با تلگرام نیست.</p>
+      <p class="muted" style="font-size:.8rem">ذخیره پیش‌نویس هیچ تبلیغی در تلگرام ایجاد نمی‌کند. پذیرش گرام‌ادز به معنی قرارداد مستقیم با تلگرام نیست.</p>
       {% if dry_run_preview and dry_run_preview.ok %}
       <details class="field" style="margin-top:1rem">
         <summary>Payload آماده (dry-run)</summary>

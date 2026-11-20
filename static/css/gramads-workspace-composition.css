@@ -134,3 +134,41 @@
 .is-app .ga-policy-layout .policy-sources__links a{padding:8px 0;border-bottom:1px solid #e0eaf6;font-size:.8rem;line-height:1.6}
 .is-app .ga-policy-layout .policy-sources__links a:last-child{border:0}
 @media(max-width:1050px){.is-app :is(.ga-ticket-detail,.ga-policy-layout){grid-template-columns:minmax(0,1fr)}}
+
+/* Campaign portfolio composition: KPIs, one integrated control/table surface and compact identities. */
+.ui-final.is-app .ga-campaign-workspace .campaigns-table-board{padding:0;overflow:visible}
+.ui-final.is-app .ga-campaign-workspace .ga-campaign-filter{border:0;border-bottom:1px solid #eaf0f6;box-shadow:none;border-radius:0;background:#f8fbff;margin:0;padding:11px 14px}
+.ui-final.is-app .ga-campaign-workspace .campaigns-filter__form{padding:0;background:none;border:0;box-shadow:none}
+.ui-final.is-app .ga-campaign-workspace .campaigns-table__head{border-bottom:1px solid #edf1f6}
+.ui-final.is-app .ga-campaign-workspace .campaigns-table__identity{min-width:155px}
+.is-app .ga-campaign-avatar{width:35px;height:35px}
+.is-app .ga-campaign-avatar--active{background:#e3f4ed;color:#11704e}
+.ui-final.is-app .ga-campaign-workspace .campaigns-table__identity .campaign-title{font-weight:750;font-size:.83rem}
+.ui-final.is-app .ga-campaign-workspace .campaigns-table__identity-meta{margin:3px 0 0;gap:5px}
+.ui-final.is-app .ga-campaign-workspace .campaigns-mobile-card__head{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.ui-final.is-app .ga-campaign-workspace .campaigns-mobile-card__title{flex:1;min-width:0}
+.ui-final.is-app .ga-campaign-workspace .campaign-kpi-ribbon__cell{min-height:99px}
+.ui-final.is-app .ga-campaign-workspace .campaigns-empty{min-height:180px}
+.is-app .ga-campaign-detail-avatar{width:44px;height:44px;border-radius:12px;background:linear-gradient(140deg,#e6f0ff,#f6faff);color:#145eb6}
+.ui-final.is-app .ga-campaign-detail-workspace .campaign-detail__title-row{align-items:center;gap:9px}
+.ui-final.is-app .ga-campaign-detail-workspace .campaign-detail__masthead-foot{padding-inline-start:53px}
+.is-app .ga-budget-settings{overflow:hidden}
+.is-app .ga-budget-summary{display:flex;align-items:center;gap:9px;padding:10px 14px;cursor:pointer;list-style:none}
+.is-app .ga-budget-summary::-webkit-details-marker{display:none}
+.is-app .ga-budget-summary>span:nth-child(2){display:flex;gap:8px;align-items:baseline;flex:1;min-width:0;flex-wrap:wrap}
+.is-app .ga-budget-summary strong{font-size:.83rem}
+.is-app .ga-budget-summary small{color:#526982;font-size:.73rem}
+.is-app .ga-budget-settings[open] .ga-budget-summary>svg:last-child{transform:rotate(180deg)}
+.ui-final.is-app .ga-budget-settings .ui-budget-alert-card{border:0;border-radius:0;border-top:1px solid #edf1f6;box-shadow:none}
+.ui-final.is-app .ga-campaign-detail-workspace .tab-bar--ref{margin-bottom:12px}
+.is-app .ga-studio-progress .ga-panel-head{padding:10px 14px;border:0}
+.is-app .ga-studio-progress .ga-panel-title{gap:10px;flex-wrap:wrap}
+.is-app .ga-studio-progress .ga-panel-title .muted{font-size:.75rem}
+.is-app .ga-step-indicator{font-size:.8rem;font-weight:750;color:#145eb6}
+.is-app .ga-progress-line{height:3px;border-radius:3px;background:#e6eef8;margin:0 14px 2px;overflow:hidden}
+.is-app .ga-progress-line>span{display:block;height:100%;background:linear-gradient(90deg,#1266c3,#5cbde8);border-radius:3px}
+.ui-final.is-app .ga-studio-progress .wizard-progress--exec{border:0;box-shadow:none;padding:6px 10px;margin:0;background:transparent}
+.ui-final.is-app .ga-studio-workspace .ui-studio-footer{margin-top:8px;padding-top:13px;border-top:1px solid #eaf0f6}
+.ui-final.is-app .ga-studio-workspace .studio-draft-status{font-size:.74rem}
+.ui-final.is-app .ga-campaign-remote .ga-remote-identity{background:linear-gradient(135deg,#fff,#eaf3ff)}
+@media(max-width:650px){.ui-final.is-app .ga-campaign-detail-workspace .campaign-detail__masthead-foot{padding-inline-start:0}.ui-final.is-app .ga-campaign-workspace .ga-campaign-filter{padding:10px}.ui-final.is-app .ga-campaign-workspace .campaigns-mobile-card__head{flex-wrap:wrap}.is-app .ga-budget-summary{padding:10px}.is-app .ga-budget-summary>span:nth-child(2){display:grid;gap:2px}}

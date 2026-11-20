@@ -2,7 +2,7 @@
 {% load core_filters %}
 {% block page_title %}آمار درون‌روزی{% endblock %}
 {% block content %}
-<div class="app-stack ui-intraday">
+<div class="app-stack ui-intraday ga-intraday-workspace">
 <nav class="ui-breadcrumb" aria-label="مسیر صفحه"><a href="{% url 'campaigns:detail' campaign.pk %}">{{ campaign.name|default:"کمپین" }}</a>{% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}<span aria-current="page">آمار درون‌روزی</span></nav>
 {% include "includes/dash_header.html" with page_icon="chart-no-axes-combined" title="آمار پنج‌دقیقه‌ای" subtitle="عملکرد در بازه‌های کوتاه، مستقل از آمار روزانه" with_sub=1 %}
 <section class="card card-pad form-stack"><div class="ui-remote-summary"><nav class="ui-section-tabs" aria-label="بازه آماری"><a href="?hours=6&amp;load=1" {% if hours == 6 %}aria-current="page"{% endif %}>۶ ساعت اخیر</a><a href="?hours=24&amp;load=1" {% if hours == 24 %}aria-current="page"{% endif %}>۲۴ ساعت اخیر</a></nav><span class="muted">فقط بازه‌های کامل</span></div><p class="field-help">نبود ردیف به معنی صفر بودن نمایش نیست. هزینه با ارز دریافتی از تلگرام نمایش داده می‌شود.</p>

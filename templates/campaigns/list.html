@@ -6,7 +6,7 @@
 {% if has_portfolio_chart %}{% include "includes/charts_exec_scripts.html" %}{% endif %}
 {% endblock %}
 {% block content %}
-<div class="app-stack campaigns-page campaigns-page--luxe ui-campaign-list">
+<div class="app-stack campaigns-page campaigns-page--luxe ui-campaign-list ga-campaign-workspace">
 <div class="campaigns-list-hero-shell motion-reveal">
 {% include "campaigns/includes/list_page_header.html" %}
 </div>
@@ -21,7 +21,37 @@
 </p>
 {% endif %}
 
-<section class="filter-exec-shell campaigns-filter campaigns-filter--luxe motion-reveal" aria-label="فیلتر کمپین‌ها">
+
+
+<article class="campaigns-table-board campaigns-table-board--luxe campaign-table-card ga-panel ga-data-panel motion-reveal">
+  <header class="campaigns-table__head campaigns-table__head--luxe table-toolbar table-toolbar--split">
+    <div class="campaigns-table__head-lead">
+      <h2 class="campaigns-table__title">فهرست کمپین‌ها</h2>
+      <p class="campaigns-table__count">
+        <span class="campaigns-table__count-badge tabnums" aria-label="تعداد">{{ kpis.campaign_count }}</span>
+        <span class="campaigns-table__count-text muted">کمپین</span>
+        {% if kpis.any_stale %}<span class="campaigns-table__stale sync-hint" title="برخی ردیف‌ها آمار قدیمی دارند">آمار ناهمگام</span>{% endif %}
+      </p>
+    </div>
+    <div class="table-toolbar__cluster campaigns-table__tools">
+      <label class="campaigns-table__density campaigns-table__density--desktop table-density-toggle" title="نمایش ستون‌های تکمیلی در جدول">
+        <input type="checkbox" id="campaign-advanced-cols" class="table-density-toggle__input campaigns-table__density-input">
+        <span class="campaigns-table__density-ui" aria-hidden="true"></span>
+        <span class="campaigns-table__density-label">ستون‌های پیشرفته</span>
+      </label>
+      <div class="campaigns-table__sort" role="group" aria-label="مرتب‌سازی">
+        <span class="campaigns-table__sort-label">مرتب‌سازی</span>
+        <div class="campaigns-table__sort-track sort-pills">
+          <a class="sort-pill campaigns-table__sort-pill {% if sort == '-views' %}is-active{% endif %}"{% if sort == '-views' %} aria-current="true"{% endif %} href="{% querystring sort='-views' page=None %}">بازدید</a>
+          <a class="sort-pill campaigns-table__sort-pill {% if sort == '-ctr' %}is-active{% endif %}"{% if sort == '-ctr' %} aria-current="true"{% endif %} href="{% querystring sort='-ctr' page=None %}">نرخ کلیک</a>
+          <a class="sort-pill campaigns-table__sort-pill {% if sort == '-spent' %}is-active{% endif %}"{% if sort == '-spent' %} aria-current="true"{% endif %} href="{% querystring sort='-spent' page=None %}">هزینه</a>
+          <a class="sort-pill campaigns-table__sort-pill {% if sort == '-created_at' or sort == '' %}is-active{% endif %}"{% if sort == '-created_at' or sort == '' %} aria-current="true"{% endif %} href="{% querystring sort='-created_at' page=None %}">جدیدترین</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section class="campaigns-filter campaigns-filter--luxe ga-campaign-filter" aria-label="فیلتر کمپین‌ها">
   <form method="get" class="filter-exec campaigns-filter__form">
   <div class="campaigns-filter__bar">
     <div class="campaigns-filter__field campaigns-filter__field--search">
@@ -55,35 +85,6 @@
   </div>
   </form>
 </section>
-
-<article class="campaigns-table-board campaigns-table-board--luxe campaign-table-card motion-reveal">
-  <header class="campaigns-table__head campaigns-table__head--luxe table-toolbar table-toolbar--split">
-    <div class="campaigns-table__head-lead">
-      <h2 class="campaigns-table__title">فهرست کمپین‌ها</h2>
-      <p class="campaigns-table__count">
-        <span class="campaigns-table__count-badge tabnums" aria-label="تعداد">{{ kpis.campaign_count }}</span>
-        <span class="campaigns-table__count-text muted">کمپین</span>
-        {% if kpis.any_stale %}<span class="campaigns-table__stale sync-hint" title="برخی ردیف‌ها آمار قدیمی دارند">آمار ناهمگام</span>{% endif %}
-      </p>
-    </div>
-    <div class="table-toolbar__cluster campaigns-table__tools">
-      <label class="campaigns-table__density campaigns-table__density--desktop table-density-toggle" title="نمایش ستون‌های تکمیلی در جدول">
-        <input type="checkbox" id="campaign-advanced-cols" class="table-density-toggle__input campaigns-table__density-input">
-        <span class="campaigns-table__density-ui" aria-hidden="true"></span>
-        <span class="campaigns-table__density-label">ستون‌های پیشرفته</span>
-      </label>
-      <div class="campaigns-table__sort" role="group" aria-label="مرتب‌سازی">
-        <span class="campaigns-table__sort-label">مرتب‌سازی</span>
-        <div class="campaigns-table__sort-track sort-pills">
-          <a class="sort-pill campaigns-table__sort-pill {% if sort == '-views' %}is-active{% endif %}"{% if sort == '-views' %} aria-current="true"{% endif %} href="{% querystring sort='-views' page=None %}">بازدید</a>
-          <a class="sort-pill campaigns-table__sort-pill {% if sort == '-ctr' %}is-active{% endif %}"{% if sort == '-ctr' %} aria-current="true"{% endif %} href="{% querystring sort='-ctr' page=None %}">نرخ کلیک</a>
-          <a class="sort-pill campaigns-table__sort-pill {% if sort == '-spent' %}is-active{% endif %}"{% if sort == '-spent' %} aria-current="true"{% endif %} href="{% querystring sort='-spent' page=None %}">هزینه</a>
-          <a class="sort-pill campaigns-table__sort-pill {% if sort == '-created_at' or sort == '' %}is-active{% endif %}"{% if sort == '-created_at' or sort == '' %} aria-current="true"{% endif %} href="{% querystring sort='-created_at' page=None %}">جدیدترین</a>
-        </div>
-      </div>
-    </div>
-  </header>
-
   {% if campaign_rows %}
   <div class="table-wrap table-wrap--scroll campaign-table-desktop" tabindex="0" role="region" aria-label="جدول کمپین‌ها؛ برای دیدن ستون‌های بیشتر پیمایش کنید">
     <table class="data-table data-table--campaigns" id="campaign-data-table">
@@ -111,11 +112,11 @@
       {% with c=row.campaign m=row.metrics %}
       <tr class="campaigns-table__row {% if m.stats_stale %}row-stale{% endif %}">
         <td class="campaigns-table__identity">
-          <a class="campaign-title" href="{% url 'campaigns:detail' c.id %}">{{ c.name|default:"بدون نام" }}</a>
+          <div class="ga-row-identity"><span class="ga-symbol ga-campaign-avatar {% if c.status == 'active' %}ga-campaign-avatar--active{% endif %}">{% include "includes/gramads_workspace_icon.html" with name="megaphone" %}</span><div><a class="campaign-title" href="{% url 'campaigns:detail' c.id %}">{{ c.name|default:"بدون نام" }}</a>
           <div class="campaigns-table__identity-meta">
             {% if row.placement_label %}<span class="campaigns-table__chip">{{ row.placement_label }}</span>{% endif %}
             {% if row.remote_ad_id %}<span class="campaigns-table__ad-id muted tabnums" dir="ltr" title="شناسه تبلیغ">#{{ row.remote_ad_id }}</span>{% endif %}
-          </div>
+          </div></div></div>
         </td>
         <td class="campaigns-table__status"><span class="status status--pill {{ c.status|campaign_status_class }}">{{ c.get_status_display }}</span></td>
         <td class="num tabnums campaigns-table__metric">{% if m.has_impressions %}{{ m.impressions|format_count }}{% else %}<span class="muted">—</span>{% endif %}</td>
@@ -153,7 +154,7 @@
         <span class="campaigns-mobile-card__rail" aria-hidden="true"></span>
         <div class="campaigns-mobile-card__content">
           <div class="campaigns-mobile-card__head">
-            <h3 class="campaigns-mobile-card__title">{{ c.name|default:"بدون نام" }}</h3>
+            <span class="ga-symbol ga-campaign-avatar">{% include "includes/gramads_workspace_icon.html" with name="megaphone" %}</span><h3 class="campaigns-mobile-card__title">{{ c.name|default:"بدون نام" }}</h3>
             <span class="status status--pill status--compact {{ c.status|campaign_status_class }}">{{ c.get_status_display }}</span>
           </div>
           {% if row.placement_label or c.get_target_type_display or m.stats_stale %}

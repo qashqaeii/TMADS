@@ -7,7 +7,7 @@
 {% endblock %}
 {% block extra_head %}{{ block.super }}{% if ai_analysis_available %}<link rel="stylesheet" href="{% static 'css/ui-ai.css' %}">{% endif %}{% endblock %}
 {% block content %}
-<div class="app-stack campaign-detail campaign-detail--luxe ui-campaign-detail">
+<div class="app-stack campaign-detail campaign-detail--luxe ui-campaign-detail ga-campaign-detail-workspace">
   <nav class="ui-breadcrumb" aria-label="مسیر صفحه"><a href="{% url 'campaigns:list' %}">کمپین‌ها</a>{% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}<span aria-current="page">جزئیات کمپین</span></nav>
   <article class="campaign-detail__brief campaign-detail__hero campaign-detail__hero--exec campaign-detail__hero--luxe campaign-detail__hero--ref campaign-detail__hero--minimal" aria-label="خلاصه کمپین">
 
@@ -15,7 +15,7 @@
     <div class="campaign-detail__hero-body campaign-detail__hero-body--ref campaign-detail__hero-body--minimal">
       <header class="campaign-detail__masthead campaign-detail__masthead--luxe campaign-detail__masthead--minimal">
         <div class="campaign-detail__title-row">
-          <h1 class="campaign-detail__title">{{ campaign.name|default:"بدون نام" }}</h1>
+          <span class="ga-symbol ga-campaign-detail-avatar">{% include "includes/gramads_workspace_icon.html" with name="megaphone" size="md" %}</span><h1 class="campaign-detail__title">{{ campaign.name|default:"بدون نام" }}</h1>
           <span class="status status--pill status--compact {{ campaign.status|campaign_status_class }}" role="status">{{ campaign.get_status_display }}</span>
         </div>
         <div class="campaign-detail__masthead-foot">
@@ -92,8 +92,10 @@
     </header>
   </article>
 
+
+  {% include "includes/campaign_metrics_strip.html" with kpi_ribbon_mode="ref" %}
   {% if budget.has_remote %}
-  <section class="ui-budget-alert-card" aria-label="تنظیم هشدار بودجه">
+  <details class="ga-panel ga-budget-settings"><summary class="ga-budget-summary"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="bell" %}</span><span><strong>هشدار باقی‌مانده بودجه</strong><small>تنظیم حد هشدار</small></span>{% include "includes/lucide_icon.html" with name="chevron-down" size="sm" %}</summary><div class="ui-budget-alert-card" aria-label="تنظیم هشدار بودجه">
     <div class="ui-budget-alert-card__lead">
       <span class="ui-target-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="bell-ring" size="md" %}</span>
       <div><h2>هشدار باقی‌مانده بودجه</h2><p>براساس مانده واقعی تلگرام؛ فقط اعلان داخل پنل و بدون تغییر خودکار هزینه</p></div>
@@ -108,14 +110,13 @@
       </select>
       <button class="btn btn-ghost btn-sm" type="submit">ذخیره</button>
     </form>
-  </section>
+  </div></details>
   {% endif %}
-  {% include "includes/campaign_metrics_strip.html" with kpi_ribbon_mode="ref" %}
 
   {% include "campaigns/includes/performance_badges.html" %}
 
   <div class="detail-tabs campaign-detail__tabs" x-data="{ tab: 'overview' }">
-    <div class="tab-bar tab-bar--exec tab-bar--ref" role="tablist" aria-label="بخش‌های کمپین">
+    <div class="tab-bar tab-bar--exec tab-bar--ref" role="tablist" aria-label="بخش‌های کمپین" data-ga-keyboard-tabs>
       <button type="button" role="tab" id="campaign-tab-overview" aria-controls="campaign-panel-overview" :aria-selected="tab === 'overview'" :tabindex="tab === 'overview' ? 0 : -1" :class="{ 'is-active': tab === 'overview' }" @click="tab = 'overview'; $nextTick(() => { window.tmadsRevealIn && window.tmadsRevealIn(document.getElementById('campaign-panel-overview')); window.dispatchEvent(new Event('tmads-charts-resize')); })">
         <span class="campaign-detail-tab__icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="layout-grid" size="sm" %}</span>
         <span class="campaign-detail-tab__label">نمای کلی</span>
