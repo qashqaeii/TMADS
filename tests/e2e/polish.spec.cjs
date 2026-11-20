@@ -441,3 +441,45 @@ test.describe('Legal content without JavaScript',()=>{
     await expect(page.locator('#legal-clause-4')).toBeVisible();
   });
 });
+
+
+test('About Orbit story, principles and independence at three viewport widths',async({page})=>{
+  test.setTimeout(60000);
+  for(const width of [320,768,1440]){
+    await page.setViewportSize({width,height:900});
+    await page.emulateMedia({reducedMotion:'reduce'});
+    await assertPage(page,'/about/');
+    await expect(page.locator('.ab-value')).toHaveCount(3);
+    for(const image of await page.locator('[data-about-art]').all()){
+      await image.scrollIntoViewIfNeeded();
+      await expect.poll(()=>image.evaluate(el=>el.complete&&el.naturalWidth>0)).toBe(true);
+      expect(await image.evaluate(el=>getComputedStyle(el).objectFit)).toBe('contain');
+    }
+    await page.locator('.ab-section-nav a[href="#product-principles"]').click();
+    await expect(page).toHaveURL(/#product-principles$/);
+    await expect(page.locator('#product-principles-heading')).toBeVisible();
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+2)).toBe(true);
+  }
+});
+test('About motion honors reduced motion',async({page})=>{
+  await page.setViewportSize({width:1440,height:900});
+  await page.emulateMedia({reducedMotion:'no-preference'});
+  await assertPage(page,'/about/');
+  await expect(page.locator('body')).toHaveClass(/ab-motion-ready/);
+  const card=page.locator('.ab-value').first();
+  await card.scrollIntoViewIfNeeded();
+  await card.hover();
+  await expect(card).toHaveClass(/ab-spot-active/);
+  await page.emulateMedia({reducedMotion:'reduce'});
+  await expect(card).not.toHaveClass(/ab-spot-active/);
+});
+test.describe('About without JavaScript',()=>{
+  test.use({javaScriptEnabled:false});
+  test('brand story and links remain available',async({page})=>{
+    await page.goto('/about/');
+    await expect(page.locator('.ab-value')).toHaveCount(3);
+    await page.locator('.ab-section-nav a[href="#about-independence"]').click();
+    await expect(page).toHaveURL(/#about-independence$/);
+    await expect(page.locator('#ab-independence-heading')).toBeVisible();
+  });
+});
