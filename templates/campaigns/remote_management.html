@@ -4,7 +4,7 @@
 {% block content %}
 <div class="app-stack ui-campaign-detail ui-remote-management">
 <nav class="ui-breadcrumb" aria-label="مسیر صفحه"><a href="{% url 'campaigns:detail' campaign.id %}">{{ campaign.name|default:"کمپین" }}</a><span> / مدیریت تبلیغ</span></nav>
-{% include "includes/dash_header.html" with title="مدیریت تبلیغ" subtitle="کنترل تبلیغ متصل و پیگیری درخواست‌ها" with_sub=1 %}
+{% include "includes/dash_header.html" with page_icon="settings" title="مدیریت تبلیغ" subtitle="کنترل تبلیغ متصل و پیگیری درخواست‌ها" with_sub=1 %}
 {% if ad %}
 <section class="card card-pad ui-remote-summary"><div class="ui-form-intro"><span class="ui-target-symbol">{% include "includes/lucide_icon.html" with name="sliders-horizontal" size="md" %}</span><div><h2>{{ campaign.name|default:"تبلیغ" }}</h2><p>شناسه تبلیغ: <bdi>#{{ ad.remote_ad_id }}</bdi></p></div></div><span class="status {{ campaign.status|campaign_status_class }}">{{ campaign.get_status_display }}</span></section>
 <p class="ui-studio-warning">عملیات ابتدا برای اپراتور ثبت می‌شود. توقف و ادامه ممکن است تاریخ فعال‌سازی و توقف تنظیم‌شده را در تلگرام پاک کند. وضعیت نهایی تنها پس از تأیید API نمایش داده می‌شود.</p>

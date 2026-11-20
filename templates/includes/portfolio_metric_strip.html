@@ -7,35 +7,35 @@
   <div class="campaign-kpi-ribbon__track" role="list">
     <article class="campaign-kpi-ribbon__cell" role="listitem" style="--kpi-accent: #1f9b78;">
       <p class="campaign-kpi-ribbon__meta">
-        <span class="campaign-kpi-ribbon__glyph" aria-hidden="true">{% include "includes/lucide_icon.html" with name="radio" size="kpi" %}</span>
+        <span class="campaign-kpi-ribbon__glyph" aria-hidden="true">{% include "includes/gramads_workspace_icon.html" with name="megaphone" size="kpi" %}</span>
         <span class="campaign-kpi-ribbon__name">فعال</span>
       </p>
       <p class="campaign-kpi-ribbon__value tabnums">{{ kpis.active_count|format_count }}</p>
     </article>
     <article class="campaign-kpi-ribbon__cell campaign-kpi-ribbon__cell--lead" role="listitem" style="--kpi-accent: #249fe5;">
       <p class="campaign-kpi-ribbon__meta">
-        <span class="campaign-kpi-ribbon__glyph" aria-hidden="true">{% include "includes/lucide_icon.html" with name="eye" size="kpi" %}</span>
+        <span class="campaign-kpi-ribbon__glyph" aria-hidden="true">{% include "includes/gramads_workspace_icon.html" with name="eye" size="kpi" %}</span>
         <span class="campaign-kpi-ribbon__name">نمایش</span>
       </p>
       <p class="campaign-kpi-ribbon__value tabnums">{% if kpis.has_impressions %}{{ kpis.total_impressions|format_count }}{% else %}—{% endif %}</p>
     </article>
     <article class="campaign-kpi-ribbon__cell" role="listitem" style="--kpi-accent: #147fc5;">
       <p class="campaign-kpi-ribbon__meta">
-        <span class="campaign-kpi-ribbon__glyph" aria-hidden="true">{% include "includes/lucide_icon.html" with name="mouse-pointer-click" size="kpi" %}</span>
+        <span class="campaign-kpi-ribbon__glyph" aria-hidden="true">{% include "includes/gramads_workspace_icon.html" with name="mouse-pointer-click" size="kpi" %}</span>
         <span class="campaign-kpi-ribbon__name">کلیک</span>
       </p>
       <p class="campaign-kpi-ribbon__value tabnums">{% if kpis.has_clicks %}{{ kpis.total_clicks|format_count }}{% else %}—{% endif %}</p>
     </article>
     <article class="campaign-kpi-ribbon__cell campaign-kpi-ribbon__cell--ctr" role="listitem" style="--kpi-accent: #ba8229;">
       <p class="campaign-kpi-ribbon__meta">
-        <span class="campaign-kpi-ribbon__glyph" aria-hidden="true">{% include "includes/lucide_icon.html" with name="percent" size="kpi" %}</span>
+        <span class="campaign-kpi-ribbon__glyph" aria-hidden="true">{% include "includes/gramads_workspace_icon.html" with name="percent" size="kpi" %}</span>
         <span class="campaign-kpi-ribbon__name">نرخ کلیک کل</span>
       </p>
       <p class="campaign-kpi-ribbon__value tabnums">{% if kpis.has_ctr %}{{ kpis.weighted_ctr|persian_digits }}<span class="campaign-kpi-ribbon__suffix">٪</span>{% else %}—{% endif %}</p>
     </article>
     <article class="campaign-kpi-ribbon__cell campaign-kpi-ribbon__cell--finance" role="listitem" style="--kpi-accent: #8794a7;">
       <p class="campaign-kpi-ribbon__meta">
-        <span class="campaign-kpi-ribbon__glyph" aria-hidden="true">{% include "includes/lucide_icon.html" with name="coins" size="kpi" %}</span>
+        <span class="campaign-kpi-ribbon__glyph" aria-hidden="true">{% include "includes/gramads_workspace_icon.html" with name="wallet" size="kpi" %}</span>
         <span class="campaign-kpi-ribbon__name">هزینه</span>
       </p>
       <p class="campaign-kpi-ribbon__value campaign-kpi-ribbon__value--ton">{% ton_amount kpis.total_spent_ton hint=0 %}</p>

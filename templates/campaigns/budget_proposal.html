@@ -3,7 +3,7 @@
 {% block page_title %}بررسی تغییر اعتبار{% endblock %}
 {% block content %}
 <div class="app-stack finance-page ui-finance">
-{% include "includes/dash_header.html" with title="بررسی تغییر اعتبار" subtitle="برآورد و تأیید درخواست بررسی مالی" with_sub=1 %}
+{% include "includes/dash_header.html" with page_icon="wallet" title="بررسی تغییر اعتبار" subtitle="برآورد و تأیید درخواست بررسی مالی" with_sub=1 %}
 <div class="ui-finance-flow">
 <section class="card card-pad form-stack"><h2 class="section-title">{{ campaign.name }}</h2>
 <div class="ui-invoice-total"><span>اعتبار درخواستی</span><strong dir="ltr">{{ proposal.amount_ton }} TON</strong></div>

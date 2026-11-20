@@ -5,7 +5,7 @@
 {% block extra_head %}{{ block.super }}{% if ai_available %}<link rel="stylesheet" href="{% static 'css/ui-ai.css' %}">{% endif %}{% endblock %}
 {% block content %}
 <div class="wizard-shell studio-shell ui-studio">
-  {% include "includes/dash_header.html" with title="استودیو ساخت تبلیغ" subtitle=campaign.name|default:"پیش‌نویس جدید" with_sub=1 %}
+  {% include "includes/dash_header.html" with page_icon="megaphone" title="استودیو ساخت تبلیغ" subtitle=campaign.name|default:"پیش‌نویس جدید" with_sub=1 %}
   <nav class="wizard-progress wizard-progress--exec" aria-label="مراحل">
     {% for key, label in steps %}
       <span {% if forloop.counter == step %}aria-current="step"{% endif %} class="wizard-step {% if forloop.counter == step %}is-active{% elif forloop.counter < step %}is-complete{% endif %}"><span class="ui-step-number">{% if forloop.counter < step %}{% include "includes/lucide_icon.html" with name="check" size="sm" %}{% else %}{{ forloop.counter|persian_digits }}{% endif %}</span><span class="ui-step-label">{{ label }}</span></span>
