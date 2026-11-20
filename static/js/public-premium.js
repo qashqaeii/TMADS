@@ -21,10 +21,12 @@
       var input = document.getElementById(button.getAttribute('aria-controls'));
       if (!input || input.type !== 'password') return;
       button.hidden = false;
+      button.setAttribute("aria-pressed", "false");
       button.addEventListener('click',function(){
         var show = input.type === 'password';
         input.type = show ? 'text' : 'password';
         button.textContent = show ? 'پنهان' : 'نمایش';
+        button.setAttribute('aria-pressed', String(show));
         button.setAttribute('aria-label',show ? 'پنهان کردن رمز عبور' : 'نمایش رمز عبور');
       });
     });

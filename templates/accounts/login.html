@@ -6,27 +6,27 @@
   <div class="auth-card auth-card--exec ui-auth-card" data-pp-reveal>
     <span class="ui-auth-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="log-in" size="md" %}</span>
     <h1>ورود به حساب تی‌ام‌ادز</h1>
-    <p class="muted">کمپین‌های تبلیغات تلگرام، وضعیت سفارش، کیف پول و گزارش‌ها را در داشبورد خود مدیریت کنید.</p>
+    <p class="muted">به فضای کاری خود خوش آمدید.</p>
     <form method="post" class="form-stack">
       {% csrf_token %}
       {% if form.non_field_errors %}<div class="form-error" role="alert">{{ form.non_field_errors }}</div>{% endif %}
       <div class="field">
         <label for="id_username">نام کاربری</label>
-        <input type="text" name="username" id="id_username" required autocomplete="username" value="{{ form.username.value|default:'' }}">
+        <input type="text" name="username" id="id_username" required autocomplete="username" dir="auto" placeholder="نام کاربری" value="{{ form.username.value|default:'' }}">
         {% if form.username.errors %}<div class="form-error" role="alert">{{ form.username.errors }}</div>{% endif %}
       </div>
       <div class="field">
         <label for="id_password">رمز عبور</label>
-        <div class="pp-password-row"><input type="password" name="password" id="id_password" required autocomplete="current-password"><button type="button" class="pp-password-toggle" data-pp-password-toggle aria-controls="id_password" aria-label="نمایش رمز عبور" hidden>نمایش</button></div>
+        <div class="pp-password-row"><input type="password" name="password" id="id_password" required autocomplete="current-password" dir="ltr"><button type="button" class="pp-password-toggle" data-pp-password-toggle aria-controls="id_password" aria-label="نمایش رمز عبور" hidden>نمایش</button></div>
         {% if form.password.errors %}<div class="form-error" role="alert">{{ form.password.errors }}</div>{% endif %}
       </div>
-      <button class="btn btn-primary btn-lg" type="submit">ورود</button>
-      <p class="auth-links">حساب ندارید؟ <a href="{% url 'accounts:register' %}">ثبت‌نام</a> · <a href="{% url 'accounts:password_reset' %}">فراموشی رمز عبور</a></p>
+      <div class="studio-login-recovery"><a href="{% url 'accounts:password_reset' %}">رمز عبور را فراموش کرده‌اید؟</a></div><button class="btn btn-primary btn-lg" type="submit">ورود به داشبورد {% include "includes/lucide_icon.html" with name="arrow-left" size="btn" %}</button>
+      <p class="auth-links">حساب ندارید؟ <a href="{% url 'accounts:register' %}">ثبت‌نام</a></p>
       <p class="auth-links">پرسشی دارید؟ <a href="{% url 'public:contact' %}">راهنمای پشتیبانی</a></p>
     </form>
-    <p class="ui-auth-context">برای حفظ امنیت حساب، رمز عبور را فقط در صفحه ورود وارد کنید. اگر دسترسی ندارید، از بازیابی رمز عبور استفاده کنید.</p>
+    <p class="ui-auth-context studio-auth-context">برای حفظ امنیت حساب، رمز عبور را فقط در صفحه ورود وارد کنید. اگر دسترسی ندارید، از بازیابی رمز عبور استفاده کنید.</p>
   </div>
-<aside class="pp-auth-aside" data-pp-reveal><span>فضای کاری تی‌ام‌ادز</span><h2>ادامه مسیر تبلیغات شما</h2><p>از یک داشبورد، گردش کمپین و وضعیت حساب خود را بررسی کنید.</p><ul><li>{% include "includes/lucide_icon.html" with name="check-circle" size="md" %} مدیریت کمپین‌ها</li><li>{% include "includes/lucide_icon.html" with name="check-circle" size="md" %} پیگیری وضعیت سفارش</li><li>{% include "includes/lucide_icon.html" with name="check-circle" size="md" %} گزارش و گردش مالی</li></ul><a href="{% url 'public:features' %}">آشنایی با امکانات</a></aside>
+<aside class="pp-auth-aside" data-pp-reveal>{% include "includes/auth_orbit.html" %}<span>فضای کاری تی‌ام‌ادز</span><h2>ادامه مسیر تبلیغات شما</h2><p>از یک داشبورد، گردش کمپین و وضعیت حساب خود را بررسی کنید.</p><ul><li>{% include "includes/lucide_icon.html" with name="check-circle" size="md" %} مدیریت کمپین‌ها</li><li>{% include "includes/lucide_icon.html" with name="check-circle" size="md" %} پیگیری وضعیت سفارش</li><li>{% include "includes/lucide_icon.html" with name="check-circle" size="md" %} گزارش و گردش مالی</li></ul><a href="{% url 'public:features' %}">آشنایی با امکانات</a></aside>
 </div></section>
 {% endblock %}
 

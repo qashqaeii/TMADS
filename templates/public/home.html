@@ -6,13 +6,13 @@
 <section class="container ui-landing-hero" aria-label="معرفی تی‌ام‌ادز">
   <div class="ui-landing-copy" data-pp-reveal>
     <span class="ui-landing-kicker"><span aria-hidden="true"></span> پلتفرم مدیریت تبلیغات تلگرام</span>
-    <h1>تبلیغات تلگرام،<br><em>هدفمند و قابل اندازه‌گیری.</em></h1>
-    <p>با تی‌ام‌ادز، کمپین‌های Telegram Ads را از یک داشبورد فارسی طراحی کنید؛ مخاطب مناسب را انتخاب کنید، بودجه و کارمزد را پیش از ثبت سفارش ببینید و پس از انتشار، نتیجه تبلیغات را بسنجید.</p>
+    <h1>تبلیغات تلگرام،<br><em>با دیدی روشن‌تر.</em></h1>
+    <p>از انتخاب مخاطب تا بررسی بودجه و تحلیل عملکرد؛ کمپین‌های Telegram Ads را در یک فضای کاری فارسی مدیریت کنید.</p>
     <div class="ui-landing-actions">{% if user.is_authenticated %}<a class="btn btn-primary btn-lg" href="{% url 'dashboard:home' %}">ورود به داشبورد {% include "includes/lucide_icon.html" with name="arrow-left" size="btn" %}</a>{% else %}<a class="btn btn-primary btn-lg" href="{% url 'accounts:register' %}">ساخت اولین کمپین {% include "includes/lucide_icon.html" with name="arrow-left" size="btn" %}</a>{% endif %}<a class="btn btn-ghost btn-lg" href="{% url 'public:how_it_works' %}">آشنایی با تبلیغات تلگرام</a></div>
     <div class="ui-landing-proof"><span>{% include "includes/lucide_icon.html" with name="check-circle" size="sm" %} پیش‌فاکتور شفاف</span><span>{% include "includes/lucide_icon.html" with name="check-circle" size="sm" %} گزارش یکپارچه</span><span>{% include "includes/lucide_icon.html" with name="check-circle" size="sm" %} بررسی قبل از ارسال</span></div>
   </div>
   <div class="ui-product-visual" data-pp-reveal aria-label="نمای شماتیک پنل مدیریت با اطلاعات نمونه">
-    <div class="ui-product-window"><div class="pp-window-chrome" aria-hidden="true"><i></i><i></i><i></i><span>TMADS / Preview</span></div>
+    <div class="studio-hero-orbit" aria-hidden="true"></div><div class="studio-visual-label"><span></span> فضای کاری تبلیغات <b dir="ltr">TMADS / 01</b></div><div class="ui-product-window"><div class="pp-window-chrome" aria-hidden="true"><i></i><i></i><i></i><span>TMADS / Preview</span></div>
       <header class="ui-product-window__head"><span class="ui-product-brand">{% include "includes/brand_mark.html" %} <strong>{{ PRODUCT_NAME }}</strong></span><span class="ui-sample-label">داده نمونه</span></header>
       <div class="ui-product-window__body">
         <div class="ui-product-window__nav" aria-hidden="true">{% include "includes/lucide_icon.html" with name="layout-grid" size="md" %}{% include "includes/lucide_icon.html" with name="megaphone" size="md" %}{% include "includes/lucide_icon.html" with name="wallet" size="md" %}{% include "includes/lucide_icon.html" with name="line-chart" size="md" %}</div>
@@ -26,13 +26,13 @@
         </div>
       </div>
     </div>
-    <p class="ui-product-caption">نمای مفهومی محصول؛ اعداد صرفاً نمونه‌اند.</p>
+    <div class="studio-floating-note" aria-hidden="true"><span>{% include "includes/lucide_icon.html" with name="target" size="md" %}</span><div><strong>هدف‌گیری دقیق‌تر</strong><small>از ایده تا مخاطب</small></div></div><p class="ui-product-caption">نمای مفهومی محصول؛ اعداد صرفاً نمونه‌اند.</p>
   </div>
 </section>
 <nav class="container pp-home-index" aria-label="بخش‌های صفحه"><a href="#home-targeting">هدف‌گیری</a><a href="#home-process">مسیر تبلیغات</a><a href="#telegram-ads-guide">راهنمای انتخاب</a><a href="#home-faq">پرسش‌ها</a></nav>
 <section id="home-targeting" class="container ui-landing-section">
   <header class="ui-landing-section-head"><div><p>هدف‌گیری</p><h2>تبلیغ در تلگرام؛ متناسب با مخاطب شما</h2></div><a href="{% url 'public:features' %}">همه امکانات {% include "includes/lucide_icon.html" with name="arrow-left" size="sm" %}</a></header>
-  <div class="ui-landing-targets">
+  <div class="ui-landing-targets studio-target-grid">
     <article><span class="ui-target-symbol">{% include "includes/lucide_icon.html" with name="search" size="md" %}</span><h3>جستجو</h3><p>عبارت‌های جستجوی منتخب</p></article>
     <article><span class="ui-target-symbol">{% include "includes/lucide_icon.html" with name="bot" size="md" %}</span><h3>ربات‌ها</h3><p>ربات‌های هدف واجد شرایط</p></article>
     <article><span class="ui-target-symbol">{% include "includes/lucide_icon.html" with name="users" size="md" %}</span><h3>کاربران</h3><p>موقعیت و ویژگی‌های مخاطب</p></article>
@@ -42,7 +42,7 @@
 </section>
 <section id="home-process" class="container ui-landing-section ui-landing-process">
   <header class="ui-landing-section-head"><div><p>مسیر کار</p><h2>چگونه تبلیغات تلگرام را شروع کنیم؟</h2></div></header>
-  <div class="ui-landing-steps"><article><span>۰۱</span><h3>طراحی کمپین</h3><p>هدف، متن، مقصد و بودجه را مشخص کنید.</p></article><article><span>۰۲</span><h3>بررسی سفارش</h3><p>پیش‌فاکتور و قوانین را مرور کنید.</p></article><article><span>۰۳</span><h3>پایش عملکرد</h3><p>پس از انتشار و همگام‌سازی، شاخص‌های تبلیغ را ببینید.</p></article></div>
+  <div class="ui-landing-steps"><article><span>۰۱</span><div class="studio-step-icon">{% include "includes/lucide_icon.html" with name="pen-tool" size="md" %}</div><h3>طراحی کمپین</h3><p>هدف، متن، مقصد و بودجه را مشخص کنید.</p></article><article><span>۰۲</span><div class="studio-step-icon">{% include "includes/lucide_icon.html" with name="clipboard-check" size="md" %}</div><h3>بررسی سفارش</h3><p>پیش‌فاکتور و قوانین را مرور کنید.</p></article><article><span>۰۳</span><div class="studio-step-icon">{% include "includes/lucide_icon.html" with name="line-chart" size="md" %}</div><h3>پایش عملکرد</h3><p>پس از انتشار و همگام‌سازی، شاخص‌های تبلیغ را ببینید.</p></article></div>
 </section>
 <section class="container ui-landing-section" aria-labelledby="why-tmads">
   <header class="ui-landing-section-head"><div><p>Telegram Ads چیست؟</p><h2 id="why-tmads">تبلیغات رسمی تلگرام، با مدیریت فارسی</h2></div></header>

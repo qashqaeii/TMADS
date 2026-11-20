@@ -1,8 +1,11 @@
 {% extends "base.html" %}
 {% load static %}
-{% block extra_head %}<link rel="stylesheet" href="{% static 'css/public-premium.css' %}"><script defer src="{% static 'js/public-premium.js' %}"></script>{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/public-premium.css' %}"><link rel="stylesheet" href="{% static 'css/public-studio.css' %}"><script defer src="{% static 'js/public-premium.js' %}"></script>{% endblock %}
 {% block body_class %}is-public public-premium{% block public_page_class %}{% endblock %}{% endblock %}
 {% block body %}
+{% if request.resolver_match.url_name == "login" or request.resolver_match.url_name == "register" %}
+<header class="studio-auth-header"><div class="container studio-auth-nav"><a href="{% url 'public:home' %}" class="brand brand-lockup">{% include "includes/brand_mark.html" %}<span>{{ PRODUCT_NAME }}</span></a><a class="studio-back" href="{% url 'public:home' %}">بازگشت به سایت {% include "includes/lucide_icon.html" with name="arrow-left" size="sm" %}</a></div></header>
+{% else %}
 <header class="site-header site-header--exec ui-public-header">
   <div
     class="container public-nav-shell"
@@ -118,7 +121,11 @@
     </aside>
   </div>
 </header>
+{% endif %}
 <main id="main-content" tabindex="-1" class="site-main site-main--public">{% block content %}{% endblock %}</main>
+{% if request.resolver_match.url_name == "login" or request.resolver_match.url_name == "register" %}
+<footer class="studio-auth-footer container"><span>© {{ PRODUCT_NAME }}</span><nav aria-label="پیوندهای حقوقی و پشتیبانی"><a href="{% url 'public:terms' %}">شرایط استفاده</a><a href="{% url 'public:privacy' %}">حریم خصوصی</a><a href="{% url 'public:contact' %}">پشتیبانی</a></nav></footer>
+{% else %}
 <footer class="site-footer site-footer--exec section-muted ui-public-footer">
   <div class="container footer-grid footer-grid--rich footer-grid--public">
     <div class="footer-col">
@@ -133,16 +140,19 @@
       <a href="{% url 'public:faq' %}">سوالات</a>
     </div>
     <div class="footer-col">
-      <h2>حقوقی و تماس</h2>
+      <h2>حقوقی</h2>
       <a href="{% url 'public:terms' %}">شرایط</a>
       <a href="{% url 'public:privacy' %}">حریم خصوصی</a>
       <a href="{% url 'public:refund' %}">بازپرداخت</a>
       <a href="{% url 'public:content_policy' %}">سیاست محتوا</a>
+    </div>
+    <div class="footer-col"><h2>تی‌ام‌ادز</h2>
       <a href="{% url 'public:about' %}">درباره ما</a>
       <a href="{% url 'public:contact' %}" {% if request.resolver_match.namespace == 'public' and request.resolver_match.url_name == 'contact' %}aria-current="page"{% endif %}>تماس</a>
     </div>
   </div>
   <div class="container ui-footer-bottom"><span>© {{ PRODUCT_NAME }}</span><span>استفاده از خدمات تابع شرایط و مجوزهای تبلیغاتی تلگرام است.</span><a href="#main-content" class="pp-top-link">بازگشت به محتوای اصلی ↑</a></div>
 </footer>
+{% endif %}
 {% endblock %}
 

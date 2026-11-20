@@ -3,7 +3,7 @@
   "use strict";
   function boot() {
     document.querySelectorAll('.ui-auth-card input[type="password"], .ui-account-page input[type="password"]').forEach(function (input) {
-      if (input.closest(".ui-password-wrap")) return;
+      if (input.closest(".ui-password-wrap, .pp-password-row")) return;
       var wrap=document.createElement("div"), button=document.createElement("button");
       wrap.className="ui-password-wrap";input.parentNode.insertBefore(wrap,input);wrap.appendChild(input);
       button.type="button";button.className="ui-password-toggle";button.textContent="نمایش";button.setAttribute("aria-label","نمایش رمز عبور");button.setAttribute("aria-pressed","false");if(input.id)button.setAttribute("aria-controls",input.id);wrap.appendChild(button);

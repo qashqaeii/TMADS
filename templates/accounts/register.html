@@ -6,18 +6,18 @@
   <div class="auth-card auth-card--exec ui-auth-card" data-pp-reveal>
     <span class="ui-auth-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="user-plus" size="md" %}</span>
     <h1>ثبت‌نام در تی‌ام‌ادز</h1>
-    <p class="muted">برای طراحی اولین کمپین تبلیغات تلگرام، حساب کاربری ایجاد کنید. ساخت حساب به معنی پرداخت یا انتشار تبلیغ نیست.</p>
+    <p class="muted">اولین قدم برای طراحی کمپین شما؛ بدون پرداخت یا انتشار تبلیغ.</p>
     <form method="post" class="form-stack">
       {% csrf_token %}
       {% if form.non_field_errors %}<div class="form-error" role="alert">{{ form.non_field_errors }}</div>{% endif %}
       {% for field in form %}{% include "includes/auth_field.html" with field=field %}{% endfor %}
       <p class="auth-links pp-register-terms">پیش از ثبت‌نام، <a href="{% url 'public:terms' %}">شرایط استفاده</a> و <a href="{% url 'public:privacy' %}">حریم خصوصی</a> را مطالعه کنید.</p>
-      <button class="btn btn-primary btn-lg" type="submit">ایجاد حساب</button>
+      <button class="btn btn-primary btn-lg" type="submit">ایجاد حساب کاربری {% include "includes/lucide_icon.html" with name="arrow-left" size="btn" %}</button>
       <p class="auth-links">قبلاً عضو شده‌اید؟ <a href="{% url 'accounts:login' %}">ورود</a></p>
     </form>
-    <p class="ui-auth-context">پس از ایجاد حساب می‌توانید امکانات را بررسی و پیش‌نویس کمپین را آماده کنید. شرایط انتشار و پرداخت در زمان ثبت سفارش مشخص می‌شود.</p>
+    <p class="ui-auth-context studio-auth-context">پس از ایجاد حساب می‌توانید امکانات را بررسی و پیش‌نویس کمپین را آماده کنید. شرایط انتشار و پرداخت در زمان ثبت سفارش مشخص می‌شود.</p>
   </div>
-<aside class="pp-auth-aside" data-pp-reveal><span>شروع با یک پیش‌نویس</span><h2>از ایده تا اولین کمپین</h2><p>هدف و پیام خود را آماده کنید و پیش از سفارش، جزئیات را مرور کنید.</p><ul><li>{% include "includes/lucide_icon.html" with name="check-circle" size="md" %} انتخاب مخاطب</li><li>{% include "includes/lucide_icon.html" with name="check-circle" size="md" %} بررسی بودجه و پیش‌فاکتور</li><li>{% include "includes/lucide_icon.html" with name="check-circle" size="md" %} آماده‌سازی پیش از ارسال</li></ul><a href="{% url 'public:how_it_works' %}">راهنمای شروع تبلیغات</a></aside>
+<aside class="pp-auth-aside" data-pp-reveal>{% include "includes/auth_orbit.html" %}<span>شروع با یک پیش‌نویس</span><h2>از ایده تا اولین کمپین</h2><p>هدف و پیام خود را آماده کنید و پیش از سفارش، جزئیات را مرور کنید.</p><ul><li>{% include "includes/lucide_icon.html" with name="check-circle" size="md" %} انتخاب مخاطب</li><li>{% include "includes/lucide_icon.html" with name="check-circle" size="md" %} بررسی بودجه و پیش‌فاکتور</li><li>{% include "includes/lucide_icon.html" with name="check-circle" size="md" %} آماده‌سازی پیش از ارسال</li></ul><a href="{% url 'public:how_it_works' %}">راهنمای شروع تبلیغات</a></aside>
 </div></section>
 {% endblock %}
 
