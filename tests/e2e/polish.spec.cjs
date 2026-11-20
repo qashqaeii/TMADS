@@ -285,3 +285,55 @@ test.describe('Pricing no-script experience',()=>{
     await expect(page.locator('.pr-detail').first()).toHaveAttribute('open','');
   });
 });
+
+
+test('Workflow journey and educational checklist at three viewport sizes',async({page})=>{
+  test.setTimeout(60000);
+  for(const width of [320,768,1440]){
+    await page.setViewportSize({width,height:900});
+    await page.emulateMedia({reducedMotion:'reduce'});
+    await assertPage(page,'/how-it-works/');
+    await expect(page.locator('.wf-step')).toHaveCount(6);
+    await expect(page.locator('[data-wf-check]')).toHaveCount(5);
+    for(const art of await page.locator('[data-workflow-art]').all()){
+      await art.scrollIntoViewIfNeeded();
+      await expect.poll(()=>art.evaluate(img=>img.complete&&img.naturalWidth>0)).toBe(true);
+      expect(await art.evaluate(img=>getComputedStyle(img).objectFit)).toBe('contain');
+    }
+    await page.locator('.wf-section-nav a[href="#campaign-playbook"]').click();
+    await expect(page).toHaveURL(/#campaign-playbook$/);
+    await page.locator('[data-wf-check]').nth(0).check();
+    await page.locator('[data-wf-check]').nth(1).check();
+    await expect(page.locator('[data-wf-count]')).toHaveText('۲ از ۵');
+    await expect(page.locator('progress')).toHaveAttribute('value','2');
+    await page.locator('[data-wf-reset]').click();
+    await expect(page.locator('[data-wf-count]')).toHaveText('۰ از ۵');
+    await expect(page.locator('[data-wf-check]:checked')).toHaveCount(0);
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+2)).toBe(true);
+  }
+});
+
+test('Workflow motion is disabled by reduced motion',async({page})=>{
+  await page.setViewportSize({width:1440,height:900});
+  await page.emulateMedia({reducedMotion:'no-preference'});
+  await assertPage(page,'/how-it-works/');
+  const card=page.locator('.wf-step').first();
+  await card.scrollIntoViewIfNeeded();
+  await card.hover();
+  await expect(card).toHaveClass(/wf-spot-active/);
+  await page.emulateMedia({reducedMotion:'reduce'});
+  await expect(card).not.toHaveClass(/wf-spot-active/);
+});
+
+test.describe('Workflow no-script experience',()=>{
+  test.use({javaScriptEnabled:false});
+  test('all steps and guidance remain readable',async({page})=>{
+    await page.goto('/how-it-works/');
+    await expect(page.locator('.wf-step')).toHaveCount(6);
+    await expect(page.locator('.wf-check-item')).toHaveCount(5);
+    await expect(page.locator('[data-wf-progress]')).toBeHidden();
+    await expect(page.locator('.wf-actions .btn-primary')).toHaveAttribute('href',/accounts\/register/);
+    await page.locator('.wf-section-nav a[href="#guide-preparation"]').click();
+    await expect(page).toHaveURL(/#guide-preparation$/);
+  });
+});
