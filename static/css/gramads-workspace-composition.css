@@ -118,3 +118,19 @@
 .is-app .ga-invoice-workspace .finance-invoice{max-width:760px;margin-inline:auto}
 @media(max-width:1200px){.is-app .ga-wallet-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.is-app .ga-wallet-nav{grid-column:1/-1}.is-app .ga-wallet-nav .ga-panel-body{grid-template-columns:repeat(3,minmax(0,1fr))}.is-app .ga-wallet-ledgers:has(.pay-history){grid-template-columns:minmax(0,1fr)}}
 @media(max-width:600px){.is-app .ga-wallet-summary{grid-template-columns:minmax(0,1fr)}.is-app .ga-wallet-nav .ga-panel-body{grid-template-columns:minmax(0,1fr)}.is-app .ga-wallet-balance{min-height:0}}
+
+/* Support: inbox and conversation with clear context; guides retain every original item. */
+.is-app .ga-help-aside,.is-app .ga-help-links,.is-app .ga-policy-main{display:grid;gap:12px;min-width:0}
+.is-app .ga-help-aside .ga-feature h2{font-size:1.2rem}
+.is-app .ga-help-aside .ga-feature>.btn{justify-self:start}
+.ui-final.is-app .ga-help-layout .ui-ticket-list{border:0;border-radius:0;box-shadow:none;margin:0}
+.is-app .ga-help-layout .record-list__item{min-height:66px}
+.is-app .ga-ticket-detail{grid-template-columns:minmax(0,2fr) minmax(230px,1fr)}
+.is-app .ga-ticket-detail .chat-thread{min-height:180px}
+.is-app .ga-ticket-detail .ga-facts{margin-bottom:10px}
+.is-app .ga-ticket-detail .ga-facts li{align-items:start}
+.is-app .ga-policy-layout{grid-template-columns:minmax(0,2.4fr) minmax(215px,1fr)}
+.is-app .ga-policy-layout .policy-sources__links{display:grid;gap:7px}
+.is-app .ga-policy-layout .policy-sources__links a{padding:8px 0;border-bottom:1px solid #e0eaf6;font-size:.8rem;line-height:1.6}
+.is-app .ga-policy-layout .policy-sources__links a:last-child{border:0}
+@media(max-width:1050px){.is-app :is(.ga-ticket-detail,.ga-policy-layout){grid-template-columns:minmax(0,1fr)}}

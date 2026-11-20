@@ -3,7 +3,7 @@
 {% block page_title %}{{ ticket.subject }}{% endblock %}
 {% block container_class %}container-wide{% endblock %}
 {% block content %}
-<div class="app-stack ui-support">
+<div class="app-stack ui-support ga-help-workspace">
 {% url 'support:list' as list_url %}
 <header class="dash-header ui-page-heading dash-header--luxe dash-header--rich">
   <div class="dash-header__main">
@@ -17,7 +17,7 @@
   </div>
   <a class="btn btn-ghost btn-sm" href="{{ list_url }}">بازگشت</a>
 </header>
-<section class="card ui-conversation">
+<div class="ga-split ga-ticket-detail"><section class="card ui-conversation"><header class="ga-panel-head"><div class="ga-panel-title"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="message-square" %}</span><h2>گفتگو با پشتیبانی</h2></div></header>
   <div class="chat-thread" aria-label="تاریخچه گفتگو">
     {% for m in ticket.messages.all %}
     <article class="msg-bubble {% if m.author.is_staff_ops %}is-staff{% endif %}">
@@ -36,6 +36,6 @@
     <button class="btn btn-primary btn-sm" type="submit">ارسال پاسخ</button>
   </form>
   {% endif %}
-</section>
+</section><aside class="ga-panel"><header class="ga-panel-head"><h2>اطلاعات درخواست</h2></header><div class="ga-panel-body"><ul class="ga-facts"><li><span>موضوع</span><strong>{{ ticket.subject }}</strong></li><li><span>وضعیت</span><strong>{{ ticket.get_status_display }}</strong></li><li><span>ثبت درخواست</span><time datetime="{{ ticket.created_at|date:'c' }}">{{ ticket.created_at|jalali_datetime }}</time></li></ul><p class="ga-inline-note">{% include "includes/gramads_workspace_icon.html" with name="shield-check" %}<span>اطلاعات کارت بانکی و رمز عبور را ارسال نکنید.</span></p></div></aside></div>
 </div>
 {% endblock %}

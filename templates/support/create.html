@@ -2,17 +2,17 @@
 {% block page_title %}تیکت جدید{% endblock %}
 {% block container_class %}container-wide{% endblock %}
 {% block content %}
-<div class="app-stack ui-support">
+<div class="app-stack ui-support ga-help-workspace">
 {% include "includes/dash_header.html" with page_icon="message-square" eyebrow="پشتیبانی" title="تیکت جدید" %}
-<div class="ui-support-flow"><form method="post" class="card card-pad form-stack" aria-label="ثبت درخواست پشتیبانی">
-  <div class="ui-form-intro"><span class="ui-target-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="message-circle" size="md" %}</span><div><h2>درخواست پشتیبانی</h2><p>موضوع و جزئیات را وارد کنید.</p></div></div>
+<div class="ga-split"><form method="post" class="ga-panel" aria-label="ثبت درخواست پشتیبانی">
+  <header class="ga-panel-head"><div class="ga-panel-title"><span class="ui-target-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="message-circle" size="md" %}</span><div><h2>درخواست پشتیبانی</h2><p>موضوع و جزئیات را وارد کنید.</p></div></div></header><div class="ga-panel-body form-stack">
   {% csrf_token %}
   {% if campaign_id %}<input type="hidden" name="campaign_id" value="{{ campaign_id }}"><p class="muted ops-pill">مرتبط با کمپین «{{ campaign.name|default:"بدون نام" }}»</p>{% endif %}
   {% if pause_request %}<p class="ui-studio-warning" role="status">این فرم فقط درخواست توقف را برای پشتیبانی ثبت می‌کند؛ تبلیغ بلافاصله متوقف نمی‌شود.</p>{% endif %}
   <div class="field"><label for="ticket-subject">موضوع</label><input id="ticket-subject" name="subject" maxlength="120" value="{{ subject }}" placeholder="مشکل پرداخت یا کمپین" required></div>
   <div class="field"><label for="ticket-body">شرح درخواست</label><textarea id="ticket-body" aria-describedby="ticket-help" name="body" rows="5" maxlength="5000" required placeholder="جزئیات را بنویسید…">{{ body }}</textarea></div>
   <p class="section-description" id="ticket-help">مراحل بروز مشکل را بنویسید؛ رمز عبور و اطلاعات کارت بانکی را ارسال نکنید.</p>
-  <div class="form-actions"><a class="btn btn-ghost" href="{% url 'support:list' %}">بازگشت</a><button class="btn btn-primary" type="submit">ثبت تیکت</button></div>
-</form><aside class="card card-pad ui-finance-guide"><h2 class="section-title">راهنمای ثبت درخواست</h2><ul class="ui-support-tips"><li>نام کمپین یا شماره فاکتور مربوط را ذکر کنید.</li><li>خطا یا رفتاری را که مشاهده کردید توضیح دهید.</li><li>اطلاعات محرمانه، رمز عبور یا شماره کارت را ننویسید.</li></ul><a href="{% url 'support:list' %}">پیگیری درخواست‌های قبلی</a></aside></div>
+  </div><footer class="ga-panel-foot"><a class="btn btn-ghost" href="{% url 'support:list' %}">بازگشت</a><button class="btn btn-primary" type="submit">ثبت تیکت</button></footer>
+</form><aside class="ga-panel"><header class="ga-panel-head"><h2>راهنمای ثبت درخواست</h2></header><div class="ga-panel-body"><ul class="ui-support-tips"><li>نام کمپین یا شماره فاکتور مربوط را ذکر کنید.</li><li>خطا یا رفتاری را که مشاهده کردید توضیح دهید.</li><li>اطلاعات محرمانه، رمز عبور یا شماره کارت را ننویسید.</li></ul><a href="{% url 'support:list' %}">پیگیری درخواست‌های قبلی</a></div></aside></div>
 </div>
 {% endblock %}

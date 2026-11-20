@@ -3,9 +3,11 @@
 {% block page_title %}پشتیبانی{% endblock %}
 {% block container_class %}container-wide{% endblock %}
 {% block content %}
-<div class="app-stack ui-support">
+<div class="app-stack ui-support ga-help-workspace">
 {% url 'support:create' as create_url %}
 {% include "includes/dash_header.html" with page_icon="headphones" eyebrow="پشتیبانی" title="تیکت‌ها" action_url=create_url action_label="تیکت جدید" action_primary=1 %}
+<div class="ga-split ga-help-layout"><section class="ga-panel">
+<header class="ga-panel-head"><div class="ga-panel-title"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="message-square" size="md" %}</span><div><h2>درخواست‌های شما</h2><p>سوابق گفتگو و وضعیت رسیدگی</p></div></div><small class="muted">{{ tickets|length|format_count }} تیکت</small></header>
 {% if tickets %}
 <ul class="record-list ui-ticket-list" aria-label="درخواست‌های پشتیبانی">
   {% for t in tickets %}
@@ -22,13 +24,13 @@
   {% endfor %}
 </ul>
 {% else %}
-<article class="card card--lift">
+<div>
   <div class="ui-empty">
     <span class="ui-empty__icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="message-square" size="md" %}</span><h2>تیکتی ثبت نشده</h2>
     <p class="muted">سوال مالی، فنی یا کمپین — در یک جا پیگیری کنید.</p>
     <a class="btn btn-primary btn-sm" href="{% url 'support:create' %}">ثبت تیکت</a>
   </div>
-</article>
-{% endif %}
 </div>
+{% endif %}</section>
+<aside class="ga-help-aside"><section class="ga-feature"><div class="ga-feature-head"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="headphones" size="md" %}</span><small>مرکز پشتیبانی</small></div><h2>به راهنمایی نیاز دارید؟</h2><p>موضوع و جزئیات درخواست را ثبت کنید و پاسخ را از همین صفحه دنبال کنید.</p><a class="btn btn-primary" href="{{ create_url }}">ثبت درخواست جدید {% include "includes/gramads_workspace_icon.html" with name="arrow-left" %}</a></section><nav class="ga-panel" aria-label="راهنمای سریع"><header class="ga-panel-head"><h2>راهنمای سریع</h2></header><div class="ga-panel-body ga-help-links"><a class="ga-link-tile" href="{% url 'campaigns:list' %}"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="megaphone" %}</span><span>مدیریت کمپین‌ها</span>{% include "includes/gramads_workspace_icon.html" with name="chevron-left" %}</a><a class="ga-link-tile" href="{% url 'finance:wallet' %}"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="wallet" %}</span><span>پیگیری پرداخت‌ها</span>{% include "includes/gramads_workspace_icon.html" with name="chevron-left" %}</a></div></nav></aside></div></div>
 {% endblock %}

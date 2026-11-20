@@ -3,7 +3,7 @@
 {% block page_title %}{{ intro.title }}{% endblock %}
 {% block container_class %}container-wide{% endblock %}
 {% block content %}
-<div class="policy-center app-stack ui-policy-center">
+<div class="policy-center app-stack ui-policy-center ga-policy-workspace">
   <header class="dash-header ui-page-heading dash-header--luxe">
     <div class="dash-header__main">
       <span class="dash-header__kicker">راهنما</span>
@@ -12,6 +12,7 @@
     </div>
   </header>
 
+  <div class="ga-split ga-policy-layout"><div class="ga-policy-main">
   <section class="card card-pad policy-intro">
     <div class="ui-form-intro"><span class="ui-target-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="shield-check" size="md" %}</span><div><h2>پیش از انتشار</h2><p>نکات اصلی را مدنظر قرار دهید.</p></div></div>
     <ul class="policy-intro-list">
@@ -20,7 +21,7 @@
       {% endfor %}
     </ul>
     <p class="muted" style="font-size:.82rem;margin:.75rem 0 0">
-      خلاصه‌های فارسی در TMADS راهنمای عملی هستند؛
+      خلاصه‌های فارسی در گرام‌ادز راهنمای عملی هستند؛
       <a href="https://ads.telegram.org/guidelines" target="_blank" rel="noopener">دستورالعمل رسمی تلگرام</a>
       و
       <a href="https://ads.telegram.org/tos" target="_blank" rel="noopener">شرایط پلتفرم تبلیغات</a>
@@ -51,7 +52,7 @@
     {% endfor %}
   </section>
 
-  <section class="card card--lift card-pad" style="margin-top:1.25rem">
+  <section class="ga-panel ga-panel-body">
     <h2 class="section-title">سوالات متداول</h2>
     <dl class="policy-faq">
       {% for item in faq %}
@@ -63,16 +64,16 @@
     </dl>
   </section>
 
-  <section class="policy-sources card-muted card-pad" style="margin-top:1.25rem">
+  </div><aside><section class="policy-sources ga-panel ga-panel-body">
     <h2 class="section-title" style="font-size:1rem">منابع رسمی</h2>
     <div class="policy-sources__links">
       <a href="https://ads.telegram.org/tos" target="_blank" rel="noopener">شرایط پلتفرم تبلیغات تلگرام</a>
       <a href="https://ads.telegram.org/guidelines" target="_blank" rel="noopener">دستورالعمل تبلیغات</a>
       <a href="https://ads.telegram.org/getting-started" target="_blank" rel="noopener">راهنمای شروع</a>
-      <a href="{% url 'public:terms' %}">شرایط TMADS</a>
-      <a href="{% url 'public:refund' %}">بازپرداخت TMADS</a>
-      <a href="{% url 'public:privacy' %}">حریم خصوصی TMADS</a>
+      <a href="{% url 'public:terms' %}">شرایط گرام‌ادز</a>
+      <a href="{% url 'public:refund' %}">بازپرداخت گرام‌ادز</a>
+      <a href="{% url 'public:privacy' %}">حریم خصوصی گرام‌ادز</a>
     </div>
-  </section>
+  </section></aside></div>
 </div>
 {% endblock %}
