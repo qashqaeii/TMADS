@@ -3,9 +3,9 @@
 {% block page_title %}مرکز عملیات{% endblock %}
 {% block container_class %}container-wide{% endblock %}
 {% block content %}
-<div class="app-stack operations-page ui-ops">
+<div class="app-stack operations-page ui-ops ga-ops-center">
   {% include "includes/dash_header.html" with page_icon="layout-grid" eyebrow="عملیات" title="مرکز عملیات" %}
-  <div class="kpi-exec-grid ui-ops-kpis" role="region" aria-label="خلاصه عملیات">
+  <div class="kpi-exec-grid ui-ops-kpis ga-ops-center-metrics" role="region" aria-label="خلاصه عملیات">
     <article class="kpi-exec">
       <span class="kpi-exec__icon">{% include "includes/kpi_icon.html" with name="users" %}</span>
       <div class="kpi-exec__body">
@@ -35,19 +35,17 @@
       </div>
     </article>
   </div>
-  <div class="ui-ops-overview"><section class="card card-pad"><div class="ui-form-intro"><span class="ui-target-symbol">{% include "includes/lucide_icon.html" with name="wallet" size="md" %}</span><div><h2>تعهدات کیف پول</h2><p>مانده حساب مشتریان، به ریال</p></div></div>
-    <div class="finance-line"><span>موجودی کل (ریال)</span><strong class="tabnums" dir="ltr">{{ wallet_liabilities.available|default:0|intcomma }}</strong></div>
-    <div class="finance-line"><span>رزرو کل (ریال)</span><strong class="tabnums" dir="ltr">{{ wallet_liabilities.reserved|default:0|intcomma }}</strong></div>
-  </section>
-  <nav class="card card-pad ui-ops-links" aria-label="میانبرهای عملیات"><h2 class="section-title">دسترسی سریع</h2>
-    <a href="{% url 'operations:remote_operations' %}">{% include "includes/lucide_icon.html" with name="sliders-horizontal" size="md" %}<span>عملیات تبلیغات</span>{% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}</a>
-    <a href="{% url 'operations:telegram_account' %}">{% include "includes/lucide_icon.html" with name="line-chart" size="md" %}<span>گزارش حساب تلگرام</span>{% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}</a>
-    <a href="{% url 'operations:campaigns' %}">{% include "includes/lucide_icon.html" with name="megaphone" size="md" %}<span>بررسی کمپین‌ها</span>{% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}</a>
-    <a href="{% url 'operations:refunds' %}">{% include "includes/lucide_icon.html" with name="rotate-ccw" size="md" %}<span>بازپرداخت‌ها</span>{% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}</a>
-    <a href="{% url 'operations:exchange_rates' %}">{% include "includes/lucide_icon.html" with name="coins" size="md" %}<span>نرخ گرام (تون)</span>{% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}</a>
-    <a href="{% url 'operations:api_status' %}">{% include "includes/lucide_icon.html" with name="activity" size="md" %}<span>وضعیت API</span>{% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}</a>
-<a href="{% url 'operations:release_readiness' %}">{% include "includes/lucide_icon.html" with name="clipboard-check" size="md" %}<span>آمادگی انتشار</span>{% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}</a>
-    <a href="{% url 'operations:audit' %}">{% include "includes/lucide_icon.html" with name="shield-check" size="md" %}<span>لاگ ممیزی</span>{% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}</a>
-  </nav></div>
+  <div class="ga-split ga-ops-priorities">
+    <section class="ga-panel"><header class="ga-panel-head"><div class="ga-panel-title"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="activity" %}</span><div><h2>صف رسیدگی</h2><p>اقدام‌های اصلی اپراتور</p></div></div></header><div class="ga-panel-body ga-ops-queue">
+      <a class="ga-queue-item" href="{% url 'operations:campaigns' %}?status=pending_review"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="megaphone" %}</span><div><strong>کمپین‌های در انتظار بررسی</strong><small>بررسی محتوای تبلیغ و شرایط سفارش</small></div><strong class="ga-queue-number">{{ pending_campaigns|format_count }}</strong>{% include "includes/gramads_workspace_icon.html" with name="chevron-left" %}</a>
+      <a class="ga-queue-item" href="{% url 'operations:refunds' %}?status=open"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="refresh-cw" %}</span><div><strong>بازپرداخت‌های باز</strong><small>پیگیری درخواست‌های مالی مشتریان</small></div><strong class="ga-queue-number">{{ open_refunds|format_count }}</strong>{% include "includes/gramads_workspace_icon.html" with name="chevron-left" %}</a>
+      <a class="ga-queue-item" href="{% url 'operations:remote_operations' %}"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="settings" %}</span><div><strong>عملیات تبلیغات</strong><small>بررسی درخواست‌ها و تطبیق عملیات</small></div>{% include "includes/gramads_workspace_icon.html" with name="chevron-left" %}</a>
+    </div></section>
+    <section class="ga-feature ga-ops-liabilities"><div class="ga-feature-head"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="wallet" %}</span><small>تعهدات کیف پول مشتریان</small></div><small>موجودی کل (ریال)</small><strong class="ga-amount"><bdi>{{ wallet_liabilities.available|default:0|intcomma }}</bdi></strong><div class="ga-ops-reserve"><span>رزرو کل (ریال)</span><strong><bdi>{{ wallet_liabilities.reserved|default:0|intcomma }}</bdi></strong></div></section>
+  </div>
+  <div class="ga-split">
+    <nav class="ga-panel" aria-label="مدیریت تبلیغات"><header class="ga-panel-head"><div class="ga-panel-title"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="layout-grid" %}</span><div><h2>مدیریت سرویس</h2><p>حساب‌ها، گزارش و نرخ‌گذاری</p></div></div></header><div class="ga-panel-body ga-link-tiles"><a class="ga-link-tile" href="{% url 'operations:telegram_account' %}"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="chart-no-axes-combined" %}</span><span>گزارش حساب تلگرام</span>{% include "includes/gramads_workspace_icon.html" with name="chevron-left" %}</a><a class="ga-link-tile" href="{% url 'operations:related_accounts' %}"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="building-2" %}</span><span>حساب‌های زیرمجموعه</span>{% include "includes/gramads_workspace_icon.html" with name="chevron-left" %}</a><a class="ga-link-tile" href="{% url 'operations:exchange_rates' %}"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="wallet" %}</span><span>نرخ گرام (تون)</span>{% include "includes/gramads_workspace_icon.html" with name="chevron-left" %}</a><a class="ga-link-tile" href="{% url 'operations:sms' %}"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="message-square" %}</span><span>مدیریت پیامک</span>{% include "includes/gramads_workspace_icon.html" with name="chevron-left" %}</a></div></nav>
+    <nav class="ga-panel" aria-label="پایش پلتفرم"><header class="ga-panel-head"><div class="ga-panel-title"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="shield-check" %}</span><div><h2>سلامت و امنیت</h2><p>کنترل آمادگی و قابلیت‌ها</p></div></div></header><div class="ga-panel-body ga-link-tiles"><a class="ga-link-tile" href="{% url 'operations:api_status' %}"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="activity" %}</span><span>وضعیت API</span>{% include "includes/gramads_workspace_icon.html" with name="chevron-left" %}</a><a class="ga-link-tile" href="{% url 'operations:release_readiness' %}"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="shield-check" %}</span><span>آمادگی انتشار</span>{% include "includes/gramads_workspace_icon.html" with name="chevron-left" %}</a><a class="ga-link-tile" href="{% url 'operations:audit' %}"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="file-text" %}</span><span>لاگ ممیزی</span>{% include "includes/gramads_workspace_icon.html" with name="chevron-left" %}</a></div></nav>
+  </div>
 </div>
 {% endblock %}

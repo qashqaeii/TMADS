@@ -3,15 +3,14 @@
 {% block container_class %}container-wide{% endblock %}
 {% block page_title %}وضعیت API{% endblock %}
 {% block content %}
-<div class="app-stack operations-page ui-ops">
-{% include "includes/dash_header.html" with page_icon="activity" eyebrow="عملیات" title="وضعیت API" %}
-<a class="btn btn-ghost" href="{% url 'operations:telegram_account' %}">گزارش‌های حساب تلگرام</a>
+<div class="app-stack operations-page ui-ops ga-ops-workspace ga-api-workspace">
+{% url 'operations:telegram_account' as report_url %}
+{% include "includes/dash_header.html" with page_icon="activity" eyebrow="عملیات" title="وضعیت API" action_url=report_url action_label="گزارش حساب تلگرام" %}
 {% if error %}<article class="card card-pad operations-error" role="alert"><strong>خطا</strong><p class="muted">{{ error }}</p></article>{% endif %}
 
 <div class="ui-ops-api-layout">
   {% if account %}
-  <section class="card card--lift card-pad">
-    <h2 class="section-title">حساب جاری (getCurrentAccount)</h2>
+  <section class="ga-panel"><header class="ga-panel-head"><div class="ga-panel-title"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="building-2" %}</span><div><h2>حساب جاری</h2><p>getCurrentAccount</p></div></div></header><div class="ga-panel-body ga-api-facts">
     <div class="finance-line"><span>عنوان</span><strong>{{ account.title|default:"—" }}</strong></div>
     <div class="finance-line"><span>ارز</span><strong dir="ltr">{{ account.currency|default:"—" }}</strong></div>
     <div class="finance-line"><span>مصرف کل</span><strong>{% if account.currency == 'TON' %}{% ton_amount account.spent_budget %}{% else %}<bdi>{{ account.spent_budget|default_if_none:"—" }} {{ account.currency|default:"" }}</bdi>{% endif %}</strong></div>
@@ -19,10 +18,9 @@
     <div class="finance-line"><span>بودجه تبلیغات</span><strong>{% if account.currency == 'TON' %}{% ton_amount account.ads_budget %}{% else %}<bdi>{{ account.ads_budget|default_if_none:"—" }} {{ account.currency|default:"" }}</bdi>{% endif %}</strong></div>
     <div class="finance-line"><span>Account ID</span><code dir="ltr">{{ account.account_id|default:"—" }}</code></div>
     <p class="muted" style="font-size:.82rem;margin-top:1rem">مبالغ حساب در API ممکن است گرام (تون)، یورو یا استار تلگرام باشد.</p>
-  </section>
+  </div></section>
   {% endif %}
-  <section class="card card--lift card-pad">
-    <h2 class="section-title">قابلیت‌های API</h2>
+  <section class="ga-panel ga-data-panel"><header class="ga-panel-head"><div class="ga-panel-title"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="shield-check" %}</span><div><h2>قابلیت‌های API</h2><p>آزمون‌های فقط‌خواندنی</p></div></div></header><div class="ga-panel-body">
     <p class="muted" style="font-size:.85rem">آزمون‌ها فقط خواندنی هستند؛ نتیجه «بررسی‌نشده» به معنی عدم پشتیبانی Telegram نیست. پس از تغییر توکن: <code>python manage.py detect_capabilities</code></p>
     <div class="table-wrap" tabindex="0" role="region" aria-label="قابلیت‌های API"><table class="data-table"><caption class="sr-only">قابلیت‌های API</caption>
       <thead><tr><th scope="col">کلید</th><th scope="col">وضعیت</th><th scope="col">جزئیات</th></tr></thead>
@@ -39,7 +37,7 @@
       </tbody>
     </table></div>
     <p class="muted" style="margin-top:1rem;font-size:.85rem">آخرین موفق: {{ last_ok.created_at|jalali_datetime|default:"—" }} · آخرین خطا: {{ last_fail.created_at|jalali_datetime|default:"—" }}</p>
-  </section>
+  </div></section>
 </div>
 
 <article class="card card--lift card-pad">

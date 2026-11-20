@@ -3,7 +3,7 @@
 {% block container_class %}container-wide{% endblock %}
 {% block page_title %}نرخ گرام{% endblock %}
 {% block content %}
-<div class="app-stack operations-page ui-ops">
+<div class="app-stack operations-page ui-ops ga-ops-workspace ga-rate-workspace">
 {% include "includes/dash_header.html" with page_icon="wallet" eyebrow="عملیات" title="نرخ گرام" %}
 {% if live_rate %}
 <div class="kpi-exec-grid kpi-exec-grid--5 ui-ops-kpis">
@@ -21,7 +21,7 @@
       <span class="kpi-exec__value">{% if live_rate.best_bid_irr %}{{ live_rate.best_bid_irr|format_count }} <span class="kpi-exec__unit">ریال</span>{% else %}—{% endif %}</span>
     </div>
   </article>
-  <article class="kpi-exec">
+  <article class="kpi-exec kpi-exec--focus">
     <span class="kpi-exec__icon">{% include "includes/kpi_icon.html" with name="wallet" %}</span>
     <div class="kpi-exec__body">
       <span class="kpi-exec__label">تومان به ازای هر گرام</span>
@@ -48,27 +48,24 @@
   <p class="muted" style="margin:0">نرخی در کش نیست — بروزرسانی نوبیتکس را بزنید یا نرخ دستی ثبت کنید.</p>
 </article>
 {% endif %}
-<div class="panel-grid panel-2">
-  <section class="card card--lift card-pad">
-    <h2 class="section-title">نوبیتکس</h2>
+<div class="ga-split">
+  <section class="ga-panel"><header class="ga-panel-head"><div class="ga-panel-title"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="activity" %}</span><div><h2>منبع نرخ</h2><p>نوبیتکس</p></div></div></header><div class="ga-panel-body form-stack">
     <p class="muted" style="font-size:.85rem">جفت آمار: گرام به ریال · دفتر سفارش گرام و ریال</p>
     <form method="post" class="form-stack">{% csrf_token %}<input type="hidden" name="action" value="refresh_nobitex">
       <button class="btn btn-primary" type="submit">بروزرسانی دستی از نوبیتکس</button>
     </form>
     <p class="muted" style="margin-top:1rem;font-size:.82rem">کارمزد پلتفرم: {{ fee_percent|persian_digits }}٪ · بافر نوسان: {{ buffer_percent|persian_digits }}٪</p>
     {% if live_rate %}<p class="muted" style="font-size:.82rem">آخرین دریافت: {{ live_rate.fetched_at|jalali_datetime }}</p>{% endif %}
-  </section>
-  <section class="card card--lift card-pad form-stack">
-    <h2 class="section-title">نرخ دستی جایگزین</h2>
+  </div></section>
+  <section class="ga-panel"><header class="ga-panel-head"><div class="ga-panel-title"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="settings" %}</span><div><h2>نرخ دستی جایگزین</h2><p>تغییر مؤثر بر قیمت‌گذاری</p></div></div></header><div class="ga-panel-body">
     <form method="post" class="form-stack">{% csrf_token %}<input type="hidden" name="action" value="manual">
       <div class="field"><label for="manual-rate">ریال به ازای یک گرام</label><input id="manual-rate" name="irr_per_ton" type="number" inputmode="numeric" min="1" step="1" dir="ltr" required></div>
       <div class="field"><label for="manual-rate-reason">دلیل</label><input id="manual-rate-reason" name="reason" placeholder="قطعی ارتباط، سیاست موقت…"></div>
       <button class="btn btn-ghost" type="submit" data-confirm-title="نرخ دستی" data-confirm-message="نرخ دستی در قیمت‌گذاری اثر می‌گذارد. مقدار و دلیل را بررسی کرده‌اید؟" data-confirm-label="ثبت نرخ" data-confirm-tone="primary" onclick="return window.tmadsConfirmReady || confirm('نرخ دستی در قیمت‌گذاری اثر می‌گذارد. مقدار و دلیل را بررسی کرده‌اید؟');">ثبت جایگزین ۲۴ ساعته</button>
     </form>
-  </section>
+  </div></section>
 </div>
-<section class="card card--lift table-card">
-  <h2 class="section-title card-pad" style="padding-bottom:0">تاریخچه</h2>
+<section class="ga-panel ga-data-panel"><header class="ga-panel-head"><div class="ga-panel-title"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="chart-no-axes-combined" %}</span><div><h2>تاریخچه نرخ</h2><p>سوابق نرخ‌های ثبت‌شده</p></div></div></header>
   <div class="table-wrap" tabindex="0" role="region" aria-label="تاریخچه نرخ گرام"><table class="data-table"><caption class="sr-only">تاریخچه نرخ گرام</caption>
     <thead><tr><th scope="col">منبع</th><th scope="col">نرخ (ریال)</th><th scope="col">فعال</th><th scope="col">زمان</th></tr></thead>
     <tbody>

@@ -3,9 +3,8 @@
 {% block page_title %}بررسی کمپین{% endblock %}
 {% block container_class %}container-wide{% endblock %}
 {% block content %}
-<div class="app-stack operations-page ui-ops">
+<div class="app-stack operations-page ui-ops ga-review-workspace">
 <nav class="ui-breadcrumb" aria-label="مسیر صفحه"><a href="{% url 'operations:campaigns' %}">صف کمپین‌ها</a>{% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}<span aria-current="page">بررسی کمپین</span></nav>
-<a class="btn btn-ghost btn-sm" href="{% url 'operations:remote_operations' %}">صف عملیات تبلیغات</a>
 <header class="dash-header ui-page-heading dash-header--luxe dash-header--rich">
   <div class="dash-header__main">
     <div class="dash-header__title-row"><span class="ga-page-heading-icon" aria-hidden="true">{% include "includes/gramads_workspace_icon.html" with name="shield-check" size="md" %}</span>
@@ -16,11 +15,10 @@
       <span class="muted" style="font-size:.8rem">{{ campaign.customer }}</span>
       <span class="status status--compact {{ campaign.status|campaign_status_class }}">{{ campaign.get_status_display }}</span>
     </div>
-  </div>
+  </div><a class="btn btn-ghost btn-sm" href="{% url 'operations:remote_operations' %}">صف عملیات تبلیغات</a>
 </header>
 <div class="panel-grid panel-2 ui-ops-review-layout">
-  <section class="card card--lift card-pad">
-    <h2 class="section-title">جزئیات کمپین</h2>
+  <section class="ga-panel"><header class="ga-panel-head"><div class="ga-panel-title"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="megaphone" %}</span><div><h2>جزئیات کمپین</h2><p>اطلاعات سفارش و محتوای تبلیغ</p></div></div></header><div class="ga-panel-body">
     <div class="finance-line"><span>مقصد</span><span dir="ltr" class="muted operations-wrap">{{ campaign.destination|default:"—" }}</span></div>
     <div class="finance-line"><span>جایگاه</span><span>{{ campaign.get_placement_display|default:"—" }}</span></div>
     <div class="finance-line"><span>هدف</span><span>{{ campaign.get_objective_display|default:"—" }}</span></div>
@@ -55,9 +53,9 @@
       {% endfor %}
     </ul>
     {% endif %}
-  </section>
-  <section class="card card--lift card-pad form-stack">
-    <div class="ui-form-intro"><span class="ui-target-symbol">{% include "includes/lucide_icon.html" with name="clipboard-check" size="md" %}</span><div><h2>اقدام عملیات</h2><p>تصمیم داخلی، ارسال و تطبیق مالی</p></div></div>
+  </div></section>
+  <section class="ga-panel ga-review-actions">
+    <header class="ga-panel-head"><div class="ga-panel-title"><span class="ui-target-symbol">{% include "includes/lucide_icon.html" with name="clipboard-check" size="md" %}</span><div><h2>اقدام عملیات</h2><p>تصمیم داخلی، ارسال و تطبیق مالی</p></div></div></header><div class="ga-panel-body form-stack">
     {% if review_block %}<div class="card-muted card-pad" role="status"><strong>بررسی داخلی در دسترس نیست</strong><p class="muted">{{ review_block }}</p></div>{% endif %}
     <form method="post" class="form-stack">{% csrf_token %}
       <div class="field"><label for="review-reason">دلیل رد (در صورت رد)</label><textarea id="review-reason" name="reason" rows="2" placeholder="توضیح برای مشتری"></textarea></div>
@@ -85,7 +83,7 @@
     {% if campaign.status == 'reconciliation' or campaign.status == 'submitting' %}
       <div class="card-muted card-pad" role="status"><strong>نیازمند تطبیق</strong><p class="muted">اتصال دستی یا ارسال مجدد غیرفعال است. ابتدا نتیجه ارسال را به‌صورت مستند بررسی کنید.</p></div>
     {% endif %}
-  </section>
+  </div></section>
 </div>
 </div>
 {% endblock %}

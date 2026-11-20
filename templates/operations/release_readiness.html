@@ -2,17 +2,17 @@
 {% load core_filters %}
 {% block page_title %}آمادگی انتشار{% endblock %}
 {% block content %}
-<div class="app-stack operations-page ui-ops ui-release">
+<div class="app-stack operations-page ui-ops ui-release ga-release-workspace">
 {% include "includes/dash_header.html" with page_icon="shield-check" title="آمادگی محیط Production" subtitle="گزارش مستقل و فقط‌خواندنی پیش‌شرط‌های انتشار" with_sub=1 %}
-<section class="card card-pad ui-release-summary">
+<section class="ga-panel ga-release-status ui-release-summary {% if can_launch %}ga-release-ready{% else %}ga-release-blocked{% endif %}">
   <div><span class="ui-target-symbol">{% include "includes/lucide_icon.html" with name="shield-check" size="md" %}</span>
   <h2>{% if can_launch %}پیش‌شرط‌های قابل‌اندازه‌گیری برقرارند{% else %}انتشار عمومی هنوز مجاز نیست{% endif %}</h2>
   <p>این صفحه هیچ پرداخت، درخواست نوشتن تلگرام یا تغییر تنظیماتی انجام نمی‌دهد.</p></div>
   <div class="ui-release-numbers" aria-label="خلاصه وضعیت"><span><small>آماده</small><strong>{{ ready|format_count }}</strong></span><span><small>مسدود</small><strong>{{ blocked|format_count }}</strong></span><span><small>نیازمند تأیید</small><strong>{{ pending|format_count }}</strong></span></div>
 </section>
-<section class="card card-pad">
-  <header class="dash-panel__head"><h2 class="section-title">چک‌لیست انتشار</h2><span class="muted">اطلاعات حساس نمایش داده نمی‌شوند</span></header>
-  <div class="ui-release-checks">
+<section class="ga-panel">
+  <header class="ga-panel-head"><h2 class="section-title">چک‌لیست انتشار</h2><span class="muted">اطلاعات حساس نمایش داده نمی‌شوند</span></header>
+  <div class="ui-release-checks ga-panel-body">
   {% for item in items %}
   <article class="ui-release-check ui-release-check--{{ item.state }}">
     <span class="ui-release-check__icon" aria-hidden="true">{% if item.state == "ready" %}{% include "includes/lucide_icon.html" with name="check-circle" size="md" %}{% elif item.state == "blocked" %}{% include "includes/lucide_icon.html" with name="x-circle" size="md" %}{% else %}{% include "includes/lucide_icon.html" with name="clock" size="md" %}{% endif %}</span>

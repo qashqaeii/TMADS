@@ -3,16 +3,16 @@
 {% block container_class %}container-wide{% endblock %}
 {% block page_title %}ممیزی{% endblock %}
 {% block content %}
-<div class="app-stack operations-page ui-ops">
+<div class="app-stack operations-page ui-ops ga-ops-workspace">
 {% include "includes/dash_header.html" with page_icon="file-text" eyebrow="امنیت" title="ممیزی" %}
-<article class="card table-card card--lift">
+<article class="ga-panel ga-data-panel ga-ops-table"><header class="ga-panel-head"><div class="ga-panel-title"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="shield-check" %}</span><div><h2>رویدادهای ممیزی</h2><p>اقدام، کاربر، موجودیت و زمان ثبت</p></div></div></header>
   <div class="table-wrap" tabindex="0" role="region" aria-label="رویدادهای ممیزی">
     <table class="data-table"><caption class="sr-only">رویدادهای ممیزی</caption>
       <thead><tr><th scope="col">اقدام</th><th scope="col">کاربر</th><th scope="col">موجودیت</th><th scope="col">زمان</th></tr></thead>
       <tbody>
         {% for log in logs %}
           <tr>
-            <td><code class="ui-audit-action" dir="ltr">{{ log.action }}</code></td>
+            <td><div class="ga-row-identity"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="file-text" %}</span><code class="ui-audit-action" dir="ltr">{{ log.action }}</code></div></td>
             <td>{{ log.actor|default:"—" }}</td>
             <td dir="ltr">{{ log.entity_type }} {{ log.entity_id|default:"" }}</td>
             <td><time datetime="{{ log.created_at|date:'c' }}">{{ log.created_at|jalali_datetime }}</time></td>

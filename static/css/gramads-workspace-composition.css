@@ -172,3 +172,49 @@
 .ui-final.is-app .ga-studio-workspace .studio-draft-status{font-size:.74rem}
 .ui-final.is-app .ga-campaign-remote .ga-remote-identity{background:linear-gradient(135deg,#fff,#eaf3ff)}
 @media(max-width:650px){.ui-final.is-app .ga-campaign-detail-workspace .campaign-detail__masthead-foot{padding-inline-start:0}.ui-final.is-app .ga-campaign-workspace .ga-campaign-filter{padding:10px}.ui-final.is-app .ga-campaign-workspace .campaigns-mobile-card__head{flex-wrap:wrap}.is-app .ga-budget-summary{padding:10px}.is-app .ga-budget-summary>span:nth-child(2){display:grid;gap:2px}}
+
+/* Operations console: overview, work queues, report controls and safety surfaces. */
+.is-app .ga-ops-center-metrics .kpi-exec{display:grid;grid-template-columns:1fr auto;align-items:start;gap:8px}
+.is-app .ga-ops-center-metrics .kpi-exec__icon{grid-column:2;grid-row:1;align-self:start}
+.is-app .ga-ops-center-metrics .kpi-exec__body{grid-column:1;grid-row:1;display:grid;gap:10px}
+.is-app .ga-ops-priorities{align-items:stretch}
+.is-app .ga-ops-queue{padding-block:8px}
+.is-app .ga-queue-item{display:flex;gap:10px;align-items:center;color:#142c46;text-decoration:none;padding:12px 2px;border-bottom:1px solid #eaf0f6;min-width:0}
+.is-app .ga-queue-item:last-child{border-bottom:0}
+.is-app .ga-queue-item>div{flex:1;min-width:0}
+.is-app .ga-queue-item>div strong{display:block;font-size:.84rem;font-weight:750}
+.is-app .ga-queue-item>div small{display:block;font-size:.73rem;margin-top:3px;color:#526982}
+.is-app .ga-queue-item:hover{color:#145eb6}
+.is-app .ga-queue-number{font-size:1.35rem;color:#145eb6;font-variant-numeric:tabular-nums}
+.is-app .ga-ops-liabilities{align-content:start;gap:10px}
+.is-app .ga-ops-reserve{padding-top:10px;border-top:1px solid #ffffff35;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;font-size:.8rem;color:#e0eeff}
+.is-app .ga-ops-reserve strong{font-size:1.05rem}
+.ui-final.is-app .ga-ops-table .ga-ops-table-filter{border:0;border-bottom:1px solid #eaf0f6;border-radius:0;background:#f8fbff;box-shadow:none}
+.is-app .ga-review-actions .card-muted{border:1px solid #e0eaf6;border-radius:11px;background:#f5f9fe!important}
+.is-app .ga-review-actions .card-muted h3{margin:0}
+.is-app .ga-review-workspace .ga-panel-body>.finance-line{padding:10px 0}
+.is-app .ga-queue-card .ga-panel-head .section-title{font-size:.9rem;margin:0 0 3px}
+.is-app .ga-queue-card .ga-panel-head p{margin:3px 0 0}
+.is-app .ga-queue-body{display:grid;gap:6px}
+.is-app .ga-queue-body .finance-line{padding:8px 0}
+.is-app .ga-queue-decision{margin-top:6px;border:1px solid #e0eaf6;background:#f5f9fe;padding:12px;border-radius:11px;gap:8px}
+.is-app .ga-queue-decision .hero-actions{justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.is-app .ga-refund-decision summary{display:flex;align-items:center;justify-content:center;gap:5px;min-height:36px;padding:6px 9px;border-radius:8px;background:#edf5ff;color:#145eb6;font-weight:700;list-style:none;cursor:pointer}
+.is-app .ga-refund-decision summary::-webkit-details-marker{display:none}
+.is-app .ga-refund-decision[open] summary svg{transform:rotate(-90deg)}
+.is-app .ga-refund-decision[open] .ui-refund-action{margin-top:8px;min-width:190px}
+.ui-final.is-app .ga-report-control .ui-account-report-tabs{margin:10px 12px 0;border:0;border-radius:9px;background:#f3f7fc;padding:5px}
+.is-app .ga-report-control .ui-account-report-tabs a[aria-current="page"]{background:#fff;color:#145eb6;box-shadow:0 1px 4px #163b6b15}
+.is-app .ga-report-control .ui-report-fields{max-width:520px}
+.is-app .ga-api-workspace .ui-ops-api-layout{grid-template-columns:minmax(0,1fr)}
+.is-app .ga-api-facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.is-app .ga-api-facts .finance-line{display:grid;gap:6px;background:#f5f9fe;border:1px solid #e5edf6;border-radius:9px;padding:10px;min-width:0}
+.is-app .ga-api-facts>p{grid-column:1/-1;margin:0}
+.is-app .ga-release-status{padding:16px;border-inline-start:3px solid #c0822e}
+.is-app .ga-release-ready{border-inline-start-color:#11704e}
+.is-app .ga-release-status .ui-release-numbers>span{min-width:90px}
+.is-app .ga-release-workspace .ui-release-checks{gap:6px}
+.is-app .ga-sms-log .ga-panel-head{margin:0}
+.is-app .ga-sms-log .ga-panel-body{margin:0}
+@media(max-width:900px){.is-app .ga-api-facts{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.is-app .ga-api-facts{grid-template-columns:minmax(0,1fr)}.is-app .ga-queue-item>div small{line-height:1.6}.is-app .ga-queue-number{font-size:1rem}.is-app .ga-ops-center-metrics .kpi-exec{padding:10px}.is-app .ga-release-status{padding:12px}}

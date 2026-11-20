@@ -3,9 +3,11 @@
 {% block page_title %}بازپرداخت‌ها{% endblock %}
 {% block container_class %}container-wide{% endblock %}
 {% block content %}
-<div class="app-stack operations-page ui-ops">
+<div class="app-stack operations-page ui-ops ga-ops-workspace">
 {% include "includes/dash_header.html" with page_icon="refresh-cw" eyebrow="عملیات" title="بازپرداخت" %}
-<section class="filter-exec-shell" aria-label="فیلتر بازپرداخت">
+
+{% if refunds %}
+<article class="ga-panel ga-data-panel ga-ops-table"><header class="ga-panel-head"><div class="ga-panel-title"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="wallet" %}</span><div><h2>درخواست‌های بازپرداخت</h2><p>بررسی مالی با ثبت دلیل تصمیم</p></div></div></header><section class="filter-exec-shell ga-ops-table-filter" aria-label="فیلتر بازپرداخت">
   <form method="get" class="filter-exec">
     <div class="filter-exec__grid filter-exec__grid--inline">
       <div class="filter-exec__field">
@@ -21,8 +23,6 @@
     </div>
   </form>
 </section>
-{% if refunds %}
-<article class="card table-card card--lift">
   <div class="table-wrap" tabindex="0" role="region" aria-label="درخواست‌های بازپرداخت">
     <table class="data-table"><caption class="sr-only">درخواست‌های بازپرداخت</caption>
       <thead><tr><th scope="col">مشتری</th><th scope="col">مبلغ</th><th scope="col">وضعیت</th><th scope="col">دلیل</th><th scope="col">اقدام</th></tr></thead>
@@ -35,12 +35,12 @@
           <td class="ui-ops-reason"><details><summary>{{ r.reason|truncatechars:55|default:"—" }}</summary><p>{{ r.reason|default:"—" }}</p></details></td>
           <td>
             {% if r.status == 'open' or r.status == 'review' %}
-            <form method="post" class="ui-refund-action">{% csrf_token %}
+            <details class="ga-refund-decision"><summary>بررسی درخواست {% include "includes/gramads_workspace_icon.html" with name="chevron-left" %}</summary><form method="post" class="ui-refund-action">{% csrf_token %}
               <input type="hidden" name="refund_id" value="{{ r.id }}">
               <div class="field"><label for="refund-note-{{ r.id }}">توضیح تصمیم</label><input id="refund-note-{{ r.id }}" name="note" placeholder="دلیل رد یا توضیح" class="operations-note"></div>
               <div class="ui-refund-buttons"><button class="btn btn-primary btn-sm" name="action" value="approve" type="submit" data-confirm-title="تأیید بازپرداخت" data-confirm-message="در صورت وجود رزرو معتبر، تأیید باعث تغییر موجودی کیف پول مشتری می‌شود. ادامه می‌دهید؟" data-confirm-label="تأیید بازپرداخت" data-confirm-tone="primary" onclick="return window.tmadsConfirmReady || confirm('در صورت وجود رزرو معتبر، تأیید باعث تغییر موجودی کیف پول مشتری می‌شود. ادامه می‌دهید؟');">تأیید</button>
               <button class="btn btn-danger-soft btn-sm" name="action" value="reject" type="submit" data-confirm-title="رد درخواست" data-confirm-message="تصمیم رد درخواست بازپرداخت ثبت می‌شود. ادامه می‌دهید؟" data-confirm-label="رد بازپرداخت" data-confirm-tone="danger" onclick="return window.tmadsConfirmReady || confirm('تصمیم رد درخواست بازپرداخت ثبت می‌شود. ادامه می‌دهید؟');">رد</button></div>
-            </form>
+            </form></details>
             {% else %}—{% endif %}
           </td>
         </tr>
@@ -50,7 +50,22 @@
   </div>
 </article>
 {% else %}
-<div class="empty-state card--lift"><strong>درخواستی با این فیلتر یافت نشد</strong></div>
+<article class="ga-panel ga-data-panel ga-ops-table"><header class="ga-panel-head"><div class="ga-panel-title"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="wallet" %}</span><div><h2>درخواست‌های بازپرداخت</h2><p>بررسی مالی با ثبت دلیل تصمیم</p></div></div></header><section class="filter-exec-shell ga-ops-table-filter" aria-label="فیلتر بازپرداخت">
+  <form method="get" class="filter-exec">
+    <div class="filter-exec__grid filter-exec__grid--inline">
+      <div class="filter-exec__field">
+        <label class="filter-exec__label" for="ops-refund-status">وضعیت</label>
+        <select id="ops-refund-status" class="filter-exec__control" name="status">
+          <option value="" {% if not filter_status %}selected{% endif %}>همه وضعیت‌ها</option>
+          <option value="open" {% if filter_status == 'open' %}selected{% endif %}>باز</option>
+          <option value="review" {% if filter_status == 'review' %}selected{% endif %}>بررسی</option>
+          <option value="approved" {% if filter_status == "approved" %}selected{% endif %}>تأیید شده</option><option value="paid" {% if filter_status == 'paid' %}selected{% endif %}>پرداخت‌شده</option>
+          <option value="rejected" {% if filter_status == 'rejected' %}selected{% endif %}>رد شده</option>
+        </select>
+      </div><div class="ui-filter-submit"><button class="btn btn-primary" type="submit">اعمال فیلتر</button></div>
+    </div>
+  </form>
+</section><div class="ga-empty-state"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="refresh-cw" %}</span><h2>درخواستی با این فیلتر یافت نشد</h2><p>برای مشاهده سایر درخواست‌ها وضعیت را تغییر دهید.</p></div></article>
 {% endif %}
 </div>
 {% endblock %}
