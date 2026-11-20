@@ -66,4 +66,4 @@ def test_public_schema_brand(client, settings):
     website, organization = data["@graph"]
     assert website["alternateName"] == "GramAds"
     assert organization["name"] == "گرام‌ادز"
-    assert organization["logo"].endswith("gramads-logo-full.webp")
+    assert organization["logo"] == "https://gramads.ir" + static(FULL)
