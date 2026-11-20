@@ -48,14 +48,32 @@ def about(request):
     return render(request, "public/about.html")
 
 
-from .legal_content import load_legal_text
+from .legal_content import load_legal_text, structure_legal_text
 
 
 def _legal(request, slug: str, title: str):
+    text = load_legal_text(slug)
+    artwork = {
+        "terms": "img/pricing/tmads_pricing_invoice_checklist.webp",
+        "privacy": "img/faq/tmads_faq_review.webp",
+        "refund": "img/pricing/tmads_pricing_refund_cycle.webp",
+        "content": "img/workflow/tmads_workflow_review.webp",
+    }
+    fallback = {
+        "terms": "feature-security", "privacy": "feature-security",
+        "refund": "feature-wallet", "content": "feature-campaign",
+    }
+    path = artwork[slug]
+    support = "img/faq/tmads_faq_support.webp"
     return render(
         request,
         "public/legal_page.html",
-        {"title": title, "slug": slug, "body_text": load_legal_text(slug)},
+        {
+            "title": title, "slug": slug, "body_text": text,
+            "legal_document": structure_legal_text(text),
+            "legal_art": static(path) if finders.find(path) else feature_asset(fallback[slug]),
+            "legal_support_art": static(support) if finders.find(support) else feature_asset("feature-support"),
+        },
     )
 
 

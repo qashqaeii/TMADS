@@ -1,18 +1,50 @@
 {% extends "public_base.html" %}
 {% block title %}{{ title }} — {{ PRODUCT_NAME }}{% endblock %}
-{% block public_page_class %} pp-legal-page{% endblock %}
+{% block public_page_class %} pp-legal-page orbit-legal{% endblock %}
 {% block content %}
-{% include "includes/public_hero.html" with title=title compact=1 %}
-<section class="section public-section container">
-  <nav class="ui-legal-nav ui-section-tabs pp-legal-tabs" aria-label="صفحات حقوقی"><a href="{% url 'public:terms' %}" {% if request.resolver_match.url_name == 'terms' %}aria-current="page"{% endif %}>شرایط استفاده</a><a href="{% url 'public:privacy' %}" {% if request.resolver_match.url_name == 'privacy' %}aria-current="page"{% endif %}>حریم خصوصی</a><a href="{% url 'public:refund' %}" {% if request.resolver_match.url_name == 'refund' %}aria-current="page"{% endif %}>بازپرداخت</a><a href="{% url 'public:content_policy' %}" {% if request.resolver_match.url_name == 'content_policy' %}aria-current="page"{% endif %}>سیاست محتوا</a></nav>
-  <p class="ui-editorial-notice">این متن در مرحله بررسی حقوقی است. برای ابهام درباره شرایط یک سفارش، از مسیر پشتیبانی پیگیری کنید.</p>
-  <article data-pp-reveal aria-label="{{ title }}" class="card card-pad legal-prose legal-md ui-public-reading">
-    {% if body_text %}
-      {{ body_text|linebreaks }}
-    {% else %}
-      <p class="muted">متن این صفحه در حال آماده‌سازی است.</p><a href="{% url 'public:contact' %}">ارتباط با پشتیبانی</a>
-    {% endif %}
-  </article>
-  <p class="ui-landing-note pp-note">برای پرسش درباره متن این صفحه یا وضعیت سفارش، از <a href="{% url 'public:contact' %}">پشتیبانی تی‌ام‌ادز</a> راهنمایی بگیرید.</p>
-</section>
+<div class="lg-page">
+  <section class="container lg-hero" aria-labelledby="lg-title">
+    <div class="lg-hero-copy">
+      <nav class="lg-crumb" aria-label="مسیر صفحه"><a href="{% url 'public:home' %}">صفحه اصلی</a>{% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}<span aria-current="page">{{ title }}</span></nav>
+      <p class="lg-kicker">{% include "includes/lucide_icon.html" with name="shield-check" size="sm" %} مرکز حقوقی تی‌ام‌ادز</p>
+      <h1 id="lg-title">{{ title }}</h1>
+      <p>اسناد و سیاست‌های استفاده از پلتفرم تبلیغات تلگرام تی‌ام‌ادز</p>
+    </div>
+    <figure class="lg-hero-scene"><div class="lg-ring" aria-hidden="true"></div><img src="{{ legal_art }}" alt="" width="400" height="400" fetchpriority="high" decoding="async" data-legal-art></figure>
+  </section>
+  <div class="container lg-content">
+    <nav class="lg-tabs" aria-label="صفحات حقوقی">
+      <a href="{% url 'public:terms' %}" {% if slug == 'terms' %}aria-current="page"{% endif %}>{% include "includes/lucide_icon.html" with name="file-text" size="md" %}<span>شرایط استفاده</span></a>
+      <a href="{% url 'public:privacy' %}" {% if slug == 'privacy' %}aria-current="page"{% endif %}>{% include "includes/lucide_icon.html" with name="shield-check" size="md" %}<span>حریم خصوصی</span></a>
+      <a href="{% url 'public:refund' %}" {% if slug == 'refund' %}aria-current="page"{% endif %}>{% include "includes/lucide_icon.html" with name="wallet" size="md" %}<span>بازپرداخت</span></a>
+      <a href="{% url 'public:content_policy' %}" {% if slug == 'content' %}aria-current="page"{% endif %}>{% include "includes/lucide_icon.html" with name="clipboard-check" size="md" %}<span>سیاست محتوا</span></a>
+    </nav>
+    <div class="lg-layout">
+      <aside class="lg-sidebar" aria-label="دسترسی سریع">
+        <nav class="lg-glass lg-toc" aria-label="فهرست مطالب">
+          <h2>{% include "includes/lucide_icon.html" with name="list" size="sm" %} فهرست مطالب</h2>
+          <a href="#legal-document" data-legal-section-link>متن سند</a>
+          {% for clause in legal_document.sections %}<a href="#{{ clause.id }}" data-legal-section-link>{{ clause.title }}</a>{% endfor %}
+        </nav>
+        <a class="lg-glass lg-back" href="{% url 'public:faq' %}">{% include "includes/lucide_icon.html" with name="help-circle" size="sm" %} سؤالات متداول {% include "includes/lucide_icon.html" with name="arrow-left" size="sm" %}</a>
+      </aside>
+      <div class="lg-main">
+        <div class="lg-notice">{% include "includes/lucide_icon.html" with name="info" size="md" %}<p><strong>در مرحله بررسی حقوقی</strong><br>این متن در مرحله بررسی حقوقی است. برای ابهام درباره شرایط یک سفارش، از مسیر پشتیبانی پیگیری کنید.</p></div>
+        <article id="legal-document" class="lg-glass lg-document" aria-labelledby="legal-document-title">
+          <header class="lg-document-head"><span class="lg-document-icon">{% include "includes/lucide_icon.html" with name="file-text" size="md" %}</span><div><h2 id="legal-document-title">{{ legal_document.heading|default:title }}</h2><p>سند حقوقی تی‌ام‌ادز</p></div><button class="lg-print" type="button" data-legal-print hidden>{% include "includes/lucide_icon.html" with name="file-text" size="sm" %} چاپ سند</button></header>
+          {% if body_text %}
+            {% if legal_document.intro %}<div class="lg-intro">{% include "includes/legal_blocks.html" with blocks=legal_document.intro only %}</div>{% endif %}
+            {% for clause in legal_document.sections %}
+              <section class="lg-clause" id="{{ clause.id }}" aria-labelledby="{{ clause.id }}-title"><h3 id="{{ clause.id }}-title"><span class="lg-index" aria-hidden="true">{{ forloop.counter }}</span>{{ clause.title }}</h3>{% include "includes/legal_blocks.html" with blocks=clause.blocks only %}</section>
+            {% endfor %}
+          {% else %}<p>متن این صفحه در حال آماده‌سازی است.</p>{% endif %}
+        </article>
+        <div class="lg-support lg-glass">
+          <div><h2>برای درک شرایط نیاز به راهنمایی دارید؟</h2><p>برای پرسش درباره متن این صفحه یا وضعیت سفارش، از <a href="{% url 'public:contact' %}">پشتیبانی تی‌ام‌ادز</a> راهنمایی بگیرید.</p><a class="btn btn-primary" href="{% url 'public:contact' %}">ارتباط با پشتیبانی {% include "includes/lucide_icon.html" with name="arrow-left" size="sm" %}</a></div>
+          <img src="{{ legal_support_art }}" alt="" width="150" height="150" loading="lazy" decoding="async" data-legal-art>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}

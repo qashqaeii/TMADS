@@ -1,0 +1,1 @@
+{% for block in blocks %}{% if block.kind == "list" %}<ul class="lg-list">{% for item in block.items %}<li>{{ item }}</li>{% endfor %}</ul>{% else %}<p>{{ block.text }}</p>{% endif %}{% endfor %}
