@@ -1,0 +1,2 @@
+# Workflow artwork
+Extract the separate WebP ZIP directly into this directory. Exact names: tmads_workflow_hero.webp, tmads_workflow_signup.webp, tmads_workflow_campaign.webp, tmads_workflow_target.webp, tmads_workflow_payment.webp, tmads_workflow_publish.webp, tmads_workflow_report.webp, tmads_workflow_review.webp. Until uploaded, existing features illustrations are used as fallbacks. No new financial or publishing logic.
