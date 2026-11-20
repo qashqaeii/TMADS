@@ -3,7 +3,8 @@
 {% block title %}{{ PRODUCT_NAME }} — تبلیغات تلگرام{% endblock %}
 {% block public_page_class %} pp-home orbit-landing{% endblock %}
 {% block content %}
-<div class="orbit-page">
+<div class="orbit-page orbit-glass">
+  <div class="orbit-atmosphere" aria-hidden="true"><i></i><i></i><i></i></div>
   <section class="orbit-hero" aria-labelledby="orbit-hero-title">
     <img class="orbit-hero-bg" src="{% landing_asset 'hero-background' %}" width="1600" height="900" alt="" fetchpriority="low" decoding="async" data-landing-art>
     <div class="container orbit-hero-inner">
@@ -12,7 +13,7 @@
         <h1 id="orbit-hero-title">تبلیغات تلگرام،<br><em>با دیدی روشن‌تر.</em></h1>
         <p class="orbit-hero-description">از انتخاب مخاطب تا بررسی بودجه و تحلیل عملکرد؛ کمپین‌های <bdi>Telegram Ads</bdi> را در یک فضای کاری فارسی مدیریت کنید.</p>
         <div class="orbit-actions">
-          {% if user.is_authenticated %}<a class="btn btn-primary btn-lg" href="{% url 'dashboard:home' %}">ورود به داشبورد {% include "includes/lucide_icon.html" with name="arrow-left" size="btn" %}</a>{% else %}<a class="btn btn-primary btn-lg" href="{% url 'accounts:register' %}">شروع تبلیغات {% include "includes/lucide_icon.html" with name="arrow-left" size="btn" %}</a>{% endif %}
+          {% if user.is_authenticated %}<a class="btn btn-primary btn-lg" href="{% url 'dashboard:home' %}">ورود به داشبورد {% include "includes/lucide_icon.html" with name="arrow-left" size="btn" %}</a>{% else %}<a class="btn btn-primary btn-lg" href="{% url 'accounts:register' %}">ساخت اولین کمپین {% include "includes/lucide_icon.html" with name="arrow-left" size="btn" %}</a>{% endif %}
           <a class="btn btn-ghost btn-lg" href="{% url 'public:how_it_works' %}">{% include "includes/lucide_icon.html" with name="play-circle" size="btn" %} آشنایی با تی‌ام‌ادز</a>
         </div>
         <div class="orbit-proof">
@@ -22,7 +23,7 @@
         </div>
       </div>
       <figure class="orbit-hero-figure">
-        <div class="orbit-hero-scene"><img class="orbit-hero-art" src="{% landing_asset 'hero-dashboard' %}" width="1200" height="900" alt="" fetchpriority="high" decoding="async" data-landing-art></div>
+        <div class="orbit-hero-scene" data-orbit-scene><div class="orbit-hero-halo" aria-hidden="true"></div><div class="orbit-hero-ring" aria-hidden="true"></div><img class="orbit-hero-art" src="{% landing_asset 'hero-dashboard' %}" width="1200" height="900" alt="" fetchpriority="high" decoding="async" data-landing-art><div class="orbit-hero-float orbit-float-top">{% include "includes/lucide_icon.html" with name="target" size="md" %}<span>هدف‌گیری کمپین<small>انتخاب مخاطب</small></span></div><div class="orbit-hero-float orbit-float-bottom">{% include "includes/lucide_icon.html" with name="line-chart" size="md" %}<span>تحلیل عملکرد<small>گزارش کمپین</small></span></div></div>
         <figcaption>نمای مفهومی فضای کاری تی‌ام‌ادز؛ داده واقعی نیست.</figcaption>
       </figure>
     </div>
@@ -44,7 +45,7 @@
     <div class="orbit-target-foot"><p>{% include "includes/lucide_icon.html" with name="info" size="sm" %} امکان ارسال و جایگاه‌ها به شرایط حساب، تأییدهای لازم و قابلیت‌های تلگرام وابسته است.</p><a class="orbit-link" href="{% url 'public:features' %}">همه امکانات {% include "includes/lucide_icon.html" with name="arrow-left" size="sm" %}</a></div>
   </section>
 
-  <section id="home-process" class="container orbit-section orbit-split-row">
+  <section id="home-process" class="container orbit-section orbit-split-row orbit-process">
     <header class="orbit-section-copy"><p class="orbit-kicker">{% include "includes/lucide_icon.html" with name="zap" size="sm" %} مسیر اجرای کمپین</p><h2>چگونه تبلیغات تلگرام را <em>شروع کنیم؟</em></h2><p>از ایده تا بررسی نتیجه، در سه مرحله مشخص.</p><a class="orbit-link" href="{% url 'public:how_it_works' %}">راهنمای شروع {% include "includes/lucide_icon.html" with name="arrow-left" size="sm" %}</a></header>
     <div class="orbit-steps">
       <article class="orbit-step"><img class="orbit-step-art" src="{% landing_asset 'channels' %}" width="360" height="360" alt="" loading="lazy" decoding="async" data-landing-art><div><span class="orbit-step-number">۰۱</span><h3>طراحی کمپین</h3><p>هدف، متن، مقصد و بودجه را مشخص کنید.</p></div></article>
@@ -69,18 +70,18 @@
   <section class="container orbit-section orbit-split-row orbit-usecases">
     <header class="orbit-section-copy"><p class="orbit-kicker">{% include "includes/lucide_icon.html" with name="users" size="sm" %} برای چه کسانی؟</p><h2>از رشد کانال تا <em>معرفی محصول</em></h2><p>فضای کاری یکپارچه برای هدف‌های مختلف تبلیغاتی در تلگرام.</p></header>
     <div class="orbit-mini-grid">
-      <article class="orbit-mini-card"><div class="orbit-line-icon">{% include "includes/lucide_icon.html" with name="users" size="md" %}</div><h3>مدیران کانال و تولیدکنندگان محتوا</h3><p>معرفی کانال به مخاطبان مرتبط و پیگیری رفتار کاربران در گزارش.</p></article>
-      <article class="orbit-mini-card"><div class="orbit-line-icon">{% include "includes/lucide_icon.html" with name="code" size="md" %}</div><h3>سازندگان ربات و مینی‌اپ</h3><p>هدایت کاربران مناسب به ربات یا مینی‌اپ بر اساس امکانات قابل استفاده.</p></article>
-      <article class="orbit-mini-card"><div class="orbit-line-icon">{% include "includes/lucide_icon.html" with name="store" size="md" %}</div><h3>کسب‌وکارها و تیم‌های بازاریابی</h3><p>برنامه‌ریزی برای معرفی محصول و ارزیابی نتایج در کنار هزینه‌ها.</p></article>
+      <article class="orbit-mini-card"><div class="orbit-card-visual"><img class="orbit-card-art" src="{% landing_asset 'users-targeting' %}" width="360" height="360" alt="" loading="lazy" decoding="async" data-landing-art><span class="orbit-card-glyph" aria-hidden="true">{% include "includes/lucide_icon.html" with name="users" size="sm" %}</span></div><h3>مدیران کانال و تولیدکنندگان محتوا</h3><p>معرفی کانال به مخاطبان مرتبط و پیگیری رفتار کاربران در گزارش.</p><a class="orbit-link orbit-card-link" href="{% url 'public:how_it_works' %}">مسیر شروع {% include "includes/lucide_icon.html" with name="arrow-left" size="sm" %}</a></article>
+      <article class="orbit-mini-card"><div class="orbit-card-visual"><img class="orbit-card-art" src="{% landing_asset 'bots-miniapps' %}" width="360" height="360" alt="" loading="lazy" decoding="async" data-landing-art><span class="orbit-card-glyph" aria-hidden="true">{% include "includes/lucide_icon.html" with name="code" size="sm" %}</span></div><h3>سازندگان ربات و مینی‌اپ</h3><p>هدایت کاربران مناسب به ربات یا مینی‌اپ بر اساس امکانات قابل استفاده.</p><a class="orbit-link orbit-card-link" href="{% url 'public:features' %}">امکانات هدف‌گیری {% include "includes/lucide_icon.html" with name="arrow-left" size="sm" %}</a></article>
+      <article class="orbit-mini-card"><div class="orbit-card-visual"><img class="orbit-card-art" src="{% landing_asset 'analytics-budget' %}" width="360" height="360" alt="" loading="lazy" decoding="async" data-landing-art><span class="orbit-card-glyph" aria-hidden="true">{% include "includes/lucide_icon.html" with name="store" size="sm" %}</span></div><h3>کسب‌وکارها و تیم‌های بازاریابی</h3><p>برنامه‌ریزی برای معرفی محصول و ارزیابی نتایج در کنار هزینه‌ها.</p><a class="orbit-link orbit-card-link" href="{% url 'public:how_it_works' %}">مدیریت کمپین {% include "includes/lucide_icon.html" with name="arrow-left" size="sm" %}</a></article>
     </div>
   </section>
 
   <section class="container orbit-section orbit-split-row orbit-benefits">
     <header class="orbit-section-copy"><p class="orbit-kicker">{% include "includes/lucide_icon.html" with name="gem" size="sm" %} مزیت‌های محصول</p><h2>قبل از هزینه، تصمیم بگیرید؛ <em>بعد از انتشار، بسنجید.</em></h2><a class="orbit-link" href="{% url 'public:features' %}">مشاهده امکانات {% include "includes/lucide_icon.html" with name="arrow-left" size="sm" %}</a></header>
     <div class="orbit-mini-grid">
-      <article class="orbit-mini-card"><div class="orbit-line-icon">{% include "includes/lucide_icon.html" with name="wallet" size="md" %}</div><h3>بودجه شفاف</h3><p>مبلغ سفارش، نرخ تبدیل و کارمزد را در پیش‌فاکتور مرور کنید؛ بودجه پیشنهادی با هزینه واقعی نمایش یکسان نیست.</p></article>
-      <article class="orbit-mini-card"><div class="orbit-line-icon">{% include "includes/lucide_icon.html" with name="target" size="md" %}</div><h3>هدف‌گیری بر اساس کمپین</h3><p>گزینه‌های قابل استفاده به نوع تبلیغ و قابلیت حساب وابسته‌اند. پیش از سفارش، محدودیت‌ها را بررسی کنید.</p></article>
-      <article class="orbit-mini-card"><div class="orbit-line-icon">{% include "includes/lucide_icon.html" with name="bar-chart-3" size="md" %}</div><h3>گزارش قابل پیگیری</h3><p>داده‌های همگام‌شده از نمایش و هزینه تا شاخص‌های در دسترس را برای ارزیابی کمپین به کار بگیرید.</p></article>
+      <article class="orbit-mini-card"><div class="orbit-card-visual"><img class="orbit-card-art" src="{% landing_asset 'analytics-budget' %}" width="360" height="360" alt="" loading="lazy" decoding="async" data-landing-art><span class="orbit-card-glyph" aria-hidden="true">{% include "includes/lucide_icon.html" with name="wallet" size="sm" %}</span></div><h3>بودجه شفاف</h3><p>مبلغ سفارش، نرخ تبدیل و کارمزد را در پیش‌فاکتور مرور کنید؛ بودجه پیشنهادی با هزینه واقعی نمایش یکسان نیست.</p><a class="orbit-link orbit-card-link" href="{% url 'public:pricing' %}">راهنمای تعرفه {% include "includes/lucide_icon.html" with name="arrow-left" size="sm" %}</a></article>
+      <article class="orbit-mini-card"><div class="orbit-card-visual"><img class="orbit-card-art" src="{% landing_asset 'users-targeting' %}" width="360" height="360" alt="" loading="lazy" decoding="async" data-landing-art><span class="orbit-card-glyph" aria-hidden="true">{% include "includes/lucide_icon.html" with name="target" size="sm" %}</span></div><h3>هدف‌گیری بر اساس کمپین</h3><p>گزینه‌های قابل استفاده به نوع تبلیغ و قابلیت حساب وابسته‌اند. پیش از سفارش، محدودیت‌ها را بررسی کنید.</p><a class="orbit-link orbit-card-link" href="{% url 'public:features' %}">گزینه‌های هدف‌گیری {% include "includes/lucide_icon.html" with name="arrow-left" size="sm" %}</a></article>
+      <article class="orbit-mini-card"><div class="orbit-card-visual"><img class="orbit-card-art" src="{% landing_asset 'analytics-budget' %}" width="360" height="360" alt="" loading="lazy" decoding="async" data-landing-art><span class="orbit-card-glyph" aria-hidden="true">{% include "includes/lucide_icon.html" with name="bar-chart-3" size="sm" %}</span></div><h3>گزارش قابل پیگیری</h3><p>داده‌های همگام‌شده از نمایش و هزینه تا شاخص‌های در دسترس را برای ارزیابی کمپین به کار بگیرید.</p><a class="orbit-link orbit-card-link" href="{% url 'public:features' %}">امکانات گزارش {% include "includes/lucide_icon.html" with name="arrow-left" size="sm" %}</a></article>
     </div>
   </section>
 
@@ -88,10 +89,10 @@
     <div class="container orbit-section">
       <header class="orbit-centered"><p class="orbit-kicker">{% include "includes/lucide_icon.html" with name="compass" size="sm" %} راهنمای انتخاب</p><h2 id="telegram-ads-guide-heading">از تبلیغات تلگرام چه <em>نتیجه‌ای</em> می‌خواهید؟</h2><p>تبلیغات موفق با انتخاب جایگاه شروع نمی‌شود؛ ابتدا مشخص کنید مخاطب بعد از دیدن پیام چه اقدامی انجام دهد.</p></header>
   <div class="ui-editorial-grid">
-    <article class="ui-editorial-item orbit-guide-card"><span class="orbit-line-icon">{% include "includes/lucide_icon.html" with name="trending-up" size="md" %}</span><h3>تبلیغ کانال تلگرام و جذب مخاطب مرتبط</h3><p>برای کانال آموزشی، رسانه یا فروشگاه، ابتدا چند محتوای نمونه ارزشمند و توضیح روشن برای اعضای جدید آماده کنید. هدف را صرفاً تعداد نمایش نگذارید؛ اگر داده عضویت معتبر در دسترس است، هزینه جذب عضو و کیفیت تعامل بعدی را نیز بررسی کنید. پیام تبلیغ باید دقیقاً با محتوای مقصد هماهنگ باشد.</p></article>
-    <article class="ui-editorial-item orbit-guide-card"><span class="orbit-line-icon">{% include "includes/lucide_icon.html" with name="megaphone" size="md" %}</span><h3>معرفی محصول، خدمات و ربات تلگرام</h3><p>در کمپین معرفی محصول، پیام را حول یک نیاز مشخص بنویسید و کاربر را به مقصدی هدایت کنید که همان وعده را توضیح دهد. برای ربات، مسیر شروع و اولین تعامل را پیش از ارسال آزمایش کنید. هنگام انتخاب مقصد، تنها امکانات و جایگاه‌های مجاز حساب را مبنا بگیرید.</p></article>
-    <article class="ui-editorial-item orbit-guide-card"><span class="orbit-line-icon">{% include "includes/lucide_icon.html" with name="repeat" size="md" %}</span><h3>تفاوت تبلیغات رسمی تلگرام با خرید پست کانال</h3><p>در خرید مستقیم پست، شرایط انتشار و هزینه معمولاً با مدیر رسانه توافق می‌شود. در Telegram Ads، پیام اسپانسری با سازوکار پیشنهاد قیمت و ضوابط پلتفرم نمایش داده می‌شود. هر روش مزایا و محدودیت‌های خود را دارد؛ برای مقایسه، هزینه، شفافیت گزارش و تناسب مخاطب را کنار هم بگذارید.</p></article>
-    <article class="ui-editorial-item orbit-guide-card"><span class="orbit-line-icon">{% include "includes/lucide_icon.html" with name="wallet" size="md" %}</span><h3>از بودجه اولیه تا بهینه‌سازی</h3><p>بودجه آزمایشی را بر اساس توان مالی و هدف انتخاب کنید. پس از دریافت داده کافی، متن یا مخاطب را با تغییرات محدود آزمایش کنید تا اثر هر تغییر روشن‌تر باشد. رزرو اعتبار، تخصیص بودجه و مصرف نهایی سه مفهوم متفاوت‌اند؛ <a href="{% url 'public:pricing' %}">راهنمای هزینه تبلیغات تلگرام</a> این تفاوت را توضیح می‌دهد.</p></article>
+    <article class="ui-editorial-item orbit-guide-card"><div class="orbit-guide-visual"><img class="orbit-card-art" src="{% landing_asset 'channels' %}" width="360" height="360" alt="" loading="lazy" decoding="async" data-landing-art><span class="orbit-card-glyph" aria-hidden="true">{% include "includes/lucide_icon.html" with name="trending-up" size="sm" %}</span></div><h3>تبلیغ کانال تلگرام و جذب مخاطب مرتبط</h3><p>برای کانال آموزشی، رسانه یا فروشگاه، ابتدا چند محتوای نمونه ارزشمند و توضیح روشن برای اعضای جدید آماده کنید. هدف را صرفاً تعداد نمایش نگذارید؛ اگر داده عضویت معتبر در دسترس است، هزینه جذب عضو و کیفیت تعامل بعدی را نیز بررسی کنید. پیام تبلیغ باید دقیقاً با محتوای مقصد هماهنگ باشد.</p></article>
+    <article class="ui-editorial-item orbit-guide-card"><div class="orbit-guide-visual"><img class="orbit-card-art" src="{% landing_asset 'bots-miniapps' %}" width="360" height="360" alt="" loading="lazy" decoding="async" data-landing-art><span class="orbit-card-glyph" aria-hidden="true">{% include "includes/lucide_icon.html" with name="megaphone" size="sm" %}</span></div><h3>معرفی محصول، خدمات و ربات تلگرام</h3><p>در کمپین معرفی محصول، پیام را حول یک نیاز مشخص بنویسید و کاربر را به مقصدی هدایت کنید که همان وعده را توضیح دهد. برای ربات، مسیر شروع و اولین تعامل را پیش از ارسال آزمایش کنید. هنگام انتخاب مقصد، تنها امکانات و جایگاه‌های مجاز حساب را مبنا بگیرید.</p></article>
+    <article class="ui-editorial-item orbit-guide-card"><div class="orbit-guide-visual"><img class="orbit-card-art" src="{% landing_asset 'order-review' %}" width="360" height="360" alt="" loading="lazy" decoding="async" data-landing-art><span class="orbit-card-glyph" aria-hidden="true">{% include "includes/lucide_icon.html" with name="repeat" size="sm" %}</span></div><h3>تفاوت تبلیغات رسمی تلگرام با خرید پست کانال</h3><p>در خرید مستقیم پست، شرایط انتشار و هزینه معمولاً با مدیر رسانه توافق می‌شود. در Telegram Ads، پیام اسپانسری با سازوکار پیشنهاد قیمت و ضوابط پلتفرم نمایش داده می‌شود. هر روش مزایا و محدودیت‌های خود را دارد؛ برای مقایسه، هزینه، شفافیت گزارش و تناسب مخاطب را کنار هم بگذارید.</p></article>
+    <article class="ui-editorial-item orbit-guide-card"><div class="orbit-guide-visual"><img class="orbit-card-art" src="{% landing_asset 'analytics-budget' %}" width="360" height="360" alt="" loading="lazy" decoding="async" data-landing-art><span class="orbit-card-glyph" aria-hidden="true">{% include "includes/lucide_icon.html" with name="wallet" size="sm" %}</span></div><h3>از بودجه اولیه تا بهینه‌سازی</h3><p>بودجه آزمایشی را بر اساس توان مالی و هدف انتخاب کنید. پس از دریافت داده کافی، متن یا مخاطب را با تغییرات محدود آزمایش کنید تا اثر هر تغییر روشن‌تر باشد. رزرو اعتبار، تخصیص بودجه و مصرف نهایی سه مفهوم متفاوت‌اند؛ <a href="{% url 'public:pricing' %}">راهنمای هزینه تبلیغات تلگرام</a> این تفاوت را توضیح می‌دهد.</p></article>
   </div>
 
   <nav class="ui-editorial-links" aria-label="مطالعه بیشتر"><strong>مطالعه بیشتر</strong><a href="{% url 'public:features' %}">امکانات مدیریت کمپین</a><a href="{% url 'public:how_it_works' %}">آموزش قدم‌به‌قدم تلگرام ادز</a><a href="{% url 'public:pricing' %}">هزینه و تعرفه تبلیغات</a><a href="{% url 'public:faq' %}">پرسش‌های متداول</a></nav>
@@ -111,14 +112,15 @@
       </div>
       <a class="orbit-link" href="{% url 'public:faq' %}">همه سوالات {% include "includes/lucide_icon.html" with name="arrow-left" size="sm" %}</a>
     </div>
-    <div class="orbit-faq-scene"><img class="orbit-faq-art" src="{% landing_asset 'channels' %}" width="360" height="360" alt="" loading="lazy" decoding="async" data-landing-art></div>
+    <div class="orbit-faq-scene" data-orbit-scene><div class="orbit-faq-halo" aria-hidden="true"></div><div class="orbit-faq-frame" aria-hidden="true"></div><img class="orbit-faq-art" src="{% landing_asset 'channels' %}" width="360" height="360" alt="" loading="lazy" decoding="async" data-landing-art><div class="orbit-faq-bubble" aria-hidden="true">؟</div><div class="orbit-faq-lines" aria-hidden="true"><i></i><i></i><i></i></div></div>
   </section>
 
   <section class="container orbit-section orbit-cta-section" aria-labelledby="orbit-cta-title">
     <div class="orbit-cta">
       <img class="orbit-cta-bg" src="{% landing_asset 'orbit-dark' %}" width="1440" height="810" alt="" loading="lazy" decoding="async" data-landing-art>
-      <div><p class="orbit-cta-kicker">{% include "includes/lucide_icon.html" with name="send" size="sm" %} آماده شروع هستید؟</p><h2 id="orbit-cta-title">اولین پیش‌نویس خود را بسازید.</h2><p>کمپین خود را آماده کنید؛ صدور سفارش و ارسال به وضعیت سرویس و بررسی‌های لازم وابسته است.</p></div>
+      <div class="orbit-cta-copy"><p class="orbit-cta-kicker">{% include "includes/lucide_icon.html" with name="send" size="sm" %} آماده شروع هستید؟</p><h2 id="orbit-cta-title">اولین پیش‌نویس خود را بسازید.</h2><p>کمپین خود را آماده کنید؛ صدور سفارش و ارسال به وضعیت سرویس و بررسی‌های لازم وابسته است.</p>
       {% if user.is_authenticated %}<a class="btn btn-lg orbit-cta-button" href="{% url 'campaigns:wizard_new' %}">ساخت پیش‌نویس {% include "includes/lucide_icon.html" with name="arrow-left" size="btn" %}</a>{% else %}<a class="btn btn-lg orbit-cta-button" href="{% url 'accounts:register' %}">ایجاد حساب {% include "includes/lucide_icon.html" with name="arrow-left" size="btn" %}</a>{% endif %}
+      </div><div class="orbit-cta-scene" aria-hidden="true"><img src="{% landing_asset 'telegram-banner' %}" width="1100" height="619" alt="" loading="lazy" decoding="async" data-landing-art></div>
     </div>
   </section>
 </div>
