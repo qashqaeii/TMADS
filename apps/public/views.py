@@ -44,8 +44,22 @@ def contact(request):
     return render(request, "public/contact.html")
 
 
+ABOUT_ART = {
+    "hero": ("img/workflow/tmads_workflow_hero.webp", "features-hero"),
+    "wallet": ("img/pricing/tmads_pricing_wallet_and_coins.webp", "feature-wallet"),
+    "analytics": ("img/faq/tmads_faq_analytics.webp", "feature-analytics"),
+    "trust": ("img/faq/tmads_faq_review.webp", "feature-security"),
+    "mission": ("img/pricing/tmads_pricing_roi_target.webp", "feature-targeting"),
+    "launch": ("img/workflow/tmads_workflow_publish.webp", "feature-channels"),
+}
+
+
 def about(request):
-    return render(request, "public/about.html")
+    artwork = {
+        role: static(path) if finders.find(path) else feature_asset(fallback)
+        for role, (path, fallback) in ABOUT_ART.items()
+    }
+    return render(request, "public/about.html", {"about_art": artwork})
 
 
 from .legal_content import load_legal_text, structure_legal_text
