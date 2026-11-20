@@ -20,6 +20,6 @@
         {% endfor %}
       </ul>
       {% else %}
-      <p class="dash-board__hint">رویدادی ثبت نشده است.</p>
+      <div class="ga-activity-empty"><span aria-hidden="true">{% include "includes/lucide_icon.html" with name="activity" size="md" %}</span><div><strong>هنوز فعالیتی ثبت نشده</strong><p class="dash-board__hint">به‌روزرسانی وضعیت کمپین‌ها اینجا نمایش داده می‌شود.</p></div></div>
       {% endif %}
     </aside>

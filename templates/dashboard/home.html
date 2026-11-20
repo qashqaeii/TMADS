@@ -6,7 +6,7 @@
 {% if has_chart %}{% include "includes/charts_exec_scripts.html" %}{% endif %}
 {% endblock %}
 {% block content %}
-<div class="dash-home dash-home--premium ui-dashboard">
+<div class="dash-home dash-home--premium ui-dashboard gramads-overview">
   {% include "includes/dash_home_hero.html" %}
 
   {% include "includes/dash_home_kpi.html" with active_count=active_count total_campaigns=total_campaigns impressions=impressions clicks=clicks ctr=ctr %}
@@ -14,8 +14,8 @@
   <section class="dash-workspace ui-dashboard-workspace" aria-label="تحلیل و کیف پول">
     <article class="dash-chart-card dash-chart-card--lux">
       <header class="dash-chart-card__head">
-        <h2 class="dash-chart-card__title">روند نمایش و کلیک</h2>
-        {% if has_chart %}<p class="dash-chart-card__meta">۳۰ روز اخیر · جمع همه کمپین‌ها</p>{% endif %}
+        <div class="ga-heading-stack"><span class="ga-overline">تحلیل عملکرد</span><h2 class="dash-chart-card__title">روند نمایش و کلیک</h2></div>
+        {% if has_chart %}<p class="dash-chart-card__meta ga-period">{% include "includes/lucide_icon.html" with name="calendar-days" size="sm" %} ۳۰ روز اخیر</p>{% endif %}
       </header>
       <div class="dash-chart-card__body">
         {% if has_chart %}
@@ -48,6 +48,7 @@
         </a>
       </header>
       {% if recent_rows %}
+      <div class="ga-campaign-columns" aria-hidden="true"><span>نام کمپین و وضعیت</span><div><span>نمایش</span><span>کلیک</span><span>نرخ کلیک</span></div><span>آخرین تغییر</span></div>
       <ul class="dash-campaign-rows dash-campaign-list">
         {% for row in recent_rows %}
         {% with c=row.campaign m=row.metrics %}
@@ -55,6 +56,8 @@
           <a class="dash-campaign-row dash-campaign-card dash-campaign-card--{{ c.status }}" href="{% url 'campaigns:detail' c.id %}">
             <span class="dash-campaign-card__rail" aria-hidden="true"></span>
             <div class="dash-campaign-card__body">
+              <span class="ga-campaign-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="megaphone" size="md" %}</span>
+              <div class="ga-campaign-identity">
               <div class="dash-campaign-row__lead dash-campaign-card__head">
                 <span class="dash-campaign-row__name dash-campaign-card__name">{{ c.name|default:"بدون نام" }}</span>
                 <span class="status status--pill status--compact {{ c.status|campaign_status_class }}">{{ c.get_status_display }}</span>
@@ -63,6 +66,7 @@
                 {% include "includes/lucide_icon.html" with name="link-2" size="sm" %}
                 <span>{% if c.destination %}{{ c.destination|shorten_url:36 }}{% else %}—{% endif %}</span>
               </p>
+              </div>
             </div>
             <div class="dash-campaign-row__nums dash-campaign-card__stats tabnums" aria-label="آمار کمپین">
               <div class="dash-campaign-stat">
@@ -98,7 +102,15 @@
       </div>
       {% endif %}
     </article>
-    {% include "dashboard/includes/activity_compact.html" %}
+    <div class="ga-bottom-rail">
+      {% include "dashboard/includes/activity_compact.html" %}
+      <article class="dash-board ga-quick-card"><header class="dash-board__head"><h2 class="dash-board__heading">دسترسی سریع</h2></header><nav class="ga-quick-nav" aria-label="دسترسی سریع">
+        <a href="{% url 'campaigns:list' %}">{% include "includes/lucide_icon.html" with name="megaphone" size="sm" %}<span>مدیریت کمپین‌ها</span>{% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}</a>
+        <a href="{% url 'finance:transactions' %}">{% include "includes/lucide_icon.html" with name="wallet" size="sm" %}<span>تراکنش‌ها</span>{% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}</a>
+        <a href="{% url 'accounts:related_account' %}">{% include "includes/lucide_icon.html" with name="building-2" size="sm" %}<span>حساب تبلیغاتی</span>{% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}</a>
+        <a href="{% url 'support:list' %}">{% include "includes/lucide_icon.html" with name="headphones" size="sm" %}<span>پشتیبانی</span>{% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}</a>
+      </nav></article>
+    </div>
   </section>
 </div>
 
