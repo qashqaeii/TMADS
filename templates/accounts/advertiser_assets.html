@@ -3,7 +3,7 @@
 {% block page_title %}مخاطبان و تبدیل{% endblock %}
 {% block content %}
 <div class="app-stack ui-account-page ui-assets">
-{% include "includes/dash_header.html" with title="مخاطبان و رهگیری تبدیل" subtitle="منابع اختصاصی حساب تبلیغاتی شما" with_sub=1 %}
+{% include "includes/dash_header.html" with page_icon="users" title="مخاطبان و رهگیری تبدیل" subtitle="منابع اختصاصی حساب تبلیغاتی شما" with_sub=1 %}
 {% if not row %}<section class="card card-pad form-stack"><h2 class="section-title">ابتدا حساب اختصاصی را فعال کنید</h2><p class="muted">منابع حساب مرکزی در اختیار مشتریان قرار نمی‌گیرند.</p><a class="btn btn-primary" href="{% url 'accounts:related_account' %}">وضعیت حساب تبلیغاتی</a></section>
 {% else %}
 <section class="card card-pad form-stack">

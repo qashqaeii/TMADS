@@ -3,7 +3,7 @@
 {% block page_title %}حساب تبلیغاتی{% endblock %}
 {% block content %}
 <div class="app-stack ui-account-page">
-{% include "includes/dash_header.html" with title="حساب تبلیغاتی" subtitle="درخواست حساب مرتبط با تلگرام" with_sub=1 %}
+{% include "includes/dash_header.html" with page_icon="building-2" title="حساب تبلیغاتی" subtitle="درخواست حساب مرتبط با تلگرام" with_sub=1 %}
 {% if row %}<section class="card card-pad form-stack"><div class="ui-remote-summary"><h2 class="section-title">{{ row.title }}</h2><span class="status {% if row.status == 'provisioned' %}status-active{% elif row.status == 'rejected' %}status-danger{% else %}status-warn{% endif %}">{{ row.get_status_display }}</span></div>{% if row.remote_account_id %}<div class="finance-line"><span>شناسه حساب</span><bdi>{{ row.remote_account_id }}</bdi></div>{% endif %}{% if row.note %}<p class="muted">{{ row.note }}</p>{% endif %}</section>{% endif %}
 {% if not row or row.status == "rejected" %}
 <div class="ui-finance-flow"><form method="post" class="card card-pad form-stack">{% csrf_token %}

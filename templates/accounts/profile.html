@@ -3,7 +3,7 @@
 {% block container_class %}container-wide{% endblock %}
 {% block content %}
 <div class="app-stack ui-account-page">
-{% include "includes/dash_header.html" with eyebrow="حساب" title="پروفایل" %}
+{% include "includes/dash_header.html" with page_icon="user" eyebrow="حساب" title="پروفایل" %}
 <section class="ui-profile-summary" aria-label="حساب شما"><span class="ui-profile-avatar" aria-hidden="true">{{ user.get_username|slice:":1" }}</span><div><h2>{{ user.get_full_name|default:user.get_username }}</h2><p class="muted">{{ user.get_role_display }}</p></div><span class="ui-profile-handle" dir="ltr">{{ user.get_username }}</span></section>
 <div class="panel-grid panel-2 account-settings">
   <form method="post" class="card card--lift card-pad form-stack">

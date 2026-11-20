@@ -4,7 +4,7 @@
 {% block content %}
 <div class="app-stack ui-account-page ui-assets">
 <nav class="ui-breadcrumb" aria-label="مسیر صفحه"><a href="{% url 'accounts:related_account' %}">حساب تبلیغاتی</a>{% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}<span aria-current="page">تبلیغات حساب اختصاصی</span></nav>
-{% include "includes/dash_header.html" with title="تبلیغات حساب اختصاصی" subtitle="مشاهده فهرست تبلیغات در حساب مرتبط شما" with_sub=1 %}
+{% include "includes/dash_header.html" with page_icon="megaphone" title="تبلیغات حساب اختصاصی" subtitle="مشاهده فهرست تبلیغات در حساب مرتبط شما" with_sub=1 %}
 {% if row %}
 <section class="card card-pad form-stack"><header class="ui-remote-summary"><div class="ui-form-intro"><span class="ui-target-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="building-2" size="md" %}</span><div><h2>{{ row.title }}</h2><p>فهرست فقط خواندنی؛ بدون تغییر بودجه یا وضعیت تبلیغات</p></div></div><a class="btn btn-primary" href="?load=1">{% include "includes/lucide_icon.html" with name="refresh-cw" size="sm" %} دریافت تبلیغات</a></header>
 {% if error %}<p class="ui-studio-warning" role="alert">{{ error }}</p>{% endif %}</section>
