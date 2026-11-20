@@ -1,36 +1,45 @@
 {% extends "public_base.html" %}
 {% block title %}تماس — {{ PRODUCT_NAME }}{% endblock %}
-{% block public_page_class %} pp-contact{% endblock %}
+{% block public_page_class %} pp-contact orbit-contact{% endblock %}
 {% block content %}
-{% include "includes/public_hero.html" with title="تماس با ما و پشتیبانی" subtitle="برای راهنمایی قبل از تبلیغ و پیگیری سفارش، از مسیرهای زیر شروع کنید" show_subtitle=1 compact=1 %}
-<section class="section public-section container">
-  <article class="contact-card contact-card--exec ui-public-contact" data-pp-reveal><div class="pp-support-badge">مرکز راهنمایی</div>
-    <span class="ui-target-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="headphones" size="md" %}</span><h2>پشتیبانی مشتریان</h2>
-    <p class="muted">برای سوالات مربوط به سفارش، کیف پول، وضعیت تبلیغ یا خطاهای سامانه، پس از ورود تیکت ثبت کنید. شماره سفارش یا نام کمپین و توضیح مسئله به بررسی سریع‌تر کمک می‌کند. رمز عبور و توکن API را در تیکت ارسال نکنید.</p>
-    {% if user.is_authenticated %}
-    <a class="btn btn-primary" href="{% url 'support:create' %}">ثبت تیکت</a>
-    {% else %}
-    <div class="hero-actions ui-contact-actions">
-      <a class="btn btn-primary" href="{% url 'accounts:login' %}">ورود و ثبت درخواست</a>
-      <a class="btn btn-ghost" href="{% url 'public:faq' %}">سوالات متداول</a>
-    </div>
-    {% endif %}
-  </article>
-  <section class="ui-landing-section pp-contact-topics"><header class="ui-landing-section-head"><div><p>راهنمای سریع</p><h2>پاسخ مناسب را پیدا کنید</h2></div></header>
-    <div class="feature-grid ui-public-feature-grid">
-      <article class="feature-card"><span class="ui-target-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="megaphone" size="md" %}</span><h3>پیش از ساخت کمپین</h3><p>مراحل، هدف‌گیری و شرایط ارسال را مرور کنید.</p><a href="{% url 'public:how_it_works' %}">راهنمای تبلیغات تلگرام</a></article>
-      <article class="feature-card"><span class="ui-target-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="wallet" size="md" %}</span><h3>سوال مالی و تعرفه</h3><p>مدل قیمت‌گذاری، بودجه و کارمزد را بررسی کنید.</p><a href="{% url 'public:pricing' %}">مشاهده تعرفه</a></article>
-      <article class="feature-card"><span class="ui-target-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="circle-help" size="md" %}</span><h3>سوالات و خطاهای رایج</h3><p>پاسخ پرسش‌های پرتکرار را قبل از ثبت درخواست بخوانید.</p><a href="{% url 'public:faq' %}">سوالات متداول</a></article>
+<div class="ct-page">
+  <section class="ct-hero" aria-labelledby="ct-title">
+    <div class="ct-hero-lines" aria-hidden="true"></div>
+    <div class="container ct-hero-inner">
+      <div class="ct-hero-copy" data-ct-reveal>
+        <nav class="ct-crumb" aria-label="مسیر صفحه"><a href="{% url 'public:home' %}">صفحه اصلی</a>{% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}<span aria-current="page">تماس و پشتیبانی</span></nav>
+        <p class="ct-kicker">{% include "includes/lucide_icon.html" with name="headphones" size="sm" %} مرکز راهنمایی تی‌ام‌ادز</p>
+        <h1 id="ct-title">تماس با ما و پشتیبانی؛<br><em>در کنار مسیر شما.</em></h1>
+        <p class="ct-lead">از اولین سؤال تا پیگیری سفارش، مسیر مناسب را پیدا کنید. برای درخواست‌های اختصاصی از طریق حساب خود تیکت ثبت کنید.</p>
+        <div class="ct-actions">{% url 'support:create' as ticket_url %}<a class="btn btn-primary btn-lg" href="{{ ticket_url }}">{% if user.is_authenticated %}ثبت تیکت{% else %}ورود و ثبت درخواست{% endif %} {% include "includes/lucide_icon.html" with name="arrow-left" size="btn" %}</a><a class="btn btn-ghost btn-lg" href="#contact-topics">راهنمای سریع {% include "includes/lucide_icon.html" with name="arrow-down" size="btn" %}</a></div>
+        <div class="ct-proof"><span>{% include "includes/lucide_icon.html" with name="shield-check" size="sm" %} رعایت حریم خصوصی</span><span>{% include "includes/lucide_icon.html" with name="message-circle" size="sm" %} پیگیری از حساب کاربری</span></div>
+      </div>
+      <figure class="ct-hero-scene"><div class="ct-halo"></div><div class="ct-ring"></div><img src="{{ contact_art.hero }}" class="ct-hero-art" alt="" width="440" height="440" fetchpriority="high" decoding="async" data-contact-art="hero"><span class="ct-float ct-float-top">{% include "includes/lucide_icon.html" with name="message-square" size="md" %}<span>ثبت درخواست<small>از فضای کاربری</small></span></span><span class="ct-float ct-float-bottom">{% include "includes/lucide_icon.html" with name="clipboard-check" size="md" %}<span>پیگیری تیکت<small>مشاهده وضعیت</small></span></span></figure>
     </div>
   </section>
-</section>
-<section id="support-guide" class="ui-editorial container" aria-labelledby="support-guide-heading">
-  <header class="ui-editorial-head"><p class="ui-editorial-kicker">راهنمای پشتیبانی</p><h2 id="support-guide-heading">درخواست خود را با اطلاعات درست ثبت کنید</h2><p>برای بررسی دقیق‌تر، ابتدا دسته مسئله و اطلاعات مرتبط را آماده کنید. مسیر پشتیبانی از داخل حساب برای پیگیری درخواست‌های اختصاصی طراحی شده است.</p></header>
-  <div class="ui-editorial-grid">
-    <article class="ui-editorial-item"><h3>سوال درباره شروع یا شرایط تبلیغ</h3><p>اگر هنوز سفارش نداده‌اید، نوع مقصد، هدف و سوال مشخص خود را بنویسید. ابتدا <a href="{% url 'public:how_it_works' %}">راهنمای شروع</a> و <a href="{% url 'public:faq' %}">سوالات متداول</a> را مرور کنید.</p></article>
-    <article class="ui-editorial-item"><h3>مشکل سفارش، پرداخت یا کیف پول</h3><p>شناسه سفارش یا تراکنش، مبلغ، زمان تقریبی و وضعیت نمایش داده‌شده را آماده کنید. اطلاعات محرمانه بانکی، رمز عبور، کلید API و کد یک‌بارمصرف را در پیام نفرستید.</p></article>
-    <article class="ui-editorial-item"><h3>گزارش خطای فنی یا مشکل نمایش</h3><p>نام صفحه، فعالیتی که پیش از خطا انجام دادید، متن خطا و در صورت امکان تصویر بدون اطلاعات حساس را ارسال کنید؛ نوع دستگاه و مرورگر هم می‌تواند به بازتولید خطا کمک کند.</p></article>
+  <div class="container ct-content">
+    <nav class="ct-section-nav" aria-label="دسترسی سریع"><a href="#contact-topics">{% include "includes/lucide_icon.html" with name="compass" size="sm" %} راهنمای سریع</a><a href="#contact-ticket">{% include "includes/lucide_icon.html" with name="headphones" size="sm" %} پشتیبانی مشتریان</a><a href="#support-guide">{% include "includes/lucide_icon.html" with name="clipboard-check" size="sm" %} آماده‌سازی درخواست</a></nav>
+    <section class="ct-section" id="contact-topics" aria-labelledby="ct-topics-title">
+      <header class="ct-centered" data-ct-reveal><p class="ct-kicker">{% include "includes/lucide_icon.html" with name="compass" size="sm" %} راهنمای سریع</p><h2 id="ct-topics-title">پاسخ مناسب را <em>پیدا کنید.</em></h2><p>پیش از ثبت درخواست، راهنمای مرتبط با موضوع خود را بررسی کنید.</p></header>
+      <div class="ct-topics">
+        <article class="ct-glass ct-topic" data-ct-reveal><img src="{{ contact_art.campaign }}" class="ct-topic-art" alt="" width="200" height="200" loading="lazy" decoding="async" data-contact-art="campaign"><h3>پیش از ساخت کمپین</h3><p>مراحل، هدف‌گیری و شرایط ارسال را مرور کنید.</p><a class="ct-link" href="{% url 'public:how_it_works' %}">راهنمای تبلیغات تلگرام {% include "includes/lucide_icon.html" with name="arrow-left" size="sm" %}</a></article>
+<article class="ct-glass ct-topic" data-ct-reveal><img src="{{ contact_art.wallet }}" class="ct-topic-art" alt="" width="200" height="200" loading="lazy" decoding="async" data-contact-art="wallet"><h3>سؤال مالی و تعرفه</h3><p>مدل قیمت‌گذاری، بودجه و کارمزد را بررسی کنید.</p><a class="ct-link" href="{% url 'public:pricing' %}">مشاهده تعرفه {% include "includes/lucide_icon.html" with name="arrow-left" size="sm" %}</a></article>
+<article class="ct-glass ct-topic" data-ct-reveal><img src="{{ contact_art.questions }}" class="ct-topic-art" alt="" width="200" height="200" loading="lazy" decoding="async" data-contact-art="questions"><h3>سؤالات و خطاهای رایج</h3><p>پاسخ پرسش‌های پرتکرار را قبل از ثبت درخواست بخوانید.</p><a class="ct-link" href="{% url 'public:faq' %}">سؤالات متداول {% include "includes/lucide_icon.html" with name="arrow-left" size="sm" %}</a></article>
+      </div>
+    </section>
+    <section class="ct-section" id="contact-ticket" aria-labelledby="ct-ticket-title">
+      <div class="ct-ticket-panel" data-ct-reveal>
+        <div class="ct-ticket-copy"><p class="ct-kicker">{% include "includes/lucide_icon.html" with name="headphones" size="sm" %} پشتیبانی مشتریان</p><h2 id="ct-ticket-title">درخواست شما،<br><em>در یک مسیر قابل پیگیری.</em></h2><p>برای سفارش، کیف پول، وضعیت تبلیغ یا خطاهای سامانه، پس از ورود تیکت ثبت کنید. شماره سفارش یا نام کمپین و شرح مسئله به بررسی دقیق‌تر کمک می‌کند.</p><div class="ct-ticket-actions"><a class="btn ct-light-button" href="{{ ticket_url }}">{% if user.is_authenticated %}ثبت تیکت جدید{% else %}ورود و ثبت درخواست{% endif %} {% include "includes/lucide_icon.html" with name="arrow-left" size="btn" %}</a>{% if user.is_authenticated %}<a class="ct-secondary-dark" href="{% url 'support:list' %}">تیکت‌های من {% include "includes/lucide_icon.html" with name="arrow-left" size="sm" %}</a>{% else %}<a class="ct-secondary-dark" href="{% url 'public:faq' %}">سؤالات متداول {% include "includes/lucide_icon.html" with name="arrow-left" size="sm" %}</a>{% endif %}</div></div>
+        <ol class="ct-ticket-steps" aria-label="مراحل پشتیبانی">
+        <li><span class="ct-step-icon">{% include "includes/lucide_icon.html" with name="log-in" size="md" %}</span><span><strong>ورود به حساب</strong><small>دسترسی به فضای پشتیبانی</small></span><span class="ct-step-no" aria-hidden="true">01</span></li><li><span class="ct-step-icon">{% include "includes/lucide_icon.html" with name="message-square" size="md" %}</span><span><strong>ثبت موضوع و توضیحات</strong><small>ارسال اطلاعات مرتبط</small></span><span class="ct-step-no" aria-hidden="true">02</span></li><li><span class="ct-step-icon">{% include "includes/lucide_icon.html" with name="clipboard-check" size="md" %}</span><span><strong>پیگیری درخواست</strong><small>مشاهده پاسخ و وضعیت تیکت</small></span><span class="ct-step-no" aria-hidden="true">03</span></li></ol>
+      </div>
+    </section>
+    <section class="ct-section" id="support-guide" aria-labelledby="support-guide-heading">
+      <header class="ct-centered" data-ct-reveal><p class="ct-kicker">{% include "includes/lucide_icon.html" with name="clipboard-check" size="sm" %} راهنمای پشتیبانی</p><h2 id="support-guide-heading">درخواست خود را با <em>اطلاعات درست</em> ثبت کنید.</h2><p>برای بررسی دقیق‌تر، ابتدا دسته مسئله و اطلاعات مرتبط را آماده کنید. مسیر پشتیبانی از داخل حساب برای پیگیری درخواست‌های اختصاصی طراحی شده است.</p></header>
+      <div class="ct-guide-grid"><article class="ct-glass ct-guide-card" data-ct-reveal><span class="ct-guide-icon">{% include "includes/lucide_icon.html" with name="megaphone" size="md" %}</span><h3>سوال درباره شروع یا شرایط تبلیغ</h3><p>اگر هنوز سفارش نداده‌اید، نوع مقصد، هدف و سوال مشخص خود را بنویسید. ابتدا <a href="{% url 'public:how_it_works' %}">راهنمای شروع</a> و <a href="{% url 'public:faq' %}">سوالات متداول</a> را مرور کنید.</p></article><article class="ct-glass ct-guide-card" data-ct-reveal><span class="ct-guide-icon">{% include "includes/lucide_icon.html" with name="wallet" size="md" %}</span><h3>مشکل سفارش، پرداخت یا کیف پول</h3><p>شناسه سفارش یا تراکنش، مبلغ، زمان تقریبی و وضعیت نمایش داده‌شده را آماده کنید. اطلاعات محرمانه بانکی، رمز عبور، کلید API و کد یک‌بارمصرف را در پیام نفرستید.</p></article><article class="ct-glass ct-guide-card" data-ct-reveal><span class="ct-guide-icon">{% include "includes/lucide_icon.html" with name="monitor" size="md" %}</span><h3>گزارش خطای فنی یا مشکل نمایش</h3><p>نام صفحه، فعالیتی که پیش از خطا انجام دادید، متن خطا و در صورت امکان تصویر بدون اطلاعات حساس را ارسال کنید؛ نوع دستگاه و مرورگر هم می‌تواند به بازتولید خطا کمک کند.</p></article></div>
+      <aside class="ct-glass ct-safety" data-ct-reveal><img src="{{ contact_art.security }}" class="ct-safety-art" alt="" width="200" height="200" loading="lazy" decoding="async" data-contact-art="security"><div><h3>اطلاعات حساس را ارسال نکنید.</h3><p>رمز عبور، توکن یا کلید API، اطلاعات محرمانه بانکی و کد یک‌بارمصرف را در تیکت قرار ندهید. هنگام ارسال تصویر، اطلاعات حساس را بپوشانید.</p></div></aside>
+      <nav class="ct-related ct-reading" aria-label="مطالعه بیشتر"><strong>مطالعه بیشتر</strong><a class="ct-link" href="{% url 'public:faq' %}">مرکز پاسخ‌ها {% include "includes/lucide_icon.html" with name="arrow-left" size="sm" %}</a><a class="ct-link" href="{% url 'public:pricing' %}">تعرفه و پیش‌فاکتور {% include "includes/lucide_icon.html" with name="arrow-left" size="sm" %}</a><a class="ct-link" href="{% url 'public:about' %}">درباره تی‌ام‌ادز {% include "includes/lucide_icon.html" with name="arrow-left" size="sm" %}</a></nav>
+    </section>
   </div>
-  <nav class="ui-editorial-links" aria-label="مطالعه بیشتر"><strong>مطالعه بیشتر</strong><a href="{% url 'public:faq' %}">مرکز پاسخ‌ها</a><a href="{% url 'public:pricing' %}">تعرفه و پیش‌فاکتور</a><a href="{% url 'public:about' %}">درباره تی‌ام‌ادز</a></nav>
-</section>
+</div>
 {% endblock %}

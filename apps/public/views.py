@@ -40,8 +40,21 @@ def faq(request):
     return render(request, "public/faq.html", {"faq_art": artwork})
 
 
+CONTACT_ART = {
+    "hero": ("img/faq/tmads_faq_support.webp", "feature-support"),
+    "campaign": ("img/workflow/tmads_workflow_campaign.webp", "feature-campaign"),
+    "wallet": ("img/pricing/tmads_pricing_wallet_and_coins.webp", "feature-wallet"),
+    "questions": ("img/faq/tmads_faq_search.webp", "feature-targeting"),
+    "security": ("img/faq/tmads_faq_review.webp", "feature-security"),
+}
+
+
 def contact(request):
-    return render(request, "public/contact.html")
+    artwork = {
+        role: static(path) if finders.find(path) else feature_asset(fallback)
+        for role, (path, fallback) in CONTACT_ART.items()
+    }
+    return render(request, "public/contact.html", {"contact_art": artwork})
 
 
 ABOUT_ART = {
