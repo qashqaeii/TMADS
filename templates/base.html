@@ -32,6 +32,7 @@
   <link rel="stylesheet" href="{% static 'css/gramads-brand.css' %}">
   <link rel="stylesheet" href="{% static 'css/gramads-workspace-system.css' %}">
   <link rel="stylesheet" href="{% static 'css/gramads-workspace-pages.css' %}">
+  <link rel="stylesheet" href="{% static 'css/gramads-workspace-composition.css' %}">
   {% block charts_head %}{% endblock %}
 </head>
 <body class="app-body ui-final {% block body_class %}{% endblock %}">
@@ -54,8 +55,8 @@
         <span class="ui-dialog__symbol" aria-hidden="true">{% include "includes/gramads_workspace_icon.html" with name="alert-triangle" size="md" %}</span>
         <button type="submit" value="cancel" class="ui-icon-button" aria-label="بستن">{% include "includes/gramads_workspace_icon.html" with name="x" size="sm" %}</button>
       </header>
-      <h2 id="ui-confirm-title">تأیید عملیات</h2>
-      <p id="ui-confirm-description"></p>
+      <div class="ga-confirm-copy"><h2 id="ui-confirm-title">تأیید عملیات</h2>
+      <p id="ui-confirm-description"></p></div>
       <footer class="ui-dialog__actions">
         <button type="submit" value="cancel" class="btn btn-ghost" autofocus>انصراف</button>
         <button type="submit" value="confirm" class="btn btn-danger" data-confirm-action>تأیید</button>
