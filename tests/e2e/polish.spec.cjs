@@ -529,3 +529,52 @@ test.describe('Contact without JavaScript',()=>{
     await expect(page.locator('.ct-ticket-actions .ct-light-button')).toHaveAttribute('href','/support/new/');
   });
 });
+
+
+test('Orbit Access fits compact desktop and mobile without horizontal overflow',async({page})=>{
+  test.setTimeout(60000);
+  await page.emulateMedia({reducedMotion:'reduce'});
+  for(const [width,height] of [[320,740],[768,900],[1440,768],[1440,900]]){
+    await page.setViewportSize({width,height});
+    for(const path of ['/accounts/login/','/accounts/register/']){
+      await assertPage(page,path);
+      await expect(page.locator('.ao-form-switch a[aria-current="page"]')).toHaveCount(1);
+      await expect(page.locator('.ao-form-card button[type="submit"]')).toBeVisible();
+      if(width>760){
+        const art=page.locator('.ao-art');
+        await expect(art).toBeVisible();
+        await expect.poll(()=>art.evaluate(el=>el.complete&&el.naturalWidth>0)).toBe(true);
+      }else{
+        await expect(page.locator('.ao-aside')).toBeHidden();
+      }
+      expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+2)).toBe(true);
+    }
+    await page.locator('.ao-form-switch a[href="/accounts/login/"]').click();
+    await expect(page).toHaveURL(/\/accounts\/login\/$/);
+  }
+});
+test('Orbit Access password controls remain separate and do not submit',async({page})=>{
+  await assertPage(page,'/accounts/register/');
+  const first=page.locator('#id_password1'),second=page.locator('#id_password2');
+  await first.fill('local-only-first');await second.fill('local-only-second');
+  const button=page.locator('.ui-password-toggle[aria-controls="id_password1"]');
+  await button.click();
+  await expect(first).toHaveAttribute('type','text');
+  await expect(second).toHaveAttribute('type','password');
+  await expect(first).toHaveValue('local-only-first');
+  await expect(page).toHaveURL(/\/accounts\/register\/$/);
+  await button.click();
+  await expect(first).toHaveAttribute('type','password');
+});
+test.describe('Orbit Access without JavaScript',()=>{
+  test.use({javaScriptEnabled:false});
+  test('native credentials and navigation are visible',async({page})=>{
+    await page.goto('/accounts/login/');
+    await expect(page.locator('#id_username')).toBeVisible();
+    await expect(page.locator('#id_password')).toHaveAttribute('type','password');
+    await expect(page.locator('[data-pp-password-toggle]')).toBeHidden();
+    await expect(page.locator('.ao-form-card button[type="submit"]')).toBeVisible();
+    await page.locator('.ao-form-switch a[href="/accounts/register/"]').click();
+    await expect(page.locator('#id_password2')).toBeVisible();
+  });
+});

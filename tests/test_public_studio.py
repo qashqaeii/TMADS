@@ -18,7 +18,7 @@ def test_studio_assets(client, route):
 def test_auth_has_dedicated_shell(client, route):
     html = client.get(reverse(route)).content.decode()
     assert 'class="studio-auth-header"' in html
-    assert 'class="studio-auth-art"' in html
+    assert 'class="ao-art"' in html
     assert 'class="studio-auth-footer container"' in html
     assert 'csrfmiddlewaretoken' in html
     assert 'class="site-header site-header--exec' not in html
