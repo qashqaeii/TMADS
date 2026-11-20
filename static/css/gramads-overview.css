@@ -194,7 +194,7 @@
 .ga-command .ga-home-campaign-row:focus-visible{outline-offset:-2px}
 @media(prefers-reduced-motion:no-preference){
  @keyframes gaOverviewAppear{from{opacity:.72;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
- .ga-command .ga-home-metric{animation:gaOverviewAppear 300ms var(--gw-ease) both}
+ .ga-command .ga-home-metric{animation:gaOverviewAppear 300ms var(--gw-ease) backwards}
  .ga-command .ga-home-metric:nth-child(2){animation-delay:35ms}
  .ga-command .ga-home-metric:nth-child(3){animation-delay:65ms}
  .ga-command .ga-home-metric:nth-child(4){animation-delay:90ms}

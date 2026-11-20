@@ -621,6 +621,25 @@ test('GramAds overview responsive composition', async ({page}) => {
     await page.emulateMedia({reducedMotion:'reduce'});
     expect(await page.locator('.ga-home-metric').first().evaluate(el=>getComputedStyle(el).animationName)).toBe('none');
     await page.emulateMedia({reducedMotion:'no-preference'});
+    if (width === 1440) {
+      const metric = page.locator('.ga-home-metric').first();
+      await metric.hover();
+      await expect.poll(() => metric.evaluate(el => getComputedStyle(el).transform)).toBe('matrix(1, 0, 0, 1, 0, -2)');
+      await page.emulateMedia({reducedMotion:'reduce'});
+      await expect.poll(() => metric.evaluate(el => getComputedStyle(el).transform)).toBe('none');
+      await page.emulateMedia({reducedMotion:'no-preference'});
+      await page.mouse.move(0,0);
+      const chart = page.locator('#dash-chart');
+      if (await chart.count()) {
+        await expect.poll(() => chart.evaluate(el => Boolean(window.echarts && window.echarts.getInstanceByDom(el)))).toBe(true);
+        const options = await chart.evaluate(el => {
+          const option = window.echarts.getInstanceByDom(el).getOption();
+          return {zoom: option.dataZoom || [], points: option.xAxis[0].data.length};
+        });
+        expect(options.zoom).toHaveLength(0);
+        expect(options.points).toBeGreaterThan(0);
+      }
+    }
     const header = await page.locator('.ga-home-header').boundingBox();
     const cards = await page.locator('.ga-home-metric-grid').boundingBox();
     if (width === 1440) {
