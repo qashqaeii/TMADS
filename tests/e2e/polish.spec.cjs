@@ -62,3 +62,24 @@ test('draft confirmation cancellation', async ({page}) => {
   await expect(dialog).not.toBeVisible();
   await expect(page).toHaveURL(/\/campaigns\//);
 });
+
+test('public studio compact auth and responsive layouts', async ({page}) => {
+  for (const width of [375, 768, 1440]) {
+    await page.setViewportSize({width, height: 900});
+    for (const path of ['/', '/features/', '/accounts/login/', '/accounts/register/']) {
+      await assertPage(page, path);
+      await expect(page.locator('h1')).toHaveCount(1);
+    }
+    await expect(page.locator('.studio-auth-header')).toBeVisible();
+    await expect(page.locator('#id_username')).toBeVisible();
+    await expect(page.locator('#id_password1')).toHaveAttribute('type', 'password');
+    await expect(page.locator('.ui-password-toggle')).toHaveCount(2);
+    await assertPage(page, '/accounts/login/');
+    await expect(page.locator('[data-pp-password-toggle]')).toHaveCount(1);
+    await expect(page.locator('.ui-password-toggle')).toHaveCount(0);
+    await page.locator('#id_password').fill('local-test-only');
+    await page.getByRole('button', {name:'نمایش رمز عبور', exact:true}).click();
+    await expect(page.locator('#id_password')).toHaveAttribute('type','text');
+    await expect(page.locator('[data-pp-password-toggle]')).toHaveAttribute('aria-pressed','true');
+  }
+});
