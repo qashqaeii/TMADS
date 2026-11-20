@@ -3,7 +3,7 @@
 {% block container_class %}container-wide{% endblock %}
 {% block content %}
 <div class="app-stack ui-support">
-{% include "includes/dash_header.html" with eyebrow="پشتیبانی" title="تیکت جدید" %}
+{% include "includes/dash_header.html" with page_icon="message-square" eyebrow="پشتیبانی" title="تیکت جدید" %}
 <div class="ui-support-flow"><form method="post" class="card card-pad form-stack" aria-label="ثبت درخواست پشتیبانی">
   <div class="ui-form-intro"><span class="ui-target-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="message-circle" size="md" %}</span><div><h2>درخواست پشتیبانی</h2><p>موضوع و جزئیات را وارد کنید.</p></div></div>
   {% csrf_token %}

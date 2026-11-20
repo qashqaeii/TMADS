@@ -4,7 +4,7 @@
 {% block container_class %}container-wide{% endblock %}
 {% block content %}
 <div class="app-stack ui-notifications ga-notifications">
-<header class="ga-notifications__hero"><div class="ga-notifications__lead"><span class="ga-notifications__symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="bell" size="md" %}</span><div><h1>اعلان‌ها</h1><p>به‌روزرسانی کمپین‌ها و پیام‌های حساب در یک نگاه</p></div></div>
+<header class="ga-notifications__hero"><div class="ga-notifications__lead"><span class="ga-notifications__symbol" aria-hidden="true">{% include "includes/gramads_workspace_icon.html" with name="bell" size="md" %}</span><div><h1>اعلان‌ها</h1><p>به‌روزرسانی کمپین‌ها و پیام‌های حساب در یک نگاه</p></div></div>
 {% if notifications %}<form method="post">{% csrf_token %}<button class="btn btn-ghost btn-sm" type="submit">{% include "includes/lucide_icon.html" with name="check-check" size="sm" %} خواندن همهٔ اعلان‌ها</button></form>{% endif %}</header>
 <article class="card card--lift notification-panel"><header class="ga-notifications__panel-head"><h2>آخرین اعلان‌ها</h2><span>{{ notifications|length|format_count }} اعلان</span></header>
   <ul class="activity-feed">

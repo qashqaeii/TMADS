@@ -5,7 +5,7 @@
 {% block content %}
 <div class="app-stack ui-support">
 {% url 'support:create' as create_url %}
-{% include "includes/dash_header.html" with eyebrow="پشتیبانی" title="تیکت‌ها" action_url=create_url action_label="تیکت جدید" action_primary=1 %}
+{% include "includes/dash_header.html" with page_icon="headphones" eyebrow="پشتیبانی" title="تیکت‌ها" action_url=create_url action_label="تیکت جدید" action_primary=1 %}
 {% if tickets %}
 <ul class="record-list ui-ticket-list" aria-label="درخواست‌های پشتیبانی">
   {% for t in tickets %}

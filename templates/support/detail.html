@@ -9,7 +9,7 @@
   <div class="dash-header__main">
     <div class="dash-header__title-row">
       <span class="dash-header__kicker">تیکت</span>
-      <h1>{{ ticket.subject }}</h1>
+      <span class="ga-page-heading-icon" aria-hidden="true">{% include "includes/gramads_workspace_icon.html" with name="message-square" size="md" %}</span><h1>{{ ticket.subject }}</h1>
     </div>
     <div class="dash-header__meta">
       <span class="status status--compact {% if ticket.status == "closed" or ticket.status == "resolved" %}status-draft{% else %}status-info{% endif %}">{{ ticket.get_status_display }}</span>
