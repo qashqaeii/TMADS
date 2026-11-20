@@ -31,7 +31,7 @@
       });
     });
     var search = root.querySelector('[data-pp-faq-search]');
-    if (search) {
+    if (search && !root.classList.contains('orbit-faq')) {
       var input = search.querySelector('input');
       var count = search.querySelector('[data-pp-faq-count]');
       var cards = Array.from(root.querySelectorAll('.ui-faq-layout .ui-public-faq details'));
