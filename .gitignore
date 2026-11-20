@@ -9,3 +9,7 @@ media/
 .pytest_cache/
 .ruff_cache/
 *.log
+
+# Generated from landing PNG masters before serving/collecting static files.
+/static/img/landing/*.webp
+/static/img/landing/*.webp.tmp

@@ -11,6 +11,10 @@ def main() -> None:
         raise ImportError(
             "Couldn't import Django. Install dependencies from requirements.txt."
         ) from exc
+    if len(sys.argv) > 1 and sys.argv[1] in {"runserver", "collectstatic"}:
+        from scripts.optimize_landing_assets import optimize
+
+        optimize()
     execute_from_command_line(sys.argv)
 
 
