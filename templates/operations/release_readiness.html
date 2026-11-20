@@ -3,7 +3,7 @@
 {% block page_title %}آمادگی انتشار{% endblock %}
 {% block content %}
 <div class="app-stack operations-page ui-ops ui-release">
-{% include "includes/dash_header.html" with title="آمادگی محیط Production" subtitle="گزارش مستقل و فقط‌خواندنی پیش‌شرط‌های انتشار" with_sub=1 %}
+{% include "includes/dash_header.html" with page_icon="shield-check" title="آمادگی محیط Production" subtitle="گزارش مستقل و فقط‌خواندنی پیش‌شرط‌های انتشار" with_sub=1 %}
 <section class="card card-pad ui-release-summary">
   <div><span class="ui-target-symbol">{% include "includes/lucide_icon.html" with name="shield-check" size="md" %}</span>
   <h2>{% if can_launch %}پیش‌شرط‌های قابل‌اندازه‌گیری برقرارند{% else %}انتشار عمومی هنوز مجاز نیست{% endif %}</h2>

@@ -4,7 +4,7 @@
 {% block container_class %}container-wide{% endblock %}
 {% block content %}
 <div class="app-stack operations-page ui-ops">
-{% include "includes/dash_header.html" with title="گزارش حساب تلگرام" subtitle="اطلاعات مستقیم حساب مرکزی؛ فقط خواندن" with_sub=1 %}
+{% include "includes/dash_header.html" with page_icon="chart-no-axes-combined" title="گزارش حساب تلگرام" subtitle="اطلاعات مستقیم حساب مرکزی؛ فقط خواندن" with_sub=1 %}
 <nav class="ui-account-report-tabs ui-section-tabs" aria-label="بخش گزارش">{% for value,label in sections %}<a href="?section={{ value }}" {% if value == section %}aria-current="page"{% endif %}>{{ label }}</a>{% endfor %}</nav>
 <form method="get" class="card card-pad form-stack"><input type="hidden" name="section" value="{{ section }}"><input type="hidden" name="load" value="1">
 {% if section == "report" %}<div class="ui-report-fields"><div class="field"><label for="report-year">سال (میلادی API)</label><input id="report-year" type="number" name="year" min="2021" max="2100" value="{{ year }}" required></div><div class="field"><label for="report-month">ماه میلادی</label><input id="report-month" name="month" type="number" min="1" max="12" value="{{ month }}" required></div></div>

@@ -232,3 +232,54 @@
 @media(hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){.ui-final.is-app .ui-ticket-list .record-list__item:hover .ui-ticket-arrow{transform:translateX(-3px)}}
 @media(prefers-reduced-motion:reduce){.ui-final.is-app :is(.record-list__item,.ui-ticket-arrow,.ui-policy-chevron){transition:none!important;animation:none!important;transform:none!important}}
 @media(max-width:600px){.ui-final.is-app .ui-ticket-list .record-list__item{padding:11px;gap:8px}.ui-final.is-app .ui-policy-center .policy-accordion__head{padding:11px}.ui-final.is-app .ui-policy-center .policy-accordion__body{padding:12px}.ui-final.is-app .ui-conversation .chat-thread,.ui-final.is-app .ui-conversation .chat-compose{padding:10px}}
+
+/* Operator console — dense, legible, status-aware. No changes to authorization or operations. */
+.ui-final.is-app :is(.ui-ops,.sms-workspace){min-width:0;gap:var(--gw-gap)}
+.ui-final.is-app .ui-ops .ui-ops-kpis{gap:10px}
+.ui-final.is-app .ui-ops .kpi-exec{position:relative;min-width:0;min-height:100px;padding:12px 14px;border-radius:var(--gw-radius);background:linear-gradient(165deg,#fff 60%,#f8fbff);border:1px solid var(--gw-stroke);box-shadow:var(--gw-shadow)}
+.ui-final.is-app .ui-ops .kpi-exec__icon{border-radius:10px;background:#e7f1fe;color:var(--gw-accent)}
+.ui-final.is-app .ui-ops .kpi-exec__value{font-size:clamp(1.25rem,2vw,1.75rem);font-weight:750;letter-spacing:0;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.ui-final.is-app .ui-ops .kpi-exec__label{font-size:.75rem;color:var(--gw-muted)}
+.ui-final.is-app .ui-ops .kpi-exec__unit{font-size:.67rem}
+.ui-final.is-app .ui-ops :is(.ui-ops-overview,.ui-ops-api-layout,.ui-ops-review-layout){gap:12px}
+.ui-final.is-app .ui-ops .ui-ops-links{gap:5px}
+.ui-final.is-app .ui-ops .ui-ops-links a{border:1px solid #e2ebf5;border-radius:8px;padding:9px;background:#f8fbff;gap:8px}
+.ui-final.is-app .ui-ops .ui-ops-links a:hover{border-color:#c3daf2;background:#edf5ff}
+.ui-final.is-app .ui-ops .filter-exec-shell{padding:11px 14px;background:#fff}
+.ui-final.is-app .ui-ops :is(.filter-exec__grid--inline,.filter-row){gap:9px;min-width:0}
+.ui-final.is-app .ui-ops .filter-exec__label{font-size:.75rem;font-weight:650}
+.ui-final.is-app .ui-ops .filter-exec__control{min-height:38px}
+.ui-final.is-app .ui-ops .data-table{font-size:.81rem;min-width:560px}
+.ui-final.is-app .ui-ops .data-table th{font-size:.72rem;background:#f1f5fa}
+.ui-final.is-app .ui-ops .data-table :is(th,td){padding:10px 12px}
+.ui-final.is-app .ui-ops .data-table td :is(form,.hero-actions){min-width:0}
+.ui-final.is-app .ui-ops .ui-ops-payload{background:#f5f9fe;border-color:#e0eaf6;border-radius:10px;padding:10px}
+.ui-final.is-app .ui-ops .ui-ops-payload pre{line-height:1.65}
+.ui-final.is-app .ui-ops .ui-remote-ops-card{padding:14px}
+.ui-final.is-app .ui-ops .ui-remote-ops-card>form{background:#f5f9fe;border:1px solid #e2ebf5;border-radius:10px;padding:12px}
+.ui-final.is-app .ui-ops .ui-remote-summary{gap:10px;min-width:0}
+.ui-final.is-app .ui-ops .ui-report-fields{gap:10px}
+.ui-final.is-app .ui-ops .ui-account-report-tabs{padding:5px;gap:5px;background:#fff;border:1px solid var(--gw-stroke);border-radius:12px;overflow-x:auto;max-width:100%}
+.ui-final.is-app .ui-ops .ui-account-report-tabs>*{flex:none}
+.ui-final.is-app .ui-ops .ui-refund-buttons{gap:6px}
+.ui-final.is-app .ui-ops .ui-release-summary{background:linear-gradient(145deg,#fff,#edf5fe);padding:16px;gap:12px}
+.ui-final.is-app .ui-ops .ui-release-numbers{gap:10px}
+.ui-final.is-app .ui-ops .ui-release-numbers>span{padding:9px 12px;background:#fff;border:1px solid #dbe8f7;border-radius:10px}
+.ui-final.is-app .ui-ops .ui-release-checks{gap:8px}
+.ui-final.is-app .ui-ops .ui-release-check{padding:11px;border-radius:10px;border-color:var(--gw-stroke);min-width:0}
+.ui-final.is-app .ui-ops .ui-release-check__icon{border-radius:9px}
+.ui-final.is-app .ui-ops .ui-audit-action{font-weight:650}
+.ui-final.is-app .sms-workspace .sms-kpis{gap:10px}
+.ui-final.is-app .sms-workspace .sms-kpi{min-width:0;padding:14px;border-radius:var(--gw-radius);box-shadow:var(--gw-shadow)}
+.ui-final.is-app .sms-workspace .sms-kpi--primary{background:radial-gradient(ellipse at 10% 0%,#398ddd66,transparent 65%),linear-gradient(125deg,#113b77,#1769c5);color:#fff;border-color:#245fa2}
+.ui-final.is-app .sms-workspace .sms-kpi--primary :is(span,small,strong){color:inherit}
+.ui-final.is-app .sms-workspace .sms-panels{gap:12px}
+.ui-final.is-app .sms-workspace .sms-panel{border-radius:var(--gw-radius)}
+.ui-final.is-app .sms-workspace .sms-history-head{gap:10px;flex-wrap:wrap}
+.ui-final.is-app .sms-workspace .sms-filter{gap:7px;flex-wrap:wrap}
+@media(hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){
+ .ui-final.is-app .ui-ops .kpi-exec,.ui-final.is-app .sms-workspace .sms-kpi{transition:transform var(--gw-fast) var(--gw-ease),box-shadow var(--gw-normal) var(--gw-ease)}
+ .ui-final.is-app .ui-ops .kpi-exec:hover,.ui-final.is-app .sms-workspace .sms-kpi:hover{transform:translateY(-2px);box-shadow:var(--gw-shadow-hover)}
+}
+@media(prefers-reduced-motion:reduce){.ui-final.is-app :is(.kpi-exec,.sms-kpi){animation:none!important;transition:none!important;transform:none!important}}
+@media(max-width:600px){.ui-final.is-app .ui-ops .kpi-exec{padding:10px;min-height:88px}.ui-final.is-app .ui-ops .filter-exec-shell{padding:10px}.ui-final.is-app .ui-ops .ui-release-summary{padding:12px}.ui-final.is-app .ui-ops .ui-release-numbers{width:100%}.ui-final.is-app .ui-ops .ui-release-numbers>span{flex:1}.ui-final.is-app .ui-ops .ui-remote-ops-card{padding:12px}}

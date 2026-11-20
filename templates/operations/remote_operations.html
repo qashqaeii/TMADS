@@ -3,7 +3,7 @@
 {% block page_title %}عملیات تبلیغات{% endblock %}
 {% block content %}
 <div class="app-stack operations-page ui-ops">
-{% include "includes/dash_header.html" with title="صف عملیات تبلیغات" subtitle="بررسی و اجرای درخواست‌های مشتریان" with_sub=1 %}
+{% include "includes/dash_header.html" with page_icon="settings" title="صف عملیات تبلیغات" subtitle="بررسی و اجرای درخواست‌های مشتریان" with_sub=1 %}
 <p class="ui-studio-warning">اجرای زنده به مجوز اپراتور، گیت‌های امنیتی و شرایط مالی وابسته است. درخواست نامطمئن هرگز دوباره اجرا نمی‌شود.</p>
 <form method="get" class="card card-pad filter-row"><div class="field"><label for="remote-status">وضعیت</label><select id="remote-status" name="status"><option value="all">همه</option>{% for value,label in statuses %}<option value="{{ value }}" {% if value == filter_status %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div><button class="btn btn-primary" type="submit">اعمال فیلتر</button></form>
 {% for op in page_obj %}

@@ -4,7 +4,7 @@
 {% block page_title %}وضعیت API{% endblock %}
 {% block content %}
 <div class="app-stack operations-page ui-ops">
-{% include "includes/dash_header.html" with eyebrow="عملیات" title="وضعیت API" %}
+{% include "includes/dash_header.html" with page_icon="activity" eyebrow="عملیات" title="وضعیت API" %}
 <a class="btn btn-ghost" href="{% url 'operations:telegram_account' %}">گزارش‌های حساب تلگرام</a>
 {% if error %}<article class="card card-pad operations-error" role="alert"><strong>خطا</strong><p class="muted">{{ error }}</p></article>{% endif %}
 

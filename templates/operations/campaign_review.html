@@ -8,7 +8,7 @@
 <a class="btn btn-ghost btn-sm" href="{% url 'operations:remote_operations' %}">صف عملیات تبلیغات</a>
 <header class="dash-header ui-page-heading dash-header--luxe dash-header--rich">
   <div class="dash-header__main">
-    <div class="dash-header__title-row">
+    <div class="dash-header__title-row"><span class="ga-page-heading-icon" aria-hidden="true">{% include "includes/gramads_workspace_icon.html" with name="shield-check" size="md" %}</span>
       <span class="dash-header__kicker">بررسی</span>
       <h1>{{ campaign.name|default:"کمپین" }}</h1>
     </div>
