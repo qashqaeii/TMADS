@@ -1,5 +1,8 @@
 from django import forms
-from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm, UsernameField
+from django.db.models import Q
+
+from apps.notifications.faraz import normalize_mobile
 
 from .models import User
 
@@ -44,4 +47,54 @@ class RegisterForm(UserCreationForm):
 
 
 class LoginForm(AuthenticationForm):
-    username = forms.CharField(label="نام کاربری یا ایمیل")
+    """Accept a unique saved mobile alias, without replacing Django password auth."""
+
+    username = UsernameField(
+        label="نام کاربری یا شماره موبایل",
+        max_length=150,
+        error_messages={"required": "نام کاربری یا شماره موبایل را وارد کنید."},
+    )
+    password = forms.CharField(
+        label="رمز عبور",
+        strip=False,
+        widget=forms.PasswordInput(attrs={"autocomplete": "current-password"}),
+        error_messages={"required": "رمز عبور را وارد کنید."},
+    )
+    error_messages = {
+        "invalid_login": "نام کاربری یا شماره موبایل یا رمز عبور اشتباه است.",
+        "inactive": "نام کاربری یا شماره موبایل یا رمز عبور اشتباه است.",
+    }
+
+    def clean(self):
+        identifier = self.cleaned_data.get("username")
+        password = self.cleaned_data.get("password")
+        if not identifier or not password:
+            return super().clean()
+
+        mobile = normalize_mobile(identifier)
+        # Preserve exact usernames, including existing numeric usernames.
+        if not mobile or User.objects.filter(username=identifier).exists():
+            return super().clean()
+
+        # SMS enrollment stores canonical 09...; also handle common legacy
+        # formats (including Persian/Arabic digits) on admin-managed accounts.
+        local = (mobile, "+98" + mobile[1:], "0098" + mobile[1:], "98" + mobile[1:])
+        aliases = {identifier, *local}
+        for digits in ("۰۱۲۳۴۵۶۷۸۹", "٠١٢٣٤٥٦٧٨٩"):
+            aliases.update(value.translate(str.maketrans("0123456789", digits)) for value in local)
+        candidates = list(
+            User.objects.filter(Q(mobile__in=aliases) | Q(username=mobile))
+            .values_list("username", flat=True)[:2]
+        )
+        if len(candidates) > 1:
+            # Ambiguous aliases must never choose an arbitrary account.
+            # Match the password-hashing work of an unknown account.
+            User().set_password(password)
+            raise self.get_invalid_login_error()
+        if candidates:
+            self.cleaned_data["username"] = candidates[0]
+            try:
+                return super().clean()
+            finally:
+                self.cleaned_data["username"] = identifier
+        return super().clean()

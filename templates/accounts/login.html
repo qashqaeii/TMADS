@@ -10,14 +10,14 @@
       {% csrf_token %}
       {% if form.non_field_errors %}<div class="form-error" role="alert">{{ form.non_field_errors }}</div>{% endif %}
       <div class="field">
-        <label for="id_username">نام کاربری</label>
-        <input type="text" name="username" id="id_username" required autocomplete="username" dir="auto" placeholder="نام کاربری خود را وارد کنید" value="{{ form.username.value|default:'' }}">
-        {% if form.username.errors %}<div class="form-error" role="alert">{{ form.username.errors }}</div>{% endif %}
+        <label for="id_username">نام کاربری یا شماره موبایل</label>
+        <input type="text" name="username" id="id_username" required autocomplete="username" dir="auto" maxlength="150" placeholder="نام کاربری یا شماره موبایل" {% if form.username.errors %}aria-invalid="true" aria-describedby="login-identifier-error"{% endif %} value="{{ form.username.value|default:'' }}">
+        {% if form.username.errors %}<div id="login-identifier-error" class="form-error" role="alert">{{ form.username.errors }}</div>{% endif %}
       </div>
       <div class="field">
         <label for="id_password">رمز عبور</label>
-        <div class="pp-password-row"><input type="password" name="password" id="id_password" required autocomplete="current-password" dir="ltr" placeholder="••••••••"><button type="button" class="pp-password-toggle" data-pp-password-toggle aria-controls="id_password" aria-label="نمایش رمز عبور" hidden>نمایش</button></div>
-        {% if form.password.errors %}<div class="form-error" role="alert">{{ form.password.errors }}</div>{% endif %}
+        <div class="pp-password-row"><input type="password" name="password" id="id_password" required autocomplete="current-password" dir="ltr" placeholder="••••••••" {% if form.password.errors %}aria-invalid="true" aria-describedby="login-password-error"{% endif %}><button type="button" class="pp-password-toggle" data-pp-password-toggle aria-controls="id_password" aria-label="نمایش رمز عبور" hidden>نمایش</button></div>
+        {% if form.password.errors %}<div id="login-password-error" class="form-error" role="alert">{{ form.password.errors }}</div>{% endif %}
       </div>
       <div class="studio-login-recovery"><a href="{% url 'accounts:password_reset' %}">رمز عبور را فراموش کرده‌اید؟</a></div><button class="btn btn-primary btn-lg" type="submit">ورود به داشبورد {% include "includes/lucide_icon.html" with name="arrow-left" size="btn" %}</button>
       <p class="auth-links">حساب ندارید؟ <a href="{% url 'accounts:register' %}">ثبت‌نام</a></p>
