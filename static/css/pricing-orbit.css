@@ -1,0 +1,115 @@
+/* Orbit Glass Financial — scoped exclusively to the public pricing page. */
+.ui-final.orbit-pricing{--pr-ink:#102746;--pr-muted:#405875;--pr-blue:#075fc8;--pr-r:27px;--pr-shadow:0 18px 45px #235ca51c,inset 0 1px 1px #fff;background:#edf6ff;color:var(--pr-ink)}
+.ui-final.orbit-pricing .container{width:min(1240px,calc(100% - 64px));max-width:1240px;margin-inline:auto}
+.ui-final.orbit-pricing .site-main--public{padding:0;max-width:none;width:100%;overflow:clip}
+.ui-final.orbit-pricing .ui-public-header{position:sticky;top:0;z-index:40;background:transparent;border:0;box-shadow:none;padding:12px 0 0}
+.ui-final.orbit-pricing .ui-public-header .public-nav-bar{min-height:64px;padding:8px 15px;border:1px solid #ffffffed;border-radius:22px;background:#e9f6ffba;box-shadow:0 10px 36px #16498e1c,inset 0 1px 1px #fff;backdrop-filter:blur(22px) saturate(145%);-webkit-backdrop-filter:blur(22px) saturate(145%)}
+.ui-final.orbit-pricing .nav-links--desktop a{color:#203b5b}
+.ui-final.orbit-pricing .nav-links--desktop a[aria-current=page]{color:#075fc8;background:#fff9}
+.ui-final.orbit-pricing :is(.ui-public-header,.pr-actions) .btn-primary{background:linear-gradient(135deg,#078de8,#0756c2 80%);border-color:#176acb;color:#fff;border-radius:13px;box-shadow:0 8px 21px #085bc72b;font-weight:750}
+.ui-final.orbit-pricing :is(.ui-public-header,.pr-actions) .btn-ghost{background:#ffffffd0;border:1px solid #d6e4f6;color:#123454;border-radius:12px}
+.pr-page{position:relative;isolation:isolate;background:radial-gradient(ellipse at 0 25%,#b9ddff94,transparent 41%),radial-gradient(ellipse at 100% 66%,#c6e4ffb0,transparent 40%),#edf6ff}
+.pr-page :is(h1,h2,h3,p,figure,dl,dd){margin:0}
+.pr-page :is(h1,h2,h3){line-height:1.46;color:var(--pr-ink);letter-spacing:normal}
+.pr-page h1{font-size:clamp(2.2rem,4.1vw,4.1rem);line-height:1.3;font-weight:850}
+.pr-page h2{font-size:clamp(1.55rem,2.7vw,2.5rem);font-weight:820}
+.pr-page h3{font-size:clamp(1.05rem,1.55vw,1.36rem);font-weight:780}
+.pr-page :is(h1,h2) em{color:var(--pr-blue);font-style:normal}
+.pr-page p{color:var(--pr-muted);line-height:1.95}
+.pr-page img{display:block;max-width:100%;height:auto;object-fit:contain}
+.pr-page .pr-kicker{display:inline-flex;align-items:center;gap:7px;width:fit-content;max-width:100%;padding:5px 12px;border:1px solid #fff;border-radius:100px;background:linear-gradient(145deg,#fff9,#d6ecff8a);color:#0757b6;box-shadow:0 5px 16px #245ca512,inset 0 1px 1px #fff;font-size:.78rem;font-weight:750;line-height:1.7}
+.pr-hero{position:relative;isolation:isolate;overflow:hidden;margin-top:-78px;padding:118px 0 55px;background:radial-gradient(ellipse at 13% 44%,#a9d7ff9c,transparent 65%),linear-gradient(130deg,#d5e9ff,#f2f8ff 70%)}
+.pr-hero-lines{position:absolute;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.pr-hero-lines::before,.pr-hero-lines::after{content:"";position:absolute;width:115%;height:76%;left:-13%;top:8%;border:1px solid #ffffffc5;border-radius:50%;transform:rotate(-17deg);box-shadow:0 0 25px #fff8}
+.pr-hero-lines::after{width:85%;height:93%;top:-19%;left:-30%;transform:rotate(20deg);border-color:#a2d5ff80}
+.pr-hero-inner{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:clamp(24px,4vw,56px);align-items:center}
+.pr-hero-copy{display:grid;gap:17px;min-width:0}
+.pr-crumb{display:flex;align-items:center;gap:7px;font-size:.78rem;color:#375879}
+.pr-crumb a{color:var(--pr-blue)}
+.pr-page .pr-lead{font-size:clamp(.96rem,1.3vw,1.12rem);max-width:47ch}
+.pr-actions,.pr-proof{display:flex;align-items:center;flex-wrap:wrap;gap:10px}
+.ui-final.orbit-pricing .pr-actions .btn,.ui-final.orbit-pricing .pr-light-button{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:49px;padding:10px 19px;white-space:normal}
+.pr-proof{gap:9px 18px;font-size:.78rem;color:#355675}
+.pr-proof span{display:inline-flex;align-items:center;gap:5px}
+.pr-proof .icon-shell{color:var(--pr-blue)}
+.pr-hero-scene{position:relative;isolation:isolate;min-width:0;text-align:center;padding:12px 0}
+.pr-halo{position:absolute;inset:3% -6% 0;background:radial-gradient(ellipse,#77c6ff80,transparent 66%);z-index:-2;pointer-events:none}
+.pr-ring{position:absolute;inset:12% 3% 10%;border:1px solid #fff9;border-radius:50%;transform:rotate(-16deg);box-shadow:0 0 24px #fff7;z-index:-1;pointer-events:none}
+.pr-page .pr-hero-art{width:100%;max-height:465px;aspect-ratio:4/3;object-fit:contain;filter:drop-shadow(0 15px 22px #1e5c9f27)}
+.pr-hero-scene figcaption{font-size:.72rem;color:#45617d;margin-top:4px}
+.pr-float{position:absolute;display:flex;align-items:center;gap:9px;padding:11px 14px;border:1px solid #fff;border-radius:16px;background:linear-gradient(145deg,#fffdfef0,#d5ebffc9);color:#075ac1;box-shadow:0 12px 30px #144d9728;font-size:.78rem;font-weight:750;text-align:start;backdrop-filter:blur(12px)}
+.pr-float small{display:block;color:#4b6482;font-size:.68rem;font-weight:500}
+.pr-float-top{top:13%;inset-inline-end:1%}.pr-float-bottom{bottom:13%;inset-inline-start:1%}
+.pr-content{position:relative;padding-bottom:clamp(38px,5vw,72px)}
+.pr-section-nav{display:flex;justify-content:center;flex-wrap:wrap;gap:7px;padding:8px;margin:8px auto 0;width:fit-content;max-width:100%;border:1px solid #fff;border-radius:19px;background:#f7fbffba;box-shadow:var(--pr-shadow)}
+.pr-section-nav a{display:flex;align-items:center;gap:7px;min-height:44px;padding:7px 14px;border-radius:12px;color:#234a75;text-decoration:none;font-size:.85rem;font-weight:700}
+.pr-section-nav a:hover,.pr-section-nav a[aria-current=location]{background:#d9ebff;color:var(--pr-blue)}
+.pr-section{padding-top:clamp(45px,6vw,84px);scroll-margin-top:110px;min-width:0}
+.pr-centered{display:grid;justify-items:center;gap:9px;text-align:center;margin-bottom:25px}
+.pr-centered>p:last-child{font-size:.9rem;max-width:76ch}
+.pr-glass{position:relative;isolation:isolate;min-width:0;border:1px solid #fff;border-radius:var(--pr-r);background:linear-gradient(145deg,#ffffffd6,#e0efff9e 72%,#c3e0ff85);box-shadow:var(--pr-shadow)}
+@supports(backdrop-filter:blur(10px)){.pr-glass{backdrop-filter:blur(13px) saturate(120%)}}
+.pr-model-grid,.pr-cpm-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:stretch}
+.pr-fee{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(0,.85fr);align-items:center;gap:6px;padding:clamp(20px,3vw,35px);background:radial-gradient(ellipse at 0 30%,#246bc2,#0b2652 73%);border-color:#a7dbff;box-shadow:0 18px 48px #104b9830;overflow:hidden}
+.pr-fee-copy{display:grid;justify-items:start;gap:11px;position:relative;z-index:1}
+.pr-fee h3{font-size:clamp(1.65rem,3vw,2.45rem);color:#fff}
+.pr-fee p{color:#deedff;font-size:.88rem}
+.pr-fee .pr-kicker,.pr-cta .pr-kicker{background:#ffffff12;color:#d0eeff;border-color:#a2d7ff40;box-shadow:none}
+.pr-checks{display:grid;gap:8px;list-style:none;padding:0;margin:5px 0;color:#e9f3ff;font-size:.82rem}
+.pr-checks li{display:flex;align-items:flex-start;gap:6px}.pr-checks .icon-shell{color:#8bd7ff;flex:none}
+.pr-fee-visual,.pr-guide-visual{min-width:0;position:relative;display:grid;place-items:center}
+.pr-page .pr-fee-art{width:100%;max-width:235px;filter:drop-shadow(0 10px 20px #071c4550)}
+.ui-final.orbit-pricing .pr-light-button{background:linear-gradient(145deg,#fff,#d7ecff);color:#0757b2;border:1px solid white;border-radius:13px;box-shadow:0 7px 25px #4eb7ff40;font-weight:750;width:fit-content;max-width:100%;margin-top:4px}
+.pr-invoice,.pr-calc,.pr-cpm-guide{padding:clamp(18px,2.7vw,30px);display:grid;align-content:start;gap:15px}
+.pr-invoice header,.pr-calc-heading,.pr-cpm-heading{display:flex;align-items:center;justify-content:space-between;gap:13px}
+.pr-eyebrow{color:#305d8c;font-size:.74rem;font-weight:750;line-height:1.6}
+.pr-page .pr-invoice-art,.pr-page .pr-calc-art,.pr-page .pr-wallet-art{width:clamp(76px,10vw,118px);aspect-ratio:1;flex:none;filter:drop-shadow(0 7px 10px #2155a421)}
+.pr-invoice-rows{display:grid;gap:0}
+.pr-invoice-rows>div{display:flex;align-items:center;justify-content:space-between;gap:9px;padding:11px 0;border-bottom:1px solid #bad2ed80}
+.pr-invoice-rows dt{font-size:.88rem;font-weight:750;color:var(--pr-ink)}
+.pr-invoice-rows dd{font-size:.78rem;color:var(--pr-muted);text-align:end}
+.pr-page :is(.pr-invoice-note,.pr-calc-note){font-size:.75rem;line-height:1.9;display:flex;align-items:flex-start;gap:7px}
+.pr-invoice-note .icon-shell,.pr-calc-note .icon-shell{flex:none;color:var(--pr-blue);margin-top:3px}
+.pr-calc-example{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.pr-calc-example>div{display:grid;gap:5px;padding:14px;border:1px solid #fff;border-radius:14px;background:#ffffff80}
+.pr-calc-example span{font-size:.78rem;color:var(--pr-muted)}
+.pr-calc-example strong{color:var(--pr-ink);font-size:1.1rem;font-variant-numeric:tabular-nums}
+.pr-calc-example .pr-result{grid-column:1/-1;background:linear-gradient(130deg,#0a66c9,#12376d);color:#fff;padding:21px}
+.pr-result span{color:#dceeff}.pr-result strong{color:#fff;font-size:clamp(1.6rem,3vw,2.5rem)}
+.pr-cpm-guide>p,.pr-detail p{font-size:.85rem}
+.pr-formulas{display:grid;gap:8px}
+.pr-formulas>div{background:#f4faffb5;border:1px solid #fff;border-radius:13px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px;font-size:.79rem;color:var(--pr-ink);flex-wrap:wrap}
+.pr-formulas bdi{font-weight:750;color:#0758b7}
+.pr-detail{border-bottom:1px solid #bed6ef99}
+.pr-detail summary{cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:12px;list-style:none;min-height:44px;font-size:.85rem;font-weight:750;color:var(--pr-ink)}
+.pr-detail summary::-webkit-details-marker{display:none}
+.pr-detail summary::after{content:"+";font:500 1.2rem/1 system-ui;color:var(--pr-blue)}
+.pr-detail[open] summary::after{content:"−"}
+.pr-detail p{padding-bottom:12px}
+.pr-related{display:flex;align-items:center;flex-wrap:wrap;gap:6px 18px;color:#395776;font-size:.8rem}
+.pr-link{display:inline-flex;align-items:center;gap:6px;min-height:35px;color:var(--pr-blue);font-weight:750;font-size:.8rem;text-decoration:none}
+.pr-link:hover{text-decoration:underline;text-underline-offset:4px}
+.pr-guide-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}
+.pr-guide-card{display:grid;grid-template-columns:minmax(0,1fr) minmax(92px,24%);align-items:center;gap:clamp(10px,2vw,25px);padding:clamp(17px,2.4vw,28px)}
+.pr-guide-copy{display:grid;gap:8px;min-width:0}
+.pr-guide-copy p{font-size:.85rem;overflow-wrap:anywhere}
+.pr-guide-copy a{color:var(--pr-blue)}
+.pr-page .pr-guide-art{width:100%;max-width:155px;aspect-ratio:1;filter:drop-shadow(0 8px 13px #1656a021)}
+.pr-reading{padding:12px 17px;margin-top:15px;background:#ffffff80;border:1px solid white;border-radius:17px;box-shadow:0 8px 20px #235ca50f}
+.pr-cta{position:relative;isolation:isolate;overflow:hidden;display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);align-items:center;min-height:280px;border:1px solid #a8d9ff;border-radius:32px;background:radial-gradient(ellipse at 10% 40%,#236ac2,#092550 74%);box-shadow:0 20px 50px #1244852d}
+.pr-cta::before{content:"";position:absolute;inset:8% -10%;border:1px solid #95ceff3d;transform:rotate(-12deg);border-radius:50%;z-index:-1}
+.pr-cta-copy{display:grid;justify-items:start;gap:10px;padding:clamp(23px,4vw,48px);z-index:1}
+.pr-cta h2{color:#fff}.pr-cta p{color:#deedff;font-size:.9rem}
+.pr-cta-visual{display:grid;place-items:center;min-width:0;padding:18px;min-height:0}
+.pr-page .pr-cta-art{width:100%;max-height:310px;aspect-ratio:4/3;filter:drop-shadow(0 12px 24px #0004)}
+.ui-final.orbit-pricing .ui-public-footer{position:relative;isolation:isolate;overflow:hidden;background:radial-gradient(ellipse at 0 100%,#185091,#081e43 65%);border:0;border-top:1px solid #8acaff66;color:#dbe9ff;padding-top:34px}
+.ui-final.orbit-pricing .ui-public-footer .footer-col :is(h2,.brand){color:#fff}
+.ui-final.orbit-pricing .ui-public-footer :is(a,.footer-tagline,.ui-footer-bottom){color:#dce9fc}
+.ui-final.orbit-pricing .ui-public-footer .footer-col:not(:first-child){border-inline-start:1px solid #b3d8ff25;padding-inline-start:18px}
+.pr-page :is(a,summary,button,input):focus-visible{outline:3px solid #126bd4;outline-offset:3px;border-radius:8px}
+.pr-fee a:focus-visible,.pr-cta a:focus-visible{outline-color:#a8e0ff}
+@media(max-width:1000px){.pr-fee{grid-template-columns:minmax(0,1.4fr) minmax(0,.65fr)}}
+@media(max-width:900px){.ui-final.orbit-pricing .container{width:calc(100% - 40px)}.ui-final.orbit-pricing .ui-public-header .public-nav-bar{min-height:58px;border-radius:17px;padding:7px 12px}.pr-hero{margin-top:-72px;padding:104px 0 43px}.pr-hero-inner{grid-template-columns:minmax(0,1fr);gap:14px}.pr-hero-copy{justify-items:center;text-align:center}.pr-hero-scene{width:min(100%,580px);margin-inline:auto!important}.pr-proof{justify-content:center}.pr-model-grid,.pr-cpm-grid{grid-template-columns:minmax(0,1fr)}.pr-fee{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr)}}
+@media(max-width:600px){.ui-final.orbit-pricing .container{width:calc(100% - 28px)}.ui-final.orbit-pricing .ui-public-header{padding-top:8px}.pr-hero{margin-top:-66px;padding:92px 0 26px}.pr-hero-copy{gap:13px}.pr-page h1{font-size:clamp(1.9rem,7.4vw,2.8rem)}.pr-page h2{font-size:1.48rem}.pr-float{display:none}.pr-actions{display:grid;width:min(100%,400px)}.pr-actions .btn{width:100%}.pr-proof{font-size:.71rem;gap:5px 10px}.pr-hero-scene{padding:0}.pr-section-nav{width:100%;gap:3px;padding:5px}.pr-section-nav a{font-size:.72rem;padding:6px 8px;gap:4px}.pr-section{padding-top:36px;scroll-margin-top:92px}.pr-centered{margin-bottom:17px}.pr-model-grid,.pr-cpm-grid,.pr-guide-grid{grid-template-columns:minmax(0,1fr);gap:10px}.pr-fee{padding:17px;grid-template-columns:minmax(0,1fr) 82px}.pr-fee h3{font-size:1.5rem}.pr-fee-copy{gap:9px}.pr-checks{font-size:.77rem}.pr-invoice,.pr-calc,.pr-cpm-guide{padding:17px;gap:12px}.pr-invoice-rows>div{flex-wrap:wrap}.pr-invoice-rows dd{text-align:start}.pr-guide-card{padding:16px;grid-template-columns:minmax(0,1fr) 79px;gap:10px}.pr-guide-copy p{font-size:.81rem}.pr-cta{grid-template-columns:minmax(0,1fr);min-height:0}.pr-cta-copy{padding:23px}.pr-cta-visual{padding:0 18px 12px}.pr-page .pr-cta-art{max-height:190px}.pr-cta .pr-light-button{width:100%}.ui-final.orbit-pricing .ui-public-footer .footer-col:not(:first-child){padding-inline-start:10px}}
+@media(max-width:360px){.pr-section-nav a{font-size:.68rem;padding-inline:5px}.pr-fee{grid-template-columns:minmax(0,1fr) 62px}.pr-guide-card{grid-template-columns:minmax(0,1fr) 62px}.pr-invoice-rows>div{display:grid;gap:3px}}
+@media(prefers-reduced-motion:reduce){.orbit-pricing *,.orbit-pricing *::before,.orbit-pricing *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}

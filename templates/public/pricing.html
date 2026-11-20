@@ -1,39 +1,79 @@
 {% extends "public_base.html" %}
+{% load static %}
 {% block title %}تعرفه — {{ PRODUCT_NAME }}{% endblock %}
-{% block public_page_class %} pp-pricing{% endblock %}
+{% block public_page_class %} pp-pricing orbit-pricing{% endblock %}
 {% block content %}
-{% include "includes/public_hero.html" with title="هزینه و تعرفه تبلیغات تلگرام" subtitle="بودجه، نرخ تبدیل و کارمزد سفارش را قبل از پرداخت بشناسید" show_subtitle=1 compact=1 %}
-<section class="section public-section container">
-  <nav class="pp-section-nav" aria-label="بخش‌های صفحه"><a href="#pricing-model">مدل قیمت</a><a href="#pricing-cpm">محاسبه CPM</a><a href="#budget-decisions">انتخاب بودجه</a></nav><div id="pricing-model" class="pricing-shell ui-public-pricing" data-pp-reveal>
-    <article class="pricing-card--exec">
-      <span class="ui-target-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="wallet" size="md" %}</span><p class="ui-price-kicker">مدل قیمت‌گذاری</p>
-      <h2 class="price-tag">کارمزد درصدی</h2>
-      <p class="muted pp-price-sub">بر بودجه خالص تبلیغ — قابل تنظیم در عملیات</p>
-      <ul>
-        <li>پیش‌فاکتور با نرخ گرام</li>
-        <li>رزرو از کیف پول ریالی</li>
-        <li>نمایش مبلغ نهایی قبل از ثبت سفارش</li>
-        <li>پرداخت پس از فعال بودن سرویس مالی</li>
-      </ul>
-      {% if user.is_authenticated %}<a class="btn btn-primary btn-lg" href="{% url 'campaigns:wizard_new' %}">ساخت کمپین</a>{% else %}<a class="btn btn-primary btn-lg" href="{% url 'accounts:register' %}">ایجاد حساب</a>{% endif %}
-    </article><aside class="ui-public-pricing-guide"><h2>مبلغ سفارش چگونه تعیین می‌شود؟</h2><dl><div><dt>بودجه تبلیغ</dt><dd>اعتبار درخواستی برای کمپین</dd></div><div><dt>کارمزد پلتفرم</dt><dd>طبق تنظیمات و پیش‌فاکتور</dd></div><div><dt>نرخ تبدیل</dt><dd>نرخ معتبر و ضوابط سفارش</dd></div></dl><p>مبلغ پیش‌فاکتور و مدت اعتبار آن قبل از پرداخت در استودیو نمایش داده می‌شود؛ نرخ و مبلغ پس از انقضای پیش‌فاکتور ممکن است تغییر کنند.</p></aside>
+<div class="pr-page">
+  <section class="pr-hero" aria-labelledby="pr-title">
+    <div class="pr-hero-lines" aria-hidden="true"></div>
+    <div class="container pr-hero-inner">
+      <div class="pr-hero-copy" data-pr-reveal>
+        <nav class="pr-crumb" aria-label="مسیر صفحه"><a href="{% url 'public:home' %}">صفحه اصلی</a>{% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}<span aria-current="page">تعرفه</span></nav>
+        <p class="pr-kicker">{% include "includes/lucide_icon.html" with name="wallet" size="sm" %} مدیریت هوشمند بودجه</p>
+        <h1 id="pr-title">هزینه و تعرفه<br>تبلیغات تلگرام،<br><em>شفاف قبل از پرداخت.</em></h1>
+        <p class="pr-lead">بودجه، نرخ تبدیل و کارمزد سفارش را پیش از پرداخت بشناسید؛ از انتخاب بودجه تا پیش‌فاکتور و تحلیل هزینه‌ها.</p>
+        <div class="pr-actions">{% if user.is_authenticated %}<a class="btn btn-primary btn-lg" href="{% url 'campaigns:wizard_new' %}">ساخت کمپین {% include "includes/lucide_icon.html" with name="arrow-left" size="btn" %}</a>{% else %}<a class="btn btn-primary btn-lg" href="{% url 'accounts:register' %}">ساخت اولین کمپین {% include "includes/lucide_icon.html" with name="arrow-left" size="btn" %}</a>{% endif %}<a class="btn btn-ghost btn-lg" href="#pricing-cpm">محاسبه تقریبی هزینه {% include "includes/lucide_icon.html" with name="calculator" size="btn" %}</a></div>
+        <div class="pr-proof"><span>{% include "includes/lucide_icon.html" with name="check-circle" size="sm" %} پیش‌فاکتور شفاف</span><span>{% include "includes/lucide_icon.html" with name="wallet" size="sm" %} کیف پول ریالی</span><span>{% include "includes/lucide_icon.html" with name="shield-check" size="sm" %} بررسی قبل از پرداخت</span></div>
+      </div>
+      <figure class="pr-hero-scene" data-pr-reveal>
+        <div class="pr-halo" aria-hidden="true"></div><div class="pr-ring" aria-hidden="true"></div>
+        <img class="pr-hero-art" src="{% static 'img/pricing/tmads_pricing_hero_orbit.webp' %}" width="1448" height="1086" alt="" fetchpriority="high" decoding="async" data-pricing-art="hero_orbit">
+        <div class="pr-float pr-float-top" aria-hidden="true">{% include "includes/lucide_icon.html" with name="receipt" size="md" %}<span>پیش‌فاکتور<small>جزئیات پیش از سفارش</small></span></div>
+        <div class="pr-float pr-float-bottom" aria-hidden="true">{% include "includes/lucide_icon.html" with name="wallet" size="md" %}<span>مدیریت هزینه<small>بودجه و کارمزد</small></span></div>
+        <figcaption>تصویرسازی مفهومی مدیریت مالی</figcaption>
+      </figure>
+    </div>
+  </section>
+  <div class="container pr-content">
+    <nav class="pr-section-nav" aria-label="بخش‌های صفحه"><a href="#pricing-model">{% include "includes/lucide_icon.html" with name="wallet" size="sm" %} مدل قیمت</a><a href="#pricing-cpm">{% include "includes/lucide_icon.html" with name="calculator" size="sm" %} محاسبه CPM</a><a href="#budget-decisions">{% include "includes/lucide_icon.html" with name="target" size="sm" %} انتخاب بودجه</a></nav>
+    <section id="pricing-model" class="pr-section" aria-labelledby="pr-model-title">
+      <header class="pr-centered" data-pr-reveal><p class="pr-kicker">{% include "includes/lucide_icon.html" with name="layers" size="sm" %} ساختار هزینه</p><h2 id="pr-model-title">بدانید <em>برای چه چیزی</em> هزینه می‌کنید</h2><p>هزینه بر اساس جزئیات سفارش و مدل کارمزد پلتفرم تعیین می‌شود.</p></header>
+      <div class="pr-model-grid">
+        <article class="pr-glass pr-fee" data-pr-reveal>
+          <div class="pr-fee-copy"><p class="pr-kicker">{% include "includes/lucide_icon.html" with name="percent" size="sm" %} مدل قیمت‌گذاری</p><h3>کارمزد درصدی</h3><p>بر بودجه خالص تبلیغ — قابل تنظیم در عملیات</p>
+            <ul class="pr-checks"><li>{% include "includes/lucide_icon.html" with name="check" size="sm" %} پیش‌فاکتور با نرخ گرام</li><li>{% include "includes/lucide_icon.html" with name="check" size="sm" %} رزرو از کیف پول ریالی</li><li>{% include "includes/lucide_icon.html" with name="check" size="sm" %} نمایش مبلغ نهایی قبل از ثبت سفارش</li><li>{% include "includes/lucide_icon.html" with name="check" size="sm" %} پرداخت پس از فعال بودن سرویس مالی</li></ul>
+            {% if user.is_authenticated %}<a class="btn btn-lg pr-light-button" href="{% url 'campaigns:wizard_new' %}">ساخت کمپین {% include "includes/lucide_icon.html" with name="arrow-left" size="btn" %}</a>{% else %}<a class="btn btn-lg pr-light-button" href="{% url 'accounts:register' %}">ایجاد حساب {% include "includes/lucide_icon.html" with name="arrow-left" size="btn" %}</a>{% endif %}
+          </div><div class="pr-fee-visual"><img class="pr-fee-art" src="{% static 'img/pricing/tmads_pricing_discount_badge.webp' %}" width="1254" height="1254" alt="" loading="lazy" decoding="async" data-pricing-art="discount_badge"></div>
+        </article>
+        <article class="pr-glass pr-invoice" data-pr-reveal>
+          <header><div><p class="pr-eyebrow">اجزای پیش‌فاکتور</p><h3>مبلغ سفارش چگونه تعیین می‌شود؟</h3></div><img class="pr-invoice-art" src="{% static 'img/pricing/tmads_pricing_invoice_checklist.webp' %}" width="1254" height="1254" alt="" loading="lazy" decoding="async" data-pricing-art="invoice_checklist"></header>
+          <dl class="pr-invoice-rows"><div><dt>بودجه تبلیغ</dt><dd>اعتبار درخواستی برای کمپین</dd></div><div><dt>کارمزد پلتفرم</dt><dd>طبق تنظیمات و پیش‌فاکتور</dd></div><div><dt>نرخ تبدیل</dt><dd>نرخ معتبر و ضوابط سفارش</dd></div><div><dt>ذخیره ریسک نرخ</dt><dd>در صورت اعمال طبق شرایط سفارش</dd></div></dl>
+          <p class="pr-invoice-note">{% include "includes/lucide_icon.html" with name="info" size="sm" %} مبلغ و مدت اعتبار پیش‌فاکتور در استودیو نمایش داده می‌شود و پس از انقضا ممکن است تغییر کند.</p>
+        </article>
+      </div>
+    </section>
+    <section id="pricing-cpm" class="pr-section" aria-labelledby="pr-cpm-title">
+      <header class="pr-centered" data-pr-reveal><p class="pr-kicker">{% include "includes/lucide_icon.html" with name="calculator" size="sm" %} ابزار برنامه‌ریزی</p><h2 id="pr-cpm-title">از <bdi>CPM</bdi> تا <em>تخمین هزینه تبلیغ</em></h2><p>درک رابطه بودجه، نرخ پیشنهادی و تعداد نمایش پیش از ساخت کمپین.</p></header>
+      <div class="pr-cpm-grid">
+        <article class="pr-glass pr-calc" data-pr-reveal>
+          <header class="pr-calc-heading"><div><p class="pr-eyebrow">ماشین‌حساب آموزشی</p><h3>تخمین نمایش و هزینه</h3></div><img class="pr-calc-art" src="{% static 'img/pricing/tmads_pricing_cpm_calculator.webp' %}" width="1254" height="1254" alt="" loading="lazy" decoding="async" data-pricing-art="cpm_calculator"></header>
+          <div class="pr-calc-example" id="pr-calc-example">
+            <div><span>بودجه خالص (فرضی)</span><strong>۲۰ واحد</strong></div><div><span>CPM (فرضی)</span><strong>۲ واحد</strong></div>
+            <div class="pr-result"><span>تخمین نظری نمایش</span><strong>۱۰٬۰۰۰</strong></div>
+          </div>
+          <p class="pr-calc-note">{% include "includes/lucide_icon.html" with name="info" size="sm" %} این محاسبه آموزشی است؛ کارمزد، نرخ تبدیل و ذخیره ریسک در آن لحاظ نشده‌اند و نمایش واقعی تضمین نمی‌شود.</p>
+        </article>
+        <article class="pr-glass pr-cpm-guide" data-pr-reveal>
+          <div class="pr-cpm-heading"><div><span class="pr-eyebrow">راهنمای هزینه</span><h3>CPM در Telegram Ads یعنی چه؟</h3></div><img class="pr-wallet-art" src="{% static 'img/pricing/tmads_pricing_wallet_and_coins.webp' %}" width="1254" height="1254" alt="" loading="lazy" decoding="async" data-pricing-art="wallet_and_coins"></div>
+          <p>CPM نرخ پیشنهادی به ازای هزار نمایش تبلیغ است. به صورت نمونه، اگر نرخ ۰٫۵ واحد ارز تبلیغاتی باشد و ۱۰ هزار نمایش با همان نرخ محاسبه شود، هزینه نظری ۵ واحد است.</p>
+          <div class="pr-formulas"><div><span>هزینه نظری</span><bdi dir="ltr">CPM × (نمایش ÷ ۱۰۰۰)</bdi></div><div><span>تعداد نمایش نظری</span><bdi dir="ltr">(بودجه ÷ CPM) × ۱۰۰۰</bdi></div></div>
+          <details class="pr-detail"><summary>بودجه و کارمزد چه تفاوتی دارند؟</summary><p>بودجه برای اعتبار تبلیغاتی در نظر گرفته می‌شود و کارمزد مربوط به خدمات پلتفرم است. پیش‌فاکتور ممکن است ذخیره موقت ریسک نرخ نیز داشته باشد که طبق شرایط سفارش پس از تخصیص تأییدشده بررسی می‌شود.</p></details>
+          <details class="pr-detail"><summary>آیا قیمت ثابت یا حداقل نمایش تضمینی وجود دارد؟</summary><p>نرخ و شرایط هر نوع تبلیغ به قابلیت حساب و شرایط بازار وابسته است. عدد ثابت یا تعداد نمایش و عضو تضمین نمی‌کنیم؛ مبلغ معتبر را در پیش‌فاکتور خود بررسی کنید.</p></details>
+          <div class="pr-related"><a class="pr-link" href="{% url 'public:refund' %}">شرایط بازپرداخت {% include "includes/lucide_icon.html" with name="arrow-left" size="sm" %}</a><a class="pr-link" href="{% url 'public:faq' %}">سوالات مالی رایج {% include "includes/lucide_icon.html" with name="arrow-left" size="sm" %}</a><a class="pr-link" href="{% url 'public:how_it_works' %}">شروع ساخت کمپین {% include "includes/lucide_icon.html" with name="arrow-left" size="sm" %}</a></div>
+        </article>
+      </div>
+    </section>
+    <section id="budget-decisions" class="pr-section" aria-labelledby="budget-decisions-heading">
+      <header class="pr-centered" data-pr-reveal><p class="pr-kicker">{% include "includes/lucide_icon.html" with name="target" size="sm" %} برنامه‌ریزی مالی</p><h2 id="budget-decisions-heading">چگونه <em>بودجه تبلیغات تلگرام</em> را انتخاب کنیم؟</h2><p>یک بودجه مناسب از هدف، ارزش اقتصادی اقدام مخاطب و توان ریسک کسب‌وکار به دست می‌آید؛ نه از یک عدد ثابت برای همه کمپین‌ها.</p></header>
+      <div class="pr-guide-grid"><article class="pr-glass pr-guide-card" data-pr-reveal><div class="pr-guide-copy"><span class="pr-eyebrow">۰۱</span><h3>تخمین نمایش در برابر تضمین نمایش</h3><p>اگر بودجه خالص ۲۰ واحد و CPM فرضی ۲ واحد باشد، تقسیم بودجه بر CPM و ضرب در هزار، ۱۰ هزار نمایش نظری می‌دهد. این یک مدل آموزشی است؛ میزان واقعی به رقابت، جایگاه، شرایط حساب و امکان نمایش وابسته است.</p></div><div class="pr-guide-visual"><img class="pr-guide-art" src="{% static 'img/pricing/tmads_pricing_cpm_calculator.webp' %}" width="1254" height="1254" alt="" loading="lazy" decoding="async" data-pricing-art="cpm_calculator"></div></article>
+<article class="pr-glass pr-guide-card" data-pr-reveal><div class="pr-guide-copy"><span class="pr-eyebrow">۰۲</span><h3>هزینه جذب مخاطب را چگونه بسنجیم؟</h3><p>اگر ۱۰۰ واحد هزینه واقعی و ۵۰ اقدام قابل انتساب ثبت شود، هزینه متوسط هر اقدام ۲ واحد است. نمایش به‌تنهایی معادل عضویت یا فروش نیست؛ تنها وقتی داده معتبر اقدام دارید می‌توانید این شاخص را محاسبه کنید.</p></div><div class="pr-guide-visual"><img class="pr-guide-art" src="{% static 'img/pricing/tmads_pricing_roi_target.webp' %}" width="1254" height="1254" alt="" loading="lazy" decoding="async" data-pricing-art="roi_target"></div></article>
+<article class="pr-glass pr-guide-card" data-pr-reveal><div class="pr-guide-copy"><span class="pr-eyebrow">۰۳</span><h3>پیش‌فاکتور، شارژ و رزرو چه تفاوتی دارند؟</h3><p>پیش‌فاکتور مبلغ و شرایط سفارش را تا زمان اعتبار خود مشخص می‌کند. شارژ کیف پول اعتبار داخلی ایجاد می‌کند؛ رزرو، بخشی از اعتبار را برای سفارش کنار می‌گذارد. وضعیت مالی نهایی پس از بررسی تخصیص یا تغییرات قابل پیگیری است.</p></div><div class="pr-guide-visual"><img class="pr-guide-art" src="{% static 'img/pricing/tmads_pricing_invoice_checklist.webp' %}" width="1254" height="1254" alt="" loading="lazy" decoding="async" data-pricing-art="invoice_checklist"></div></article>
+<article class="pr-glass pr-guide-card" data-pr-reveal><div class="pr-guide-copy"><span class="pr-eyebrow">۰۴</span><h3>مدیریت تغییر بودجه و بازپرداخت</h3><p>افزایش و کاهش بودجه باید با توجه به وضعیت کمپین، موجودی و فرایند بررسی مالی انجام شود. کاهش بودجه لزوماً به معنی بازگشت نقدی نیست؛ قبل از تصمیم، <a href="{% url 'public:refund' %}">سیاست بازپرداخت</a> و وضعیت تراکنش را بررسی کنید.</p></div><div class="pr-guide-visual"><img class="pr-guide-art" src="{% static 'img/pricing/tmads_pricing_refund_cycle.webp' %}" width="1254" height="1254" alt="" loading="lazy" decoding="async" data-pricing-art="refund_cycle"></div></article></div>
+      <nav class="pr-related pr-reading" aria-label="مطالعه بیشتر"><strong>مطالعه بیشتر</strong><a class="pr-link" href="{% url 'public:how_it_works' %}">راهنمای اولین سفارش {% include "includes/lucide_icon.html" with name="arrow-left" size="sm" %}</a><a class="pr-link" href="{% url 'public:faq' %}">سوالات مالی و پرداخت {% include "includes/lucide_icon.html" with name="arrow-left" size="sm" %}</a><a class="pr-link" href="{% url 'public:contact' %}">پیگیری مالی {% include "includes/lucide_icon.html" with name="arrow-left" size="sm" %}</a></nav>
+    </section>
+    <section class="pr-section pr-cta-section" aria-labelledby="pr-cta-title">
+      <div class="pr-cta" data-pr-reveal><div class="pr-cta-copy"><p class="pr-kicker">{% include "includes/lucide_icon.html" with name="send" size="sm" %} آماده شروع هستید؟</p><h2 id="pr-cta-title">با بودجه‌ای که می‌شناسید،<br>کمپین خود را شروع کنید.</h2><p>ابتدا پیش‌نویس کمپین را آماده کنید؛ مبلغ معتبر در زمان ثبت سفارش مشخص می‌شود.</p>{% if user.is_authenticated %}<a class="btn btn-lg pr-light-button" href="{% url 'campaigns:wizard_new' %}">ساخت کمپین {% include "includes/lucide_icon.html" with name="arrow-left" size="btn" %}</a>{% else %}<a class="btn btn-lg pr-light-button" href="{% url 'accounts:register' %}">ایجاد حساب {% include "includes/lucide_icon.html" with name="arrow-left" size="btn" %}</a>{% endif %}</div><div class="pr-cta-visual"><img class="pr-cta-art" src="{% static 'img/pricing/tmads_pricing_hero_orbit.webp' %}" width="1448" height="1086" alt="" loading="lazy" decoding="async" data-pricing-art="hero_orbit"></div></div>
+    </section>
   </div>
-  <section id="pricing-cpm" class="ui-landing-section"><header class="ui-landing-section-head"><div><p>هزینه تبلیغات چگونه محاسبه می‌شود؟</p><h2>از CPM تا مبلغ قابل پرداخت</h2></div></header>
-  <article class="card card-pad legal-prose ui-public-reading">
-    <h3>CPM در Telegram Ads یعنی چه؟</h3><div class="pp-formula" aria-label="فرمول تقریبی هزینه"><span>هزینه نظری</span><b> = </b><span>تعداد نمایش ÷ ۱۰۰۰</span><b> × </b><span>CPM</span></div><p>CPM نرخ پیشنهادی به ازای هزار نمایش تبلیغ است. به صورت نمونه، اگر نرخ ۰٫۵ واحد ارز تبلیغاتی باشد و ۱۰ هزار نمایش با همان نرخ محاسبه شود، هزینه نظری ۵ واحد است. این مثال صرفاً آموزشی است؛ رقابت، محدودیت و وضعیت کمپین بر نتیجه اثر دارند.</p>
-    <h3>بودجه و کارمزد چه تفاوتی دارند؟</h3><p>بودجه برای اعتبار تبلیغاتی در نظر گرفته می‌شود و کارمزد مربوط به خدمات پلتفرم است. پیش‌فاکتور ممکن است ذخیره موقت ریسک نرخ نیز داشته باشد که طبق شرایط سفارش پس از تخصیص تأییدشده بررسی می‌شود.</p>
-    <h3>آیا قیمت ثابت یا حداقل نمایش تضمینی وجود دارد؟</h3><p>نرخ و شرایط هر نوع تبلیغ به قابلیت حساب و شرایط بازار وابسته است. عدد ثابت یا تعداد نمایش و عضو تضمین نمی‌کنیم؛ مبلغ معتبر را در پیش‌فاکتور خود بررسی کنید.</p>
-    <p><a href="{% url 'public:refund' %}">شرایط بازپرداخت</a> · <a href="{% url 'public:faq' %}">سوالات مالی رایج</a> · <a href="{% url 'public:how_it_works' %}">شروع ساخت کمپین</a></p>
-  </article></section>
-</section>
-<section id="budget-decisions" class="ui-editorial container" aria-labelledby="budget-decisions-heading">
-  <header class="ui-editorial-head"><p class="ui-editorial-kicker">برنامه‌ریزی مالی</p><h2 id="budget-decisions-heading">چگونه بودجه تبلیغات تلگرام را انتخاب کنیم؟</h2><p>یک بودجه مناسب از هدف، ارزش اقتصادی اقدام مخاطب و توان ریسک کسب‌وکار به دست می‌آید؛ نه از یک عدد ثابت برای همه کمپین‌ها.</p></header>
-  <div class="ui-editorial-grid">
-    <article class="ui-editorial-item"><h3>تخمین نمایش در برابر تضمین نمایش</h3><p>اگر بودجه خالص ۲۰ واحد و CPM فرضی ۲ واحد باشد، تقسیم بودجه بر CPM و ضرب در هزار، ۱۰ هزار نمایش نظری می‌دهد. این یک مدل آموزشی است؛ میزان واقعی به رقابت، جایگاه، شرایط حساب و امکان نمایش وابسته است.</p></article>
-    <article class="ui-editorial-item"><h3>هزینه جذب مخاطب را چگونه بسنجیم؟</h3><p>اگر ۱۰۰ واحد هزینه واقعی و ۵۰ اقدام قابل انتساب ثبت شود، هزینه متوسط هر اقدام ۲ واحد است. نمایش به‌تنهایی معادل عضویت یا فروش نیست؛ تنها وقتی داده معتبر اقدام دارید می‌توانید این شاخص را محاسبه کنید.</p></article>
-    <article class="ui-editorial-item"><h3>پیش‌فاکتور، شارژ و رزرو چه تفاوتی دارند؟</h3><p>پیش‌فاکتور مبلغ و شرایط سفارش را تا زمان اعتبار خود مشخص می‌کند. شارژ کیف پول اعتبار داخلی ایجاد می‌کند؛ رزرو، بخشی از اعتبار را برای سفارش کنار می‌گذارد. وضعیت مالی نهایی پس از بررسی تخصیص یا تغییرات قابل پیگیری است.</p></article>
-    <article class="ui-editorial-item"><h3>مدیریت تغییر بودجه و بازپرداخت</h3><p>افزایش و کاهش بودجه باید با توجه به وضعیت کمپین، موجودی و فرایند بررسی مالی انجام شود. کاهش بودجه لزوماً به معنی بازگشت نقدی نیست؛ قبل از تصمیم، <a href="{% url 'public:refund' %}">سیاست بازپرداخت</a> و وضعیت تراکنش را بررسی کنید.</p></article>
-  </div>
-  <nav class="ui-editorial-links" aria-label="مطالعه بیشتر"><strong>مطالعه بیشتر</strong><a href="{% url 'public:how_it_works' %}">راهنمای اولین سفارش</a><a href="{% url 'public:faq' %}">سوالات مالی و پرداخت</a><a href="{% url 'public:contact' %}">پیگیری مالی</a></nav>
-</section>
+</div>
 {% endblock %}
