@@ -2,7 +2,7 @@
 <aside class="ga-home-panel ga-home-wallet" aria-label="کیف پول">
   <header class="ga-home-wallet-head">
     <h2 class="ga-home-panel-title ga-home-wallet-title">
-      {% include "includes/lucide_icon.html" with name="wallet" size="sm" %}
+      {% include "includes/gramads_workspace_icon.html" with name="wallet" size="sm" %}
       <span>کیف پول</span>
     </h2>
     {% with total=wallet.available_irr|add:wallet.reserved_irr %}
@@ -20,7 +20,7 @@
   <dl class="ga-home-wallet-rows">
     <div class="ga-home-wallet-row ga-home-wallet-available">
       <dt>موجودی قابل استفاده</dt>
-      <dd class="tabnums">{{ wallet.available_irr|irr_to_toman|format_irr }} <span class="ga-home-wallet-unit">تومان</span></dd>
+      <dd class="tabnums"><b>{{ wallet.available_irr|irr_to_toman|format_irr }}</b> <span class="ga-home-wallet-unit">تومان</span></dd>
     </div>
     <div class="ga-home-wallet-row">
       <dt>رزرو سفارش‌ها</dt>
@@ -33,11 +33,11 @@
   {% endif %}
   {% endwith %}
   <div class="ga-home-wallet-actions">
-    <a class="btn btn-primary btn-sm" href="{% url 'finance:topup' %}">{% include "includes/lucide_icon.html" with name="plus" size="sm" %} شارژ کیف پول</a>
+    <a class="btn btn-primary btn-sm" href="{% url 'finance:topup' %}">{% include "includes/gramads_workspace_icon.html" with name="plus" size="sm" %} شارژ کیف پول</a>
     <a class="btn btn-ghost btn-sm" href="{% url 'finance:wallet' %}">جزئیات</a>
   </div>
   <nav class="ga-home-wallet-links" aria-label="پیوندهای مالی">
-    <a href="{% url 'finance:transactions' %}">تراکنش‌ها</a>
-    <a href="{% url 'finance:invoices' %}">فاکتورها</a>
+    <a href="{% url 'finance:transactions' %}">{% include "includes/gramads_workspace_icon.html" with name="credit-card" %} تراکنش‌ها</a>
+    <a href="{% url 'finance:invoices' %}">{% include "includes/gramads_workspace_icon.html" with name="file-text" %} فاکتورها</a>
   </nav>
 </aside>

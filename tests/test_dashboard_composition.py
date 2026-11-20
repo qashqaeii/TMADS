@@ -44,3 +44,17 @@ def test_overview_uses_isolated_compact_components(client, customer_user):
     assert 'Overview regression' in html
     assert reverse("campaigns:detail", args=[campaign.id]) in html
     assert 'class="dash-campaign-card__body"' not in html
+
+@pytest.mark.django_db
+def test_overview_reference_design(client, customer_user):
+    from django.templatetags.static import static
+    client.force_login(customer_user)
+    response = client.get(reverse("dashboard:home"))
+    assert response.status_code == 200
+    html = response.content.decode()
+    assert static("css/gramads-workspace-system.css") in html
+    assert "ga-workspace-system" in html
+    assert "ga-home-panel-heading" not in html
+    assert 'class="ga-ws-icon ga-ws-icon--' in html
+    assert "فعالیت اخیر" in html
+    assert html.count("ga-home-metric-icon") == 4

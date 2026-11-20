@@ -65,6 +65,7 @@ test('draft confirmation cancellation', async ({page}) => {
 
 test('public studio compact auth and responsive layouts', async ({page}) => {
   for (const width of [375, 768, 1440]) {
+    await page.emulateMedia({reducedMotion:'no-preference'});
     await page.setViewportSize({width, height: 900});
     for (const path of ['/', '/features/', '/accounts/login/', '/accounts/register/']) {
       await assertPage(page, path);
@@ -614,6 +615,12 @@ test('GramAds overview responsive composition', async ({page}) => {
     await expect(page.locator('.gramads-overview .ga-home-metric')).toHaveCount(4);
     await expect(page.locator('.ga-home-campaigns')).toBeVisible();
     await expect(page.locator('.ga-quick-nav a')).toHaveCount(4);
+    await expect(page.locator('.ga-home-activity .ga-home-panel-title')).toHaveText('فعالیت اخیر');
+    await expect(page.locator('.ga-home-metric-icon svg')).toHaveCount(4);
+    expect(await page.locator('.ga-home-metric').first().evaluate(el=>getComputedStyle(el).animationName)).not.toBe('none');
+    await page.emulateMedia({reducedMotion:'reduce'});
+    expect(await page.locator('.ga-home-metric').first().evaluate(el=>getComputedStyle(el).animationName)).toBe('none');
+    await page.emulateMedia({reducedMotion:'no-preference'});
     const header = await page.locator('.ga-home-header').boundingBox();
     const cards = await page.locator('.ga-home-metric-grid').boundingBox();
     if (width === 1440) {

@@ -1,0 +1,27 @@
+/* Workspace reference tokens. Opt in with .ga-workspace-system on a page root.
+   Compact by default; no global reset and no remote assets. */
+.ga-workspace-system {
+  --gw-ink:#142c46;
+  --gw-muted:#526982;
+  --gw-accent:#145eb6;
+  --gw-accent-deep:#103c77;
+  --gw-canvas:#f2f6fb;
+  --gw-surface:#fff;
+  --gw-soft:#f4f8fc;
+  --gw-stroke:#dce6f1;
+  --gw-success:#11704e;
+  --gw-warning:#8b5c16;
+  --gw-danger:#ad3e4c;
+  --gw-radius:15px;
+  --gw-radius-control:9px;
+  --gw-shadow:0 2px 4px #19395b05,0 8px 24px #19395b06;
+  --gw-shadow-hover:0 5px 16px #173b6810;
+  --gw-gap:12px;
+  --gw-ease:cubic-bezier(.2,.65,.25,1);
+  --gw-fast:160ms;
+  --gw-normal:260ms;
+}
+.ga-workspace-system .ga-ws-icon {display:inline-block;inline-size:18px;block-size:18px;vertical-align:middle;flex:none}
+.ga-workspace-system .ga-ws-icon--md {inline-size:21px;block-size:21px}
+.ga-workspace-system .ga-ws-icon--btn {inline-size:18px;block-size:18px}
+.ga-workspace-system :is(a,button):focus-visible {outline:2px solid var(--gw-accent);outline-offset:3px}

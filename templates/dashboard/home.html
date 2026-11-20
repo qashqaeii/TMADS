@@ -2,12 +2,13 @@
 {% load core_filters humanize static %}
 {% block container_class %}container-wide{% endblock %}
 {% block page_title %}داشبورد{% endblock %}
-{% block extra_head %}<link rel="stylesheet" href="{% static 'css/gramads-overview.css' %}">{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/gramads-workspace-system.css' %}">
+<link rel="stylesheet" href="{% static 'css/gramads-overview.css' %}">{% endblock %}
 {% block charts_head %}
 {% if has_chart %}{% include "includes/charts_exec_scripts.html" %}{% endif %}
 {% endblock %}
 {% block content %}
-<div class="dash-home--premium gramads-overview ga-command">
+<div class="dash-home--premium gramads-overview ga-command ga-workspace-system">
   {% include "dashboard/includes/overview_header.html" %}
 
   {% include "dashboard/includes/overview_metrics.html" with active_count=active_count total_campaigns=total_campaigns impressions=impressions clicks=clicks ctr=ctr %}
@@ -15,8 +16,8 @@
   <section class="ga-home-workspace" aria-label="تحلیل و کیف پول">
     <article class="ga-home-panel ga-home-chart">
       <header class="ga-home-panel-head">
-        <h2 class="ga-home-panel-title">روند نمایش و کلیک</h2>
-        {% if has_chart %}<p class="ga-home-period">{% include "includes/lucide_icon.html" with name="calendar-days" size="sm" %} ۳۰ روز اخیر</p>{% endif %}
+        <h2 class="ga-home-panel-title">{% include "includes/gramads_workspace_icon.html" with name="chart-no-axes-combined" %} روند نمایش و کلیک</h2>
+        {% if has_chart %}<p class="ga-home-period">{% include "includes/gramads_workspace_icon.html" with name="calendar-days" size="sm" %} ۳۰ روز اخیر</p>{% endif %}
       </header>
       <div class="ga-home-chart-body">
         {% if has_chart %}
@@ -36,13 +37,13 @@
       <header class="ga-home-panel-head">
         <div class="ga-home-campaign-heading">
           <div class="ga-home-campaign-title">
-            <h2 class="ga-home-panel-title">کمپین‌های اخیر</h2>
-            {% if recent_rows %}<span class="ga-home-count tabnums">{{ recent_rows|length }}</span>{% endif %}
+            <h2 class="ga-home-panel-title">{% include "includes/gramads_workspace_icon.html" with name="megaphone" %} کمپین‌های اخیر</h2>
+            {% if recent_rows %}<span class="ga-home-count tabnums">{{ recent_rows|length|persian_digits }}</span>{% endif %}
           </div>
         </div>
         <a class="ga-home-link" href="{% url 'campaigns:list' %}">
           <span>همه کمپین‌ها</span>
-          {% include "includes/lucide_icon.html" with name="arrow-left" size="sm" %}
+          {% include "includes/gramads_workspace_icon.html" with name="arrow-left" size="sm" %}
         </a>
       </header>
       {% if recent_rows %}
@@ -53,14 +54,14 @@
         <li class="ga-home-campaign-item">
           <a class="ga-home-campaign-row ga-home-campaign-row--{{ c.status }}" href="{% url 'campaigns:detail' c.id %}">
             <div class="ga-home-campaign-body">
-              <span class="ga-home-campaign-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="megaphone" size="md" %}</span>
+              <span class="ga-home-campaign-icon" aria-hidden="true">{% include "includes/gramads_workspace_icon.html" with name="megaphone" size="md" %}</span>
               <div class="ga-home-campaign-identity">
               <div class="ga-home-campaign-name-line">
-                <span class="ga-home-campaign-name">{{ c.name|default:"بدون نام" }}</span>
-                <span class="status status--pill status--compact {{ c.status|campaign_status_class }}">{{ c.get_status_display }}</span>
+                <span class="ga-home-campaign-name" dir="auto" title="{{ c.name|default:'بدون نام' }}">{{ c.name|default:"بدون نام" }}</span>
+                <span class="ga-home-status status status--pill status--compact {{ c.status|campaign_status_class }}">{{ c.get_status_display }}</span>
               </div>
               <p class="ga-home-campaign-destination" dir="ltr" title="{{ c.destination }}">
-                {% include "includes/lucide_icon.html" with name="link-2" size="sm" %}
+                {% include "includes/gramads_workspace_icon.html" with name="link-2" size="sm" %}
                 <span>{% if c.destination %}{{ c.destination|shorten_url:36 }}{% else %}—{% endif %}</span>
               </p>
               </div>
@@ -81,7 +82,7 @@
             </div>
             <div class="ga-home-campaign-meta">
               <time class="ga-home-campaign-time" datetime="{{ c.updated_at|date:'c' }}">{{ c.updated_at|jalali_datetime }}</time>
-              <span class="ga-home-campaign-go" aria-hidden="true">{% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}</span>
+              <span class="ga-home-campaign-go" aria-hidden="true">{% include "includes/gramads_workspace_icon.html" with name="chevron-left" size="sm" %}</span>
             </div>
           </a>
         </li>
@@ -90,10 +91,10 @@
       </ul>
       {% else %}
       <div class="ga-home-campaign-empty">
-        <span class="ui-empty__icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="megaphone" size="md" %}</span><p class="ga-home-empty-title">اولین کمپین را بسازید</p>
+        <span class="ui-empty__icon" aria-hidden="true">{% include "includes/gramads_workspace_icon.html" with name="megaphone" size="md" %}</span><p class="ga-home-empty-title">اولین کمپین را بسازید</p>
         <p class="muted">۵ مرحله · پیش‌نویس خودکار</p>
         <a class="btn btn-primary btn-sm" href="{% url 'campaigns:wizard_new' %}">
-          {% include "includes/lucide_icon.html" with name="plus" size="btn" %}
+          {% include "includes/gramads_workspace_icon.html" with name="plus" size="btn" %}
           <span>شروع</span>
         </a>
       </div>
@@ -101,11 +102,11 @@
     </article>
     <div class="ga-home-bottom ga-bottom-rail">
       {% include "dashboard/includes/overview_activity.html" %}
-      <article class="ga-home-panel ga-home-quick-card"><header class="ga-home-panel-head"><h2 class="ga-home-panel-title">دسترسی سریع</h2></header><nav class="ga-home-quick-nav ga-quick-nav" aria-label="دسترسی سریع">
-        <a href="{% url 'campaigns:list' %}">{% include "includes/lucide_icon.html" with name="megaphone" size="sm" %}<span>مدیریت کمپین‌ها</span>{% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}</a>
-        <a href="{% url 'finance:transactions' %}">{% include "includes/lucide_icon.html" with name="wallet" size="sm" %}<span>تراکنش‌ها</span>{% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}</a>
-        <a href="{% url 'accounts:related_account' %}">{% include "includes/lucide_icon.html" with name="building-2" size="sm" %}<span>حساب تبلیغاتی</span>{% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}</a>
-        <a href="{% url 'support:list' %}">{% include "includes/lucide_icon.html" with name="headphones" size="sm" %}<span>پشتیبانی</span>{% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}</a>
+      <article class="ga-home-panel ga-home-quick-card"><header class="ga-home-panel-head"><h2 class="ga-home-panel-title">{% include "includes/gramads_workspace_icon.html" with name="layout-grid" %} دسترسی سریع</h2></header><nav class="ga-home-quick-nav ga-quick-nav" aria-label="دسترسی سریع">
+        <a href="{% url 'campaigns:list' %}">{% include "includes/gramads_workspace_icon.html" with name="megaphone" size="sm" %}<span>مدیریت کمپین‌ها</span>{% include "includes/gramads_workspace_icon.html" with name="chevron-left" size="sm" %}</a>
+        <a href="{% url 'finance:transactions' %}">{% include "includes/gramads_workspace_icon.html" with name="wallet" size="sm" %}<span>تراکنش‌ها</span>{% include "includes/gramads_workspace_icon.html" with name="chevron-left" size="sm" %}</a>
+        <a href="{% url 'accounts:related_account' %}">{% include "includes/gramads_workspace_icon.html" with name="building-2" size="sm" %}<span>حساب تبلیغاتی</span>{% include "includes/gramads_workspace_icon.html" with name="chevron-left" size="sm" %}</a>
+        <a href="{% url 'support:list' %}">{% include "includes/gramads_workspace_icon.html" with name="headphones" size="sm" %}<span>پشتیبانی</span>{% include "includes/gramads_workspace_icon.html" with name="chevron-left" size="sm" %}</a>
       </nav></article>
     </div>
   </section>
@@ -120,6 +121,9 @@
   (window.tmadsRunWhenReady || function (cb) { cb(); })(function () {
     const chart = TMADSCharts.portfolioChart(el, data, { dashboardHome: true });
     if (!chart) return;
+    const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const syncMotion = () => chart.setOption({animation: !motion.matches});
+    if (motion.addEventListener) motion.addEventListener('change', syncMotion);
     const resize = function () { chart.resize(); };
     requestAnimationFrame(resize);
     if (typeof ResizeObserver !== "undefined") {

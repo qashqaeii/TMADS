@@ -1,7 +1,7 @@
 /* GramAds command centre. Independent component namespace: no legacy dashboard card classes. */
 .ui-final .ui-shell .app-content:has(.ga-command){padding-block:12px 24px}
 .ui-final .ui-shell .app-content:has(.ga-command) .page-frame{max-width:1480px;max-inline-size:1480px}
-.ui-final .ga-command{--ga-ink:#152f4a;--ga-muted:#536b83;--ga-border:#dce6f0;--ga-surface:#fff;--ga-brand:#1465c2;--ga-radius:14px;display:grid;align-content:start;gap:12px;min-width:0;container-type:inline-size;container-name:ga-command;margin:0}
+.ui-final .ga-command{--ga-ink:var(--gw-ink);--ga-muted:var(--gw-muted);--ga-border:var(--gw-stroke);--ga-surface:var(--gw-surface);--ga-brand:var(--gw-accent);--ga-radius:var(--gw-radius);display:grid;align-content:start;gap:var(--gw-gap);min-width:0;container-type:inline-size;container-name:ga-command;margin:0}
 .ga-command *, .ga-command *::before,.ga-command *::after{box-sizing:border-box}
 .ga-command :is(h1,h2,p,dl,dd,dt,ul){margin:0}
 .ga-command :is(a,button):focus-visible{outline:2px solid #1475c5;outline-offset:3px}
@@ -30,7 +30,7 @@
 .ga-home-metric-value small{font-size:.69rem;font-weight:550;color:var(--ga-muted)}
 .ga-home-metric-value--accent small{font-size:.8em;color:inherit}
 .ga-home-coverage{display:flex;align-items:flex-start;gap:5px;color:var(--ga-muted);font-size:.68rem;line-height:1.5;padding-inline:2px}
-.ga-home-coverage>.icon-shell{flex:none}
+.ga-home-coverage>.ga-ws-icon{flex:none}
 .ga-home-workspace{display:grid;grid-template-columns:minmax(0,2.15fr) minmax(235px,1fr);gap:12px;align-items:start;min-width:0}
 .ga-home-panel{min-width:0;border:1px solid var(--ga-border);border-radius:var(--ga-radius);background:var(--ga-surface);box-shadow:0 2px 9px #183e6509;overflow:hidden}
 .ga-home-panel-head{display:flex;justify-content:space-between;align-items:center;gap:8px;min-height:43px;padding:10px 14px;border-bottom:1px solid #eef2f7}
@@ -48,7 +48,7 @@
 .ga-home-wallet{padding:12px;display:grid;align-content:start;gap:9px}
 .ga-home-wallet-head{display:flex;justify-content:space-between;align-items:center;gap:6px}
 .ga-home-wallet-title{display:flex;align-items:center;gap:6px}
-.ga-home-wallet-title .icon-shell{color:var(--ga-brand)}
+.ga-home-wallet-title .ga-ws-icon{color:var(--ga-brand)}
 .ga-home-wallet-badge{font-size:.64rem;color:var(--ga-muted);border:1px solid var(--ga-border);border-radius:6px;padding:2px 6px}
 .ga-home-wallet-rows{display:grid;gap:8px}
 .ga-home-wallet-row{display:flex;justify-content:space-between;align-items:baseline;gap:6px;min-width:0}
@@ -70,7 +70,7 @@
 .ga-home-count{background:#edf3fa;color:var(--ga-muted);font-size:.68rem;padding:2px 7px;border-radius:6px}
 .ga-home-link{display:inline-flex;align-items:center;gap:5px;font-size:.75rem;color:var(--ga-brand);white-space:nowrap;text-decoration:none}
 .ga-home-link:hover{text-decoration:underline}
-.ga-home-campaign-columns,.ga-home-campaign-row{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1.15fr) minmax(112px,.55fr);align-items:center;gap:14px;padding-inline:12px}
+.ga-home-campaign-columns,.ga-home-campaign-row{display:grid;grid-template-columns:minmax(0,1.22fr) minmax(0,1.35fr) minmax(118px,.65fr);align-items:center;gap:14px;padding-inline:12px}
 .ga-home-campaign-columns{background:#f3f7fb;color:var(--ga-muted);font-size:.7rem;min-height:32px;margin:0 10px;border-radius:7px}
 .ga-home-campaign-columns>div,.ga-home-campaign-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;text-align:center;min-width:0}
 .ga-home-campaign-columns>span:last-child{text-align:end;padding-inline-end:15px}
@@ -87,7 +87,7 @@
 .ga-home-campaign-name{font-size:.8rem;font-weight:700;line-height:1.4;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;max-width:100%;min-width:0}
 .ga-command .ga-home-campaign-name-line .status{font-size:.64rem;padding:2px 6px;line-height:1.25;flex:none}
 .ga-home-campaign-destination{display:flex;align-items:center;gap:4px;max-width:100%;width:fit-content;min-width:0;font-size:.68rem;color:var(--ga-muted);line-height:1.35}
-.ga-home-campaign-destination>.icon-shell{flex:none}
+.ga-home-campaign-destination>.ga-ws-icon{flex:none}
 .ga-home-campaign-destination>span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
 .ga-home-stat{min-width:0;line-height:1.4}
 .ga-home-stat__value{font-size:.8rem;font-weight:700;overflow-wrap:anywhere}
@@ -111,8 +111,111 @@
 .ga-home-activity-list__time{font-size:.65rem;color:var(--ga-muted)}
 .ga-home-quick-nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;padding:9px 12px}
 .ga-home-quick-nav a{display:flex;align-items:center;gap:6px;padding:8px;border:1px solid #e4ecf5;background:#f8fbff;border-radius:8px;color:#24527e;font-size:.72rem;min-width:0}
-.ga-home-quick-nav a>span:not(.icon-shell){flex:1;min-width:0;overflow-wrap:anywhere}
+.ga-home-quick-nav a>span{flex:1;min-width:0;overflow-wrap:anywhere}
 .ga-home-quick-nav a:hover,.ga-home-campaign-row:hover{background:#edf5fd}
 @container ga-command (max-width:850px){.ga-home-workspace{grid-template-columns:minmax(0,1fr)}.ga-home-metric-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.ga-home-campaign-columns{display:none}.ga-home-campaign-row{grid-template-columns:minmax(0,1fr) minmax(76px,.28fr);grid-template-areas:"body time" "stats stats";gap:8px;min-height:0;padding:9px 5px}.ga-home-campaign-body{grid-area:body}.ga-home-campaign-meta{grid-area:time}.ga-home-campaign-stats{grid-area:stats;border-top:1px solid #edf1f6;padding-top:6px}.ga-home-stat__label{position:static;display:block;width:auto;height:auto;margin:2px 0 0;clip-path:none;white-space:normal;color:var(--ga-muted);font-size:.65rem}.ga-home-bottom{grid-template-columns:minmax(0,1fr)}}
 @container ga-command (max-width:440px){.ga-home-header{gap:8px}.ga-home-intro{gap:5px}.ga-home-toolbar{width:100%;justify-content:space-between}.ga-home-chip{flex:1}.ga-home-metric-grid{gap:8px}.ga-home-metric{padding:9px;min-height:90px}.ga-home-metric-icon{width:27px;height:27px}.ga-home-metric-label{font-size:.72rem}.ga-home-metric-value{font-size:1.32rem}.ga-home-metric-value small{font-size:.62rem}.ga-home-campaign-icon{width:29px;height:29px}.ga-home-campaign-body{gap:6px}.ga-home-campaign-meta{flex-direction:column;align-items:flex-end}.ga-home-campaign-name{font-size:.75rem}.ga-home-quick-nav{gap:6px;padding:8px}}
 @media(prefers-reduced-motion:reduce){.ga-command *{transition:none!important;animation:none!important}}
+
+/* Reference polish: optical alignment, readable type, restrained depth and motion. */
+.ga-command .ga-home-intro{align-items:center;gap:9px}
+.ga-home-header-symbol{display:grid;place-items:center;width:34px;height:34px;flex:none;background:linear-gradient(145deg,#fff,#e7f1fd);border:1px solid #d9e6f5;border-radius:10px;color:var(--ga-brand)}
+.ga-command .ga-home-intro h1{font-size:clamp(1.25rem,1.65vw,1.55rem);font-weight:750;line-height:1.35}
+.ga-command .ga-home-intro p{font-size:.78rem;border-inline-start:1px solid #d9e3ee;padding-inline-start:10px}
+.ga-home-chip .ga-ws-icon{width:14px;height:14px;color:#50779e}
+.ga-command .ga-home-chip{background:#ffffffdc;min-height:34px;gap:5px}
+.ga-command .ga-home-cta{background:linear-gradient(125deg,#0b79c9,#155bb8);box-shadow:0 3px 8px #155cb51c,inset 0 1px 0 #ffffff25;font-weight:650}
+.ga-command .ga-home-metric{min-height:100px;padding:12px 14px;gap:8px;background:linear-gradient(165deg,#fff 60%,#f8fbff);box-shadow:var(--gw-shadow);border-radius:var(--gw-radius)}
+.ga-command .ga-home-metric--primary{background:radial-gradient(ellipse at 15% 12%,#3889dd53,transparent 65%),linear-gradient(125deg,#113b77,#1769c5);border-color:#245fa2;box-shadow:0 5px 15px #165cb322,inset 0 1px 0 #ffffff20}
+.ga-home-metric--primary::after{inset-inline-end:-38px;inset-block-end:-102px;width:195px;height:195px;box-shadow:0 0 0 16px #ffffff06,0 0 0 35px #ffffff04}
+.ga-home-metric-label{font-size:.79rem;font-weight:600}
+.ga-command .ga-home-metric-icon{width:34px;height:34px;border-radius:10px;background:linear-gradient(145deg,#eaf3fe,#e1edfb);color:#185fa9}
+.ga-command .ga-home-metric--primary .ga-home-metric-icon{background:#ffffff1e;color:#e8f5ff}
+.ga-command .ga-home-metric--live .ga-home-metric-icon{background:#e4f4ed;color:var(--gw-success)}
+.ga-command .ga-home-metric-value{font-size:clamp(1.45rem,2.15vw,1.9rem);font-weight:760;letter-spacing:0;line-height:1.22}
+.ga-command .ga-home-metric-active-value{display:flex;align-items:baseline;flex-wrap:wrap;gap:6px}
+.ga-command .ga-home-metric-active-value small{font-size:.72rem;font-weight:500}
+.ga-command .ga-home-coverage{color:var(--ga-muted);font-size:.69rem}
+.ga-home-coverage .ga-ws-icon{width:14px;height:14px}
+.ga-home-panel{box-shadow:var(--gw-shadow);border-radius:var(--gw-radius)}
+.ga-home-workspace{align-items:stretch}
+.ga-home-chart{display:flex;flex-direction:column}
+.ga-home-chart-body{flex:1;display:grid;align-items:center;padding:8px 12px 4px}
+.ga-command .ga-home-panel-head{min-height:43px;padding:10px 14px;border-bottom-color:#eaf0f6}
+.ga-command .ga-home-panel-title{display:flex;align-items:center;gap:7px;margin:0;color:var(--ga-ink);font-size:.94rem;font-weight:700;line-height:1.5;letter-spacing:0}
+.ga-home-panel-title .ga-ws-icon{color:#2c6dac;width:17px;height:17px}
+.ga-home-period{border:1px solid #e4edf6;background:#f6f9fd;color:#526b86;border-radius:8px}
+.ga-home-period .ga-ws-icon{width:14px;height:14px}
+.ga-home-wallet{gap:10px;padding:13px 14px}
+.ga-command .ga-home-wallet-available{position:relative;isolation:isolate;overflow:hidden;background:linear-gradient(125deg,#f0f7ff,#deedff);padding:10px 12px;border-color:#d6e6f9}
+.ga-home-wallet-available::after{content:"";position:absolute;z-index:-1;inset-inline-end:-24px;inset-block-end:-40px;width:96px;height:96px;border:1px solid #a9c8ed50;border-radius:50%;box-shadow:0 0 0 12px #aec9ef18,0 0 0 25px #aec9ef12}
+.ga-command .ga-home-wallet-available dd{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;font-size:1.56rem;line-height:1.25}
+.ga-command .ga-home-wallet-available dd b{font-size:inherit;font-weight:760;line-height:inherit}
+.ga-home-wallet-unit{font-size:.68rem;font-weight:500}
+.ga-home-wallet-zero{border-inline-start:2px solid #b9d4f2;padding-inline-start:8px;line-height:1.6}
+.ga-command .ga-home-wallet-actions .btn{min-height:38px;border-radius:var(--gw-radius-control);font-weight:650}
+.ga-command .ga-home-wallet-actions .btn-primary{background:#1767b6;color:#fff}
+.ga-home-wallet-actions .ga-ws-icon{width:14px;height:14px}
+.ga-home-wallet-links a{display:inline-flex;align-items:center;gap:4px;text-decoration:none}
+.ga-home-wallet-links .ga-ws-icon{width:14px;height:14px}
+.ga-home-wallet-links a:hover{text-decoration:underline}
+.ga-home-campaign-columns{margin:5px 10px 2px;background:#f1f5fa;border:1px solid #eaf0f6;border-radius:8px;min-height:32px}
+.ga-home-campaign-row{position:relative;min-height:58px;border-radius:8px;border-bottom-color:#eaf0f6}
+.ga-home-campaign-row--active{box-shadow:inset -2px 0 0 #32a17a;background:#f6fcf9}
+.ga-home-campaign-icon{background:linear-gradient(140deg,#eef4fc,#e1edfb);border:1px solid #e0eaf6}
+.ga-home-campaign-row--active .ga-home-campaign-icon{background:#e4f4ee;border-color:#d7ece3;color:var(--gw-success)}
+.ga-home-campaign-name-line{flex-wrap:nowrap}
+.ga-home-campaign-name{font-size:.83rem;font-weight:680;line-height:1.5}
+.ga-command .ga-home-status{border-radius:6px;font-size:.65rem;padding:3px 6px}
+.ga-home-campaign-destination{font-size:.7rem;gap:4px}
+.ga-home-campaign-destination .ga-ws-icon{width:13px;height:13px}
+.ga-home-stat__value{font-size:.86rem}
+.ga-home-campaign-time{font-size:.69rem}
+.ga-home-campaign-go .ga-ws-icon{width:15px;height:15px}
+.ga-home-bottom{align-items:stretch}
+.ga-home-activity-empty{min-height:76px;margin:0;padding:12px 14px}
+.ga-home-activity-empty>span{background:#edf4fc}
+.ga-home-activity-list__item:last-child{border:0}
+.ga-home-quick-nav{gap:7px}
+.ga-home-quick-nav a{min-height:38px;padding:8px 9px;border-radius:9px}
+.ga-home-quick-nav a .ga-ws-icon:last-child{width:14px;height:14px;margin-inline-start:auto;color:#718ca8}
+.ga-home-link .ga-ws-icon{width:15px;height:15px}
+.ga-command .ga-home-metric,.ga-command .ga-home-cta,.ga-command .ga-home-wallet-actions .btn,.ga-command .ga-home-quick-nav a,.ga-command .ga-home-campaign-row,.ga-command .ga-home-campaign-icon,.ga-command .ga-home-campaign-go,.ga-command .ga-home-link,.ga-command .ga-home-metric-icon{transition:transform var(--gw-fast) var(--gw-ease),background-color var(--gw-fast) var(--gw-ease),color var(--gw-fast) var(--gw-ease),border-color var(--gw-fast) var(--gw-ease),box-shadow var(--gw-normal) var(--gw-ease)}
+@media (hover:hover) and (pointer:fine){
+ .ga-command .ga-home-metric:hover{transform:translateY(-2px);box-shadow:var(--gw-shadow-hover)}
+ .ga-command .ga-home-metric:hover .ga-home-metric-icon{transform:translateY(-1px)}
+ .ga-command .ga-home-metric--primary:hover{box-shadow:0 7px 20px #145eb630}
+ .ga-command .ga-home-campaign-row:hover{background:#eff6fe}
+ .ga-command .ga-home-campaign-row:hover .ga-home-campaign-go{transform:translateX(-3px);color:var(--ga-brand)}
+ .ga-command .ga-home-quick-nav a:hover{border-color:#c3d9ef;background:#edf5fe}
+ .ga-command .ga-home-cta:hover,.ga-command .ga-home-wallet-actions .btn:hover{box-shadow:0 4px 12px #155cb526;transform:translateY(-1px)}
+}
+.ga-command :is(.ga-home-cta,.ga-home-wallet-actions .btn,.ga-home-quick-nav a):active{transform:scale(.985)}
+.ga-command .ga-home-campaign-row:focus-visible{outline-offset:-2px}
+@media(prefers-reduced-motion:no-preference){
+ @keyframes gaOverviewAppear{from{opacity:.72;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+ .ga-command .ga-home-metric{animation:gaOverviewAppear 300ms var(--gw-ease) both}
+ .ga-command .ga-home-metric:nth-child(2){animation-delay:35ms}
+ .ga-command .ga-home-metric:nth-child(3){animation-delay:65ms}
+ .ga-command .ga-home-metric:nth-child(4){animation-delay:90ms}
+}
+@container ga-command (max-width:850px){
+ .ga-home-campaign-name-line{flex-wrap:wrap}
+ .ga-home-workspace{align-items:start}
+}
+@container ga-command (max-width:440px){
+ .ga-home-header-symbol{width:29px;height:29px}
+ .ga-command .ga-home-intro p{font-size:.72rem;padding-inline-start:6px}
+ .ga-command .ga-home-metric{min-height:90px;padding:9px}
+ .ga-command .ga-home-metric-icon{width:27px;height:27px}
+ .ga-command .ga-home-metric-label{font-size:.72rem}
+ .ga-command .ga-home-metric-value{font-size:1.32rem}
+ .ga-command .ga-home-metric-active-value small{font-size:.62rem}
+ .ga-command .ga-home-campaign-name{font-size:.76rem}
+ .ga-command .ga-home-quick-nav a{min-height:44px}
+ .ga-command .ga-home-wallet-actions .btn,.ga-command .ga-home-cta{min-height:44px}
+}
+@media(prefers-reduced-motion:reduce){
+ .ga-command *{animation:none!important;transition:none!important}
+ .ga-command :is(.ga-home-metric,.ga-home-metric-icon,.ga-home-cta,.ga-home-wallet-actions .btn,.ga-home-campaign-go,.ga-home-quick-nav a){transform:none!important}
+}

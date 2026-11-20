@@ -3,21 +3,21 @@
   <h2 class="sr-only">عملکرد تبلیغات</h2>
   <div class="ga-home-metric-grid" role="list">
     <article class="ga-home-metric ga-home-metric--primary" role="listitem">
-      <div class="ga-home-metric-label"><span>نمایش تبلیغات</span><span class="ga-home-metric-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="eye" size="sm" %}</span></div>
+      <div class="ga-home-metric-label"><span>نمایش تبلیغات</span><span class="ga-home-metric-icon" aria-hidden="true">{% include "includes/gramads_workspace_icon.html" with name="eye" size="sm" %}</span></div>
       <div class="ga-home-metric-value tabnums">{% if portfolio.has_impressions %}{{ impressions|format_count }}{% else %}—{% endif %}</div>
     </article>
-    <article class="ga-home-metric" role="listitem">
-      <div class="ga-home-metric-label"><span>کلیک</span><span class="ga-home-metric-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="mouse-pointer-click" size="sm" %}</span></div>
+    <article class="ga-home-metric ga-home-metric--clicks" role="listitem">
+      <div class="ga-home-metric-label"><span>کلیک</span><span class="ga-home-metric-icon" aria-hidden="true">{% include "includes/gramads_workspace_icon.html" with name="mouse-pointer-click" size="sm" %}</span></div>
       <div class="ga-home-metric-value tabnums">{% if portfolio.has_clicks %}{{ clicks|format_count }}{% else %}—{% endif %}</div>
     </article>
     <article class="ga-home-metric" role="listitem">
-      <div class="ga-home-metric-label"><span>نرخ کلیک کل</span><span class="ga-home-metric-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="percent" size="sm" %}</span></div>
+      <div class="ga-home-metric-label"><span>نرخ کلیک کل</span><span class="ga-home-metric-icon" aria-hidden="true">{% include "includes/gramads_workspace_icon.html" with name="percent" size="sm" %}</span></div>
       <div class="ga-home-metric-value ga-home-metric-value--accent tabnums">{% if portfolio.has_ctr %}{{ ctr|persian_digits }}<small>٪</small>{% else %}—{% endif %}</div>
     </article>
-    <article class="ga-home-metric ga-kpi-active" role="listitem">
-      <div class="ga-home-metric-label"><span>کمپین‌های فعال</span><span class="ga-home-metric-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="megaphone" size="sm" %}</span></div>
-      <div class="ga-home-metric-value tabnums">{{ active_count|format_count }} <small>از {{ total_campaigns|format_count }} کمپین</small></div>
+    <article class="ga-home-metric ga-kpi-active{% if active_count %} ga-home-metric--live{% endif %}" role="listitem">
+      <div class="ga-home-metric-label"><span>کمپین‌های فعال</span><span class="ga-home-metric-icon" aria-hidden="true">{% include "includes/gramads_workspace_icon.html" with name="megaphone" size="sm" %}</span></div>
+      <div class="ga-home-metric-value ga-home-metric-active-value tabnums">{{ active_count|format_count }} <small>از {{ total_campaigns|format_count }} کمپین</small></div>
     </article>
   </div>
-  <p class="ga-home-coverage" role="status">{% include "includes/lucide_icon.html" with name="info" size="sm" %}<span>آمار {{ portfolio.stats_count|format_count }} از {{ portfolio.linked_count|format_count }} کمپین متصل · خط تیره: داده ناموجود{% if portfolio.any_stale %} · بخشی از آمار نیازمند همگام‌سازی است{% endif %}</span></p>
+  <p class="ga-home-coverage" role="status">{% include "includes/gramads_workspace_icon.html" with name="info" size="sm" %}<span>آمار {{ portfolio.stats_count|format_count }} از {{ portfolio.linked_count|format_count }} کمپین متصل · خط تیره: داده ناموجود{% if portfolio.any_stale %} · بخشی از آمار نیازمند همگام‌سازی است{% endif %}</span></p>
 </section>

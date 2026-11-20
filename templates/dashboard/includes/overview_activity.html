@@ -1,8 +1,8 @@
 {% load core_filters %}
 <aside class="ga-home-panel ga-home-activity{% if not activity %} is-empty{% endif %}">
       <header class="ga-home-panel-head">
-        <h2 class="ga-home-panel-heading">فعالیت</h2>
-        <a class="ga-home-link" href="{% url 'dashboard:notifications' %}">اعلان‌ها</a>
+        <h2 class="ga-home-panel-title">{% include "includes/gramads_workspace_icon.html" with name="activity" %} فعالیت اخیر</h2>
+        <a class="ga-home-link" href="{% url 'dashboard:notifications' %}">{% include "includes/gramads_workspace_icon.html" with name="bell" %} اعلان‌ها</a>
       </header>
       {% if activity %}
       <ul class="ga-home-activity-list">
@@ -20,6 +20,6 @@
         {% endfor %}
       </ul>
       {% else %}
-      <div class="ga-home-activity-empty"><span aria-hidden="true">{% include "includes/lucide_icon.html" with name="activity" size="md" %}</span><div><strong>هنوز فعالیتی ثبت نشده</strong><p class="ga-home-activity-hint">به‌روزرسانی وضعیت کمپین‌ها اینجا نمایش داده می‌شود.</p></div></div>
+      <div class="ga-home-activity-empty"><span aria-hidden="true">{% include "includes/gramads_workspace_icon.html" with name="activity" size="md" %}</span><div><strong>هنوز فعالیتی ثبت نشده</strong><p class="ga-home-activity-hint">به‌روزرسانی وضعیت کمپین‌ها اینجا نمایش داده می‌شود.</p></div></div>
       {% endif %}
     </aside>

@@ -258,6 +258,7 @@
     const lbl = labels(data);
     const portfolio = Boolean(opts.portfolio);
     const dashboardHome = Boolean(opts.dashboardHome);
+    const reduceMotion = dashboardHome && global.matchMedia && global.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const analyticsMode = Boolean(opts.analyticsMode);
     const overviewMini = Boolean(opts.overviewMini);
     const compact = Boolean(opts.compact);
@@ -286,11 +287,11 @@
         opacity: analyticsMode ? 0.85 : 1,
       };
     } else {
-      impressionsSeries.barMaxWidth = portfolio ? 20 : 24;
+      impressionsSeries.barMaxWidth = dashboardHome ? 18 : portfolio ? 20 : 24;
       impressionsSeries.barGap = portfolio ? "35%" : "22%";
       impressionsSeries.itemStyle = {
         borderRadius: [6, 6, 2, 2],
-        color: barFill("#6CC8F6", "#2AABEE"),
+        color: dashboardHome ? barFill("#95C8F5", "#4C97E0") : barFill("#6CC8F6", "#2AABEE"),
       };
       impressionsSeries.emphasis = {
         itemStyle: {
@@ -302,18 +303,18 @@
     const clicksSeries = {
       name: "کلیک",
       type: "line",
-      smooth: 0.35,
+      smooth: dashboardHome ? false : 0.35,
       data: data.clicks,
-      showSymbol: true,
+      showSymbol: !dashboardHome || lbl.length <= 16,
       symbol: "circle",
-      symbolSize: portfolio ? 7 : 6,
+      symbolSize: dashboardHome ? 5 : portfolio ? 7 : 6,
       lineStyle: {
         width: portfolio ? 2.5 : 2.25,
-        color: COLORS.clicks,
+        color: dashboardHome ? "#174B97" : COLORS.clicks,
       },
       itemStyle: {
         color: "#fff",
-        borderColor: COLORS.clicks,
+        borderColor: dashboardHome ? "#174B97" : COLORS.clicks,
         borderWidth: 2,
       },
       yAxisIndex: portfolio || analyticsMode ? 1 : 0,
@@ -322,7 +323,7 @@
     };
 
     if (portfolio || analyticsMode) {
-      clicksSeries.areaStyle = analyticsMode
+      clicksSeries.areaStyle = analyticsMode || dashboardHome
         ? undefined
         : { color: areaFill("23, 125, 199") };
     }
@@ -387,6 +388,12 @@
       }
     }
 
+    if (dashboardHome && portfolio) {
+      yAxis[0].axisLabel.color = "#526982";
+      yAxis[1].axisLabel.color = "#174B97";
+      yAxis.forEach(axis => { axis.splitNumber = 4; axis.min = 0; axis.minInterval = 1; });
+      yAxis[0].splitLine.lineStyle = {color:"#e8eef5", type:"solid"};
+    }
     const gridDefaults = {
       containLabel: true,
       left: overviewMini ? 2 : 10,
@@ -412,9 +419,11 @@
     chart.setOption({
       color: [COLORS.impressions, COLORS.clicks, COLORS.actions, COLORS.ctr],
       grid,
-      animationDuration: 720,
+      animation: !reduceMotion,
+      animationDuration: dashboardHome ? 420 : 720,
       animationEasing: "cubicOut",
       tooltip: tooltipAxis({
+        ...(dashboardHome ? {axisPointer:{type:"line",lineStyle:{color:"#93afce",type:"dashed",width:1}}} : {}),
         formatter(params) {
           if (!params || !params.length) return "";
           const head = params[0].axisValueLabel || params[0].name;
@@ -455,7 +464,7 @@
             textStyle: { color: COLORS.muted, fontFamily: FA_FONT, fontSize: overviewMini ? 10 : 11 },
             icon: "roundRect",
           },
-      xAxis: axisCategory(lbl, opts),
+      xAxis: dashboardHome ? {...axisCategory(lbl, opts), axisLabel:{...axisCategory(lbl, opts).axisLabel, color:"#526982", rotate:0, fontSize:10, interval:Math.max(0,Math.ceil(lbl.length/7)-1)}} : axisCategory(lbl, opts),
       yAxis,
       series,
       dataZoom: (() => {
@@ -483,7 +492,7 @@
         if (n > 16 && !portfolio) {
           return [{ type: "inside", start: Math.max(0, 100 - (14 / n) * 100), end: 100 }];
         }
-        if (portfolio && n > 12) {
+        if (portfolio && !dashboardHome && n > 12) {
           return [{ type: "inside", start: Math.max(0, 100 - (12 / n) * 100), end: 100 }];
         }
         return undefined;
