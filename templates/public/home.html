@@ -1,91 +1,125 @@
 {% extends "public_base.html" %}
+{% load landing_assets %}
 {% block title %}{{ PRODUCT_NAME }} — تبلیغات تلگرام{% endblock %}
-{% block public_page_class %} pp-home{% endblock %}
+{% block public_page_class %} pp-home orbit-landing{% endblock %}
 {% block content %}
-<div class="ui-public-home">
-<section class="container ui-landing-hero" aria-label="معرفی تی‌ام‌ادز">
-  <div class="ui-landing-copy" data-pp-reveal>
-    <span class="ui-landing-kicker"><span aria-hidden="true"></span> پلتفرم مدیریت تبلیغات تلگرام</span>
-    <h1>تبلیغات تلگرام،<br><em>با دیدی روشن‌تر.</em></h1>
-    <p>از انتخاب مخاطب تا بررسی بودجه و تحلیل عملکرد؛ کمپین‌های Telegram Ads را در یک فضای کاری فارسی مدیریت کنید.</p>
-    <div class="ui-landing-actions">{% if user.is_authenticated %}<a class="btn btn-primary btn-lg" href="{% url 'dashboard:home' %}">ورود به داشبورد {% include "includes/lucide_icon.html" with name="arrow-left" size="btn" %}</a>{% else %}<a class="btn btn-primary btn-lg" href="{% url 'accounts:register' %}">ساخت اولین کمپین {% include "includes/lucide_icon.html" with name="arrow-left" size="btn" %}</a>{% endif %}<a class="btn btn-ghost btn-lg" href="{% url 'public:how_it_works' %}">آشنایی با تبلیغات تلگرام</a></div>
-    <div class="ui-landing-proof"><span>{% include "includes/lucide_icon.html" with name="check-circle" size="sm" %} پیش‌فاکتور شفاف</span><span>{% include "includes/lucide_icon.html" with name="check-circle" size="sm" %} گزارش یکپارچه</span><span>{% include "includes/lucide_icon.html" with name="check-circle" size="sm" %} بررسی قبل از ارسال</span></div>
-  </div>
-  <div class="ui-product-visual" data-pp-reveal aria-label="نمای شماتیک پنل مدیریت با اطلاعات نمونه">
-    <div class="studio-hero-orbit" aria-hidden="true"></div><div class="studio-visual-label"><span></span> فضای کاری تبلیغات <b dir="ltr">TMADS / 01</b></div><div class="ui-product-window"><div class="pp-window-chrome" aria-hidden="true"><i></i><i></i><i></i><span>TMADS / Preview</span></div>
-      <header class="ui-product-window__head"><span class="ui-product-brand">{% include "includes/brand_mark.html" %} <strong>{{ PRODUCT_NAME }}</strong></span><span class="ui-sample-label">داده نمونه</span></header>
-      <div class="ui-product-window__body">
-        <div class="ui-product-window__nav" aria-hidden="true">{% include "includes/lucide_icon.html" with name="layout-grid" size="md" %}{% include "includes/lucide_icon.html" with name="megaphone" size="md" %}{% include "includes/lucide_icon.html" with name="wallet" size="md" %}{% include "includes/lucide_icon.html" with name="line-chart" size="md" %}</div>
-        <div class="ui-product-window__main">
-          <div class="ui-product-title"><div><strong>نمای کلی تبلیغات</strong><small>شاخص‌های نمونه</small></div><span class="ui-product-mock-action">کمپین جدید +</span></div>
-          <div class="ui-product-metrics"><article><small>نمایش</small><strong>۱۶۸٬۴۱۶</strong></article><article><small>کلیک</small><strong>۵٬۱۰۹</strong></article><article><small>نرخ کلیک</small><strong>۳٫۰۳٪</strong></article></div>
-          <div class="ui-product-chart" aria-hidden="true"><div><span>روند نمایش</span><small>نمای نمونه</small></div><svg viewBox="0 0 300 90" fill="none" focusable="false"><path d="M0 22H300M0 45H300M0 68H300" stroke="#dce6ef" stroke-dasharray="3 5"/><path d="M0 78C24 75 33 52 53 57S85 72 104 43 137 61 158 37 184 58 206 25 240 45 260 19 283 23 300 7V90H0Z" fill="#e6f1fa"/><path d="M0 78C24 75 33 52 53 57S85 72 104 43 137 61 158 37 184 58 206 25 240 45 260 19 283 23 300 7" stroke="#146ca8" stroke-width="3" stroke-linecap="round"/></svg></div>
-          <div class="ui-product-workflow"><span class="ui-product-feature-icon">{% include "includes/lucide_icon.html" with name="crosshair" size="md" %}</span><div><strong>انتخاب مخاطب</strong><small>هدف‌گیری پیش از ارسال</small></div><span class="ui-product-chip">پیش‌نویس</span></div>
-          <div class="ui-product-workflow"><span class="ui-product-feature-icon">{% include "includes/lucide_icon.html" with name="wallet" size="md" %}</span><div><strong>بررسی بودجه</strong><small>اعتبار و کارمزد تفکیک‌شده</small></div>{% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}</div>
-          <div class="ui-product-workflow"><span class="ui-product-feature-icon">{% include "includes/lucide_icon.html" with name="line-chart" size="md" %}</span><div><strong>تحلیل عملکرد</strong><small>گزارش داده‌های همگام‌شده</small></div>{% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}</div>
+<div class="orbit-page">
+  <section class="orbit-hero" aria-labelledby="orbit-hero-title">
+    <img class="orbit-hero-bg" src="{% landing_asset 'hero-background' %}" width="1600" height="900" alt="" fetchpriority="low" decoding="async" data-landing-art>
+    <div class="container orbit-hero-inner">
+      <div class="orbit-hero-copy">
+        <p class="orbit-kicker"><span class="orbit-kicker-icon">{% include "includes/lucide_icon.html" with name="zap" size="sm" %}</span> پلتفرم مدیریت تبلیغات تلگرام</p>
+        <h1 id="orbit-hero-title">تبلیغات تلگرام،<br><em>با دیدی روشن‌تر.</em></h1>
+        <p class="orbit-hero-description">از انتخاب مخاطب تا بررسی بودجه و تحلیل عملکرد؛ کمپین‌های <bdi>Telegram Ads</bdi> را در یک فضای کاری فارسی مدیریت کنید.</p>
+        <div class="orbit-actions">
+          {% if user.is_authenticated %}<a class="btn btn-primary btn-lg" href="{% url 'dashboard:home' %}">ورود به داشبورد {% include "includes/lucide_icon.html" with name="arrow-left" size="btn" %}</a>{% else %}<a class="btn btn-primary btn-lg" href="{% url 'accounts:register' %}">شروع تبلیغات {% include "includes/lucide_icon.html" with name="arrow-left" size="btn" %}</a>{% endif %}
+          <a class="btn btn-ghost btn-lg" href="{% url 'public:how_it_works' %}">{% include "includes/lucide_icon.html" with name="play-circle" size="btn" %} آشنایی با تی‌ام‌ادز</a>
+        </div>
+        <div class="orbit-proof">
+          <div><span>{% include "includes/lucide_icon.html" with name="wallet" size="md" %}</span><strong>پیش‌فاکتور شفاف</strong></div>
+          <div><span>{% include "includes/lucide_icon.html" with name="line-chart" size="md" %}</span><strong>گزارش یکپارچه</strong></div>
+          <div><span>{% include "includes/lucide_icon.html" with name="shield-check" size="md" %}</span><strong>بررسی قبل از ارسال</strong></div>
         </div>
       </div>
+      <figure class="orbit-hero-figure">
+        <div class="orbit-hero-scene"><img class="orbit-hero-art" src="{% landing_asset 'hero-dashboard' %}" width="1200" height="900" alt="" fetchpriority="high" decoding="async" data-landing-art></div>
+        <figcaption>نمای مفهومی فضای کاری تی‌ام‌ادز؛ داده واقعی نیست.</figcaption>
+      </figure>
     </div>
-    <div class="studio-floating-note" aria-hidden="true"><span>{% include "includes/lucide_icon.html" with name="target" size="md" %}</span><div><strong>هدف‌گیری دقیق‌تر</strong><small>از ایده تا مخاطب</small></div></div><p class="ui-product-caption">نمای مفهومی محصول؛ اعداد صرفاً نمونه‌اند.</p>
-  </div>
-</section>
-<nav class="container pp-home-index" aria-label="بخش‌های صفحه"><a href="#home-targeting">هدف‌گیری</a><a href="#home-process">مسیر تبلیغات</a><a href="#telegram-ads-guide">راهنمای انتخاب</a><a href="#home-faq">پرسش‌ها</a></nav>
-<section id="home-targeting" class="container ui-landing-section">
-  <header class="ui-landing-section-head"><div><p>هدف‌گیری</p><h2>تبلیغ در تلگرام؛ متناسب با مخاطب شما</h2></div><a href="{% url 'public:features' %}">همه امکانات {% include "includes/lucide_icon.html" with name="arrow-left" size="sm" %}</a></header>
-  <div class="ui-landing-targets studio-target-grid">
-    <article><span class="ui-target-symbol">{% include "includes/lucide_icon.html" with name="search" size="md" %}</span><h3>جستجو</h3><p>عبارت‌های جستجوی منتخب</p></article>
-    <article><span class="ui-target-symbol">{% include "includes/lucide_icon.html" with name="bot" size="md" %}</span><h3>ربات‌ها</h3><p>ربات‌های هدف واجد شرایط</p></article>
-    <article><span class="ui-target-symbol">{% include "includes/lucide_icon.html" with name="users" size="md" %}</span><h3>کاربران</h3><p>موقعیت و ویژگی‌های مخاطب</p></article>
-    <article><span class="ui-target-symbol">{% include "includes/lucide_icon.html" with name="megaphone" size="md" %}</span><h3>کانال‌ها</h3><p>زبان، موضوع یا کانال مشخص</p></article>
-  </div>
-  <p class="ui-landing-note">امکان ارسال و جایگاه‌های قابل استفاده به شرایط حساب، تأییدهای لازم و قابلیت‌های تلگرام وابسته است.</p>
-</section>
-<section id="home-process" class="container ui-landing-section ui-landing-process">
-  <header class="ui-landing-section-head"><div><p>مسیر کار</p><h2>چگونه تبلیغات تلگرام را شروع کنیم؟</h2></div></header>
-  <div class="ui-landing-steps"><article><span>۰۱</span><div class="studio-step-icon">{% include "includes/lucide_icon.html" with name="pen-tool" size="md" %}</div><h3>طراحی کمپین</h3><p>هدف، متن، مقصد و بودجه را مشخص کنید.</p></article><article><span>۰۲</span><div class="studio-step-icon">{% include "includes/lucide_icon.html" with name="clipboard-check" size="md" %}</div><h3>بررسی سفارش</h3><p>پیش‌فاکتور و قوانین را مرور کنید.</p></article><article><span>۰۳</span><div class="studio-step-icon">{% include "includes/lucide_icon.html" with name="line-chart" size="md" %}</div><h3>پایش عملکرد</h3><p>پس از انتشار و همگام‌سازی، شاخص‌های تبلیغ را ببینید.</p></article></div>
-</section>
-<section class="container ui-landing-section" aria-labelledby="why-tmads">
-  <header class="ui-landing-section-head"><div><p>Telegram Ads چیست؟</p><h2 id="why-tmads">تبلیغات رسمی تلگرام، با مدیریت فارسی</h2></div></header>
-  <article class="card card-pad legal-prose ui-public-reading">
-    <p>در پلتفرم تبلیغاتی تلگرام، پیام‌های اسپانسری در جایگاه‌های واجد شرایط به مخاطبان نمایش داده می‌شوند. برخلاف خرید مستقیم یک پست تبلیغاتی از مدیر کانال، در Telegram Ads می‌توانید بودجه، هدف‌گیری و نرخ پیشنهاد نمایش (CPM) را مشخص کنید و نتیجه را با آمار تبلیغ بررسی کنید.</p>
-    <p>تی‌ام‌ادز برای کسب‌وکارهای فارسی‌زبان طراحی شده تا مراحل برنامه‌ریزی، آماده‌سازی سفارش و مدیریت کمپین در یک محیط یکپارچه انجام شود. امکان انتشار به قابلیت‌های حساب و تأییدهای لازم وابسته است.</p>
-    <p><a href="{% url 'public:how_it_works' %}">راهنمای کامل شروع تبلیغات در تلگرام</a> · <a href="{% url 'public:pricing' %}">نحوه محاسبه هزینه تبلیغات تلگرام</a></p>
-  </article>
-</section>
-<section class="container ui-landing-section">
-  <header class="ui-landing-section-head"><div><p>برای چه کسانی؟</p><h2>از رشد کانال تا معرفی محصول</h2></div></header>
-  <div class="feature-grid ui-public-feature-grid">
-    <article class="feature-card"><h3>مدیران کانال و تولیدکنندگان محتوا</h3><p>برای معرفی کانال به مخاطبان مرتبط، مقصد تبلیغ و پیام خود را مشخص کنید و رفتار کاربران را در گزارش پیگیری کنید.</p></article>
-    <article class="feature-card"><h3>سازندگان ربات و مینی‌اپ</h3><p>کاربران مناسب را به ربات یا مینی‌اپ هدایت کنید و هدف کمپین را بر اساس امکانات قابل استفاده انتخاب کنید.</p></article>
-    <article class="feature-card"><h3>کسب‌وکارها و تیم‌های بازاریابی</h3><p>برای معرفی محصول یا خدمات، بودجه کمپین را برنامه‌ریزی کنید و نتایج را در کنار هزینه‌ها ارزیابی کنید.</p></article>
-  </div>
-</section>
-<section class="container ui-landing-section">
-  <header class="ui-landing-section-head"><div><p>مزیت‌های محصول</p><h2>قبل از هزینه، تصمیم بگیرید؛ بعد از انتشار، بسنجید.</h2></div><a href="{% url 'public:features' %}">مشاهده امکانات</a></header>
-  <div class="feature-grid ui-public-feature-grid">
-    <article class="feature-card"><h3>بودجه شفاف</h3><p>مبلغ سفارش، نرخ تبدیل و کارمزد را در پیش‌فاکتور مرور کنید؛ بودجه پیشنهادی با هزینه واقعی نمایش یکسان نیست.</p></article>
-    <article class="feature-card"><h3>هدف‌گیری بر اساس کمپین</h3><p>گزینه‌های قابل استفاده به نوع تبلیغ و قابلیت حساب وابسته‌اند. پیش از سفارش، هدف و محدودیت‌ها را بررسی کنید.</p></article>
-    <article class="feature-card"><h3>گزارش قابل پیگیری</h3><p>از نمایش و هزینه تا سایر شاخص‌های در دسترس، داده‌های همگام‌شده را برای ارزیابی کمپین به کار بگیرید.</p></article>
-  </div>
-</section>
-<section id="telegram-ads-guide" class="ui-editorial container" aria-labelledby="telegram-ads-guide-heading">
-  <header class="ui-editorial-head"><p class="ui-editorial-kicker">راهنمای انتخاب</p><h2 id="telegram-ads-guide-heading">از تبلیغات تلگرام چه نتیجه‌ای می‌خواهید؟</h2><p>تبلیغات موفق با انتخاب جایگاه شروع نمی‌شود؛ ابتدا باید بدانید مخاطب بعد از دیدن پیام چه اقدامی انجام دهد. تی‌ام‌ادز این تصمیم‌ها را به یک مسیر قابل پیگیری تبدیل می‌کند.</p></header>
+    <div class="orbit-hero-wave" aria-hidden="true"></div>
+  </section>
+
+  <section id="home-targeting" class="container orbit-section orbit-target-section">
+    <header class="orbit-centered">
+      <p class="orbit-kicker">{% include "includes/lucide_icon.html" with name="target" size="sm" %} هدف‌گیری دقیق مخاطب</p>
+      <h2>تبلیغ در تلگرام؛ <em>متناسب با مخاطب شما</em></h2>
+      <p>مخاطب هدف خود را بر اساس جایگاه‌ها و گزینه‌های قابل استفاده انتخاب کنید.</p>
+    </header>
+    <div class="orbit-target-grid">
+      <article class="orbit-target orbit-target--primary"><img class="orbit-target-art" src="{% landing_asset 'channels' %}" width="360" height="360" alt="" loading="lazy" decoding="async" data-landing-art><div><h3>کانال‌ها</h3><p>زبان، موضوع یا کانال مشخص</p></div></article>
+      <article class="orbit-target "><img class="orbit-target-art" src="{% landing_asset 'users-targeting' %}" width="360" height="360" alt="" loading="lazy" decoding="async" data-landing-art><div><h3>کاربران</h3><p>موقعیت و ویژگی‌های مخاطب</p></div></article>
+      <article class="orbit-target "><img class="orbit-target-art" src="{% landing_asset 'bots-miniapps' %}" width="360" height="360" alt="" loading="lazy" decoding="async" data-landing-art><div><h3>ربات‌ها</h3><p>ربات‌های هدف واجد شرایط</p></div></article>
+      <article class="orbit-target "><img class="orbit-target-art" src="{% landing_asset 'search' %}" width="360" height="360" alt="" loading="lazy" decoding="async" data-landing-art><div><h3>جستجو</h3><p>عبارت‌های جستجوی منتخب</p></div></article>
+    </div>
+    <div class="orbit-target-foot"><p>{% include "includes/lucide_icon.html" with name="info" size="sm" %} امکان ارسال و جایگاه‌ها به شرایط حساب، تأییدهای لازم و قابلیت‌های تلگرام وابسته است.</p><a class="orbit-link" href="{% url 'public:features' %}">همه امکانات {% include "includes/lucide_icon.html" with name="arrow-left" size="sm" %}</a></div>
+  </section>
+
+  <section id="home-process" class="container orbit-section orbit-split-row">
+    <header class="orbit-section-copy"><p class="orbit-kicker">{% include "includes/lucide_icon.html" with name="zap" size="sm" %} مسیر اجرای کمپین</p><h2>چگونه تبلیغات تلگرام را <em>شروع کنیم؟</em></h2><p>از ایده تا بررسی نتیجه، در سه مرحله مشخص.</p><a class="orbit-link" href="{% url 'public:how_it_works' %}">راهنمای شروع {% include "includes/lucide_icon.html" with name="arrow-left" size="sm" %}</a></header>
+    <div class="orbit-steps">
+      <article class="orbit-step"><img class="orbit-step-art" src="{% landing_asset 'channels' %}" width="360" height="360" alt="" loading="lazy" decoding="async" data-landing-art><div><span class="orbit-step-number">۰۱</span><h3>طراحی کمپین</h3><p>هدف، متن، مقصد و بودجه را مشخص کنید.</p></div></article>
+      <article class="orbit-step"><img class="orbit-step-art" src="{% landing_asset 'order-review' %}" width="360" height="360" alt="" loading="lazy" decoding="async" data-landing-art><div><span class="orbit-step-number">۰۲</span><h3>بررسی سفارش</h3><p>پیش‌فاکتور و قوانین را مرور کنید.</p></div></article>
+      <article class="orbit-step"><img class="orbit-step-art" src="{% landing_asset 'analytics-budget' %}" width="360" height="360" alt="" loading="lazy" decoding="async" data-landing-art><div><span class="orbit-step-number">۰۳</span><h3>پایش عملکرد</h3><p>پس از انتشار و همگام‌سازی، شاخص‌ها را ببینید.</p></div></article>
+    </div>
+  </section>
+
+  <section class="container orbit-section" aria-labelledby="why-tmads">
+    <div class="orbit-official">
+      <div class="orbit-official-copy">
+        <p class="orbit-kicker">{% include "includes/lucide_icon.html" with name="info" size="sm" %} Telegram Ads چیست؟</p>
+        <h2 id="why-tmads">تبلیغات رسمی تلگرام، <em>با مدیریت فارسی</em></h2>
+        <p>در پلتفرم تبلیغاتی تلگرام، پیام‌های اسپانسری در جایگاه‌های واجد شرایط نمایش داده می‌شوند. برخلاف خرید مستقیم پست، می‌توانید بودجه، هدف‌گیری و نرخ پیشنهاد نمایش (CPM) را مشخص کنید و آمار تبلیغ را بررسی کنید.</p>
+        <p>تی‌ام‌ادز مراحل برنامه‌ریزی، آماده‌سازی سفارش و مدیریت کمپین را در یک محیط یکپارچه فراهم می‌کند. انتشار به قابلیت‌های حساب و تأییدهای لازم وابسته است.</p>
+        <div class="orbit-banner-links"><a class="orbit-link" href="{% url 'public:how_it_works' %}">راهنمای شروع تبلیغات {% include "includes/lucide_icon.html" with name="arrow-left" size="sm" %}</a> <a class="orbit-link" href="{% url 'public:pricing' %}">نحوه محاسبه هزینه {% include "includes/lucide_icon.html" with name="arrow-left" size="sm" %}</a></div>
+      </div>
+      <div class="orbit-official-scene"><img class="orbit-official-art" src="{% landing_asset 'telegram-banner' %}" width="1100" height="619" alt="" loading="lazy" decoding="async" data-landing-art></div>
+    </div>
+  </section>
+
+  <section class="container orbit-section orbit-split-row orbit-usecases">
+    <header class="orbit-section-copy"><p class="orbit-kicker">{% include "includes/lucide_icon.html" with name="users" size="sm" %} برای چه کسانی؟</p><h2>از رشد کانال تا <em>معرفی محصول</em></h2><p>فضای کاری یکپارچه برای هدف‌های مختلف تبلیغاتی در تلگرام.</p></header>
+    <div class="orbit-mini-grid">
+      <article class="orbit-mini-card"><div class="orbit-line-icon">{% include "includes/lucide_icon.html" with name="users" size="md" %}</div><h3>مدیران کانال و تولیدکنندگان محتوا</h3><p>معرفی کانال به مخاطبان مرتبط و پیگیری رفتار کاربران در گزارش.</p></article>
+      <article class="orbit-mini-card"><div class="orbit-line-icon">{% include "includes/lucide_icon.html" with name="code" size="md" %}</div><h3>سازندگان ربات و مینی‌اپ</h3><p>هدایت کاربران مناسب به ربات یا مینی‌اپ بر اساس امکانات قابل استفاده.</p></article>
+      <article class="orbit-mini-card"><div class="orbit-line-icon">{% include "includes/lucide_icon.html" with name="store" size="md" %}</div><h3>کسب‌وکارها و تیم‌های بازاریابی</h3><p>برنامه‌ریزی برای معرفی محصول و ارزیابی نتایج در کنار هزینه‌ها.</p></article>
+    </div>
+  </section>
+
+  <section class="container orbit-section orbit-split-row orbit-benefits">
+    <header class="orbit-section-copy"><p class="orbit-kicker">{% include "includes/lucide_icon.html" with name="gem" size="sm" %} مزیت‌های محصول</p><h2>قبل از هزینه، تصمیم بگیرید؛ <em>بعد از انتشار، بسنجید.</em></h2><a class="orbit-link" href="{% url 'public:features' %}">مشاهده امکانات {% include "includes/lucide_icon.html" with name="arrow-left" size="sm" %}</a></header>
+    <div class="orbit-mini-grid">
+      <article class="orbit-mini-card"><div class="orbit-line-icon">{% include "includes/lucide_icon.html" with name="wallet" size="md" %}</div><h3>بودجه شفاف</h3><p>مبلغ سفارش، نرخ تبدیل و کارمزد را در پیش‌فاکتور مرور کنید؛ بودجه پیشنهادی با هزینه واقعی نمایش یکسان نیست.</p></article>
+      <article class="orbit-mini-card"><div class="orbit-line-icon">{% include "includes/lucide_icon.html" with name="target" size="md" %}</div><h3>هدف‌گیری بر اساس کمپین</h3><p>گزینه‌های قابل استفاده به نوع تبلیغ و قابلیت حساب وابسته‌اند. پیش از سفارش، محدودیت‌ها را بررسی کنید.</p></article>
+      <article class="orbit-mini-card"><div class="orbit-line-icon">{% include "includes/lucide_icon.html" with name="bar-chart-3" size="md" %}</div><h3>گزارش قابل پیگیری</h3><p>داده‌های همگام‌شده از نمایش و هزینه تا شاخص‌های در دسترس را برای ارزیابی کمپین به کار بگیرید.</p></article>
+    </div>
+  </section>
+
+  <section id="telegram-ads-guide" class="orbit-guide" aria-labelledby="telegram-ads-guide-heading">
+    <div class="container orbit-section">
+      <header class="orbit-centered"><p class="orbit-kicker">{% include "includes/lucide_icon.html" with name="compass" size="sm" %} راهنمای انتخاب</p><h2 id="telegram-ads-guide-heading">از تبلیغات تلگرام چه <em>نتیجه‌ای</em> می‌خواهید؟</h2><p>تبلیغات موفق با انتخاب جایگاه شروع نمی‌شود؛ ابتدا مشخص کنید مخاطب بعد از دیدن پیام چه اقدامی انجام دهد.</p></header>
   <div class="ui-editorial-grid">
-    <article class="ui-editorial-item"><h3>تبلیغ کانال تلگرام و جذب مخاطب مرتبط</h3><p>برای کانال آموزشی، رسانه یا فروشگاه، ابتدا چند محتوای نمونه ارزشمند و توضیح روشن برای اعضای جدید آماده کنید. هدف را صرفاً تعداد نمایش نگذارید؛ اگر داده عضویت معتبر در دسترس است، هزینه جذب عضو و کیفیت تعامل بعدی را نیز بررسی کنید. پیام تبلیغ باید دقیقاً با محتوای مقصد هماهنگ باشد.</p></article>
-    <article class="ui-editorial-item"><h3>معرفی محصول، خدمات و ربات تلگرام</h3><p>در کمپین معرفی محصول، پیام را حول یک نیاز مشخص بنویسید و کاربر را به مقصدی هدایت کنید که همان وعده را توضیح دهد. برای ربات، مسیر شروع و اولین تعامل را پیش از ارسال آزمایش کنید. هنگام انتخاب مقصد، تنها امکانات و جایگاه‌های مجاز حساب را مبنا بگیرید.</p></article>
-    <article class="ui-editorial-item"><h3>تفاوت تبلیغات رسمی تلگرام با خرید پست کانال</h3><p>در خرید مستقیم پست، شرایط انتشار و هزینه معمولاً با مدیر رسانه توافق می‌شود. در Telegram Ads، پیام اسپانسری با سازوکار پیشنهاد قیمت و ضوابط پلتفرم نمایش داده می‌شود. هر روش مزایا و محدودیت‌های خود را دارد؛ برای مقایسه، هزینه، شفافیت گزارش و تناسب مخاطب را کنار هم بگذارید.</p></article>
-    <article class="ui-editorial-item"><h3>از بودجه اولیه تا بهینه‌سازی</h3><p>بودجه آزمایشی را بر اساس توان مالی و هدف انتخاب کنید. پس از دریافت داده کافی، متن یا مخاطب را با تغییرات محدود آزمایش کنید تا اثر هر تغییر روشن‌تر باشد. رزرو اعتبار، تخصیص بودجه و مصرف نهایی سه مفهوم متفاوت‌اند؛ <a href="{% url 'public:pricing' %}">راهنمای هزینه تبلیغات تلگرام</a> این تفاوت را توضیح می‌دهد.</p></article>
+    <article class="ui-editorial-item orbit-guide-card"><span class="orbit-line-icon">{% include "includes/lucide_icon.html" with name="trending-up" size="md" %}</span><h3>تبلیغ کانال تلگرام و جذب مخاطب مرتبط</h3><p>برای کانال آموزشی، رسانه یا فروشگاه، ابتدا چند محتوای نمونه ارزشمند و توضیح روشن برای اعضای جدید آماده کنید. هدف را صرفاً تعداد نمایش نگذارید؛ اگر داده عضویت معتبر در دسترس است، هزینه جذب عضو و کیفیت تعامل بعدی را نیز بررسی کنید. پیام تبلیغ باید دقیقاً با محتوای مقصد هماهنگ باشد.</p></article>
+    <article class="ui-editorial-item orbit-guide-card"><span class="orbit-line-icon">{% include "includes/lucide_icon.html" with name="megaphone" size="md" %}</span><h3>معرفی محصول، خدمات و ربات تلگرام</h3><p>در کمپین معرفی محصول، پیام را حول یک نیاز مشخص بنویسید و کاربر را به مقصدی هدایت کنید که همان وعده را توضیح دهد. برای ربات، مسیر شروع و اولین تعامل را پیش از ارسال آزمایش کنید. هنگام انتخاب مقصد، تنها امکانات و جایگاه‌های مجاز حساب را مبنا بگیرید.</p></article>
+    <article class="ui-editorial-item orbit-guide-card"><span class="orbit-line-icon">{% include "includes/lucide_icon.html" with name="repeat" size="md" %}</span><h3>تفاوت تبلیغات رسمی تلگرام با خرید پست کانال</h3><p>در خرید مستقیم پست، شرایط انتشار و هزینه معمولاً با مدیر رسانه توافق می‌شود. در Telegram Ads، پیام اسپانسری با سازوکار پیشنهاد قیمت و ضوابط پلتفرم نمایش داده می‌شود. هر روش مزایا و محدودیت‌های خود را دارد؛ برای مقایسه، هزینه، شفافیت گزارش و تناسب مخاطب را کنار هم بگذارید.</p></article>
+    <article class="ui-editorial-item orbit-guide-card"><span class="orbit-line-icon">{% include "includes/lucide_icon.html" with name="wallet" size="md" %}</span><h3>از بودجه اولیه تا بهینه‌سازی</h3><p>بودجه آزمایشی را بر اساس توان مالی و هدف انتخاب کنید. پس از دریافت داده کافی، متن یا مخاطب را با تغییرات محدود آزمایش کنید تا اثر هر تغییر روشن‌تر باشد. رزرو اعتبار، تخصیص بودجه و مصرف نهایی سه مفهوم متفاوت‌اند؛ <a href="{% url 'public:pricing' %}">راهنمای هزینه تبلیغات تلگرام</a> این تفاوت را توضیح می‌دهد.</p></article>
   </div>
+
   <nav class="ui-editorial-links" aria-label="مطالعه بیشتر"><strong>مطالعه بیشتر</strong><a href="{% url 'public:features' %}">امکانات مدیریت کمپین</a><a href="{% url 'public:how_it_works' %}">آموزش قدم‌به‌قدم تلگرام ادز</a><a href="{% url 'public:pricing' %}">هزینه و تعرفه تبلیغات</a><a href="{% url 'public:faq' %}">پرسش‌های متداول</a></nav>
-</section>
-<section id="home-faq" class="container ui-landing-section">
-  <header class="ui-landing-section-head"><div><p>پرسش‌های پیش از شروع</p><h2>هرآنچه برای تصمیم‌گیری نیاز دارید</h2></div><a href="{% url 'public:faq' %}">همه سوالات</a></header>
-  <div class="faq-list faq-list--exec ui-public-faq">
+
+    </div>
+  </section>
+
+  <section id="home-faq" class="container orbit-section orbit-faq">
+    <div class="orbit-faq-copy">
+      <header class="orbit-section-copy"><p class="orbit-kicker">{% include "includes/lucide_icon.html" with name="help-circle" size="sm" %} پرسش‌های پیش از شروع</p><h2>هرآنچه برای <em>تصمیم‌گیری</em> نیاز دارید</h2><p>پاسخ پرسش‌های رایج درباره هزینه، اجرا و نتایج کمپین‌ها.</p></header>
+      <div class="orbit-faq-list">
     <details class="faq-item faq-item--exec"><summary>هزینه تبلیغات در تلگرام چقدر است؟</summary><p>هزینه به بودجه، نرخ پیشنهاد نمایش، نرخ تبدیل و کارمزد وابسته است. پیش از ثبت سفارش مبلغ را در <a href="{% url 'public:pricing' %}">راهنمای تعرفه</a> بررسی کنید.</p></details>
     <details class="faq-item faq-item--exec"><summary>آیا جذب عضو یا فروش تضمین می‌شود؟</summary><p>خیر؛ نتیجه به محتوا، هدف‌گیری، رقابت و مقصد تبلیغ وابسته است. گزارش‌ها برای سنجش عملکرد ارائه می‌شوند، نه تضمین نتیجه.</p></details>
     <details class="faq-item faq-item--exec"><summary>آیا ساخت پیش‌نویس به معنی انتشار تبلیغ است؟</summary><p>خیر. پیش‌نویس صرفاً آماده‌سازی است؛ سفارش، بررسی محتوا و ارسال مراحل جداگانه‌اند.</p></details>
-  </div>
-  <div class="ui-landing-end"><div><h2>اولین پیش‌نویس خود را بسازید.</h2><p>صدور سفارش و ارسال وابسته به وضعیت سرویس و بررسی‌های لازم است.</p></div>{% if user.is_authenticated %}<a class="btn btn-primary btn-lg" href="{% url 'campaigns:wizard_new' %}">ساخت پیش‌نویس</a>{% else %}<a class="btn btn-primary btn-lg" href="{% url 'accounts:register' %}">ایجاد حساب</a>{% endif %}</div>
-</section>
+
+        <details class="faq-item faq-item--exec"><summary>نتایج کمپین‌ها چه زمانی قابل مشاهده است؟</summary><p>پس از انتشار و دریافت داده‌های همگام‌شده، شاخص‌های در دسترس نمایش داده می‌شوند. زمان دسترسی به داده به وضعیت سرویس و حساب بستگی دارد.</p></details>
+      </div>
+      <a class="orbit-link" href="{% url 'public:faq' %}">همه سوالات {% include "includes/lucide_icon.html" with name="arrow-left" size="sm" %}</a>
+    </div>
+    <div class="orbit-faq-scene"><img class="orbit-faq-art" src="{% landing_asset 'channels' %}" width="360" height="360" alt="" loading="lazy" decoding="async" data-landing-art></div>
+  </section>
+
+  <section class="container orbit-section orbit-cta-section" aria-labelledby="orbit-cta-title">
+    <div class="orbit-cta">
+      <img class="orbit-cta-bg" src="{% landing_asset 'orbit-dark' %}" width="1440" height="810" alt="" loading="lazy" decoding="async" data-landing-art>
+      <div><p class="orbit-cta-kicker">{% include "includes/lucide_icon.html" with name="send" size="sm" %} آماده شروع هستید؟</p><h2 id="orbit-cta-title">اولین پیش‌نویس خود را بسازید.</h2><p>کمپین خود را آماده کنید؛ صدور سفارش و ارسال به وضعیت سرویس و بررسی‌های لازم وابسته است.</p></div>
+      {% if user.is_authenticated %}<a class="btn btn-lg orbit-cta-button" href="{% url 'campaigns:wizard_new' %}">ساخت پیش‌نویس {% include "includes/lucide_icon.html" with name="arrow-left" size="btn" %}</a>{% else %}<a class="btn btn-lg orbit-cta-button" href="{% url 'accounts:register' %}">ایجاد حساب {% include "includes/lucide_icon.html" with name="arrow-left" size="btn" %}</a>{% endif %}
+    </div>
+  </section>
 </div>
 {% endblock %}

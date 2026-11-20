@@ -83,3 +83,19 @@ test('public studio compact auth and responsive layouts', async ({page}) => {
     await expect(page.locator('[data-pp-password-toggle]')).toHaveAttribute('aria-pressed','true');
   }
 });
+
+test('Orbit landing artwork, CTA and FAQ work across viewports', async ({page}) => {
+  for (const width of [375, 768, 1440]) {
+    await page.setViewportSize({width, height: 900});
+    await assertPage(page, '/');
+    await expect(page.locator('.orbit-hero h1')).toBeVisible();
+    await expect(page.locator('.orbit-actions .btn-primary')).toHaveAttribute('href', /accounts\/register/);
+    for (const art of await page.locator('[data-landing-art]').all()) {
+      await art.scrollIntoViewIfNeeded();
+      await expect.poll(async () => art.evaluate(img => img.complete && img.naturalWidth > 0)).toBe(true);
+    }
+    await page.locator('#home-faq summary').first().click();
+    await expect(page.locator('#home-faq details').first()).toHaveAttribute('open', '');
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 2)).toBe(true);
+  }
+});
