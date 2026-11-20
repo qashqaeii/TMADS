@@ -611,10 +611,25 @@ test('GramAds overview responsive composition', async ({page}) => {
   for (const width of [375, 768, 1440]) {
     await page.setViewportSize({width,height:900});
     await assertPage(page,'/app/');
-    await expect(page.locator('.gramads-overview .dash-kpi-tile')).toHaveCount(4);
-    await expect(page.locator('.dash-board--campaigns')).toBeVisible();
+    await expect(page.locator('.gramads-overview .ga-home-metric')).toHaveCount(4);
+    await expect(page.locator('.ga-home-campaigns')).toBeVisible();
     await expect(page.locator('.ga-quick-nav a')).toHaveCount(4);
-    const campaign = await page.locator('.dash-board--campaigns').boundingBox();
+    const header = await page.locator('.ga-home-header').boundingBox();
+    const cards = await page.locator('.ga-home-metric-grid').boundingBox();
+    if (width === 1440) {
+      expect(header.height).toBeLessThan(80);
+      expect(cards.y).toBeLessThan(200);
+      expect(cards.height).toBeLessThan(150);
+      const first = page.locator('.ga-home-campaign-row').first();
+      if (await first.count()) {
+        expect((await first.boundingBox()).height).toBeLessThan(90);
+        const icon = await first.locator('.ga-home-campaign-icon').boundingBox();
+        const identity = await first.locator('.ga-home-campaign-identity').boundingBox();
+        expect(icon.x).toBeGreaterThan(identity.x);
+        expect(Math.abs(icon.y + icon.height / 2 - identity.y - identity.height / 2)).toBeLessThan(6);
+      }
+    }
+    const campaign = await page.locator('.ga-home-campaigns').boundingBox();
     const overview = await page.locator('.gramads-overview').boundingBox();
     expect(campaign.width).toBeGreaterThan(overview.width * .95);
     await assertPage(page,'/app/notifications/');

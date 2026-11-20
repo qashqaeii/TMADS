@@ -2,89 +2,86 @@
 {% load core_filters humanize static %}
 {% block container_class %}container-wide{% endblock %}
 {% block page_title %}داشبورد{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/gramads-overview.css' %}">{% endblock %}
 {% block charts_head %}
 {% if has_chart %}{% include "includes/charts_exec_scripts.html" %}{% endif %}
 {% endblock %}
 {% block content %}
-<div class="dash-home dash-home--premium ui-dashboard gramads-overview">
-  {% include "includes/dash_home_hero.html" %}
+<div class="dash-home--premium gramads-overview ga-command">
+  {% include "dashboard/includes/overview_header.html" %}
 
-  {% include "includes/dash_home_kpi.html" with active_count=active_count total_campaigns=total_campaigns impressions=impressions clicks=clicks ctr=ctr %}
+  {% include "dashboard/includes/overview_metrics.html" with active_count=active_count total_campaigns=total_campaigns impressions=impressions clicks=clicks ctr=ctr %}
 
-  <section class="dash-workspace ui-dashboard-workspace" aria-label="تحلیل و کیف پول">
-    <article class="dash-chart-card dash-chart-card--lux">
-      <header class="dash-chart-card__head">
-        <div class="ga-heading-stack"><span class="ga-overline">تحلیل عملکرد</span><h2 class="dash-chart-card__title">روند نمایش و کلیک</h2></div>
-        {% if has_chart %}<p class="dash-chart-card__meta ga-period">{% include "includes/lucide_icon.html" with name="calendar-days" size="sm" %} ۳۰ روز اخیر</p>{% endif %}
+  <section class="ga-home-workspace" aria-label="تحلیل و کیف پول">
+    <article class="ga-home-panel ga-home-chart">
+      <header class="ga-home-panel-head">
+        <h2 class="ga-home-panel-title">روند نمایش و کلیک</h2>
+        {% if has_chart %}<p class="ga-home-period">{% include "includes/lucide_icon.html" with name="calendar-days" size="sm" %} ۳۰ روز اخیر</p>{% endif %}
       </header>
-      <div class="dash-chart-card__body">
+      <div class="ga-home-chart-body">
         {% if has_chart %}
-        <div id="dash-chart" class="chart-box chart-box--dash-home" role="img" aria-label="نمودار روند پورتفولیو"></div>
+        <div id="dash-chart" class="ga-home-chart-canvas chart-box--dash-home" role="img" aria-label="نمودار روند پورتفولیو"></div>
         {% else %}
-        <div class="dash-chart-card__empty">
-          {% include "includes/chart_empty_dash.html" with has_linked_ads=has_linked_ads show_steps=1 %}
+        <div class="ga-home-chart-empty">
+          {% include "includes/chart_empty_dash.html" with has_linked_ads=has_linked_ads show_steps=0 %}
         </div>
         {% endif %}
       </div>
     </article>
-    <div class="ui-dashboard-rail">
-      {% include "includes/wallet_module_compact.html" with wallet=wallet %}
-     </div>
+    {% include "dashboard/includes/overview_wallet.html" with wallet=wallet %}
   </section>
 
-  <section class="dash-bottom ui-dashboard-recent" aria-label="کمپین‌های اخیر و فعالیت‌ها">
-    <article class="dash-board dash-board--campaigns">
-      <header class="dash-board__head">
-        <div class="dash-board__title">
-          <div class="dash-board__title-row">
-            <h2 class="dash-board__heading">کمپین‌های اخیر</h2>
-            {% if recent_rows %}<span class="dash-board__count tabnums">{{ recent_rows|length }}</span>{% endif %}
+  <section class="ga-home-recent" aria-label="کمپین‌های اخیر و فعالیت‌ها">
+    <article class="ga-home-panel ga-home-campaigns">
+      <header class="ga-home-panel-head">
+        <div class="ga-home-campaign-heading">
+          <div class="ga-home-campaign-title">
+            <h2 class="ga-home-panel-title">کمپین‌های اخیر</h2>
+            {% if recent_rows %}<span class="ga-home-count tabnums">{{ recent_rows|length }}</span>{% endif %}
           </div>
-          <p class="dash-board__sub">مرتب‌شده بر اساس آخرین به‌روزرسانی</p>
         </div>
-        <a class="dash-board__all" href="{% url 'campaigns:list' %}">
+        <a class="ga-home-link" href="{% url 'campaigns:list' %}">
           <span>همه کمپین‌ها</span>
           {% include "includes/lucide_icon.html" with name="arrow-left" size="sm" %}
         </a>
       </header>
       {% if recent_rows %}
-      <div class="ga-campaign-columns" aria-hidden="true"><span>نام کمپین و وضعیت</span><div><span>نمایش</span><span>کلیک</span><span>نرخ کلیک</span></div><span>آخرین تغییر</span></div>
-      <ul class="dash-campaign-rows dash-campaign-list">
+      <div class="ga-home-campaign-columns" aria-hidden="true"><span>نام کمپین و وضعیت</span><div><span>نمایش</span><span>کلیک</span><span>نرخ کلیک</span></div><span>آخرین تغییر</span></div>
+      <ul class="ga-home-campaign-list">
         {% for row in recent_rows %}
         {% with c=row.campaign m=row.metrics %}
-        <li class="dash-campaign-list__item">
-          <a class="dash-campaign-row dash-campaign-card dash-campaign-card--{{ c.status }}" href="{% url 'campaigns:detail' c.id %}">
-            <span class="dash-campaign-card__rail" aria-hidden="true"></span>
-            <div class="dash-campaign-card__body">
-              <span class="ga-campaign-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="megaphone" size="md" %}</span>
-              <div class="ga-campaign-identity">
-              <div class="dash-campaign-row__lead dash-campaign-card__head">
-                <span class="dash-campaign-row__name dash-campaign-card__name">{{ c.name|default:"بدون نام" }}</span>
+        <li class="ga-home-campaign-item">
+          <a class="ga-home-campaign-row ga-home-campaign-row--{{ c.status }}" href="{% url 'campaigns:detail' c.id %}">
+            <div class="ga-home-campaign-body">
+              <span class="ga-home-campaign-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="megaphone" size="md" %}</span>
+              <div class="ga-home-campaign-identity">
+              <div class="ga-home-campaign-name-line">
+                <span class="ga-home-campaign-name">{{ c.name|default:"بدون نام" }}</span>
                 <span class="status status--pill status--compact {{ c.status|campaign_status_class }}">{{ c.get_status_display }}</span>
               </div>
-              <p class="dash-campaign-row__dest dash-campaign-card__dest" dir="ltr" title="{{ c.destination }}">
+              <p class="ga-home-campaign-destination" dir="ltr" title="{{ c.destination }}">
                 {% include "includes/lucide_icon.html" with name="link-2" size="sm" %}
                 <span>{% if c.destination %}{{ c.destination|shorten_url:36 }}{% else %}—{% endif %}</span>
               </p>
               </div>
             </div>
-            <div class="dash-campaign-row__nums dash-campaign-card__stats tabnums" aria-label="آمار کمپین">
-              <div class="dash-campaign-stat">
-                <span class="dash-campaign-stat__value">{% if m.has_impressions %}{{ m.impressions|format_count }}{% else %}—{% endif %}</span>
-                <span class="dash-campaign-stat__label">نمایش</span>
+            <div class="ga-home-campaign-stats tabnums" aria-label="آمار کمپین">
+              <div class="ga-home-stat">
+                <span class="ga-home-stat__value">{% if m.has_impressions %}{{ m.impressions|format_count }}{% else %}—{% endif %}</span>
+                <span class="ga-home-stat__label">نمایش</span>
               </div>
-              <div class="dash-campaign-stat">
-                <span class="dash-campaign-stat__value">{% if m.has_clicks %}{{ m.clicks|format_count }}{% else %}—{% endif %}</span>
-                <span class="dash-campaign-stat__label">کلیک</span>
+              <div class="ga-home-stat">
+                <span class="ga-home-stat__value">{% if m.has_clicks %}{{ m.clicks|format_count }}{% else %}—{% endif %}</span>
+                <span class="ga-home-stat__label">کلیک</span>
               </div>
-              <div class="dash-campaign-stat dash-campaign-stat--accent">
-                <span class="dash-campaign-stat__value">{% if m.has_ctr %}{{ row.ctr|persian_digits }}<span class="dash-campaign-stat__suffix">٪</span>{% else %}—{% endif %}</span>
-                <span class="dash-campaign-stat__label">نرخ کلیک</span>
+              <div class="ga-home-stat ga-home-stat--accent">
+                <span class="ga-home-stat__value">{% if m.has_ctr %}{{ row.ctr|persian_digits }}<span class="ga-home-stat__suffix">٪</span>{% else %}—{% endif %}</span>
+                <span class="ga-home-stat__label">نرخ کلیک</span>
               </div>
             </div>
-            <div class="dash-campaign-card__meta">
-              <time class="dash-campaign-row__when dash-campaign-card__when" datetime="{{ c.updated_at|date:'c' }}">{{ c.updated_at|jalali_datetime }}</time>
-              <span class="dash-campaign-card__go" aria-hidden="true">{% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}</span>
+            <div class="ga-home-campaign-meta">
+              <time class="ga-home-campaign-time" datetime="{{ c.updated_at|date:'c' }}">{{ c.updated_at|jalali_datetime }}</time>
+              <span class="ga-home-campaign-go" aria-hidden="true">{% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}</span>
             </div>
           </a>
         </li>
@@ -92,8 +89,8 @@
         {% endfor %}
       </ul>
       {% else %}
-      <div class="dash-board__empty dash-board__empty--lux">
-        <span class="ui-empty__icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="megaphone" size="md" %}</span><p class="dash-board__empty-title">اولین کمپین را بسازید</p>
+      <div class="ga-home-campaign-empty">
+        <span class="ui-empty__icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="megaphone" size="md" %}</span><p class="ga-home-empty-title">اولین کمپین را بسازید</p>
         <p class="muted">۵ مرحله · پیش‌نویس خودکار</p>
         <a class="btn btn-primary btn-sm" href="{% url 'campaigns:wizard_new' %}">
           {% include "includes/lucide_icon.html" with name="plus" size="btn" %}
@@ -102,9 +99,9 @@
       </div>
       {% endif %}
     </article>
-    <div class="ga-bottom-rail">
-      {% include "dashboard/includes/activity_compact.html" %}
-      <article class="dash-board ga-quick-card"><header class="dash-board__head"><h2 class="dash-board__heading">دسترسی سریع</h2></header><nav class="ga-quick-nav" aria-label="دسترسی سریع">
+    <div class="ga-home-bottom ga-bottom-rail">
+      {% include "dashboard/includes/overview_activity.html" %}
+      <article class="ga-home-panel ga-home-quick-card"><header class="ga-home-panel-head"><h2 class="ga-home-panel-title">دسترسی سریع</h2></header><nav class="ga-home-quick-nav ga-quick-nav" aria-label="دسترسی سریع">
         <a href="{% url 'campaigns:list' %}">{% include "includes/lucide_icon.html" with name="megaphone" size="sm" %}<span>مدیریت کمپین‌ها</span>{% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}</a>
         <a href="{% url 'finance:transactions' %}">{% include "includes/lucide_icon.html" with name="wallet" size="sm" %}<span>تراکنش‌ها</span>{% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}</a>
         <a href="{% url 'accounts:related_account' %}">{% include "includes/lucide_icon.html" with name="building-2" size="sm" %}<span>حساب تبلیغاتی</span>{% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}</a>

@@ -1,0 +1,25 @@
+{% load core_filters %}
+<header class="ga-home-header" aria-label="سرفصل داشبورد">
+  <div class="ga-home-intro">
+    <h1>داشبورد</h1>
+     
+    <p>نمای کلی عملکرد تبلیغات</p>
+  </div>
+  <div class="ga-home-toolbar">
+    {% if ton_rate_display %}
+    <p
+      class="ga-home-chip tabnums"
+      title="{% if not ton_rate_display.is_fresh %}آخرین نرخ ثبت‌شده در سیستم{% else %}نرخ فعلی هر گرام{% endif %}"
+    >
+      <span class="ga-home-chip-label">گرام</span>
+      <span class="ga-home-chip-value">{{ ton_rate_display.irr_per_ton|irr_to_toman|format_count }}</span>
+      <span class="ga-home-chip-unit">تومان</span>
+      {% if not ton_rate_display.is_fresh %}<span class="ga-home-chip-dot" aria-hidden="true"></span><span class="ga-home-rate-note">آخرین نرخ ثبت‌شده</span>{% endif %}
+    </p>
+    {% endif %}
+    <a class="ga-home-cta btn btn-primary btn-sm" href="{% url 'campaigns:wizard_new' %}">
+      {% include "includes/lucide_icon.html" with name="plus" size="btn" %}
+      <span>ساخت تبلیغ</span>
+    </a>
+  </div>
+</header>

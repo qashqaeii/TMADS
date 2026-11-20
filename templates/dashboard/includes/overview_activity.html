@@ -1,0 +1,25 @@
+{% load core_filters %}
+<aside class="ga-home-panel ga-home-activity{% if not activity %} is-empty{% endif %}">
+      <header class="ga-home-panel-head">
+        <h2 class="ga-home-panel-heading">فعالیت</h2>
+        <a class="ga-home-link" href="{% url 'dashboard:notifications' %}">اعلان‌ها</a>
+      </header>
+      {% if activity %}
+      <ul class="ga-home-activity-list">
+        {% for a in activity %}
+        <li class="ga-home-activity-list__item">
+          <span class="ga-home-activity-list__dot" aria-hidden="true"></span>
+          <div class="ga-home-activity-list__body">
+            <p class="ga-home-activity-list__line">
+              <a href="{% url 'campaigns:detail' a.campaign_id %}">{{ a.campaign.name|default:"کمپین" }}</a>
+              — {% if a.note %}{{ a.note }}{% else %}به‌روزرسانی وضعیت{% endif %}
+            </p>
+            <time class="ga-home-activity-list__time" datetime="{{ a.created_at|date:'c' }}">{{ a.created_at|jalali_datetime }}</time>
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <div class="ga-home-activity-empty"><span aria-hidden="true">{% include "includes/lucide_icon.html" with name="activity" size="md" %}</span><div><strong>هنوز فعالیتی ثبت نشده</strong><p class="ga-home-activity-hint">به‌روزرسانی وضعیت کمپین‌ها اینجا نمایش داده می‌شود.</p></div></div>
+      {% endif %}
+    </aside>
