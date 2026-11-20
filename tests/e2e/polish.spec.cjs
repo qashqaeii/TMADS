@@ -337,3 +337,65 @@ test.describe('Workflow no-script experience',()=>{
     await expect(page).toHaveURL(/#guide-preparation$/);
   });
 });
+
+
+test('FAQ Orbit category, Persian search and keyboard accordion at three widths',async({page})=>{
+  test.setTimeout(60000);
+  for(const width of [320,768,1440]){
+    await page.setViewportSize({width,height:900});
+    await page.emulateMedia({reducedMotion:'reduce'});
+    await assertPage(page,'/faq/');
+    const questions=page.locator('[data-fq-question]');
+    await expect(questions).toHaveCount(16);
+    const query=page.locator('#pp-faq-query');
+    const category=page.locator('[data-fq-category="finance"]');
+    await category.click();
+    await expect(category).toHaveAttribute('aria-pressed','true');
+    await expect(page.locator('[data-fq-question]:visible')).toHaveCount(4);
+    await query.fill('cpm');
+    await expect(page.locator('[data-fq-question]:visible')).toHaveCount(1);
+    const result=page.locator('[data-fq-question]:visible').first();
+    await result.locator('summary').focus();
+    await page.keyboard.press('Enter');
+    await expect(result).toHaveAttribute('open','');
+    await query.fill('zzzznotfound');
+    await expect(page.locator('[data-fq-empty]')).toBeVisible();
+    await page.locator('[data-fq-reset]').click();
+    await expect(query).toHaveValue('');
+    await expect(page.locator('[data-fq-question]:visible')).toHaveCount(16);
+    await query.fill('كيف پول');
+    await expect.poll(()=>page.locator('[data-fq-question]:visible').count()).toBeGreaterThan(0);
+    await page.locator('[data-fq-clear]').click();
+    await expect(page.locator('[data-fq-question]:visible')).toHaveCount(16);
+    for(const image of await page.locator('[data-faq-art]:visible').all()){
+      await image.scrollIntoViewIfNeeded();
+      await expect.poll(()=>image.evaluate(el=>el.complete&&el.naturalWidth>0)).toBe(true);
+      expect(await image.evaluate(el=>getComputedStyle(el).objectFit)).toBe('contain');
+    }
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+2)).toBe(true);
+  }
+});
+test('FAQ Orbit motion honors reduced motion',async({page})=>{
+  await page.setViewportSize({width:1440,height:900});
+  await page.emulateMedia({reducedMotion:'no-preference'});
+  await assertPage(page,'/faq/');
+  await expect(page.locator('body')).toHaveClass(/fq-motion-ready/);
+  const card=page.locator('.fq-guide-card').first();
+  await card.scrollIntoViewIfNeeded();
+  await card.hover();
+  await expect(card).toHaveClass(/fq-spot-active/);
+  await page.emulateMedia({reducedMotion:'reduce'});
+  await expect(card).not.toHaveClass(/fq-spot-active/);
+});
+test.describe('FAQ without JavaScript',()=>{
+  test.use({javaScriptEnabled:false});
+  test('answers and support remain accessible',async({page})=>{
+    await page.goto('/faq/');
+    await expect(page.locator('[data-fq-question]:visible')).toHaveCount(16);
+    await expect(page.locator('[data-pp-faq-search]')).toBeHidden();
+    const first=page.locator('[data-fq-question]').first();
+    await first.locator('summary').click();
+    await expect(first).toHaveAttribute('open','');
+    await expect(page.locator('.fq-support a')).toHaveAttribute('href',/contact/);
+  });
+});
