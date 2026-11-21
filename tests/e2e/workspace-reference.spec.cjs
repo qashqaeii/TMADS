@@ -27,6 +27,9 @@ for (const role of Object.keys(routes)) {
         expect(response.status(),route).toBe(200);
         expect(new URL(page.url()).pathname,route).toBe(route);
         await expect(page.locator('body')).toHaveClass(/ga-workspace-system/);
+        if (role === 'ops') {
+          await expect(page.locator('.sidebar-admin-group')).toHaveAttribute('open', '');
+        }
         await expect(page.locator('#main-content')).toBeVisible();
         await expect(page.locator('#ui-confirmation')).toHaveCount(1);
         expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),route+' @ '+width).toBe(true);

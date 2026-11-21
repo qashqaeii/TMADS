@@ -29,6 +29,7 @@ def test_workspace_visual_contract(client, customer_user, path, marker):
     assert marker in html
     assert static("css/gramads-workspace-pages.css") in html
     assert static("css/gramads-workspace-composition.css") in html
+    assert static("css/gramads-sidebar.css") in html
     assert static("css/gramads-workspace-background.css") in html
     assert 'is-app ga-workspace-system' in html
     assert html.count('id="ui-confirmation"') == 1

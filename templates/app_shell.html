@@ -60,8 +60,12 @@
         </a>
 
         {% if user.is_platform_manager %}
-        <p class="sidebar-group-label sidebar-group-label--admin">مدیریت پلتفرم</p>
-        <div class="sidebar-admin-block">
+        <details class="sidebar-admin-group" {% if '/ops/' in request.path %}open{% endif %}>
+          <summary class="sidebar-group-label sidebar-group-label--admin">
+            <span>مدیریت پلتفرم</span>
+            <span class="sidebar-admin-chevron" aria-hidden="true">{% include "includes/lucide_icon.html" with name="chevron-down" size="sm" %}</span>
+          </summary>
+          <div class="sidebar-admin-block">
           <a href="{% url 'operations:overview' %}" class="sidebar-link {% if request.path == '/ops/' or request.path == '/ops' %}active{% endif %}"{% if request.path == '/ops/' or request.path == '/ops' %} aria-current="page"{% endif %}>
             <span class="nav-icon">{% include "includes/nav_icon.html" with icon="ops" %}</span>
             <span class="nav-label">نمای کلی</span>
@@ -91,7 +95,8 @@
             <span class="nav-icon">{% include "includes/nav_icon.html" with icon="audit" %}</span>
             <span class="nav-label">ممیزی</span>
           </a>
-        </div>
+          </div>
+        </details>
         {% endif %}
       </nav>
     </div>

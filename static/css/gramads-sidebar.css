@@ -1,0 +1,435 @@
+/* GramAds navigation system — a compact, high-contrast workspace sidebar.
+   Loaded last so this is the single source of truth for the authenticated shell. */
+body.ui-final.is-app .ui-shell .sidebar--premium {
+  background-color: #081b31 !important;
+  background-image: var(--tmads-bg-sidebar) !important;
+  background-position: center top !important;
+  background-size: cover !important;
+  background-repeat: no-repeat !important;
+  border-inline-end: 1px solid rgba(120, 174, 218, .16) !important;
+  box-shadow: 10px 0 32px rgba(4, 17, 32, .12) !important;
+}
+body.ui-final.is-app .ui-shell .sidebar--premium::before {
+  background: linear-gradient(
+    180deg,
+    rgba(7, 27, 49, .70) 0%,
+    rgba(7, 25, 45, .88) 43%,
+    rgba(6, 22, 40, .97) 100%
+  ) !important;
+}
+body.ui-final.is-app .ui-shell .sidebar--premium::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 82% 0%, rgba(45, 153, 224, .15), transparent 34%);
+}
+body.ui-final.is-app .ui-shell .sidebar--premium :is(.sidebar-head, .sidebar-scroll, .sidebar-foot) {
+  position: relative;
+  z-index: 1;
+  background: transparent !important;
+}
+
+/* Brand header */
+body.ui-final.is-app .ui-shell .sidebar--premium .sidebar-head {
+  flex: 0 0 auto;
+  min-height: 76px;
+  margin-inline: 13px;
+  padding: 12px 3px 13px;
+  border-bottom: 1px solid rgba(157, 192, 225, .13) !important;
+  gap: 8px;
+}
+body.ui-final.is-app .ui-shell .sidebar--premium .sidebar-brand {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 10px;
+  color: #f4f8ff;
+  text-decoration: none;
+}
+body.ui-final.is-app .ui-shell .sidebar--premium .sidebar-brand .gramads-mark {
+  width: 40px;
+  height: 40px;
+  flex-basis: 40px;
+  filter: drop-shadow(0 3px 10px rgba(0, 153, 255, .18));
+}
+body.ui-final.is-app .ui-shell .sidebar--premium .sidebar-brand-text {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+  line-height: 1.25;
+}
+body.ui-final.is-app .ui-shell .sidebar--premium .sidebar-brand-text strong {
+  color: #f5f9ff;
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: -.01em;
+}
+body.ui-final.is-app .ui-shell .sidebar--premium .sidebar-brand-text small {
+  color: #83a9cc;
+  font-size: .56rem;
+  font-weight: 650;
+  letter-spacing: .075em;
+  white-space: nowrap;
+}
+
+/* Scrollable navigation; wallet and identity stay anchored at the bottom. */
+body.ui-final.is-app .ui-shell .sidebar--premium .sidebar-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding: 8px 10px 12px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(119, 163, 203, .32) transparent;
+}
+body.ui-final.is-app .ui-shell .sidebar--premium .sidebar-scroll::-webkit-scrollbar {
+  width: 5px;
+}
+body.ui-final.is-app .ui-shell .sidebar--premium .sidebar-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+body.ui-final.is-app .ui-shell .sidebar--premium .sidebar-scroll::-webkit-scrollbar-thumb {
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: rgba(119, 163, 203, .28);
+  background-clip: padding-box;
+}
+body.ui-final.is-app .ui-shell .sidebar--premium .sidebar-nav {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+}
+body.ui-final.is-app .ui-shell .sidebar--premium .sidebar-group-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 14px 9px 6px;
+  color: #8ba8c5;
+  font-size: .65rem;
+  font-weight: 750;
+  line-height: 1.35;
+  letter-spacing: 0;
+}
+body.ui-final.is-app .ui-shell .sidebar--premium .sidebar-group-label::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  flex: 0 0 5px;
+  border-radius: 50%;
+  background: #4c9ed5;
+  box-shadow: 0 0 0 3px rgba(76, 158, 213, .10);
+}
+body.ui-final.is-app .ui-shell .sidebar--premium .sidebar-group-label::after {
+  content: "";
+  display: block;
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(130, 169, 205, .22), transparent);
+}
+body.ui-final.is-app .ui-shell .sidebar--premium .sidebar-group-label:first-child {
+  margin-top: 5px;
+}
+
+/* Uniform navigation rows and icon geometry */
+body.ui-final.is-app .ui-shell .sidebar--premium a.sidebar-link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+  min-height: 39px;
+  gap: 10px;
+  margin: 0;
+  padding: 3px 8px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: #bdcde0 !important;
+  font-size: .82rem;
+  font-weight: 550;
+  line-height: 1.45;
+  text-decoration: none;
+  box-shadow: none;
+  transform: none;
+  transition: background .18s ease, border-color .18s ease, color .18s ease;
+}
+body.ui-final.is-app .ui-shell .sidebar--premium .sidebar-link .nav-label {
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+body.ui-final.is-app .ui-shell .sidebar--premium .sidebar-link .nav-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 31px;
+  width: 31px;
+  height: 31px;
+  border: 1px solid rgba(143, 184, 221, .09);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, .035);
+  color: #8eabc8;
+  opacity: 1;
+  transition: background .18s ease, border-color .18s ease, color .18s ease;
+}
+body.ui-final.is-app .ui-shell .sidebar--premium .sidebar-link .nav-icon .icon-shell {
+  width: 17px;
+  height: 17px;
+}
+body.ui-final.is-app .ui-shell .sidebar--premium .sidebar-link .nav-icon svg {
+  width: 17px;
+  height: 17px;
+  stroke-width: 1.8;
+}
+body.ui-final.is-app .ui-shell .sidebar--premium a.sidebar-link:hover {
+  color: #f6faff !important;
+  background: rgba(255, 255, 255, .065);
+  border-color: rgba(146, 188, 224, .09);
+  transform: none;
+}
+body.ui-final.is-app .ui-shell .sidebar--premium a.sidebar-link:hover .nav-icon {
+  color: #b8e5ff;
+  background: rgba(54, 142, 202, .16);
+  border-color: rgba(103, 184, 239, .20);
+}
+body.ui-final.is-app .ui-shell .sidebar--premium a.sidebar-link.active {
+  color: #f8fbff !important;
+  background: linear-gradient(105deg, rgba(28, 91, 145, .36), rgba(24, 63, 102, .42));
+  border: 1px solid rgba(100, 181, 235, .17);
+  border-inline-start: 1px solid rgba(100, 181, 235, .17);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .035), 0 3px 12px rgba(2, 15, 29, .10);
+  font-weight: 700;
+}
+body.ui-final.is-app .ui-shell .sidebar--premium a.sidebar-link.active::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: -1px;
+  inset-block: 8px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: linear-gradient(180deg, #76d2ff, #2796df);
+  box-shadow: 0 0 10px rgba(65, 175, 238, .35);
+}
+body.ui-final.is-app .ui-shell .sidebar--premium a.sidebar-link.active .nav-icon {
+  color: #8cdaff;
+  background: rgba(43, 145, 208, .20);
+  border-color: rgba(104, 197, 247, .24);
+}
+body.ui-final.is-app .ui-shell .sidebar--premium a.sidebar-link:focus-visible {
+  outline: 2px solid #8fd6ff;
+  outline-offset: 2px;
+}
+
+/* Platform tools collapse into a native, keyboard-accessible disclosure.
+   It opens automatically while the user is in /ops/ and stays compact elsewhere. */
+body.ui-final.is-app .ui-shell .sidebar--premium .sidebar-admin-group {
+  margin-block-start: 13px;
+  overflow: hidden;
+  border: 1px solid rgba(107, 165, 211, .15);
+  border-radius: 11px;
+  background: rgba(16, 45, 74, .34);
+}
+body.ui-final.is-app .ui-shell .sidebar--premium .sidebar-admin-group > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 39px;
+  margin: 0;
+  padding: 7px 10px;
+  color: #9db7d0;
+  font-size: .70rem;
+  font-weight: 750;
+  line-height: 1.4;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+body.ui-final.is-app .ui-shell .sidebar--premium .sidebar-admin-group > summary::-webkit-details-marker {
+  display: none;
+}
+body.ui-final.is-app .ui-shell .sidebar--premium .sidebar-admin-group > summary::marker {
+  content: "";
+}
+body.ui-final.is-app .ui-shell .sidebar--premium .sidebar-admin-group > summary::before,
+body.ui-final.is-app .ui-shell .sidebar--premium .sidebar-admin-group > summary::after {
+  display: none;
+  content: none;
+}
+body.ui-final.is-app .ui-shell .sidebar--premium .sidebar-admin-chevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #7597b8;
+  transition: transform .2s ease, color .2s ease;
+}
+body.ui-final.is-app .ui-shell .sidebar--premium .sidebar-admin-group[open] > summary {
+  color: #d9eaff;
+  background: rgba(45, 112, 165, .15);
+  border-bottom: 1px solid rgba(107, 165, 211, .13);
+}
+body.ui-final.is-app .ui-shell .sidebar--premium .sidebar-admin-group[open] .sidebar-admin-chevron {
+  color: #8bd4ff;
+  transform: rotate(180deg);
+}
+body.ui-final.is-app .ui-shell .sidebar--premium .sidebar-admin-block {
+  display: grid;
+  gap: 2px;
+  padding: 6px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+body.ui-final.is-app .ui-shell .sidebar--premium .sidebar-admin-block a.sidebar-link {
+  min-height: 36px;
+  padding: 2px 6px;
+  border-radius: 8px;
+  font-size: .78rem;
+}
+body.ui-final.is-app .ui-shell .sidebar--premium .sidebar-admin-block .nav-icon {
+  flex-basis: 28px;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+}
+
+/* Anchored wallet and account controls */
+body.ui-final.is-app .ui-shell .sidebar--premium .sidebar-foot--compact {
+  flex: 0 0 auto;
+  margin-top: auto;
+  display: grid;
+  gap: 8px;
+  padding: 11px 11px max(12px, env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid rgba(147, 183, 216, .13) !important;
+  background: linear-gradient(180deg, rgba(8, 27, 48, .55), rgba(5, 19, 35, .88)) !important;
+}
+body.ui-final.is-app .ui-shell .sidebar--premium .sidebar-foot__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid rgba(105, 166, 214, .17);
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(30, 78, 119, .46), rgba(13, 39, 67, .56));
+}
+body.ui-final.is-app .ui-shell .sidebar--premium .sidebar-foot__balance {
+  display: grid;
+  flex: 1 1 auto;
+  min-width: 0;
+  gap: 3px;
+  padding: 2px 4px;
+  border: 0;
+  background: transparent;
+  color: #edf6ff;
+  text-decoration: none;
+}
+body.ui-final.is-app .ui-shell .sidebar--premium .sidebar-foot__balance-label {
+  color: #92acc7;
+  font-size: .66rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+body.ui-final.is-app .ui-shell .sidebar--premium .sidebar-foot__balance-value {
+  color: #f2f8ff;
+  font-size: .96rem;
+  font-weight: 800;
+  line-height: 1.35;
+  font-variant-numeric: tabular-nums;
+}
+body.ui-final.is-app .ui-shell .sidebar--premium .sidebar-foot__topup {
+  display: grid;
+  place-items: center;
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgba(104, 191, 242, .28);
+  border-radius: 10px;
+  background: rgba(34, 133, 196, .20);
+  color: #94dcff;
+  transition: background .18s ease, border-color .18s ease, transform .18s ease;
+}
+body.ui-final.is-app .ui-shell .sidebar--premium .sidebar-foot__topup:hover {
+  background: rgba(34, 133, 196, .32);
+  border-color: rgba(124, 207, 250, .45);
+  transform: translateY(-1px);
+}
+body.ui-final.is-app .ui-shell .sidebar--premium .sidebar-foot__user {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  min-height: 46px;
+  gap: 10px;
+  padding: 5px 7px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  color: #e8f2fc;
+  text-decoration: none;
+  transition: background .18s ease, border-color .18s ease;
+}
+body.ui-final.is-app .ui-shell .sidebar--premium .sidebar-foot__user:hover {
+  background: rgba(255, 255, 255, .055);
+  border-color: rgba(134, 182, 222, .10);
+}
+body.ui-final.is-app .ui-shell .sidebar--premium .sidebar-foot__avatar {
+  display: grid;
+  place-items: center;
+  flex: 0 0 34px;
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(100, 184, 235, .24);
+  border-radius: 10px;
+  background: linear-gradient(145deg, #1e6091, #15395f);
+  color: #f1f8ff;
+  font-size: .78rem;
+  font-weight: 800;
+}
+body.ui-final.is-app .ui-shell .sidebar--premium .sidebar-foot__user-meta {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+body.ui-final.is-app .ui-shell .sidebar--premium .sidebar-foot__name {
+  color: #e9f3fd;
+  font-size: .77rem;
+  font-weight: 700;
+}
+body.ui-final.is-app .ui-shell .sidebar--premium .sidebar-foot__role {
+  color: #89a6c3;
+  font-size: .64rem;
+}
+
+/* Mobile drawer: same visual language, with touch-sized controls and safe-area spacing. */
+@media (max-width: 900px) {
+  body.ui-final.is-app .ui-shell .sidebar--premium {
+    width: min(320px, 88vw);
+    max-height: 100dvh;
+    box-shadow: -14px 0 40px rgba(0, 12, 26, .30) !important;
+  }
+  body.ui-final.is-app .ui-shell .sidebar--premium .sidebar-head {
+    min-height: 72px;
+    padding-block: 10px 11px;
+  }
+  body.ui-final.is-app .ui-shell .sidebar--premium a.sidebar-link {
+    min-height: 44px;
+  }
+  body.ui-final.is-app .ui-shell .sidebar--premium .sidebar-admin-group > summary {
+    min-height: 44px;
+  }
+  body.ui-final.is-app .ui-shell .sidebar--premium .sidebar-admin-block a.sidebar-link {
+    min-height: 42px;
+  }
+  body.ui-final.is-app .ui-shell .sidebar--premium .sidebar-foot--compact {
+    padding-bottom: max(14px, env(safe-area-inset-bottom, 0px));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  body.ui-final.is-app .ui-shell .sidebar--premium :is(.sidebar-link, .sidebar-foot__user, .sidebar-foot__topup, .sidebar-admin-chevron) {
+    transition: none !important;
+    transform: none !important;
+  }
+}
