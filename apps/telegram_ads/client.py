@@ -206,11 +206,17 @@ class TelegramAdsClient:
 
         return self._run("get_ad_statistics", _stats)
 
-    def get_ad_transactions(self, ad_id: str, *, limit: int = 20) -> dict[str, Any]:
-        return self._run(
-            "get_ad_transactions",
-            lambda client: _model_to_dict(client.get_ad_transactions_list(int(ad_id), limit=limit)),
-        )
+    def get_ad_transactions(self, ad_id: str, *, limit: int = 100) -> dict[str, Any]:
+        """Return a complete bounded history; truncated histories are never treated as evidence."""
+        def _read(client):
+            rows = []
+            for item in client.iter_ad_transactions(int(ad_id), page_size=min(max(int(limit), 1), 100)):
+                rows.append(_model_to_dict(item))
+                if len(rows) > 5000:
+                    return {"transactions": rows[:5000], "total_count": len(rows), "next_offset": "truncated"}
+            return {"transactions": rows, "total_count": len(rows), "next_offset": None}
+
+        return self._run("get_ad_transactions", _read)
 
     def get_target_languages(self) -> list[dict[str, Any]]:
         return self._run("get_target_languages", lambda client: [_model_to_dict(x) for x in client.get_target_languages_list()])

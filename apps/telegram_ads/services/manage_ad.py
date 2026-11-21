@@ -3,6 +3,7 @@ from decimal import Decimal, InvalidOperation
 
 from django.conf import settings
 from django.db import transaction
+from django.utils import timezone
 from django.core.exceptions import PermissionDenied
 
 from apps.campaigns.models import Campaign, RemoteAdOperation, TelegramAdvertisement
@@ -21,20 +22,30 @@ Status = RemoteAdOperation.Status
 OPEN = [Status.PENDING, Status.EXECUTING, Status.UNCERTAIN]
 
 
-def parse_request(action, value=""):
+def parse_request(action, value="", *, currency="TON"):
     if action not in Action.values:
         raise ValueError("عملیات معتبر نیست.")
-    if action in (Action.INCREASE_BUDGET,Action.DECREASE_BUDGET):
-        raise ValueError("درخواست بودجه باید از مسیر پیش‌فاکتور و بررسی اعتبار ثبت شود.")
+    precision = {"TON": 2, "EUR": 2, "XTR": 0}.get(str(currency or "TON").upper())
+    if precision is None:
+        raise ValueError("ارز حساب تبلیغاتی پشتیبانی نمی‌شود.")
+    quantum = Decimal(1).scaleb(-precision)
+    if action in (Action.INCREASE_BUDGET, Action.DECREASE_BUDGET):
+        try:
+            amount = Decimal(str(value))
+            if not amount.is_finite() or not 0 < amount <= Decimal("100000000000") or amount != amount.quantize(quantum):
+                raise ValueError
+        except (InvalidOperation, ValueError, TypeError):
+            raise ValueError(f"مبلغ باید مثبت و با دقت مجاز ارز {currency} باشد.") from None
+        return {"amount": str(amount)}
     if action in (Action.EDIT_CPM, Action.EDIT_DAILY_LIMIT):
         try:
-            amount = Decimal(value)
+            amount = Decimal(str(value))
             if (not amount.is_finite() or not 0 <= amount <= Decimal("99999999.99")
-                    or amount != amount.quantize(Decimal(".01"))
+                    or amount != amount.quantize(quantum)
                     or action == Action.EDIT_CPM and amount <= 0):
                 raise ValueError
         except (InvalidOperation, ValueError, TypeError):
-            raise ValueError("مبلغ TON باید معتبر و با حداکثر دو رقم اعشار باشد.") from None
+            raise ValueError(f"مبلغ باید معتبر و با دقت مجاز ارز {currency} باشد.") from None
         return {"cpm" if action == Action.EDIT_CPM else "daily_budget_limit": str(amount)}
     if action == Action.EDIT_TITLE:
         title = str(value).strip()
@@ -54,7 +65,7 @@ def request_operation(campaign_id, *, actor, action, value=""):
     customer = getattr(actor, "customer_profile", None)
     if not customer or customer.is_suspended:
         raise PermissionDenied
-    campaign = Campaign.objects.select_for_update().get(pk=campaign_id, customer=customer)
+    campaign = Campaign.objects.select_for_update().select_related("telegram_connection").get(pk=campaign_id, customer=customer)
     if has_financial_lock(campaign) or campaign.status in {Campaign.Status.CANCELLED, Campaign.Status.FAILED, Campaign.Status.DRAFT}:
         raise ValueError("ابتدا وضعیت ارسال و مالی کمپین باید مشخص شود.")
     ads = list(campaign.remote_ads.exclude(remote_ad_id="")[:2])
@@ -63,7 +74,14 @@ def request_operation(campaign_id, *, actor, action, value=""):
     ad = ads[0]
     if ad.operations.filter(status__in=OPEN).exists():
         raise ValueError("یک درخواست باز یا نیازمند تطبیق وجود دارد.")
-    op = RemoteAdOperation.objects.create(advertisement=ad, action=action, request_payload=parse_request(action,value))
+    direct = bool(campaign.telegram_connection_id and campaign.telegram_connection.connection_type == "customer_owned")
+    if action in (Action.INCREASE_BUDGET, Action.DECREASE_BUDGET) and not direct:
+        raise ValueError("درخواست بودجه مدیریت‌شده باید از مسیر پیش‌فاکتور و بررسی اعتبار ثبت شود.")
+    currency = campaign.telegram_connection.currency if direct else "TON"
+    op = RemoteAdOperation.objects.create(
+        advertisement=ad, action=action,
+        request_payload=parse_request(action, value, currency=currency),
+    )
     _audit(op,actor,"requested")
     return op
 
@@ -124,8 +142,10 @@ def _payload(op, remote):
             raise ValueError("تبلیغ در وضعیت آماده بررسی نیست.")
         return {}
     if action in (Action.EDIT_CPM, Action.EDIT_DAILY_LIMIT):
-        if remote.get("currency") != "TON":
-            raise ValueError("ویرایش مبلغ تنها برای حساب TON مجاز است.")
+        campaign = op.advertisement.campaign
+        expected_currency = campaign.telegram_connection.currency if campaign.telegram_connection_id else "TON"
+        if remote.get("currency") != expected_currency:
+            raise ValueError("ارز تبلیغ با حساب متصل مطابقت ندارد.")
         return {k:float(v) for k,v in op.request_payload.items()}
     return op.request_payload
 
@@ -136,7 +156,20 @@ def operation_matches_remote(op, remote):
         return False
     action = op.action
     if action in (Action.INCREASE_BUDGET, Action.DECREASE_BUDGET):
-        return False  # Budget requires independent financial and transfer evidence.
+        try:
+            before = Decimal(str(op.request_payload["before_remaining_budget"]))
+            amount = Decimal(str(op.request_payload["amount"]))
+            observed = Decimal(str(remote["remaining_budget"]))
+            expected = before + amount if action == Action.INCREASE_BUDGET else before - amount
+            campaign = op.advertisement.campaign
+            currency = campaign.telegram_connection.currency
+            return (
+                remote.get("currency") == currency and before.is_finite()
+                and amount.is_finite() and observed.is_finite() and expected >= 0
+                and observed == expected
+            )
+        except (KeyError, InvalidOperation, TypeError, ValueError):
+            return False
     if action == Action.REVIEW:
         return remote.get("status") in {"in_review", "active", "on_hold", "declined"}
     if action in (Action.PAUSE, Action.RESUME):
@@ -145,7 +178,9 @@ def operation_matches_remote(op, remote):
             return remote.get("is_paused") is True or state in {"stopped", "on_hold"}
         return state == "active" and remote.get("is_paused") is not True
     if action in (Action.EDIT_CPM, Action.EDIT_DAILY_LIMIT):
-        if remote.get("currency") != "TON":
+        campaign = op.advertisement.campaign
+        expected_currency = campaign.telegram_connection.currency if campaign.telegram_connection_id else "TON"
+        if remote.get("currency") != expected_currency:
             return False
         field = "cpm" if action == Action.EDIT_CPM else "daily_budget_limit"
         try:
@@ -192,6 +227,180 @@ def reconcile_operation_readonly(operation_id, *, actor):
         notify_customer(campaign.customer, "نتیجه درخواست تبلیغ تأیید شد", op.get_action_display(), related_campaign_id=campaign.pk)
     return op
 
+
+
+def _budget_transaction_evidence(client, op, ad):
+    """Require a complete exact account↔ad transaction history for a budget write."""
+    try:
+        page = client.get_ad_transactions(ad.remote_ad_id, limit=100)
+        rows = page.get("transactions")
+        if not isinstance(rows, list) or page.get("next_offset") or page.get("total_count") != len(rows):
+            return False
+        amount = Decimal(str(op.request_payload["amount"]))
+        expected = amount if op.action == Action.INCREASE_BUDGET else -amount
+        matches = []
+        for row in rows:
+            peer = row.get("peer") or {}
+            if peer.get("type") != "account":
+                continue
+            value = Decimal(str(row.get("amount")))
+            timestamp = int(row.get("date"))
+            if value == expected and timestamp >= int(op.created_at.timestamp()) - 5:
+                matches.append(row)
+        return len(matches) == 1
+    except (KeyError, InvalidOperation, TypeError, ValueError, OverflowError):
+        return False
+
+
+def _customer_owned_guard(campaign, actor, op):
+    profile = getattr(actor, "customer_profile", None)
+    connection = campaign.telegram_connection
+    if not profile or profile.is_suspended or profile.pk != campaign.customer_id:
+        raise PermissionDenied
+    if not connection or connection.connection_type != "customer_owned" or connection.status != "connected":
+        raise ValueError("اتصال حساب شخصی برای این کمپین فعال نیست.")
+    if not settings.TELEGRAM_ADS_WRITE_ENABLED or not settings.TELEGRAM_ADS_PAID_SUBMISSION_ENABLED:
+        raise ValueError("عملیات زنده تبلیغات غیرفعال است.")
+    if not getattr(settings, "TELEGRAM_ADS_CUSTOMER_OWNED_ENABLED", False):
+        raise ValueError("مدیریت مستقیم حساب مشتری در تنظیمات پلتفرم غیرفعال است.")
+    if has_financial_lock(campaign) or campaign.status in {Campaign.Status.CANCELLED, Campaign.Status.FAILED, Campaign.Status.DRAFT}:
+        raise ValueError("کمپین نیازمند تطبیق وضعیت است.")
+    if not (campaign.ad_settings or {}).get("terms_accepted"):
+        raise ValueError("پذیرش شرایط استفاده برای مدیریت تبلیغ ثبت نشده است.")
+    if op.action in (Action.INCREASE_BUDGET, Action.DECREASE_BUDGET) and campaign.budget_currency != connection.currency:
+        raise ValueError("ارز کمپین با حساب تلگرام یکسان نیست.")
+
+
+def execute_customer_operation(operation_id, *, actor):
+    """Execute with the customer's own token and never touch the TMADS wallet."""
+    stub = RemoteAdOperation.objects.select_related(
+        "advertisement__campaign__telegram_connection",
+    ).get(pk=operation_id)
+    ad = stub.advertisement
+    with transaction.atomic():
+        campaign = Campaign.objects.select_for_update().select_related("telegram_connection").get(pk=ad.campaign_id)
+        op = RemoteAdOperation.objects.select_for_update().get(pk=operation_id)
+        if op.status != Status.PENDING:
+            raise ValueError("درخواست قبلاً اجرا شده یا نیازمند تطبیق است.")
+        _customer_owned_guard(campaign, actor, op)
+        if ad.operations.exclude(pk=op.pk).filter(status__in=OPEN).exists():
+            raise ValueError("یک عملیات باز دیگر برای این تبلیغ وجود دارد.")
+        client = campaign_client(campaign)
+        remote = _checked_remote(client, ad)
+        if op.action in (Action.INCREASE_BUDGET, Action.DECREASE_BUDGET):
+            if remote.get("currency") != campaign.telegram_connection.currency:
+                raise ValueError("ارز تبلیغ با حساب شخصی شما مطابقت ندارد.")
+            if remote.get("status") not in {"stopped", "on_hold"}:
+                raise ValueError("برای تغییر مستقیم بودجه، ابتدا تبلیغ را متوقف کنید.")
+            amount = Decimal(str(op.request_payload["amount"]))
+            before = Decimal(str(remote.get("remaining_budget")))
+            if not before.is_finite() or before < 0:
+                raise ValueError("مانده بودجه تبلیغ قابل تأیید نیست.")
+            if op.action == Action.DECREASE_BUDGET and before < amount:
+                raise ValueError("مانده بودجه تبلیغ برای کاهش انتخاب‌شده کافی نیست.")
+            if op.action == Action.INCREASE_BUDGET:
+                try:
+                    available = Decimal(str(client.get_account().get("remaining_budget")))
+                except (InvalidOperation, TypeError, ValueError):
+                    raise ValueError("موجودی آزاد حساب تلگرام قابل تأیید نیست.") from None
+                if not available.is_finite() or available < amount:
+                    raise ValueError("موجودی آزاد حساب تلگرام برای افزایش بودجه کافی نیست.")
+            op.request_payload = {
+                **op.request_payload,
+                "before_remaining_budget": str(before),
+                "currency": campaign.telegram_connection.currency,
+            }
+        else:
+            payload = _payload(op, remote)
+        op.status = Status.EXECUTING
+        op.save(update_fields=["status", "request_payload", "updated_at"])
+        _audit(op, actor, "customer_claimed")
+
+    try:
+        if op.action == Action.REVIEW:
+            client.submit_ad_for_review(ad.remote_ad_id)
+        elif op.action == Action.INCREASE_BUDGET:
+            client.increase_ad_budget(
+                ad.remote_ad_id, float(op.request_payload["amount"]),
+                idempotency_key=f"tmads-customer-ad-budget-{op.pk}",
+            )
+        elif op.action == Action.DECREASE_BUDGET:
+            client.decrease_ad_budget(
+                ad.remote_ad_id, float(op.request_payload["amount"]),
+                idempotency_key=f"tmads-customer-ad-budget-{op.pk}",
+            )
+        else:
+            client.edit_advertisement(ad.remote_ad_id, payload)
+        confirmed = _checked_remote(client, ad)
+        if not operation_matches_remote(op, confirmed):
+            raise ValueError("تغییر در پاسخ خواندنی تلگرام تأیید نشد.")
+        if op.action in (Action.INCREASE_BUDGET, Action.DECREASE_BUDGET):
+            if not _budget_transaction_evidence(client, op, ad):
+                raise ValueError("سند تراکنش تغییر بودجه کامل یا منطبق نیست.")
+        with transaction.atomic():
+            locked_campaign = Campaign.objects.select_for_update().get(pk=campaign.pk)
+            op = RemoteAdOperation.objects.select_for_update().get(pk=op.pk)
+            ad = TelegramAdvertisement.objects.select_for_update().get(pk=ad.pk)
+            _apply_remote_ad_payload(ad, confirmed)
+            ad.save(update_fields=["remote_status", "remote_status_raw", "placement", "promotion_url", "updated_at"])
+            _sync_campaign_from_remote(ad)
+            op.status = Status.COMPLETED
+            op.result_payload = {
+                "ad_id": ad.remote_ad_id, "status": confirmed.get("status"),
+                "currency": confirmed.get("currency"), "remaining_budget": confirmed.get("remaining_budget"),
+                "confirmed": True,
+            }
+            op.save(update_fields=["status", "result_payload", "updated_at"])
+            _audit(op, actor, "customer_completed")
+            notify_customer(locked_campaign.customer, "عملیات حساب تلگرام انجام شد",
+                            op.get_action_display(), level="success", related_campaign_id=locked_campaign.pk)
+        return op
+    except Exception as exc:
+        with transaction.atomic():
+            op = RemoteAdOperation.objects.select_for_update().get(pk=op.pk)
+            op.status = Status.UNCERTAIN
+            op.note = "پاسخ عملیات قطعی نیست؛ تا تطبیق خواندنی دوباره اجرا نکنید."
+            op.save(update_fields=["status", "note", "updated_at"])
+            _audit(op, actor, "customer_uncertain")
+        raise TelegramAdsError("نتیجه عملیات در حساب تلگرام نامطمئن است؛ درخواست را تکرار نکنید.") from exc
+
+
+def reconcile_customer_operation_readonly(operation_id, *, actor):
+    """Read-only reconciliation for an uncertain operation in the customer's account."""
+    op = RemoteAdOperation.objects.select_related(
+        "advertisement__campaign__telegram_connection",
+    ).get(pk=operation_id)
+    campaign = op.advertisement.campaign
+    profile = getattr(actor, "customer_profile", None)
+    if not profile or profile.pk != campaign.customer_id or op.status != Status.UNCERTAIN:
+        raise PermissionDenied
+    _customer_owned_guard(campaign, actor, op)
+    ad = op.advertisement
+    client = campaign_client(campaign)
+    remote = _checked_remote(client, ad)
+    if not operation_matches_remote(op, remote):
+        raise ValueError("تغییر مورد انتظار در تبلیغ تأیید نشد؛ وضعیت نامطمئن حفظ شد.")
+    if op.action in (Action.INCREASE_BUDGET, Action.DECREASE_BUDGET) and not _budget_transaction_evidence(client, op, ad):
+        raise ValueError("سند تراکنش بودجه کامل نیست؛ وضعیت نامطمئن حفظ شد.")
+    with transaction.atomic():
+        campaign = Campaign.objects.select_for_update().get(pk=campaign.pk)
+        op = RemoteAdOperation.objects.select_for_update().get(pk=operation_id)
+        ad = TelegramAdvertisement.objects.select_for_update().get(pk=ad.pk)
+        _apply_remote_ad_payload(ad, remote)
+        ad.save(update_fields=["remote_status", "remote_status_raw", "placement", "promotion_url", "updated_at"])
+        _sync_campaign_from_remote(ad)
+        op.status = Status.COMPLETED
+        op.note = "انجام عملیات با استعلام خواندنی و سند تراکنش تأیید شد."
+        op.result_payload = {
+            "ad_id": ad.remote_ad_id, "status": remote.get("status"),
+            "remaining_budget": remote.get("remaining_budget"),
+            "confirmed": True, "reconciled_readonly": True,
+        }
+        op.save(update_fields=["status", "note", "result_payload", "updated_at"])
+        _audit(op, actor, "customer_reconciled")
+        notify_customer(campaign.customer, "نتیجه عملیات تلگرام تأیید شد",
+                        op.get_action_display(), level="success", related_campaign_id=campaign.pk)
+    return op
 
 def execute_operation(operation_id, *, actor):
     """Claim before I/O; once a write is attempted, ambiguity blocks retries."""
