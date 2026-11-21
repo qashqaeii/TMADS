@@ -10,9 +10,9 @@ from .gateway import run
 
 # Remove contact details and links before user text is sent to the provider.
 PRIVATE = re.compile(
-    r"https?://\\S+|(?:t\\.me|telegram\\.me)/\\S+|@[\\w.]+|"
-    r"[\\w.+-]+@[\\w.-]+\\.[A-Za-z]{2,}|"
-    r"(?:\\+?98|0)?[\\d۰-۹٠-٩][\\d۰-۹٠-٩\\s().-]{8,}[\\d۰-۹٠-٩]",
+    r"https?://\S+|(?:t\.me|telegram\.me)/\S+|@[\w.]+|"
+    r"[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}|"
+    r"(?:\+?98|0)?[\d۰-۹٠-٩][\d۰-۹٠-٩\s().-]{8,}[\d۰-۹٠-٩]",
     re.I,
 )
 
@@ -49,8 +49,8 @@ def creative_variants(customer, campaign, brief, current):
                 not 1 <= len(text) <= 160
                 or PRIVATE.search(text)
                 or "[حذف‌شده]" in text
-                or "\\n" in text
-                or "\\r" in text
+                or "\n" in text
+                or "\r" in text
                 or text in variants
             ):
                 continue
@@ -222,7 +222,7 @@ def plan_campaign(customer, campaign, brief, audience="", goal=""):
         if (
             target_type not in TARGET_TYPE_LABELS
             or not isinstance(name, str) or not 3 <= len(name.strip()) <= 100
-            or PRIVATE.search(name) or "\\n" in name or "\\r" in name
+            or PRIVATE.search(name) or "\n" in name or "\r" in name
         ):
             raise AiError("invalid_output")
 
@@ -230,7 +230,7 @@ def plan_campaign(customer, campaign, brief, audience="", goal=""):
             if not isinstance(value, str):
                 return ""
             value = value.strip()
-            if not value or len(value) > limit or PRIVATE.search(value) or "\\n" in value or "\\r" in value:
+            if not value or len(value) > limit or PRIVATE.search(value) or "\n" in value or "\r" in value:
                 return ""
             return value
 
@@ -397,8 +397,8 @@ def optimize_campaign(customer, campaign):
                 or not 8 <= len(reason.strip()) <= 220
                 or PRIVATE.search(reason)
                 or any(ch.isdecimal() for ch in reason)
-                or "\\n" in reason
-                or "\\r" in reason
+                or "\n" in reason
+                or "\r" in reason
             ):
                 continue
             seen.add(action)

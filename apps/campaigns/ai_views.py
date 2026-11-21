@@ -9,11 +9,9 @@ from apps.ai.provider import AiError, available
 from apps.ai.features import (
     analyze_campaign,
     creative_variants,
-    optimization_eligible,
     optimize_campaign,
     plan_campaign,
 )
-from apps.campaigns.analytics import aggregate_campaign_metrics
 from .ownership import get_customer_campaign
 from .studio import ensure_studio_step
 
@@ -111,9 +109,6 @@ def optimization(request, campaign_id):
     campaign = get_customer_campaign(request.user.customer_profile, campaign_id)
     if not available():
         return fail(AiError("disabled"))
-    metrics = aggregate_campaign_metrics(campaign)
-    if not optimization_eligible(campaign, metrics):
-        return fail(AiError("insufficient_data"))
     try:
         result, cached = optimize_campaign(campaign.customer, campaign)
     except AiError as exc:
