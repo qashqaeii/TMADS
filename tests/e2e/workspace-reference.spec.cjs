@@ -43,12 +43,17 @@ for (const role of Object.keys(routes)) {
                 const cardRect = rect(el), labelRect = rect(el.querySelector('.kpi-exec__label'));
                 const valueRect = rect(el.querySelector('.kpi-exec__value'));
                 const iconRect = rect(el.querySelector('.kpi-exec__icon'));
+                const body = el.querySelector('.kpi-exec__body');
                 return {labelValue:intersects(labelRect,valueRect),iconValue:intersects(iconRect,valueRect),
-                  contained:valueRect.left>=cardRect.left-1 && valueRect.right<=cardRect.right+1};
+                  contained:valueRect.left>=cardRect.left-1 && valueRect.right<=cardRect.right+1,
+                  bodyRatio:body.getBoundingClientRect().width/el.getBoundingClientRect().width,
+                  valueOverflow:el.querySelector('.kpi-exec__value').scrollWidth>el.querySelector('.kpi-exec__value').clientWidth+1};
               });
               expect(geometry.labelValue).toBe(false);
               expect(geometry.iconValue).toBe(false);
               expect(geometry.contained).toBe(true);
+              expect(geometry.bodyRatio).toBeGreaterThan(.55);
+              expect(geometry.valueOverflow).toBe(false);
             }
           }
           if (route === '/ops/campaigns/' || route === '/ops/refunds/') {
@@ -62,8 +67,10 @@ for (const role of Object.keys(routes)) {
             const emptyHeight = (await page.locator('.ops-queue-empty').boundingBox()).height;
             expect(emptyHeight).toBeLessThan(190);
             if (route === '/ops/remote-operations/') {
-              const filterHeight = (await page.locator('.ops-remote-filter').boundingBox()).height;
-              expect(filterHeight).toBeLessThan(width < 800 ? 180 : 125);
+              const filter = await page.locator('.ops-remote-filter').boundingBox();
+              const frame = await page.locator('.page-frame').boundingBox();
+              expect(filter.height).toBeLessThan(width < 800 ? 180 : 125);
+              expect(filter.width).toBeGreaterThan(frame.width * .9);
             }
           }
           if (route === '/ops/api-status/' && !(await page.locator('.ops-api-account').count())) {
@@ -73,7 +80,7 @@ for (const role of Object.keys(routes)) {
           }
           if (route === '/ops/exchange-rates/') {
             const columns = await page.locator('.ops-rate-metrics').evaluate(el => getComputedStyle(el).gridTemplateColumns.trim().split(' ').length);
-            expect(columns).toBe(width <= 560 ? 1 : width <= 800 ? 2 : 3);
+            expect(columns).toBe(width <= 560 ? 1 : width <= 900 ? 2 : width <= 1280 ? 3 : 5);
             const metrics = page.locator('.ops-rate-metrics .kpi-exec');
             await expect(metrics).toHaveCount(5);
             for (const card of await metrics.all()) {

@@ -361,12 +361,6 @@ body.ui-final.is-app .ga-ops-premium .ops-filter-bar .filter-exec__grid{display:
 body.ui-final.is-app .ga-ops-premium .ops-filter-bar .ops-filter-actions{display:flex;align-items:center;gap:8px;flex:0 0 auto;flex-wrap:wrap}
 body.ui-final.is-app .ga-ops-premium .ops-filter-bar .ops-filter-actions .ui-filter-submit{flex:none}
 body.ui-final.is-app .ga-ops-premium .ops-filter-bar .ops-filter-actions .btn{white-space:nowrap}
-body.ui-final.is-app .ga-ops-premium .ops-remote-filter{
-  width:fit-content;max-width:100%;align-self:start;display:flex;align-items:end;
-  gap:12px;padding:14px 16px;
-}
-body.ui-final.is-app .ga-ops-premium .ops-remote-filter>.field{flex:1 1 250px;min-width:220px;max-width:340px}
-body.ui-final.is-app .ga-ops-premium .ops-remote-filter select{width:100%}
 body.ui-final.is-app .ga-ops-premium .ops-queue-empty .ui-empty{
   min-height:0;padding:23px 16px;gap:8px;
 }
@@ -380,10 +374,6 @@ body.ui-final.is-app .ga-ops-premium .ops-empty__symbol{width:42px;height:42px;b
 body.ui-final.is-app .ga-ops-premium .ops-empty p{margin:0;color:#6b8299;font-size:.77rem;line-height:1.7}
 body.ui-final.is-app .ga-ops-premium .ops-accounts-page .ui-studio-warning{
   margin:0;padding:10px 13px;border-radius:11px;line-height:1.8;font-size:.77rem;
-}
-@media(max-width:740px){
-  body.ui-final.is-app .ga-ops-premium .ops-remote-filter{width:100%;align-items:stretch;flex-direction:column}
-  body.ui-final.is-app .ga-ops-premium .ops-remote-filter>.field{max-width:none;min-width:0}
 }
 @media(max-width:620px){
   body.ui-final.is-app .ga-ops-premium .ops-filter-bar .ops-filter-actions{width:100%;flex:1 1 100%}
@@ -448,66 +438,6 @@ body.ui-final.is-app .ga-ops-premium .ops-queue-empty .ui-empty .btn{
   min-height:30px;padding:5px 10px;margin-top:0;
 }
 
-
-
-body.ui-final.is-app .ga-ops-premium .ops-rate-metrics .kpi-exec{
-  overflow:hidden;min-width:0;
-}
-body.ui-final.is-app .ga-ops-premium .ops-rate-metrics .kpi-exec__body{
-  width:100%;max-width:100%;min-width:0;overflow:hidden;
-}
-body.ui-final.is-app .ga-ops-premium .ops-rate-metrics .kpi-exec__value{
-  display:block;width:100%;max-width:100%;min-width:0;
-  white-space:normal;overflow-wrap:anywhere;word-break:break-word;
-  text-align:start;line-height:1.35;
-}
-body.ui-final.is-app .ga-ops-premium .ops-rate-metrics .ops-rate-number{
-  display:inline-block;max-width:100%;direction:ltr;unicode-bidi:isolate;
-  white-space:normal;overflow-wrap:anywhere;word-break:break-all;
-}
-body.ui-final.is-app .ga-ops-premium .ops-rate-metrics .kpi-exec__icon{
-  min-width:0;max-width:100%;justify-self:end;
-}
-@media(max-width:560px){
-  body.ui-final.is-app .ga-ops-premium .ops-rate-metrics .kpi-exec__value{font-size:1rem}
-}
-
-
-/* Rate cards use a simple flex track: icon beside a full-width stacked metric body. */
-body.ui-final.is-app .ga-ops-premium .ops-rate-metrics .kpi-exec{
-  display:flex;direction:rtl;align-items:center;gap:12px;
-  min-width:0;overflow:hidden;
-}
-body.ui-final.is-app .ga-ops-premium .ops-rate-metrics .kpi-exec__icon{
-  display:flex;flex:0 0 38px;align-items:center;justify-content:center;
-  width:38px;height:38px;min-width:38px;max-width:38px;
-}
-body.ui-final.is-app .ga-ops-premium .ops-rate-metrics .kpi-exec__body{
-  display:flex;flex:1 1 0;flex-direction:column;align-items:stretch;
-  width:0;max-width:100%;min-width:0;gap:5px;overflow:hidden;
-}
-body.ui-final.is-app .ga-ops-premium .ops-rate-metrics .kpi-exec__label,
-body.ui-final.is-app .ga-ops-premium .ops-rate-metrics .kpi-exec__value{
-  display:block;width:100%;max-width:100%;min-width:0;grid-area:auto;
-  text-align:right;white-space:normal;overflow-wrap:anywhere;word-break:break-word;
-}
-body.ui-final.is-app .ga-ops-premium .ops-rate-metrics .kpi-exec__label{
-  font-size:.75rem;line-height:1.55;color:#607992;font-weight:750;
-}
-body.ui-final.is-app .ga-ops-premium .ops-rate-metrics .kpi-exec__value{
-  font-size:clamp(1rem,1.2vw,1.25rem);line-height:1.4;font-weight:850;
-}
-body.ui-final.is-app .ga-ops-premium .ops-rate-metrics .ops-rate-number{
-  display:inline;max-width:100%;direction:ltr;unicode-bidi:isolate;
-  white-space:normal;overflow-wrap:anywhere;word-break:break-word;
-}
-body.ui-final.is-app .ga-ops-premium .ops-rate-metrics .kpi-exec__unit{
-  display:inline;white-space:nowrap;font-size:.7rem;
-}
-@media(max-width:560px){
-  body.ui-final.is-app .ga-ops-premium .ops-rate-metrics .kpi-exec{min-height:82px;padding:12px 14px}
-  body.ui-final.is-app .ga-ops-premium .ops-rate-metrics .kpi-exec__value{font-size:1.08rem}
-}
 
 /* Operations KPI system — one RTL geometry shared by overview and rate cards.
    The body is a real flex item (not display:contents / nested grid areas), so
@@ -800,6 +730,148 @@ body.ui-final.is-app .ga-ops-premium .ops-rate-history .empty-state {
   body.ui-final.is-app .ga-ops-premium .ga-ops-liabilities {
     min-height:0;
     padding:16px;
+  }
+}
+
+/* Operations filters and data surfaces — full-width, aligned and RTL-first. */
+body.ui-final.is-app .ga-ops-premium .ops-remote-filter {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:end;
+  width:100%;
+  max-width:none;
+  min-width:0;
+  align-self:stretch;
+  gap:14px;
+  padding:15px 17px;
+  box-sizing:border-box;
+}
+body.ui-final.is-app .ga-ops-premium .ops-remote-filter>.field {
+  width:100%;
+  min-width:0;
+  max-width:none;
+  margin:0;
+}
+body.ui-final.is-app .ga-ops-premium .ops-remote-filter select {
+  width:100%;
+  min-height:44px;
+}
+body.ui-final.is-app .ga-ops-premium .ops-remote-filter>.btn {
+  min-width:124px;
+  min-height:44px;
+  white-space:nowrap;
+}
+body.ui-final.is-app .ga-ops-premium .ops-accounts-filter {
+  width:100%;
+  grid-template-columns:minmax(180px,.9fr) minmax(240px,1.5fr) auto auto;
+  align-items:end;
+}
+body.ui-final.is-app .ga-ops-premium .ops-accounts-filter>.btn {
+  min-height:44px;
+  white-space:nowrap;
+}
+body.ui-final.is-app .ga-ops-premium .ops-report-form {
+  width:100%;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:end;
+}
+body.ui-final.is-app .ga-ops-premium .ops-report-form>.field {
+  width:min(100%,640px);
+  max-width:640px;
+}
+body.ui-final.is-app .ga-ops-premium .ops-report-form .ops-report-actions {
+  display:flex;
+  justify-content:flex-start;
+  align-items:center;
+  gap:9px;
+  flex-wrap:wrap;
+}
+body.ui-final.is-app .ga-ops-premium .ops-report-empty .ui-empty {
+  min-height:0;
+  padding:25px 18px;
+}
+body.ui-final.is-app .ga-ops-premium .ops-report-results .data-table td bdi {
+  unicode-bidi:plaintext;
+  overflow-wrap:anywhere;
+}
+body.ui-final.is-app .ga-ops-premium .ops-api-layout:not(:has(.ops-api-account)) {
+  grid-template-columns:minmax(0,1fr);
+}
+body.ui-final.is-app .ga-ops-premium :is(.ga-panel,.ops-context-strip,.ops-lead,.filter-exec-shell) {
+  min-width:0;
+  box-sizing:border-box;
+}
+body.ui-final.is-app .ga-ops-premium .data-table {
+  direction:rtl;
+}
+body.ui-final.is-app .ga-ops-premium .data-table :is(th,td) {
+  text-align:start;
+}
+body.ui-final.is-app .ga-ops-premium .data-table td :is(bdi,code) {
+  max-width:100%;
+  overflow-wrap:anywhere;
+  word-break:normal;
+}
+body.ui-final.is-app .ga-ops-premium .status {
+  flex:0 0 auto;
+  white-space:nowrap;
+  word-break:keep-all;
+  overflow-wrap:normal;
+}
+body.ui-final.is-app .ga-ops-premium .ops-remote-page .ga-queue-card {
+  margin-block:0;
+}
+body.ui-final.is-app .ga-ops-premium .ops-remote-page .ga-queue-body {
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  align-items:start;
+}
+body.ui-final.is-app .ga-ops-premium .ops-remote-page .ga-queue-body>* {
+  min-width:0;
+}
+body.ui-final.is-app .ga-ops-premium .ops-remote-page .ga-queue-body :is(.ui-studio-warning,.ga-queue-decision,.ops-reconcile-box,p) {
+  grid-column:1/-1;
+}
+@media(max-width:900px) {
+  body.ui-final.is-app .ga-ops-premium .ops-accounts-filter {
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  body.ui-final.is-app .ga-ops-premium .ops-report-form {
+    grid-template-columns:minmax(0,1fr);
+  }
+  body.ui-final.is-app .ga-ops-premium .ops-report-form>.field {
+    width:100%;
+    max-width:none;
+  }
+  body.ui-final.is-app .ga-ops-premium .ops-report-form .ops-report-actions {
+    justify-content:flex-start;
+  }
+}
+@media(max-width:800px) {
+  body.ui-final.is-app .ga-ops-premium .ops-remote-filter {
+    grid-template-columns:minmax(0,1fr);
+    width:100%;
+    gap:10px;
+  }
+  body.ui-final.is-app .ga-ops-premium .ops-remote-filter>.btn {
+    width:100%;
+  }
+  body.ui-final.is-app .ga-ops-premium .ops-remote-page .ga-queue-body {
+    grid-template-columns:minmax(0,1fr);
+  }
+}
+@media(max-width:580px) {
+  body.ui-final.is-app .ga-ops-premium .ops-accounts-filter {
+    grid-template-columns:minmax(0,1fr);
+  }
+  body.ui-final.is-app .ga-ops-premium .ops-accounts-filter>.btn {
+    width:100%;
+  }
+  body.ui-final.is-app .ga-ops-premium .ops-report-form .ops-report-actions {
+    flex-direction:column;
+    align-items:stretch;
+  }
+  body.ui-final.is-app .ga-ops-premium .ops-report-form .ops-report-actions .btn {
+    width:100%;
   }
 }
 
