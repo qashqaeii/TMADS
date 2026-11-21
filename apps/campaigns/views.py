@@ -343,6 +343,10 @@ def campaign_wizard(request, campaign_id=None):
         return redirect("campaigns:wizard", campaign_id=campaign.id)
 
     campaign = get_customer_campaign(customer, campaign_id)
+    is_customer_owned = bool(
+        campaign.telegram_connection_id
+        and campaign.telegram_connection.connection_type == "customer_owned"
+    )
     if request.method == "POST":
         campaign = Campaign.objects.select_for_update().get(pk=campaign.pk)
     if not _campaign_editable(campaign):
@@ -359,11 +363,14 @@ def campaign_wizard(request, campaign_id=None):
             messages.error(request, "نسخه یا مرحله پیش‌نویس تغییر کرده است؛ صفحه جدید را بررسی کنید.")
             return redirect("campaigns:wizard", campaign_id=campaign.id)
         if action == "refresh_quote" and step == max_step:
-            try:
-                _create_quote(campaign)
-                messages.success(request, "پیش‌فاکتور جدید آماده است. مبلغ را بررسی و سپس پرداخت کنید.")
-            except PricingError as exc:
-                messages.error(request, str(exc))
+            if is_customer_owned:
+                messages.error(request, "حساب اختصاصی مشتری به پیش‌فاکتور یا کیف پول TMADS نیاز ندارد.")
+            else:
+                try:
+                    _create_quote(campaign)
+                    messages.success(request, "پیش‌فاکتور جدید آماده است. مبلغ را بررسی و سپس پرداخت کنید.")
+                except PricingError as exc:
+                    messages.error(request, str(exc))
             return redirect("campaigns:wizard", campaign_id=campaign.id)
         strict_next = action in {"next", "pay"}
         try:
@@ -426,28 +433,49 @@ def campaign_wizard(request, campaign_id=None):
                         if request.POST.get("terms_accepted") != "1":
                             messages.error(request, "پذیرش قوانین برای پرداخت الزامی است.")
                             return redirect("campaigns:wizard", campaign_id=campaign.id)
-                        if not _handle_payment_submission(request, campaign):
-                            return redirect("campaigns:wizard", campaign_id=campaign.id)
                         acceptance = (
                             "مشتری تأیید می‌کند حق تبلیغ مقصد را دارد، محتوا دقیق است، "
                             "بررسی نهایی با تلگرام است و تأیید TMADS تضمین نمایش نیست."
                         )
+                        if is_customer_owned:
+                            campaign.refresh_from_db()
+                            CampaignPolicyPreflight.record_acceptance(
+                                campaign, request=request, acceptance_text=acceptance,
+                            )
+                            CampaignPolicyPreflight(campaign).run(
+                                strict=True, context="customer_owned_pre_submit", check_operator=False,
+                            )
+                            previous = campaign.status
+                            campaign.status = Campaign.Status.READY_FOR_SUBMISSION
+                            campaign.save(update_fields=["status", "updated_at"])
+                            CampaignStatusHistory.objects.create(
+                                campaign=campaign, from_status=previous,
+                                to_status=campaign.status,
+                                note="آماده ثبت مستقیم از حساب تبلیغاتی مشتری؛ بدون پرداخت TMADS",
+                            )
+                            try:
+                                from apps.telegram_ads.services.submission import submit_campaign_to_telegram
+                                submit_campaign_to_telegram(campaign)
+                            except Exception as exc:
+                                messages.error(request, str(exc))
+                                return redirect("campaigns:detail", campaign_id=campaign.id)
+                            messages.success(request, "کمپین مستقیماً از حساب تلگرام شما ثبت شد؛ وضعیت بررسی را از همین پنل دنبال کنید.")
+                            return redirect("campaigns:detail", campaign_id=campaign.id)
+
+                        if not _handle_payment_submission(request, campaign):
+                            return redirect("campaigns:wizard", campaign_id=campaign.id)
                         campaign.refresh_from_db()
                         CampaignPolicyPreflight.record_acceptance(
-                            campaign,
-                            request=request,
-                            acceptance_text=acceptance,
+                            campaign, request=request, acceptance_text=acceptance,
                         )
                         CampaignPolicyPreflight(campaign).run(
-                            strict=True,
-                            context="post_payment",
-                            check_operator=False,
+                            strict=True, context="post_payment", check_operator=False,
                         )
                         return redirect("campaigns:detail", campaign_id=campaign.id)
             elif step < max_step and action == "next":
                 campaign.wizard_step = step + 1
                 campaign.save(update_fields=["wizard_step", "updated_at"])
-                if step == 4:
+                if step == 4 and not is_customer_owned:
                     try:
                         _create_quote(campaign)
                     except PricingError as exc:
@@ -470,15 +498,30 @@ def campaign_wizard(request, campaign_id=None):
     creative = campaign.creatives.first()
     is_customer_owned = bool(campaign.telegram_connection_id and campaign.telegram_connection.connection_type == "customer_owned")
     wallet = None if is_customer_owned else ensure_wallet(customer)
+    if is_customer_owned and step in {4, max_step}:
+        try:
+            from apps.telegram_ads.services.account_connections import refresh_connection
+            connection = campaign.telegram_connection
+            if not connection.last_checked_at or (timezone.now() - connection.last_checked_at).total_seconds() > 30:
+                refresh_connection(connection)
+        except Exception as exc:
+            messages.warning(request, "وضعیت زنده حساب تلگرام دریافت نشد؛ پیش از ثبت دوباره اتصال را بررسی کنید.")
+    account_can_submit = bool(
+        is_customer_owned
+        and campaign.telegram_connection.status == "connected"
+        and campaign.budget_currency == campaign.telegram_connection.currency
+        and campaign.account_budget_amount > 0
+        and campaign.telegram_connection.remaining_budget >= campaign.account_budget_amount
+    )
     ton_rate_display = None
-    try:
-        from apps.finance.services.ton_exchange_rate import get_cached_snapshot
-
-        snap = get_cached_snapshot(allow_stale_display=True)
-        if snap:
-            ton_rate_display = snap
-    except Exception:
-        pass
+    if not is_customer_owned:
+        try:
+            from apps.finance.services.ton_exchange_rate import get_cached_snapshot
+            snap = get_cached_snapshot(allow_stale_display=True)
+            if snap:
+                ton_rate_display = snap
+        except Exception:
+            pass
     from apps.telegram_ads.services.ad_write import dry_run_create_ad
     from apps.telegram_ads.targeting.compatibility import placement_choices_for_target
     from apps.telegram_ads.targeting.validators import validate_studio_config
@@ -524,10 +567,11 @@ def campaign_wizard(request, campaign_id=None):
         "is_customer_owned": is_customer_owned,
         "account_currency": campaign.telegram_connection.currency if campaign.telegram_connection_id else "",
         "account_balance": campaign.telegram_connection.remaining_budget if campaign.telegram_connection_id else None,
+        "account_can_submit": account_can_submit,
         "media_uploaded": bool(media_receipt(campaign)),
         "website_photo_uploaded": bool(website_photo_receipt(campaign)),
-        "website_photo_enabled": website_photo_enabled(),
-        "media_upload_enabled": media_upload_enabled(),
+        "website_photo_enabled": website_photo_enabled(campaign),
+        "media_upload_enabled": media_upload_enabled(campaign),
         "step": step,
         "steps": STUDIO_STEPS,
         "target_placement_choices": placement_choices_for_target(campaign.target_type or "channels"),
