@@ -6,12 +6,13 @@
       <span class="tm-ai-chevron" aria-hidden="true">{% include "includes/lucide_icon.html" with name="chevron-down" size="sm" %}</span>
     </summary>
     <div class="tm-ai-body">
-      <p class="tm-ai-hint">پیشنهادها فقط از داده‌های معتبر و به‌روز همین کمپین استفاده می‌کنند. هیچ بودجه، متن یا تنظیمی بدون تأیید شما تغییر نمی‌کند.</p>
+      <p class="tm-ai-hint">پیشنهادها از آمار معتبر و به‌روز و متن تبلیغِ پاک‌سازی‌شده از لینک و اطلاعات تماس استفاده می‌کنند. هیچ بودجه، متن یا تنظیمی بدون تأیید شما تغییر نمی‌کند.</p>
       <form method="post" class="tm-ai-inline-form">{% csrf_token %}
         <button type="button" class="btn btn-ghost tm-ai-button" data-ai-generate><span data-ai-label>بررسی فرصت‌های بهینه‌سازی</span>{% include "includes/lucide_icon.html" with name="sparkles" size="sm" %}</button>
       </form>
       <p class="tm-ai-status" data-ai-status role="status"></p>
       <div class="tm-ai-results" data-ai-results hidden></div>
+      <p class="tm-ai-hint">مدل: Gemini 2.5 Flash Lite از طریق آروان‌کلاد.</p>
     </div>
   </details>
 </section>
