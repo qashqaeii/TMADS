@@ -29,6 +29,60 @@ for (const role of Object.keys(routes)) {
         await expect(page.locator('body')).toHaveClass(/ga-workspace-system/);
         if (role === 'ops') {
           await expect(page.locator('.sidebar-admin-group')).toHaveAttribute('open', '');
+          await expect(page.locator('.ga-ops-premium')).toBeVisible();
+          if (route === '/ops/') {
+            const cards = page.locator('.ga-ops-center-metrics .kpi-exec');
+            await expect(cards).toHaveCount(4);
+            for (const card of await cards.all()) {
+              const geometry = await card.evaluate(el => {
+                const rect = node => {
+                  const r = node.getBoundingClientRect();
+                  return {left:r.left,right:r.right,top:r.top,bottom:r.bottom};
+                };
+                const intersects = (a,b) => a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
+                const cardRect = rect(el), labelRect = rect(el.querySelector('.kpi-exec__label'));
+                const valueRect = rect(el.querySelector('.kpi-exec__value'));
+                const iconRect = rect(el.querySelector('.kpi-exec__icon'));
+                return {labelValue:intersects(labelRect,valueRect),iconValue:intersects(iconRect,valueRect),
+                  contained:valueRect.left>=cardRect.left-1 && valueRect.right<=cardRect.right+1};
+              });
+              expect(geometry.labelValue).toBe(false);
+              expect(geometry.iconValue).toBe(false);
+              expect(geometry.contained).toBe(true);
+            }
+          }
+          if (route === '/ops/campaigns/' || route === '/ops/refunds/') {
+            const actions = page.locator('.ops-filter-actions');
+            await expect(actions).toBeVisible();
+            expect(await actions.evaluate(el => el.parentElement.classList.contains('filter-exec__grid'))).toBe(true);
+          }
+          if (route === '/ops/remote-operations/' || route === '/ops/related-accounts/') {
+            await expect(page.locator('.ops-queue-empty')).toBeVisible();
+            await expect(page.locator('.ops-pager')).toHaveCount(0);
+          }
+          if (route === '/ops/exchange-rates/') {
+            const metrics = page.locator('.ops-rate-metrics .kpi-exec');
+            await expect(metrics).toHaveCount(5);
+            for (const card of await metrics.all()) {
+              const geometry = await card.evaluate(el => {
+                const a=el.querySelector('.kpi-exec__label').getBoundingClientRect();
+                const b=el.querySelector('.kpi-exec__value').getBoundingClientRect();
+                return {overlap:a.left<b.right && a.right>b.left && a.top<b.bottom && a.bottom>b.top,
+                  valueInside:b.left>=el.getBoundingClientRect().left-1 && b.right<=el.getBoundingClientRect().right+1};
+              });
+              expect(geometry.overlap).toBe(false);
+              expect(geometry.valueInside).toBe(true);
+            }
+          }
+          if (route === '/ops/api-status/') {
+            const status = page.locator('.ops-api-capabilities .ops-api-table .status').first();
+            await expect(status).toBeVisible();
+            expect(await status.evaluate(el => getComputedStyle(el).whiteSpace)).toBe('nowrap');
+          }
+          if (route === '/ops/sms/') {
+            await expect(page.locator('.ops-sms-metrics .sms-kpi')).toHaveCount(4);
+            await expect(page.locator('.sms-kpi__icon')).toHaveCount(4);
+          }
         }
         await expect(page.locator('#main-content')).toBeVisible();
         await expect(page.locator('#ui-confirmation')).toHaveCount(1);
@@ -74,4 +128,53 @@ test('shared confirmation closes with Escape and never submits on cancel',async(
   await dialog.getByRole('button',{name:'انصراف',exact:true}).click();
   await expect(dialog).not.toBeVisible();
   await expect(trigger).toBeFocused();
+});
+
+test('operator Telegram account facts wrap long values without overlap', async ({page}, testInfo) => {
+  test.skip(!users.ops.every(Boolean), 'Requires disposable local operator credentials');
+  await login(page, users.ops);
+  for (const width of [375, 768, 1440]) {
+    await page.setViewportSize({width, height:900});
+    await page.goto('/ops/api-status/', {waitUntil:'domcontentloaded'});
+    await expect(page.locator('.ops-api-layout')).toBeVisible();
+    await page.locator('.ops-api-layout').evaluate(root => {
+      const panel=document.createElement('section');
+      panel.className='ga-panel ops-api-account';
+      const body=document.createElement('div');
+      body.className='ga-panel-body ga-api-facts ops-api-facts';
+      const facts=[
+        ['عنوان','GramAds Central Account'],
+        ['ارز','TON'],
+        ['مصرف کل','0.125000 TON'],
+        ['باقی‌مانده','0.00000012 TON'],
+        ['بودجه تبلیغات','123456789.123456 TON'],
+        ['شناسه حساب','bj4KvgRwQRW28yLry1O2MrBSH2BBvETPnewLPT8s'],
+      ];
+      for(const [label,value] of facts){
+        const line=document.createElement('div');line.className='finance-line';
+        const key=document.createElement('span');key.textContent=label;
+        const val=label==='شناسه حساب'?document.createElement('code'):document.createElement('strong');
+        if(label==='شناسه حساب')val.dir='ltr';
+        val.textContent=value;line.append(key,val);body.append(line);
+      }
+      panel.append(body);root.prepend(panel);
+    });
+    const facts=await page.locator('.ops-api-facts .finance-line').evaluateAll(cards=>cards.map(card=>{
+      const label=card.querySelector('span').getBoundingClientRect();
+      const value=card.querySelector('strong,code').getBoundingClientRect();
+      const box=card.getBoundingClientRect();
+      return {stacked:label.bottom<=value.top+2,inside:value.left>=box.left-1&&value.right<=box.right+1,
+        noOverflow:card.scrollWidth<=card.clientWidth+1};
+    }));
+    expect(facts).toHaveLength(6);
+    for(const fact of facts){expect(fact.stacked).toBe(true);expect(fact.inside).toBe(true);expect(fact.noOverflow).toBe(true);}
+    const chip=page.locator('.ops-api-capabilities .ops-api-table .status').first();
+    await expect(chip).toBeVisible();
+    expect(await chip.evaluate(el=>getComputedStyle(el).whiteSpace)).toBe('nowrap');
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2)).toBe(true);
+    if(process.env.TMADS_E2E_CAPTURE==='1'){
+      await page.evaluate(()=>document.fonts.ready);
+      await page.screenshot({path:testInfo.outputPath('ops-api-facts-'+width+'.png'),fullPage:true,animations:'disabled'});
+    }
+  }
 });
