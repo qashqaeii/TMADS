@@ -4,7 +4,7 @@
 {% block container_class %}container-wide{% endblock %}
 {% block extra_head %}{{ block.super }}{% if ai_available %}<link rel="stylesheet" href="{% static 'css/ui-ai.css' %}">{% endif %}{% endblock %}
 {% block content %}
-<div class="wizard-shell studio-shell ui-studio ga-studio-workspace">
+<div id="campaign-studio" class="wizard-shell studio-shell ui-studio ga-studio-workspace">
   {% include "includes/dash_header.html" with page_icon="megaphone" title="استودیو ساخت تبلیغ" subtitle=campaign.name|default:"پیش‌نویس جدید" with_sub=1 %}
   <section class="ga-panel ga-studio-progress"><header class="ga-panel-head"><div class="ga-panel-title"><h2>مسیر ساخت تبلیغ</h2><span class="muted">مرحله {{ step|persian_digits }} از {{ steps|length|persian_digits }}</span></div><span class="ga-step-indicator" aria-hidden="true">{% widthratio step steps|length 100 %}٪</span></header><div class="ga-progress-line" aria-hidden="true"><span style="width:{% widthratio step steps|length 100 %}%"></span></div>
   <nav class="wizard-progress wizard-progress--exec" aria-label="مراحل">
