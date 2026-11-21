@@ -145,6 +145,7 @@
 
     <div class="tab-panel" role="tabpanel" tabindex="0" id="campaign-panel-overview" aria-labelledby="campaign-tab-overview" x-show="tab === 'overview'" x-cloak>
       {% if ai_analysis_available %}{% include "campaigns/includes/ai_analysis.html" %}{% endif %}
+      {% if ai_optimization_available %}{% include "campaigns/includes/ai_optimization.html" %}{% endif %}
       {% if performance_recommendations %}
       <section class="ui-performance-advice" aria-label="راهنمای عملکرد کمپین">
         <header><span class="ui-target-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="lightbulb" size="md" %}</span><div><h2>پیشنهادهای مبتنی بر داده</h2><p>تحلیل قاعده‌محور بر پایه آمار دریافتی از تلگرام؛ بدون تغییر خودکار تبلیغ</p></div></header>

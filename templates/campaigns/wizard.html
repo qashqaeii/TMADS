@@ -42,6 +42,7 @@
       {% if step == 1 %}
       <h2 class="section-title">نوع هدف‌گیری و مقصد</h2>
       <p class="muted">یکی از چهار روش رسمی Telegram Ads را انتخاب کنید.</p>
+      {% if ai_available %}{% include "campaigns/includes/ai_planner.html" %}{% endif %}
       <div class="target-grid">
         {% for value, label in target_type_choices %}
         <label class="target-card choice-card">

@@ -4,3 +4,28 @@
 @keyframes tm-ai-in{from{opacity:.75;transform:translateY(4px)}to{opacity:1;transform:none}}@container(max-width:440px){.tm-ai-head{padding:12px;gap:9px}.tm-ai-body{padding:0 12px 12px}.tm-ai-button,.tm-ai-option .btn{width:100%}.tm-ai-heading small{font-size:.75rem}}@media(prefers-reduced-motion:reduce){.tm-ai *{animation:none!important;transition:none!important}}
 
 .tm-ai--analysis .tm-ai-head{padding-block:17px}.tm-ai--analysis .tm-ai-body{gap:14px}.tm-ai-inline-form{margin:0}.tm-ai-summary{border-inline-start:3px solid #245d89}.tm-ai-actions{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:10px}.tm-ai-action{display:flex;align-items:flex-start;gap:10px}.tm-ai-action>div{min-width:0}.tm-ai-action-number{width:28px;height:28px;border-radius:9px;background:#e8f1fa;color:#245d89;display:grid;place-items:center;flex:none;font-weight:700}.tm-ai-action strong{font-size:.91rem}.tm-ai-action p{font-size:.84rem;color:#52677b;margin-top:4px}.tm-ai-summary small{display:block}
+
+
+/* Campaign planning and optimization surfaces */
+.tm-ai--planner,.tm-ai--optimization{margin-block:10px 14px;background:linear-gradient(145deg,#f9fbfe,#f5f8fc)}
+.tm-ai--planner .tm-ai-head,.tm-ai--optimization .tm-ai-head{padding-block:12px}
+.tm-ai-fields{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+.tm-ai-field{display:grid;gap:6px;min-width:0}
+.tm-ai-field--wide{grid-column:1/-1}
+.tm-ai-field input,.tm-ai-field select,.tm-ai-field textarea{width:100%;min-width:0;border:1px solid var(--ai-line);border-radius:10px;background:#fff;padding:10px 12px;color:inherit;font:inherit;font-size:.88rem}
+.tm-ai-field textarea{min-height:78px;resize:vertical;line-height:1.9}
+.tm-ai-plan{gap:14px}
+.tm-ai-plan-target,.tm-ai-priority{display:inline-flex;align-items:center;justify-content:center;padding:4px 9px;border:1px solid #d8e5f1;border-radius:999px;background:#eef5fb;color:#315f85;font-size:.73rem;font-weight:700;white-space:nowrap}
+.tm-ai-plan-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.tm-ai-plan-item{padding:11px 12px;border:1px solid #e4ebf2;border-radius:11px;background:#f9fbfd;min-width:0}
+.tm-ai-plan-item strong,.tm-ai-plan-missing>strong{font-size:.82rem;color:#24445f}
+.tm-ai-plan-item p{margin:5px 0 0;color:#52677b;font-size:.82rem;line-height:1.85}
+.tm-ai-plan-missing{display:grid;gap:6px;padding:10px 12px;border-radius:11px;background:#f2f6fa}
+.tm-ai-plan-missing ul{margin:0;padding-inline-start:18px;color:#52677b;font-size:.8rem;line-height:1.9}
+.tm-ai-plan .btn{justify-self:start}
+.tm-ai-optimization-item{align-content:start}
+.tm-ai-optimization-item .tm-ai-option-head{align-items:center}
+.tm-ai-optimization-item>small{line-height:1.8}
+.tm-ai-priority{border-color:#e3eaf1;background:#f4f7fa;color:#52677b}
+.tm-ai-optimization-list{grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr))}
+@container(max-width:520px){.tm-ai-fields,.tm-ai-plan-grid{grid-template-columns:minmax(0,1fr)}.tm-ai-field--wide{grid-column:auto}.tm-ai-plan .btn{width:100%}}

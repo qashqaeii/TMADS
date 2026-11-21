@@ -1,0 +1,38 @@
+<section class="tm-ai tm-ai--planner" data-tm-ai="planner" data-ai-url="{% url 'campaigns:ai_plan' campaign.id %}" hidden aria-label="برنامه‌ریز هوشمند کمپین">
+  <details>
+    <summary class="tm-ai-head">
+      <span class="tm-ai-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="sparkles" size="md" %}</span>
+      <span class="tm-ai-heading"><strong>برنامه‌ریز هوشمند کمپین</strong><small>از شرح محصول تا پیشنهاد مسیر مناسب تبلیغ</small></span>
+      <span class="tm-ai-chevron" aria-hidden="true">{% include "includes/lucide_icon.html" with name="chevron-down" size="sm" %}</span>
+    </summary>
+    <div class="tm-ai-body">
+      <div class="tm-ai-fields">
+        <div class="tm-ai-field tm-ai-field--wide">
+          <label for="tm-ai-plan-brief">چه محصول یا خدمتی را می‌خواهید تبلیغ کنید؟</label>
+          <textarea id="tm-ai-plan-brief" data-ai-brief maxlength="800" rows="3" placeholder="محصول، مزیت اصلی و چیزی که مخاطب باید بداند را کوتاه توضیح دهید."></textarea>
+        </div>
+        <div class="tm-ai-field">
+          <label for="tm-ai-plan-audience">مخاطب موردنظر <small>(اختیاری)</small></label>
+          <input id="tm-ai-plan-audience" data-ai-audience maxlength="400" placeholder="مثلاً صاحبان کسب‌وکارهای آنلاین">
+        </div>
+        <div class="tm-ai-field">
+          <label for="tm-ai-plan-goal">هدف اصلی تبلیغ</label>
+          <select id="tm-ai-plan-goal" data-ai-goal>
+            <option value="">پیشنهاد بر اساس توضیحات</option>
+            <option value="awareness">افزایش آگاهی از محصول</option>
+            <option value="traffic">افزایش بازدید</option>
+            <option value="leads">دریافت سرنخ و مشتری بالقوه</option>
+            <option value="conversions">افزایش اقدام و تبدیل</option>
+            <option value="community">جذب عضو و مخاطب</option>
+            <option value="sales">افزایش فروش</option>
+          </select>
+        </div>
+      </div>
+      <p class="tm-ai-hint">پیشنهادها بر اساس توضیحات شما ساخته می‌شوند. لینک مقصد، شناسه مخاطبان و اطلاعات مالی به مدل ارسال نمی‌شود.</p>
+      <button type="button" class="btn btn-ghost tm-ai-button" data-ai-generate><span data-ai-label>طراحی استراتژی کمپین</span>{% include "includes/lucide_icon.html" with name="sparkles" size="sm" %}</button>
+      <p class="tm-ai-status" data-ai-status role="status"></p>
+      <div class="tm-ai-results" data-ai-results hidden></div>
+      <p class="tm-ai-hint">اعمال پیشنهاد فقط نام و نوع هدف‌گیری پیش‌نویس را تنظیم می‌کند؛ مقصد، مخاطبان دقیق و سایر تنظیمات با تأیید شما تکمیل می‌شوند.</p>
+    </div>
+  </details>
+</section>
