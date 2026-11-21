@@ -27,7 +27,7 @@ def sms_workspace(request):
     else:
         status = ""
     page = Paginator(rows, 30).get_page(request.GET.get("page", 1))
-    items = [{"purpose": PURPOSES.get(r.purpose, r.purpose), "status": r.get_status_display(),
+    items = [{"purpose": PURPOSES.get(r.purpose, "سایر اعلان‌ها"), "status": r.get_status_display(),
               "state": r.status, "phone": r.phone[:4]+"•••••"+r.phone[-2:],
               "time": r.created_at, "ref": r.provider_id, "error": r.error_code} for r in page]
     balance, balance_error = None, ""

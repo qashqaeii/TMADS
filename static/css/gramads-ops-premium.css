@@ -185,3 +185,31 @@ body.ui-final.is-app .ga-ops-premium .ops-rate-history tbody tr:has(td:nth-child
 @media(max-width:1150px){body.ui-final.is-app .ga-ops-premium .ops-rate-metrics{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:800px){body.ui-final.is-app .ga-ops-premium .ops-rate-panels{grid-template-columns:minmax(0,1fr)}body.ui-final.is-app .ga-ops-premium .ops-rate-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:450px){body.ui-final.is-app .ga-ops-premium .ops-rate-metrics .kpi-exec{display:grid;gap:8px}body.ui-final.is-app .ga-ops-premium .ops-rate-metrics .kpi-exec__value{font-size:1rem}}
+
+/* SMS telemetry: humane priorities, protected details and responsive queues. */
+body.ui-final.is-app .ga-ops-premium.ops-sms-page .ops-sms-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+body.ui-final.is-app .ga-ops-premium.ops-sms-page .sms-kpi{display:grid;gap:8px;min-height:107px;padding:18px;border:1px solid #dde9f6;background:#fff;border-radius:17px;box-shadow:0 7px 24px #163f6b0a}
+body.ui-final.is-app .ga-ops-premium.ops-sms-page .sms-kpi strong{font-size:1.65rem;font-weight:850}
+body.ui-final.is-app .ga-ops-premium.ops-sms-page .sms-kpi span{font-size:.79rem;font-weight:700}
+body.ui-final.is-app .ga-ops-premium.ops-sms-page .sms-kpi small{font-size:.7rem;color:#667f99}
+body.ui-final.is-app .ga-ops-premium.ops-sms-page .sms-kpi--primary{background:linear-gradient(125deg,#0e3a72,#1a6bb8);color:#fff;border-color:#1b67ad}
+body.ui-final.is-app .ga-ops-premium.ops-sms-page .sms-kpi--primary small{color:#d4eaff}
+body.ui-final.is-app .ga-ops-premium.ops-sms-page .ops-sms-panels{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}
+body.ui-final.is-app .ga-ops-premium.ops-sms-page .sms-panel{border:1px solid #deebf5;border-radius:17px;background:#fff;overflow:hidden}
+body.ui-final.is-app .ga-ops-premium.ops-sms-page .sms-head h2{font-weight:850;color:#173956}
+body.ui-final.is-app .ga-ops-premium.ops-sms-page .sms-head p{font-size:.74rem;color:#677f99;line-height:1.7}
+body.ui-final.is-app .ga-ops-premium.ops-sms-page .sms-patterns{display:grid;gap:9px}
+body.ui-final.is-app .ga-ops-premium.ops-sms-page .sms-patterns li{min-height:38px;display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid #edf3f9;padding-block:7px}
+body.ui-final.is-app .ga-ops-premium.ops-sms-page .sms-patterns li:last-child{border-bottom:0}
+body.ui-final.is-app .ga-ops-premium.ops-sms-page .sms-history-head{flex-wrap:wrap;gap:12px}
+body.ui-final.is-app .ga-ops-premium.ops-sms-page .ops-sms-filter{display:flex;align-items:end;gap:8px}
+body.ui-final.is-app .ga-ops-premium.ops-sms-page .ops-sms-filter select{min-width:145px}
+body.ui-final.is-app .ga-ops-premium.ops-sms-page .sms-log{display:grid;gap:0}
+body.ui-final.is-app .ga-ops-premium.ops-sms-page .sms-log li{display:grid;grid-template-columns:minmax(160px,1.25fr) minmax(120px,.9fr) auto minmax(110px,1fr);align-items:center;gap:14px;min-height:65px;border-bottom:1px solid #eaf1f8;padding-block:11px}
+body.ui-final.is-app .ga-ops-premium.ops-sms-page .sms-log li:last-child{border-bottom:0}
+body.ui-final.is-app .ga-ops-premium.ops-sms-page .sms-log li>div{display:grid;gap:2px}
+body.ui-final.is-app .ga-ops-premium.ops-sms-page .sms-log li strong{font-size:.8rem}
+body.ui-final.is-app .ga-ops-premium.ops-sms-page .sms-log li small{color:#6d839b;font-size:.72rem;overflow-wrap:anywhere}
+body.ui-final.is-app .ga-ops-premium.ops-sms-page .ops-sms-error{color:#ab444f}
+@media(max-width:1020px){body.ui-final.is-app .ga-ops-premium.ops-sms-page .ops-sms-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}body.ui-final.is-app .ga-ops-premium.ops-sms-page .ops-sms-panels{grid-template-columns:minmax(0,1fr)}body.ui-final.is-app .ga-ops-premium.ops-sms-page .sms-log li{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){body.ui-final.is-app .ga-ops-premium.ops-sms-page .sms-log li{grid-template-columns:minmax(0,1fr);gap:7px}body.ui-final.is-app .ga-ops-premium.ops-sms-page .ops-sms-filter{flex-wrap:wrap;width:100%}body.ui-final.is-app .ga-ops-premium.ops-sms-page .ops-sms-filter select{flex:1;min-width:0}body.ui-final.is-app .ga-ops-premium.ops-sms-page .sms-kpi{padding:12px;min-height:100px}body.ui-final.is-app .ga-ops-premium.ops-sms-page .sms-kpi strong{font-size:1.35rem}}
