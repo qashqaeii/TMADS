@@ -7,8 +7,9 @@ from django.db.models import Sum
 from django.shortcuts import get_object_or_404, redirect, render
 from apps.accounts.models import CustomerProfile
 from apps.accounts.permissions import staff_ops_required
-from apps.campaigns.models import Campaign, CampaignStatusHistory, TelegramAdvertisement
+from apps.campaigns.models import Campaign, CampaignStatusHistory, TelegramAdvertisement, RemoteAdOperation
 from apps.core.models import AuditLog
+from django.utils import timezone
 from apps.finance.models import AdvertisingOrder, ExchangeRate, RefundRequest, Wallet
 from apps.finance.refunds import approve_refund, reject_refund, mark_refund_in_review
 from apps.notifications.services import notify_customer
@@ -27,6 +28,8 @@ def overview(request):
         request,
         "operations/overview.html",
         {
+            "today": timezone.localdate(),
+            "remote_pending": RemoteAdOperation.objects.filter(status=RemoteAdOperation.Status.PENDING).count(),
             "customer_count": CustomerProfile.objects.count(),
             "order_count": AdvertisingOrder.objects.count(),
             "pending_campaigns": Campaign.objects.filter(

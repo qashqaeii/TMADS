@@ -1,10 +1,21 @@
 {% extends "app_shell.html" %}
-{% load core_filters humanize %}
+{% load core_filters %}
 {% block page_title %}مرکز عملیات{% endblock %}
 {% block container_class %}container-wide{% endblock %}
 {% block content %}
-<div class="app-stack operations-page ui-ops ga-ops-center">
-  {% include "includes/dash_header.html" with page_icon="layout-grid" eyebrow="عملیات" title="مرکز عملیات" %}
+<div class="app-stack operations-page ui-ops ga-ops-premium ga-ops-center">
+  <section class="ops-lead" aria-label="نمای عملیات پلتفرم">
+    <div class="ops-lead__content">
+      <span class="ops-lead__eyebrow">{% include "includes/gramads_workspace_icon.html" with name="shield-check" %} فرماندهی پلتفرم</span>
+      <h1>مرکز عملیات</h1>
+      <p>درخواست‌های منتظر تصمیم، تعهدات مالی و سلامت سرویس‌ها را از یک نقطه مدیریت کنید.</p>
+      <div class="ops-lead__meta"><span>امروز: {{ today|jalali_date }}</span><span>اطلاعات این صفحه فقط از سامانه خوانده می‌شوند.</span></div>
+    </div>
+    <div class="ops-lead__actions" aria-label="اقدام‌های سریع">
+      <a class="btn btn-primary" href="{% url 'operations:campaigns' %}?status=pending_review">بررسی کمپین‌ها {% include "includes/gramads_workspace_icon.html" with name="chevron-left" %}</a>
+      <a class="btn btn-ghost" href="{% url 'operations:release_readiness' %}">آمادگی انتشار</a>
+    </div>
+  </section>
   <div class="kpi-exec-grid ui-ops-kpis ga-ops-center-metrics" role="region" aria-label="خلاصه عملیات">
     <article class="kpi-exec">
       <span class="kpi-exec__icon">{% include "includes/kpi_icon.html" with name="users" %}</span>
@@ -23,7 +34,7 @@
     <article class="kpi-exec kpi-exec--focus">
       <span class="kpi-exec__icon">{% include "includes/kpi_icon.html" with name="clock" %}</span>
       <div class="kpi-exec__body">
-        <span class="kpi-exec__label">در صف بررسی</span>
+        <span class="kpi-exec__label">در انتظار تصمیم</span>
         <span class="kpi-exec__value">{{ pending_campaigns|format_count }}</span>
       </div>
     </article>
@@ -35,15 +46,18 @@
       </div>
     </article>
   </div>
+  <div class="ops-section-heading"><div><h2>اولویت‌های امروز</h2><p>پرونده‌هایی که بیشترین نیاز به اقدام دارند</p></div><span class="ops-section-heading__count">{{ pending_campaigns|add:open_refunds|format_count }} مورد در صف</span></div>
   <div class="ga-split ga-ops-priorities">
     <section class="ga-panel"><header class="ga-panel-head"><div class="ga-panel-title"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="activity" %}</span><div><h2>صف رسیدگی</h2><p>اقدام‌های اصلی اپراتور</p></div></div></header><div class="ga-panel-body ga-ops-queue">
       <a class="ga-queue-item" href="{% url 'operations:campaigns' %}?status=pending_review"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="megaphone" %}</span><div><strong>کمپین‌های در انتظار بررسی</strong><small>بررسی محتوای تبلیغ و شرایط سفارش</small></div><strong class="ga-queue-number">{{ pending_campaigns|format_count }}</strong>{% include "includes/gramads_workspace_icon.html" with name="chevron-left" %}</a>
       <a class="ga-queue-item" href="{% url 'operations:refunds' %}?status=open"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="refresh-cw" %}</span><div><strong>بازپرداخت‌های باز</strong><small>پیگیری درخواست‌های مالی مشتریان</small></div><strong class="ga-queue-number">{{ open_refunds|format_count }}</strong>{% include "includes/gramads_workspace_icon.html" with name="chevron-left" %}</a>
       <a class="ga-queue-item" href="{% url 'operations:remote_operations' %}"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="settings" %}</span><div><strong>عملیات تبلیغات</strong><small>بررسی درخواست‌ها و تطبیق عملیات</small></div>{% include "includes/gramads_workspace_icon.html" with name="chevron-left" %}</a>
+      <a class="ga-queue-item" href="{% url 'operations:remote_operations' %}?status=pending"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="settings" %}</span><div><strong>درخواست‌های اجرای تبلیغ</strong><small>تصمیم قبل از هر تغییر در تلگرام</small></div><strong class="ga-queue-number">{{ remote_pending|format_count }}</strong>{% include "includes/gramads_workspace_icon.html" with name="chevron-left" %}</a>
     </div></section>
-    <section class="ga-feature ga-ops-liabilities"><div class="ga-feature-head"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="wallet" %}</span><small>تعهدات کیف پول مشتریان</small></div><small>موجودی کل (ریال)</small><strong class="ga-amount"><bdi>{{ wallet_liabilities.available|default:0|intcomma }}</bdi></strong><div class="ga-ops-reserve"><span>رزرو کل (ریال)</span><strong><bdi>{{ wallet_liabilities.reserved|default:0|intcomma }}</bdi></strong></div></section>
+    <section class="ga-feature ga-ops-liabilities"><div class="ga-feature-head"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="wallet" %}</span><small>تعهدات کیف پول مشتریان</small></div><small>موجودی کل (ریال)</small><strong class="ga-amount"><bdi>{{ wallet_liabilities.available|default:0|format_irr }}</bdi></strong><div class="ga-ops-reserve"><span>رزرو کل (ریال)</span><strong><bdi>{{ wallet_liabilities.reserved|default:0|format_irr }}</bdi></strong></div></section>
   </div>
-  <div class="ga-split">
+  <div class="ops-section-heading"><div><h2>مدیریت و پایش</h2><p>دسترسی سریع به ابزارها و کنترل‌های مدیریتی</p></div></div>
+  <div class="ga-split ops-link-sections">
     <nav class="ga-panel" aria-label="مدیریت تبلیغات"><header class="ga-panel-head"><div class="ga-panel-title"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="layout-grid" %}</span><div><h2>مدیریت سرویس</h2><p>حساب‌ها، گزارش و نرخ‌گذاری</p></div></div></header><div class="ga-panel-body ga-link-tiles"><a class="ga-link-tile" href="{% url 'operations:telegram_account' %}"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="chart-no-axes-combined" %}</span><span>گزارش حساب تلگرام</span>{% include "includes/gramads_workspace_icon.html" with name="chevron-left" %}</a><a class="ga-link-tile" href="{% url 'operations:related_accounts' %}"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="building-2" %}</span><span>حساب‌های زیرمجموعه</span>{% include "includes/gramads_workspace_icon.html" with name="chevron-left" %}</a><a class="ga-link-tile" href="{% url 'operations:exchange_rates' %}"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="wallet" %}</span><span>نرخ گرام (تون)</span>{% include "includes/gramads_workspace_icon.html" with name="chevron-left" %}</a><a class="ga-link-tile" href="{% url 'operations:sms' %}"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="message-square" %}</span><span>مدیریت پیامک</span>{% include "includes/gramads_workspace_icon.html" with name="chevron-left" %}</a></div></nav>
     <nav class="ga-panel" aria-label="پایش پلتفرم"><header class="ga-panel-head"><div class="ga-panel-title"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="shield-check" %}</span><div><h2>سلامت و امنیت</h2><p>کنترل آمادگی و قابلیت‌ها</p></div></div></header><div class="ga-panel-body ga-link-tiles"><a class="ga-link-tile" href="{% url 'operations:api_status' %}"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="activity" %}</span><span>وضعیت اتصال تلگرام</span>{% include "includes/gramads_workspace_icon.html" with name="chevron-left" %}</a><a class="ga-link-tile" href="{% url 'operations:release_readiness' %}"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="shield-check" %}</span><span>آمادگی انتشار</span>{% include "includes/gramads_workspace_icon.html" with name="chevron-left" %}</a><a class="ga-link-tile" href="{% url 'operations:audit' %}"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="file-text" %}</span><span>لاگ ممیزی</span>{% include "includes/gramads_workspace_icon.html" with name="chevron-left" %}</a></div></nav>
   </div>

@@ -1,5 +1,6 @@
 {% extends "base.html" %}
-{% load core_filters %}
+{% load static core_filters %}
+{% block page_styles %}{{ block.super }}{% if user.is_platform_manager %}<link rel="stylesheet" href="{% static 'css/gramads-ops-premium.css' %}">{% endif %}{% endblock %}
 {% block body_class %}is-app ga-workspace-system{% endblock %}
 {% block body %}
 <div class="app-layout ui-shell" x-data="{ open: false, accountOpen: false }" @keydown.escape.window="open = false; accountOpen = false">
