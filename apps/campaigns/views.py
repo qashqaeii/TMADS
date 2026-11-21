@@ -209,7 +209,7 @@ def campaign_detail(request, campaign_id):
     from .performance_advice import campaign_advice
     performance_recommendations = campaign_advice(campaign, metrics)
     from apps.ai.provider import available as ai_available
-    from apps.ai.features import analysis_eligible
+    from apps.ai.features import analysis_eligible, optimization_eligible
     return render(
         request,
         "campaigns/detail.html",
@@ -221,6 +221,7 @@ def campaign_detail(request, campaign_id):
             "performance_badges": performance_badges,
             "performance_recommendations": performance_recommendations,
             "ai_analysis_available": ai_available() and analysis_eligible(campaign, metrics),
+            "ai_optimization_available": ai_available() and optimization_eligible(campaign, metrics),
             "has_chart": has_chart,
             "chart_has_signal": chart_has_signal(chart),
             "has_spend_chart": any(v is not None for v in chart.get("spent", [])),

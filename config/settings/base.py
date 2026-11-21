@@ -190,13 +190,23 @@ FARAZSMS_PATTERNS = {
     "campaign_status": env("FARAZSMS_PATTERN_CAMPAIGN_STATUS", default=""),
 }
 FARAZSMS_OTP_ATTR = env("FARAZSMS_OTP_ATTR", default="code")
-# Opt-in AI; one economical model, no automatic generation.
+# ArvanCloud AIaaS — server-side only; calls are always explicitly user-triggered.
 ARVAN_AI_ENABLED = env.bool("ARVAN_AI_ENABLED", default=False)
 ARVAN_AI_BASE_URL = env("ARVAN_AI_BASE_URL", default="")
 ARVAN_AI_API_KEY = env("ARVAN_AI_API_KEY", default="")
 ARVAN_AI_MODEL = "Gemini-2.5-Flash-lite"
+ARVAN_AI_TIMEOUT_SECONDS = env.int("ARVAN_AI_TIMEOUT_SECONDS", default=10)
+ARVAN_AI_MAX_RETRIES = env.int("ARVAN_AI_MAX_RETRIES", default=1)
+ARVAN_AI_TEMPERATURE = env.float("ARVAN_AI_TEMPERATURE", default=0.2)
+ARVAN_AI_MAX_TOKENS = env.int("ARVAN_AI_MAX_TOKENS", default=900)
 ARVAN_AI_USER_DAILY_LIMIT = env.int("ARVAN_AI_USER_DAILY_LIMIT", default=10)
 ARVAN_AI_GLOBAL_DAILY_LIMIT = env.int("ARVAN_AI_GLOBAL_DAILY_LIMIT", default=200)
+ARVAN_AI_FEATURE_DAILY_LIMITS = {
+    "planner": env.int("ARVAN_AI_PLANNER_DAILY_LIMIT", default=3),
+    "creative": env.int("ARVAN_AI_CREATIVE_DAILY_LIMIT", default=4),
+    "analysis": env.int("ARVAN_AI_ANALYSIS_DAILY_LIMIT", default=3),
+    "optimization": env.int("ARVAN_AI_OPTIMIZATION_DAILY_LIMIT", default=3),
+}
 # Payments
 PAYMENT_GATEWAY = env("PAYMENT_GATEWAY", default="fake")
 PAYMENT_FAKE_ENABLED = env("PAYMENT_FAKE_ENABLED")

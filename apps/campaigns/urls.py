@@ -12,7 +12,7 @@ urlpatterns = [
     path("<uuid:campaign_id>/intraday/", intraday_views.campaign_intraday, name="intraday"),
     path("<uuid:campaign_id>/manage/", remote_views.remote_management, name="remote_management"),
     path("<uuid:campaign_id>/alerts/budget/", views.campaign_budget_alert_settings, name="budget_alert_settings"),
-    path("<uuid:campaign_id>/ai/analysis/", ai_views.analysis, name="ai_analysis"),
+    path("<uuid:campaign_id>/ai/plan/", ai_views.plan, name="ai_plan"),\n    path("<uuid:campaign_id>/ai/analysis/", ai_views.analysis, name="ai_analysis"),\n    path("<uuid:campaign_id>/ai/optimization/", ai_views.optimization, name="ai_optimization"),
     path("<uuid:campaign_id>/ai/creative/", ai_views.creative, name="ai_creative"),
     path("<uuid:campaign_id>/wizard/", views.campaign_wizard, name="wizard"),
     path("<uuid:campaign_id>/website-photo/upload/", views.upload_website_photo_draft, name="upload_website_photo"),
