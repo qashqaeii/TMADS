@@ -12,21 +12,21 @@
     <span class="kpi-exec__icon">{% include "includes/kpi_icon.html" with name="click" %}</span>
     <div class="kpi-exec__body">
       <span class="kpi-exec__label">پیشنهاد فروش</span>
-      <span class="kpi-exec__value">{{ live_rate.best_ask_irr|format_count }} <span class="kpi-exec__unit">ریال</span></span>
+      <span class="kpi-exec__value"><bdi class="ops-rate-number" dir="ltr">{{ live_rate.best_ask_irr|format_count }}</bdi> <span class="kpi-exec__unit">ریال</span></span>
     </div>
   </article>
   <article class="kpi-exec">
     <span class="kpi-exec__icon">{% include "includes/kpi_icon.html" with name="percent" %}</span>
     <div class="kpi-exec__body">
       <span class="kpi-exec__label">پیشنهاد خرید</span>
-      <span class="kpi-exec__value">{% if live_rate.best_bid_irr %}{{ live_rate.best_bid_irr|format_count }} <span class="kpi-exec__unit">ریال</span>{% else %}—{% endif %}</span>
+      <span class="kpi-exec__value">{% if live_rate.best_bid_irr %}<bdi class="ops-rate-number" dir="ltr">{{ live_rate.best_bid_irr|format_count }}</bdi> <span class="kpi-exec__unit">ریال</span>{% else %}—{% endif %}</span>
     </div>
   </article>
   <article class="kpi-exec kpi-exec--focus">
     <span class="kpi-exec__icon">{% include "includes/kpi_icon.html" with name="wallet" %}</span>
     <div class="kpi-exec__body">
       <span class="kpi-exec__label">تومان به ازای هر گرام</span>
-      <span class="kpi-exec__value">{{ live_rate.irr_per_ton|irr_to_toman|format_count }}</span>
+      <span class="kpi-exec__value"><bdi class="ops-rate-number" dir="ltr">{{ live_rate.irr_per_ton|irr_to_toman|format_count }}</bdi></span>
     </div>
   </article>
   <article class="kpi-exec">
