@@ -53,7 +53,18 @@
       <a class="ga-queue-item" href="{% url 'operations:refunds' %}?status=open"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="refresh-cw" %}</span><div><strong>بازپرداخت‌های باز</strong><small>پیگیری درخواست‌های مالی مشتریان</small></div><strong class="ga-queue-number">{{ open_refunds|format_count }}</strong>{% include "includes/gramads_workspace_icon.html" with name="chevron-left" %}</a>
       <a class="ga-queue-item" href="{% url 'operations:remote_operations' %}?status=pending"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="settings" %}</span><div><strong>درخواست‌های اجرای تبلیغ</strong><small>تصمیم قبل از هر تغییر در تلگرام</small></div><strong class="ga-queue-number">{{ remote_pending|format_count }}</strong>{% include "includes/gramads_workspace_icon.html" with name="chevron-left" %}</a>
     </div></section>
-    <section class="ga-feature ga-ops-liabilities"><div class="ga-feature-head"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="wallet" %}</span><small>تعهدات کیف پول مشتریان</small></div><small>موجودی کل (ریال)</small><strong class="ga-amount"><bdi>{{ wallet_liabilities.available|default:0|format_irr }}</bdi></strong><div class="ga-ops-reserve"><span>رزرو کل (ریال)</span><strong><bdi>{{ wallet_liabilities.reserved|default:0|format_irr }}</bdi></strong></div></section>
+    <section class="ga-feature ga-ops-liabilities" aria-label="تعهدات کیف پول مشتریان">
+      <div class="ga-feature-head"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="wallet" %}</span><small>تعهدات کیف پول مشتریان</small></div>
+      <div class="ops-liability-primary">
+        <span class="ops-liability-label">موجودی کل (ریال)</span>
+        <strong class="ga-amount"><bdi>{{ wallet_liabilities.available|default:0|format_irr }}</bdi></strong>
+      </div>
+      <div class="ops-liability-reserve">
+        <span>رزرو کل (ریال)</span>
+        <strong><bdi>{{ wallet_liabilities.reserved|default:0|format_irr }}</bdi></strong>
+      </div>
+      <small class="ops-liability-footnote">مقادیر بر اساس اطلاعات دفتر مالی سامانه نمایش داده می‌شوند.</small>
+    </section>
   </div>
   <div class="ops-section-heading"><div><h2>مدیریت و پایش</h2><p>دسترسی سریع به ابزارها و کنترل‌های مدیریتی</p></div></div>
   <div class="ga-split ops-link-sections">
