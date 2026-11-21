@@ -319,7 +319,7 @@ def validate_budget_inputs(campaign, data, *, strict):
             if not cpm.is_finite() or not 0 < cpm <= Decimal("99999999.99") or cpm != cpm.quantize(Decimal("0.01")):
                 raise ValueError
         except (InvalidOperation, TypeError, ValueError):
-            errors.append("CPM باید عدد مثبت با حداکثر دو رقم اعشار باشد.")
+            errors.append("هزینه هر هزار نمایش باید عدد مثبت با حداکثر دو رقم اعشار باشد.")
     dates = []
     for key, previous in (("schedule_start", campaign.schedule_start), ("schedule_end", campaign.schedule_end)):
         raw = data.get(key)

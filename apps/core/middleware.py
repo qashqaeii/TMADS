@@ -18,23 +18,73 @@ class CustomerContextMiddleware:
 
 
 class AuthRateLimitMiddleware:
-    """Light rate limit on login/register POST."""
+    """Bound failed sign-in attempts without blocking an entire shared-IP office.
+
+    Identifiers are hashed in cache keys. Only trusted REMOTE_ADDR is used;
+    untrusted forwarded IP headers cannot bypass these limits.
+    """
 
     PATHS = {"/accounts/login/", "/accounts/register/", "/accounts/password-reset/"}
-    LIMIT = 20
     WINDOW = 300
+    LOGIN_IDENTITY_LIMIT = 10
+    LOGIN_IP_LIMIT = 120
+    OTHER_IP_LIMIT = 20
 
     def __init__(self, get_response):
         self.get_response = get_response
 
+    def _key(self, label, value):
+        from hashlib import sha256
+
+        fingerprint = sha256(value.encode("utf-8", errors="replace")).hexdigest()[:32]
+        return f"authlimit:{label}:{fingerprint}"
+
+    def _increment(self, key):
+        # Preserve the original fixed-window expiry instead of resetting the
+        # clock after every attempt.
+        cache.add(key, 0, timeout=self.WINDOW)
+        try:
+            cache.incr(key)
+        except ValueError:
+            cache.set(key, 1, timeout=self.WINDOW)
+
     def __call__(self, request: HttpRequest):
         if settings.DEBUG and settings.APP_ENV == "LOCAL":
             return self.get_response(request)
-        if request.method == "POST" and request.path in self.PATHS:
-            ip = request.META.get("REMOTE_ADDR", "unknown")
-            key = f"ratelimit:{request.path}:{ip}"
-            count = cache.get(key, 0)
-            if count >= self.LIMIT:
-                return HttpResponseForbidden("درخواست زیاد است. کمی بعد تلاش کنید.")
-            cache.set(key, count + 1, self.WINDOW)
-        return self.get_response(request)
+        if request.method != "POST" or request.path not in self.PATHS:
+            return self.get_response(request)
+
+        from django.http import HttpResponse
+
+        ip = request.META.get("REMOTE_ADDR") or "unknown"
+        global_key = self._key(request.path, ip)
+        is_login = request.path == "/accounts/login/"
+        limit = self.LOGIN_IP_LIMIT if is_login else self.OTHER_IP_LIMIT
+        identity = str(request.POST.get("username", "")).strip().casefold()[:150]
+        identifier_key = self._key("login-identity", ip + ":" + identity)
+        try:
+            blocked = cache.get(global_key, 0) >= limit
+            if is_login and cache.get(identifier_key, 0) >= self.LOGIN_IDENTITY_LIMIT:
+                blocked = True
+            if blocked:
+                response = HttpResponse("درخواست‌های ورود بیش از حد مجاز است. چند دقیقه دیگر تلاش کنید.", status=429)
+                response["Retry-After"] = str(self.WINDOW)
+                response["Cache-Control"] = "no-store"
+                return response
+        except Exception:
+            # An unavailable cache must not turn login into a platform outage.
+            return self.get_response(request)
+
+        response = self.get_response(request)
+        try:
+            if is_login:
+                if request.user.is_authenticated:
+                    cache.delete(identifier_key)
+                else:
+                    self._increment(global_key)
+                    self._increment(identifier_key)
+            else:
+                self._increment(global_key)
+        except Exception:
+            pass
+        return response

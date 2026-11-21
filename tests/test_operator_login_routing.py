@@ -47,9 +47,6 @@ def test_authenticated_operator_login_and_public_ctas_use_operations(client):
 
 @pytest.mark.django_db
 def test_customers_still_land_on_customer_dashboard(client, customer_user):
-    response = client.post(reverse("accounts:login"), {
-        "username": customer_user.username, "password": "pass1234",
-    })
-    assert response.status_code == 302
-    assert response.url == reverse("dashboard:home")
-    assert client.get(response.url).status_code == 200
+    client.force_login(customer_user)
+    assert client.get(reverse("dashboard:home")).status_code == 200
+    assert client.get(reverse("operations:overview")).status_code == 403

@@ -173,8 +173,14 @@
     );
   }
 
+  function escapeTooltipText(value) {
+    return String(value == null ? "" : value).replace(/[&<>"']/g, function (ch) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch];
+    });
+  }
+
   function tooltipHeader(label) {
-    return `<div style="font-weight:600;margin-bottom:6px;color:${COLORS.heading}">${label}</div>`;
+    return `<div style="font-weight:600;margin-bottom:6px;color:${COLORS.heading}">${escapeTooltipText(label)}</div>`;
   }
 
   function init(el) {
@@ -434,7 +440,7 @@
                 ? formatPct(p.data)
                 : formatCountFull(p.data);
             html += `<div style="display:flex;align-items:center;gap:8px;margin:3px 0;color:${COLORS.heading}">`;
-            html += `<span>${p.marker}</span><span>${p.seriesName}</span>`;
+            html += `<span>${p.marker}</span><span>${escapeTooltipText(p.seriesName)}</span>`;
             html += `<strong style="margin-inline-start:auto;font-variant-numeric:tabular-nums">${val}</strong></div>`;
           });
           return html;
@@ -762,7 +768,7 @@
         borderWidth: 1,
         extraCssText: TOOLTIP_PREMIUM_CSS,
         formatter(p) {
-          return `${p.name}<br/><strong>${formatCountFull(p.value)}</strong>`;
+          return `${escapeTooltipText(p.name)}<br/><strong>${formatCountFull(p.value)}</strong>`;
         },
       },
       series: [

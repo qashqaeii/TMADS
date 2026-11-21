@@ -61,3 +61,12 @@ def test_provider_codes_are_not_exposed_as_user_facing_labels():
     assert telegram_remote_status_fa("on_hold") == "در انتظار"
     assert telegram_remote_status_fa("unmapped_remote_code") == "وضعیت نامشخص"
     assert "Connection" not in user_message_fa("ConnectionError: timeout")
+
+
+def test_account_report_unix_milliseconds_render_same_jalali_datetime():
+    with timezone.override("Asia/Tehran"):
+        stamp = datetime(2026, 11, 21, 8, 45, tzinfo=utc_timezone.utc).timestamp()
+        expected = "۱۴۰۵/۰۸/۳۰ — ۱۲:۱۵"
+        from apps.operations.account_reports import _display_timestamp
+        assert _display_timestamp(int(stamp)) == expected
+        assert _display_timestamp(int(stamp * 1000)) == expected

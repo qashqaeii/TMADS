@@ -33,7 +33,7 @@ def ops_related_accounts(request):
             row=get_object_or_404(RelatedAccountRequest,pk=uuid.UUID(request.POST.get("id","")))
             if request.POST.get("action")=="execute":
                 execute_account(row.pk,request.user)
-                messages.success(request,"هویت حساب ایجادشده از API تأیید شد.")
+                messages.success(request,"هویت حساب ایجادشده از سوی تلگرام تأیید شد.")
             elif request.POST.get("action")=="reject":
                 reject_account(row.pk,request.user,request.POST.get("note",""))
                 messages.success(request,"تصمیم ثبت شد.")

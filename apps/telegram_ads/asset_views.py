@@ -55,7 +55,7 @@ def customer_assets(request):
 def customer_audience_update(request):
     try:
         change_audience_contacts(request.user, request.POST)
-        messages.success(request, "درخواست تغییر مخاطبان توسط API تأیید شد؛ اندازه گروه ممکن است تخمینی باشد.")
+        messages.success(request, "درخواست تغییر مخاطبان از سوی تلگرام تأیید شد؛ اندازه گروه ممکن است تخمینی باشد.")
     except (ValueError, TelegramAdsError):
         messages.error(request, "تغییر مخاطبان انجام نشد یا نتیجه آن نیازمند تطبیق است؛ بدون بررسی دوباره ارسال نکنید.")
     return redirect("accounts:advertiser_assets")
@@ -69,7 +69,7 @@ def customer_audience_update(request):
 def customer_audience_delete(request):
     try:
         delete_unused_audience(request.user, request.POST)
-        messages.success(request, "حذف گروه مخاطبان توسط API تأیید شد.")
+        messages.success(request, "حذف گروه مخاطبان از سوی تلگرام تأیید شد.")
     except (ValueError, TelegramAdsError):
         messages.error(request, "حذف تأیید نشد یا نتیجه نامطمئن است. گروهِ دارای تبلیغ فعال حذف نمی‌شود.")
     return redirect("accounts:advertiser_assets")
@@ -83,7 +83,7 @@ def customer_audience_delete(request):
 def customer_pixel_event_manage(request):
     try:
         manage_pixel_event(request.user, request.POST)
-        messages.success(request, "نتیجه تغییر رویداد توسط API تلگرام تأیید شد.")
+        messages.success(request, "نتیجه تغییر رویداد از سوی تلگرام تأیید شد.")
     except (ValueError, TelegramAdsError):
         messages.error(request, "رویداد تغییر نکرد یا نتیجه آن نامطمئن است؛ بدون تطبیق دوباره ارسال نکنید.")
     return redirect("accounts:advertiser_assets")

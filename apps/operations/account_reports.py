@@ -109,7 +109,11 @@ def _parse_report_period(raw, fallback_year: int, fallback_month: int):
 def _display_timestamp(raw):
     try:
         if isinstance(raw, (int, float)) or str(raw).strip().isdigit():
-            value = datetime.fromtimestamp(float(raw), tz=utc_timezone.utc)
+            # Telegram data may use Unix seconds or milliseconds.
+            timestamp = float(raw)
+            if abs(timestamp) >= 100_000_000_000:
+                timestamp /= 1000
+            value = datetime.fromtimestamp(timestamp, tz=utc_timezone.utc)
         else:
             value = datetime.fromisoformat(str(raw).strip().replace("Z", "+00:00"))
             if timezone.is_naive(value):
