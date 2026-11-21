@@ -174,9 +174,11 @@
 @media(max-width:650px){.ui-final.is-app .ga-campaign-detail-workspace .campaign-detail__masthead-foot{padding-inline-start:0}.ui-final.is-app .ga-campaign-workspace .ga-campaign-filter{padding:10px}.ui-final.is-app .ga-campaign-workspace .campaigns-mobile-card__head{flex-wrap:wrap}.is-app .ga-budget-summary{padding:10px}.is-app .ga-budget-summary>span:nth-child(2){display:grid;gap:2px}}
 
 /* Operations console: overview, work queues, report controls and safety surfaces. */
-.is-app .ga-ops-center-metrics .kpi-exec{display:grid;grid-template-columns:1fr auto;align-items:start;gap:8px}
-.is-app .ga-ops-center-metrics .kpi-exec__icon{grid-column:2;grid-row:1;align-self:start}
-.is-app .ga-ops-center-metrics .kpi-exec__body{grid-column:1;grid-row:1;display:grid;gap:10px}
+.is-app .ga-ops-center-metrics .kpi-exec{display:grid;grid-template-columns:minmax(0,1fr) 2.5rem;grid-template-areas:"body icon";align-items:center;gap:9px}
+.is-app .ga-ops-center-metrics .kpi-exec__icon{grid-area:icon;grid-column:auto;grid-row:auto;align-self:center;justify-self:end}
+.is-app .ga-ops-center-metrics .kpi-exec__body{grid-area:body;grid-column:auto;grid-row:auto;display:grid;gap:6px;min-width:0}
+.is-app .ga-ops-center-metrics .kpi-exec__label,.is-app .ga-ops-center-metrics .kpi-exec__value{grid-area:auto;display:block;min-width:0}
+.is-app .ga-ops-center-metrics .kpi-exec__value{width:auto;line-height:1.35;overflow-wrap:anywhere}
 .is-app .ga-ops-priorities{align-items:stretch}
 .is-app .ga-ops-queue{padding-block:8px}
 .is-app .ga-queue-item{display:flex;gap:10px;align-items:center;color:#142c46;text-decoration:none;padding:12px 2px;border-bottom:1px solid #eaf0f6;min-width:0}
