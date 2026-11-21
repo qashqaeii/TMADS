@@ -230,7 +230,7 @@
 #campaign-studio .studio-preview__telegram-mark{display:grid;place-items:center;width:30px;height:30px;border-radius:10px;background:#d5e9f8;color:#2876aa}
 #campaign-studio .ui-preview-device__head>span:nth-child(2){display:grid;gap:1px;flex:1;min-width:0}
 #campaign-studio .ui-preview-device__head strong{font-size:.72rem}
-#campaign-studio .ui-preview-device__head small{font-size:.56rem;color:#7f93a7;direction:ltr;text-align:right}
+#campaign-studio .ui-preview-device__head small{font-size:.56rem;color:#7f93a7;direction:rtl;text-align:right}
 #campaign-studio .ui-preview-device__head .ui-preview-sponsored{padding:4px 7px;border-radius:7px;background:#fff;color:#71859a}
 #campaign-studio .ui-preview-search,#campaign-studio .ui-preview-message{padding:13px 11px 15px}
 #campaign-studio .ui-preview-search__query{display:flex;align-items:center;gap:7px;padding:9px 10px;border:1px solid #e7edf3;border-radius:9px;background:#fff;color:#71849a;font-size:.7rem}
@@ -274,10 +274,10 @@
 #campaign-studio .studio-form .catalog-suggest[hidden]{display:none!important}
 #campaign-studio .studio-form :is(input,select,textarea,button,a,summary):focus-visible,
 #campaign-studio .studio-stepper a:focus-visible{outline:2px solid #2b83c2;outline-offset:3px}
-@media(min-width:1251px){
+@media(min-width:1081px){
   #campaign-studio .studio-aside{position:sticky;top:20px;align-self:start}
 }
-@media(max-width:1250px){
+@media(max-width:1080px){
   #campaign-studio .studio-layout{grid-template-columns:minmax(0,1fr);grid-template-areas:"main" "preview"}
   #campaign-studio .studio-aside{position:static}
   #campaign-studio .studio-preview-jump{display:inline-flex}
