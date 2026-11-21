@@ -124,3 +124,19 @@ body.ui-final.is-app .ga-ops-premium .ops-remote-page .ga-queue-decision>.field{
 body.ui-final.is-app .ga-ops-premium .ops-remote-page .ga-queue-decision>.hero-actions{flex:1 1 240px;display:flex;gap:8px;flex-wrap:wrap}
 body.ui-final.is-app .ga-ops-premium .ops-remote-page .ga-queue-decision>.hero-actions .btn{flex:1}
 @media(max-width:740px){body.ui-final.is-app .ga-ops-premium .ops-remote-page .ga-queue-body{grid-template-columns:minmax(0,1fr)}body.ui-final.is-app .ga-ops-premium .ops-queue-filter>.field{max-width:none}body.ui-final.is-app .ga-ops-premium .ops-queue-filter>.btn{width:100%}body.ui-final.is-app .ga-ops-premium .ops-remote-page .ga-panel-head{align-items:start}}
+
+/* Related account consent & provisioning queue. */
+body.ui-final.is-app .ga-ops-premium .ops-accounts-filter{display:grid;grid-template-columns:minmax(170px,1fr) minmax(220px,1.6fr) auto auto;align-items:end;gap:12px}
+body.ui-final.is-app .ga-ops-premium .ops-accounts-filter .field{min-width:0}
+body.ui-final.is-app .ga-ops-premium .ops-accounts-filter :is(input,select){width:100%}
+body.ui-final.is-app .ga-ops-premium .ops-accounts-page .ga-queue-card{border-inline-start:3px solid #85b3dc}
+body.ui-final.is-app .ga-ops-premium .ops-accounts-page .ga-queue-card .ui-remote-summary{align-items:start}
+body.ui-final.is-app .ga-ops-premium .ops-accounts-page .ga-queue-card .ops-date{display:block;margin-top:4px}
+body.ui-final.is-app .ga-ops-premium .ops-accounts-page .ga-queue-decision{display:flex;flex-wrap:wrap;gap:10px;align-items:end}
+body.ui-final.is-app .ga-ops-premium .ops-accounts-page .ga-queue-decision>.field{flex:2 1 250px}
+body.ui-final.is-app .ga-ops-premium .ops-accounts-page .ga-queue-decision>.hero-actions{flex:1 1 250px;display:flex;gap:8px}
+body.ui-final.is-app .ga-ops-premium .ops-accounts-page .ga-queue-decision .btn{flex:1}
+body.ui-final.is-app .ga-ops-premium .ops-accounts-page .ops-reconcile-box{border:1px solid #eed9a5;border-radius:12px;background:#fffbf0;padding:13px;color:#815f2f}
+body.ui-final.is-app .ga-ops-premium .ops-accounts-page .ops-reconcile-box p{margin:5px 0 0;font-size:.78rem}
+@media(max-width:850px){body.ui-final.is-app .ga-ops-premium .ops-accounts-filter{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:580px){body.ui-final.is-app .ga-ops-premium .ops-accounts-filter{grid-template-columns:minmax(0,1fr)}}

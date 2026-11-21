@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render,redirect,get_object_or_404
 from django.views.decorators.http import require_http_methods
 from django.core.paginator import Paginator
+from django.db.models import Q
 from apps.accounts.permissions import customer_required,staff_ops_required
 from apps.telegram_ads.models import RelatedAccountRequest
 from apps.telegram_ads.services.related_accounts import RelatedAccountForm,request_account,execute_account,reject_account,provisioning_enabled
@@ -42,5 +43,19 @@ def ops_related_accounts(request):
         except (ValueError,TelegramAdsError) as exc:
             messages.error(request,str(exc))
         return redirect("operations:related_accounts")
-    page=Paginator(RelatedAccountRequest.objects.select_related("customer"),20).get_page(request.GET.get("page"))
-    return render(request,"operations/related_accounts.html",{"page_obj":page,"enabled":provisioning_enabled()})
+    status=request.GET.get("status","pending")
+    if status not in RelatedAccountRequest.Status.values and status!="all":
+        status="pending"
+    query=request.GET.get("q","").strip()[:100]
+    rows=RelatedAccountRequest.objects.select_related("customer","customer__user")
+    if status!="all":
+        rows=rows.filter(status=status)
+    if query:
+        rows=rows.filter(Q(title__icontains=query)|Q(customer__display_name__icontains=query)
+                         |Q(customer__user__username__icontains=query))
+    page=Paginator(rows,20).get_page(request.GET.get("page"))
+    return render(request,"operations/related_accounts.html",{
+        "page_obj":page,"enabled":provisioning_enabled(),
+        "filter_status":status,"query":query,
+        "status_choices":RelatedAccountRequest.Status.choices,
+    })
