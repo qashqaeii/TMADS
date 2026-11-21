@@ -161,3 +161,35 @@ class RefundRequest(TenantOwnedModel):
     amount_irr = models.BigIntegerField()
     status = models.CharField(max_length=16, choices=Status.choices, default=Status.OPEN)
     reason = models.TextField(blank=True)
+
+
+class AccountFundingTransfer(UUIDModel, TimeStampedModel):
+    """Idempotent funding receipt for platform-managed customer child accounts."""
+
+    class Status(models.TextChoices):
+        EXECUTING = "executing", "در حال انتقال"
+        COMPLETED = "completed", "تأییدشده"
+        UNCERTAIN = "uncertain", "نیازمند تطبیق"
+        FAILED = "failed", "ناموفق"
+
+    order = models.OneToOneField(
+        AdvertisingOrder,
+        on_delete=models.PROTECT,
+        related_name="account_funding_transfer",
+    )
+    connection = models.ForeignKey(
+        "telegram_ads.TelegramAdsConnection",
+        on_delete=models.PROTECT,
+        related_name="funding_transfers",
+    )
+    status = models.CharField(max_length=16, choices=Status.choices, default=Status.EXECUTING)
+    amount = models.DecimalField(max_digits=24, decimal_places=9)
+    currency = models.CharField(max_length=8)
+    idempotency_key = models.CharField(max_length=128, unique=True)
+    transaction_id = models.CharField(max_length=256, blank=True)
+    response_payload = models.JSONField(default=dict, blank=True)
+    error_code = models.CharField(max_length=120, blank=True)
+    confirmed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-created_at"]

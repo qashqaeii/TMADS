@@ -402,12 +402,15 @@ class TelegramAdsClient:
             raise ValueError("Account funding must originate from the platform main account.")
         if not (settings.TELEGRAM_ADS_WRITE_ENABLED and settings.TELEGRAM_ADS_PAID_SUBMISSION_ENABLED):
             raise TelegramAdsWriteDisabled("Account funding is disabled")
-        return self._run(
-            "related_account_funding",
-            lambda c: _model_to_dict(c.increase_account_budget(
+        def _transfer(c):
+            result = c.increase_account_budget(
                 account_id, float(amount), idempotency_key=idempotency_key,
-            )),
-        )
+            )
+            if result.is_pending:
+                result = c.wait_for_transaction(result, timeout=60, interval=2)
+            return _model_to_dict(result)
+
+        return self._run("related_account_funding", _transfer)
 
     def get_account_transaction_status(self, transaction_id: str):
         return self._run(
