@@ -47,7 +47,7 @@ def remote_management(request, campaign_id):
             if request.POST.get("action")=="confirm_budget_proposal":
                 from apps.finance.budget_management import submit_budget_proposal
                 submit_budget_proposal(campaign.pk,actor=request.user,token=request.POST.get("token",""))
-                messages.success(request,"درخواست بررسی بودجه ثبت شد؛ هیچ مبلغی کسر یا منتقل نشده است.")
+                messages.success(request,"درخواست بودجه ثبت شد. برای افزایش، مبلغ پیش‌فاکتور در کیف پول رزرو می‌شود و انتقال فقط پس از تأیید اپراتور انجام خواهد شد؛ بازگشت اعتبار کاهش نیز پس از تأیید انتقال انجام می‌شود.")
                 return redirect("campaigns:remote_management",campaign_id=campaign.pk)
             op = request_operation(campaign.pk,actor=request.user,action=request.POST.get("action",""),value=request.POST.get("value",""))
             if campaign.telegram_connection_id and campaign.telegram_connection.connection_type == "customer_owned":
