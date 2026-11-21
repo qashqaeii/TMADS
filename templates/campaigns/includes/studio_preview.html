@@ -53,7 +53,7 @@
   </section>
   {% endif %}
   {% if quote_totals and campaign.budget_irr and step != 5 %}
-  <div class="ui-preview-cost"><span>برآورد پرداختی</span><strong class="tabnums">{{ quote_totals.total_irr|irr_to_toman|format_irr }} تومان</strong>{% if quote_totals.ton_allocation %}<small dir="ltr">{{ quote_totals.ton_allocation }} TON</small>{% endif %}</div>
+  <div class="ui-preview-cost"><span>برآورد پرداختی</span><strong class="tabnums">{{ quote_totals.total_irr|irr_to_toman|format_irr }} تومان</strong>{% if quote_totals.ton_allocation %}<small dir="rtl">{{ quote_totals.ton_allocation|persian_digits }} تون</small>{% endif %}</div>
   {% endif %}
   <p class="ui-preview-footnote">{% include "includes/lucide_icon.html" with name="shield-check" size="sm" %} پیش‌نمایش به معنی تأیید یا انتشار تبلیغ نیست.</p>
 </aside>

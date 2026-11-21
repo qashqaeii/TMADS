@@ -51,3 +51,14 @@ def test_campaign_studio_renders_premium_guided_steps(client, customer_user, ste
         assert 'name="schedule_start" type="text"' in html
         assert 'name="schedule_end" type="text"' in html
         assert "۱۴۰۵/۰۹/۳۰" in html
+
+
+def test_campaign_preview_keeps_currency_labels_persian():
+    from pathlib import Path
+    from django.conf import settings
+
+    template = (settings.BASE_DIR / "templates/campaigns/includes/studio_preview.html").read_text(encoding="utf-8")
+    assert "ton_allocation|persian_digits" in template
+    assert " TON</small>" not in template
+    assert "LIVE CAMPAIGN PREVIEW" not in template
+    assert "Sponsored placement" not in template
