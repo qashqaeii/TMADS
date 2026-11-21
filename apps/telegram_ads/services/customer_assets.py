@@ -8,7 +8,7 @@ from django.db import transaction
 from apps.telegram_ads.client import TelegramAdsClient
 from apps.telegram_ads.exceptions import TelegramAdsError
 from apps.telegram_ads.models import TelegramAdsConnection, AccountAssetOperation
-from apps.telegram_ads.services.account_connections import connection_client
+from apps.telegram_ads.services.account_connections import connection_client, refresh_connection
 from apps.policies.services.preflight import CampaignPolicyPreflight
 
 EVENT_TYPES=("page_view","add_to_cart","add_to_wishlist","customize_product","initiate_checkout","add_payment_info","purchase","contact","lead","schedule","complete_registration","submit_application","start_trial","subscribe","view_content","search","find_location","donate","custom")
@@ -30,6 +30,8 @@ def _account_id(connection):
 
 
 def verified_client(connection):
+    if not connection.currency:
+        refresh_connection(connection)
     client = connection_client(connection)
     account = client.get_account()
     info = client.get_account_info()

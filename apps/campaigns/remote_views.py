@@ -59,8 +59,11 @@ def remote_management(request, campaign_id):
             messages.error(request,str(exc))
         return redirect("campaigns:remote_management",campaign_id=campaign.pk)
     ads=list(campaign.remote_ads.exclude(remote_ad_id="")[:2])
+    is_customer_owned = bool(campaign.telegram_connection_id and campaign.telegram_connection.connection_type == "customer_owned")
     return render(request,"campaigns/remote_management.html",{
         "campaign":campaign,"ad":ads[0] if len(ads)==1 else None,
+        "is_customer_owned":is_customer_owned,
+        "account_currency":campaign.telegram_connection.currency if campaign.telegram_connection_id else "TON",
         "operations":RemoteAdOperation.objects.filter(advertisement__campaign=campaign)[:30],
     })
 
