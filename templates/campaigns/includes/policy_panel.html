@@ -1,9 +1,16 @@
 {% load core_filters %}
 {% if policy_run %}
 <section class="policy-panel card card-pad card-muted" aria-live="polite">
-  <h3 class="section-title ui-policy-title">{% include "includes/lucide_icon.html" with name="shield-check" size="md" %} بررسی قوانین تبلیغ</h3>
   {% with counts=policy_run.counts %}
-  <div class="ui-policy-counts"><span class="status status-danger">مسدود: {{ counts.blocked|default:0 }}</span><span class="status status-warn">بررسی: {{ counts.review_required|default:0 }}</span><span class="status status-info">هشدار: {{ counts.warning|default:0 }}</span></div><p class="field-help">نسخه قوانین: <bdi>{{ policy_run.policy_version_code }}</bdi></p>
+  <header class="policy-panel__head">
+    <h3 class="section-title ui-policy-title">{% include "includes/lucide_icon.html" with name="shield-check" size="md" %}<span>بررسی قوانین تبلیغ</span></h3>
+    <p class="policy-panel__version">نسخه قوانین: <bdi>{{ policy_run.policy_version_code }}</bdi></p>
+  </header>
+  <div class="ui-policy-counts" role="group" aria-label="خلاصه نتیجه بررسی قوانین">
+    <span class="status status-danger">مسدود: {{ counts.blocked|default:0 }}</span>
+    <span class="status status-warn">بررسی: {{ counts.review_required|default:0 }}</span>
+    <span class="status status-info">هشدار: {{ counts.warning|default:0 }}</span>
+  </div>
   {% endwith %}
   <ul class="policy-findings">
     {% for f in policy_run.findings %}
@@ -14,13 +21,15 @@
       {% if f.field_key and step %}<a href="#field-{{ f.field_key }}" class="policy-findings__jump">رفتن به فیلد</a>{% endif %}
     </li>
     {% empty %}
-    <li class="muted" style="font-size:.85rem">مورد مهمی یافت نشد.</li>
+    <li class="policy-findings__empty muted">مورد مهمی یافت نشد.</li>
     {% endfor %}
   </ul>
-  <p style="margin:.65rem 0 0;font-size:.78rem;display:flex;flex-wrap:wrap;gap:.75rem;align-items:center">
+  <div class="policy-panel__actions">
     <a href="{% url 'policies:ad_policies' %}">راهنمای کامل قوانین</a>
-    {% if step %}<button type="button" class="btn btn-ghost btn-sm" data-policy-refresh>بررسی مجدد قوانین</button>
-    <span class="muted" data-policy-refresh-status aria-live="polite"></span>{% endif %}
-  </p>
+    {% if step %}
+    <button type="button" class="btn btn-ghost btn-sm" data-policy-refresh>بررسی مجدد قوانین</button>
+    <span class="muted" data-policy-refresh-status aria-live="polite"></span>
+    {% endif %}
+  </div>
 </section>
 {% endif %}

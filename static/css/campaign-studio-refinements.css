@@ -1,0 +1,234 @@
+/* GramAds Campaign Studio — compact, non-overlapping final polish. */
+#campaign-studio{gap:12px}
+
+/* Keep the brand statement, but return the first fold to the actual task. */
+#campaign-studio .studio-masthead{
+  min-height:0;
+  gap:14px;
+  padding:14px 24px 16px;
+  border-radius:20px;
+}
+#campaign-studio .studio-masthead__top{min-height:32px}
+#campaign-studio .studio-masthead__brand-icon{width:32px;height:32px;border-radius:10px}
+#campaign-studio .studio-masthead__body{align-items:center;gap:24px}
+#campaign-studio .studio-masthead__eyebrow{margin-bottom:4px;font-size:.58rem}
+#campaign-studio .studio-masthead h1{font-size:clamp(1.3rem,2.2vw,1.72rem);line-height:1.4}
+#campaign-studio .studio-masthead__copy p{margin-top:3px;font-size:.77rem;line-height:1.75}
+#campaign-studio .studio-masthead__draft{
+  min-width:210px;
+  max-width:270px;
+  gap:4px;
+  padding:9px 12px;
+  border-radius:12px;
+}
+#campaign-studio .studio-masthead__draft strong{font-size:.82rem}
+#campaign-studio .studio-masthead__draft small{font-size:.64rem}
+
+/* A quieter, shorter progress rail. */
+#campaign-studio .studio-progress-panel{
+  gap:8px;
+  padding:10px 14px 9px;
+  border-radius:16px;
+}
+#campaign-studio .studio-progress-panel__eyebrow{font-size:.55rem}
+#campaign-studio .studio-progress-panel__title strong{font-size:.84rem}
+#campaign-studio .studio-progress-panel__count strong{font-size:1.05rem}
+#campaign-studio .studio-progress-track{height:3px}
+#campaign-studio .studio-stepper__list{gap:5px}
+#campaign-studio .studio-stepper__item{
+  min-height:44px;
+  gap:7px;
+  padding:6px 8px;
+  border-radius:10px;
+}
+#campaign-studio .studio-stepper__number{width:28px;height:28px;border-radius:9px;font-size:.72rem}
+#campaign-studio .studio-stepper__copy strong{font-size:.71rem}
+#campaign-studio .studio-stepper__copy small{font-size:.57rem}
+
+/* Give the form the useful width; keep preview secondary and aligned. */
+#campaign-studio .studio-layout{
+  grid-template-columns:minmax(0,1fr) minmax(280px,320px);
+  gap:14px;
+}
+#campaign-studio .studio-form{
+  gap:14px;
+  padding:clamp(16px,1.8vw,23px);
+  border-radius:20px;
+}
+#campaign-studio .studio-form-topbar{padding-bottom:10px}
+#campaign-studio .studio-step-heading{gap:4px}
+#campaign-studio .studio-step-heading h2{font-size:clamp(1.1rem,1.65vw,1.35rem);line-height:1.55}
+#campaign-studio .studio-step-heading p{font-size:.76rem}
+#campaign-studio .studio-mode-option{min-height:60px}
+#campaign-studio .studio-form .target-grid{gap:9px}
+#campaign-studio .studio-form .target-card{
+  min-height:122px;
+  gap:7px;
+  padding:13px!important;
+}
+#campaign-studio .studio-form .target-card .ui-target-symbol{width:35px;height:35px;border-radius:11px}
+
+/* The action area stays in document flow: no field or card is covered. */
+#campaign-studio .studio-footer{
+  position:static;
+  inset:auto;
+  z-index:auto;
+  gap:8px;
+  margin-top:3px;
+  padding:11px 0 0;
+  border:0;
+  border-top:1px solid #edf1f5;
+  border-radius:0;
+  background:transparent;
+  box-shadow:none;
+  backdrop-filter:none;
+}
+#campaign-studio .studio-footer__hint{font-size:.65rem;line-height:1.7}
+#campaign-studio .studio-actions-bar{gap:8px}
+#campaign-studio .studio-actions-bar .btn{min-height:44px}
+#campaign-studio .studio-actions-bar .studio-action-primary{min-width:180px}
+
+/* A cleaner policy summary: severity, explanation and next action are distinct. */
+#campaign-studio .policy-panel{
+  display:grid;
+  gap:10px;
+  padding:13px 14px;
+  border:1px solid #e3eaf1;
+  border-radius:15px;
+  background:linear-gradient(180deg,#fbfdff 0%,#f7fafd 100%);
+}
+#campaign-studio .policy-panel__head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px 14px;
+  flex-wrap:wrap;
+}
+#campaign-studio .ui-policy-title{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin:0;
+  color:#243f59;
+  font-size:.82rem;
+}
+#campaign-studio .ui-policy-title svg{width:18px;height:18px;flex:none}
+#campaign-studio .policy-panel__version{margin:0;color:#8a98a7;font-size:.62rem}
+#campaign-studio .ui-policy-counts{gap:6px}
+#campaign-studio .ui-policy-counts .status{padding:5px 8px;border-radius:8px;font-size:.64rem}
+#campaign-studio .policy-findings{
+  display:grid;
+  gap:7px;
+  margin:0;
+  padding:0;
+  list-style:none;
+}
+#campaign-studio .policy-findings__item{
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr);
+  align-items:start;
+  gap:3px 9px;
+  margin:0;
+  padding:9px 10px;
+  border:1px solid #e9eef3;
+  border-radius:10px;
+  background:#fff;
+  color:#405970;
+  font-size:.7rem;
+  line-height:1.8;
+}
+#campaign-studio .policy-findings__badge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  align-self:start;
+  padding:3px 7px;
+  border-radius:7px;
+  background:#f0f4f7;
+  color:#657b8f;
+  font-size:.61rem;
+  font-weight:750;
+  white-space:nowrap;
+}
+#campaign-studio .policy-findings__item small,
+#campaign-studio .policy-findings__jump{grid-column:2;min-width:0}
+#campaign-studio .policy-findings__item small{font-size:.65rem;line-height:1.75;color:#7b8c9c}
+#campaign-studio .policy-findings__jump{font-size:.65rem;font-weight:750}
+#campaign-studio .policy-findings__item--blocked{border-color:#f0dfe2;background:#fffdfd}
+#campaign-studio .policy-findings__item--blocked .policy-findings__badge{background:#fff0f1;color:#ad4050}
+#campaign-studio .policy-findings__item--review_required{border-color:#f0e6d5;background:#fffefa}
+#campaign-studio .policy-findings__item--review_required .policy-findings__badge{background:#fff5e5;color:#9a6b27}
+#campaign-studio .policy-findings__item--warning .policy-findings__badge{background:#edf6fd;color:#286b9b}
+#campaign-studio .policy-findings__item--info .policy-findings__badge{background:#eef5f2;color:#39745d}
+#campaign-studio .policy-findings__empty{padding:10px 12px;border:1px dashed #dce5ed;border-radius:10px;background:#fff;font-size:.7rem}
+#campaign-studio .policy-panel__actions{
+  display:flex;
+  align-items:center;
+  gap:8px 12px;
+  flex-wrap:wrap;
+  padding-top:8px;
+  border-top:1px solid #e9eef3;
+  font-size:.68rem;
+}
+#campaign-studio .policy-panel__actions .btn{min-height:34px;padding:6px 10px;font-size:.66rem}
+#campaign-studio [id^="field-"]{scroll-margin-top:92px}
+
+/* The preview remains available without competing with the active step. */
+#campaign-studio .studio-aside{padding:15px;border-radius:19px}
+#campaign-studio .studio-preview__heading{margin-bottom:11px}
+#campaign-studio .studio-preview__summary{margin-top:10px}
+#campaign-studio .studio-preview__guidance{margin-top:10px;padding:9px}
+#campaign-studio .ui-preview-footnote{margin-top:9px}
+
+@media(min-width:1161px){
+  #campaign-studio .studio-aside{position:sticky;top:84px}
+}
+@media(max-width:1160px){
+  #campaign-studio .studio-layout{
+    grid-template-columns:minmax(0,1fr);
+    grid-template-areas:"main" "preview";
+  }
+  #campaign-studio .studio-aside{position:static}
+  #campaign-studio .studio-preview-jump{display:inline-flex}
+}
+@media(max-height:820px) and (min-width:1161px){
+  #campaign-studio .studio-masthead{gap:10px;padding-block:11px 12px}
+  #campaign-studio .studio-progress-panel{gap:7px;padding-block:9px 8px}
+  #campaign-studio .studio-stepper__item{min-height:41px}
+}
+@media(max-width:760px){
+  #campaign-studio{gap:10px}
+  #campaign-studio .studio-masthead{gap:13px;padding:12px 13px 14px;border-radius:16px}
+  #campaign-studio .studio-masthead__body{align-items:flex-start;gap:10px}
+  #campaign-studio .studio-masthead h1{font-size:1.2rem}
+  #campaign-studio .studio-masthead__copy p{font-size:.69rem}
+  #campaign-studio .studio-masthead__draft{width:100%;max-width:none;padding:8px 10px}
+  #campaign-studio .studio-progress-panel{gap:8px;padding:10px;border-radius:14px}
+  #campaign-studio .studio-stepper__item{flex-basis:136px;min-height:45px}
+  #campaign-studio .studio-layout{gap:10px}
+  #campaign-studio .studio-form{gap:12px;padding:12px;border-radius:15px}
+  #campaign-studio .studio-form-topbar{gap:8px}
+  #campaign-studio .studio-step-heading h2{font-size:1.06rem}
+  #campaign-studio .studio-form .target-card{min-height:0;padding:11px!important}
+  #campaign-studio .studio-footer{gap:7px;padding-top:10px}
+  #campaign-studio .studio-footer__hint{font-size:.6rem}
+  #campaign-studio .studio-actions-bar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+  #campaign-studio .studio-actions-bar .btn{width:100%;min-width:0;min-height:43px;padding:8px;font-size:.68rem}
+  #campaign-studio .studio-actions-bar .studio-action-primary{grid-column:1/-1;grid-row:1;margin:0}
+  #campaign-studio .studio-actions-bar .studio-action-save{grid-column:1}
+  #campaign-studio .studio-actions-bar .studio-action-back{grid-column:2}
+  #campaign-studio .studio-actions-bar .studio-action-review-save{grid-column:2}
+  #campaign-studio .studio-aside{padding:12px;border-radius:15px}
+  #campaign-studio .policy-panel{gap:8px;padding:11px}
+  #campaign-studio .policy-findings__item{padding:8px;gap:3px 7px}
+  #campaign-studio .policy-panel__actions{gap:7px}
+}
+@media(max-width:390px){
+  #campaign-studio .studio-masthead__back span{max-width:88px;white-space:nowrap}
+  #campaign-studio .studio-stepper__item{flex-basis:128px}
+  #campaign-studio .studio-form{padding:11px}
+  #campaign-studio .policy-panel__head{align-items:flex-start}
+}
+@media(prefers-reduced-motion:reduce){
+  #campaign-studio :is(*,::before,::after){scroll-behavior:auto!important;transition:none!important;animation:none!important}
+}

@@ -3,7 +3,7 @@
 {% block page_title %}استودیو ساخت تبلیغ{% endblock %}
 {% block container_class %}container-wide{% endblock %}
 {% block extra_head %}{{ block.super }}{% if ai_available %}<link rel="stylesheet" href="{% static 'css/ui-ai.css' %}">{% endif %}{% endblock %}
-{% block page_styles %}{{ block.super }}<link rel="stylesheet" href="{% static 'css/campaign-studio-premium.css' %}">{% endblock %}
+{% block page_styles %}{{ block.super }}<link rel="stylesheet" href="{% static 'css/campaign-studio-premium.css' %}"><link rel="stylesheet" href="{% static 'css/campaign-studio-refinements.css' %}">{% endblock %}
 {% block content %}
 <div id="campaign-studio" class="wizard-shell studio-shell ui-studio ga-studio-workspace">
   <header class="studio-masthead">

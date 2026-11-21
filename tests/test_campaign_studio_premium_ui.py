@@ -37,6 +37,7 @@ def test_campaign_studio_renders_premium_guided_steps(client, customer_user, ste
     assert 'id="draft-save-status"' in html
     assert 'id="studio-preview-panel"' in html
     assert "campaign-studio-premium" in html
+    assert "campaign-studio-refinements" in html
     assert heading in html
     assert field in html
     assert html.count('aria-current="step"') == 1
