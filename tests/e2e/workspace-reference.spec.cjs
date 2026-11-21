@@ -79,12 +79,18 @@ for (const role of Object.keys(routes)) {
             for (const card of await metrics.all()) {
               const geometry = await card.evaluate(el => {
                 const a=el.querySelector('.kpi-exec__label').getBoundingClientRect();
-                const b=el.querySelector('.kpi-exec__value').getBoundingClientRect();
+                const value=el.querySelector('.kpi-exec__value');
+                const b=value.getBoundingClientRect();
+                const body=el.querySelector('.kpi-exec__body');
                 return {overlap:a.left<b.right && a.right>b.left && a.top<b.bottom && a.bottom>b.top,
-                  valueInside:b.left>=el.getBoundingClientRect().left-1 && b.right<=el.getBoundingClientRect().right+1};
+                  valueInside:b.left>=el.getBoundingClientRect().left-1 && b.right<=el.getBoundingClientRect().right+1,
+                  bodyRatio:body.getBoundingClientRect().width/el.getBoundingClientRect().width,
+                  valueOverflow:value.scrollWidth>value.clientWidth+1};
               });
               expect(geometry.overlap).toBe(false);
               expect(geometry.valueInside).toBe(true);
+              expect(geometry.bodyRatio).toBeGreaterThan(.55);
+              expect(geometry.valueOverflow).toBe(false);
             }
           }
           if (route === '/ops/api-status/') {
