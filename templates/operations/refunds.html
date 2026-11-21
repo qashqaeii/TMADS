@@ -3,12 +3,13 @@
 {% block page_title %}بازپرداخت‌ها{% endblock %}
 {% block container_class %}container-wide{% endblock %}
 {% block content %}
-<div class="app-stack operations-page ui-ops ga-ops-workspace">
-{% include "includes/dash_header.html" with page_icon="refresh-cw" eyebrow="عملیات" title="بازپرداخت" %}
+<div class="app-stack operations-page ui-ops ga-ops-premium ga-ops-workspace ops-refund-workspace">
+{% include "includes/dash_header.html" with page_icon="refresh-cw" eyebrow="مالی" title="بازپرداخت‌ها" subtitle="تصمیم مالی با مستندات روشن و تأیید نهایی" %}
+<div class="ops-context-strip"><div><strong>{{ page_obj.paginator.count|format_count }} درخواست</strong><span>تعداد مطابق فیلتر فعال</span></div><a href="{% url 'operations:overview' %}">مرکز عملیات</a></div>
 
 {% if refunds %}
 <article class="ga-panel ga-data-panel ga-ops-table"><header class="ga-panel-head"><div class="ga-panel-title"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="wallet" %}</span><div><h2>درخواست‌های بازپرداخت</h2><p>بررسی مالی با ثبت دلیل تصمیم</p></div></div></header><section class="filter-exec-shell ga-ops-table-filter" aria-label="فیلتر بازپرداخت">
-  <form method="get" class="filter-exec">
+  <form method="get" class="filter-exec ops-filter-bar">
     <div class="filter-exec__grid filter-exec__grid--inline">
       <div class="filter-exec__field">
         <label class="filter-exec__label" for="ops-refund-status">وضعیت</label>
@@ -19,26 +20,27 @@
           <option value="approved" {% if filter_status == "approved" %}selected{% endif %}>تأیید شده</option><option value="paid" {% if filter_status == 'paid' %}selected{% endif %}>پرداخت‌شده</option>
           <option value="rejected" {% if filter_status == 'rejected' %}selected{% endif %}>رد شده</option>
         </select>
-      </div><div class="ui-filter-submit"><button class="btn btn-primary" type="submit">اعمال فیلتر</button></div>
+      </div><div class="filter-exec__field ops-search-field"><label class="filter-exec__label" for="ops-refund-query">جستجوی مشتری یا دلیل</label><input id="ops-refund-query" class="filter-exec__control" type="search" name="q" maxlength="100" value="{{ query }}" placeholder="نام مشتری یا متن درخواست"></div><div class="ui-filter-submit"><button class="btn btn-primary" type="submit">اعمال فیلتر</button></div>
     </div>
+  <a class="btn btn-ghost" href="{% url 'operations:refunds' %}">پاک‌کردن فیلترها</a>
   </form>
 </section>
   <div class="table-wrap" tabindex="0" role="region" aria-label="درخواست‌های بازپرداخت">
     <table class="data-table"><caption class="sr-only">درخواست‌های بازپرداخت</caption>
-      <thead><tr><th scope="col">مشتری</th><th scope="col">مبلغ</th><th scope="col">وضعیت</th><th scope="col">دلیل</th><th scope="col">اقدام</th></tr></thead>
+      <thead><tr><th scope="col">مشتری</th><th scope="col">مبلغ</th><th scope="col">وضعیت</th><th scope="col">دلیل</th><th scope="col">زمان درخواست</th><th scope="col">اقدام</th></tr></thead>
       <tbody>
       {% for r in refunds %}
         <tr>
           <td>{{ r.customer }}</td>
           <td>{{ r.amount_irr|irr_to_toman|format_irr }} تومان</td>
           <td><span class="status {% if r.status == 'paid' or r.status == 'approved' %}status-active{% elif r.status == 'rejected' %}status-danger{% else %}status-warn{% endif %}">{{ r.get_status_display }}</span></td>
-          <td class="ui-ops-reason"><details><summary>{{ r.reason|truncatechars:55|default:"—" }}</summary><p>{{ r.reason|default:"—" }}</p></details></td>
+          <td class="ui-ops-reason"><details><summary>{{ r.reason|truncatechars:55|default:"—" }}</summary><p>{{ r.reason|default:"—" }}</p></details></td><td class="ops-date"><time datetime="{{ r.created_at|date:'c' }}">{{ r.created_at|jalali_datetime }}</time></td>
           <td>
             {% if r.status == 'open' or r.status == 'review' %}
             <details class="ga-refund-decision"><summary>بررسی درخواست {% include "includes/gramads_workspace_icon.html" with name="chevron-left" %}</summary><form method="post" class="ui-refund-action">{% csrf_token %}
               <input type="hidden" name="refund_id" value="{{ r.id }}">
               <div class="field"><label for="refund-note-{{ r.id }}">توضیح تصمیم</label><input id="refund-note-{{ r.id }}" name="note" placeholder="دلیل رد یا توضیح" class="operations-note"></div>
-              <div class="ui-refund-buttons"><button class="btn btn-primary btn-sm" name="action" value="approve" type="submit" data-confirm-title="تأیید بازپرداخت" data-confirm-message="در صورت وجود رزرو معتبر، تأیید باعث تغییر موجودی کیف پول مشتری می‌شود. ادامه می‌دهید؟" data-confirm-label="تأیید بازپرداخت" data-confirm-tone="primary" onclick="return window.tmadsConfirmReady || confirm('در صورت وجود رزرو معتبر، تأیید باعث تغییر موجودی کیف پول مشتری می‌شود. ادامه می‌دهید؟');">تأیید</button>
+              <div class="ui-refund-buttons">{% if r.status == 'open' %}<button class="btn btn-ghost btn-sm" name="action" value="review" type="submit">ارجاع به بررسی</button>{% endif %}<button class="btn btn-primary btn-sm" name="action" value="approve" type="submit" data-confirm-title="تأیید بازپرداخت" data-confirm-message="در صورت وجود رزرو معتبر، تأیید باعث تغییر موجودی کیف پول مشتری می‌شود. ادامه می‌دهید؟" data-confirm-label="تأیید بازپرداخت" data-confirm-tone="primary" onclick="return window.tmadsConfirmReady || confirm('در صورت وجود رزرو معتبر، تأیید باعث تغییر موجودی کیف پول مشتری می‌شود. ادامه می‌دهید؟');">تأیید</button>
               <button class="btn btn-danger-soft btn-sm" name="action" value="reject" type="submit" data-confirm-title="رد درخواست" data-confirm-message="تصمیم رد درخواست بازپرداخت ثبت می‌شود. ادامه می‌دهید؟" data-confirm-label="رد بازپرداخت" data-confirm-tone="danger" onclick="return window.tmadsConfirmReady || confirm('تصمیم رد درخواست بازپرداخت ثبت می‌شود. ادامه می‌دهید؟');">رد</button></div>
             </form></details>
             {% else %}—{% endif %}
@@ -51,7 +53,7 @@
 </article>
 {% else %}
 <article class="ga-panel ga-data-panel ga-ops-table"><header class="ga-panel-head"><div class="ga-panel-title"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="wallet" %}</span><div><h2>درخواست‌های بازپرداخت</h2><p>بررسی مالی با ثبت دلیل تصمیم</p></div></div></header><section class="filter-exec-shell ga-ops-table-filter" aria-label="فیلتر بازپرداخت">
-  <form method="get" class="filter-exec">
+  <form method="get" class="filter-exec ops-filter-bar">
     <div class="filter-exec__grid filter-exec__grid--inline">
       <div class="filter-exec__field">
         <label class="filter-exec__label" for="ops-refund-status">وضعیت</label>
@@ -62,10 +64,12 @@
           <option value="approved" {% if filter_status == "approved" %}selected{% endif %}>تأیید شده</option><option value="paid" {% if filter_status == 'paid' %}selected{% endif %}>پرداخت‌شده</option>
           <option value="rejected" {% if filter_status == 'rejected' %}selected{% endif %}>رد شده</option>
         </select>
-      </div><div class="ui-filter-submit"><button class="btn btn-primary" type="submit">اعمال فیلتر</button></div>
+      </div><div class="filter-exec__field ops-search-field"><label class="filter-exec__label" for="ops-refund-query">جستجوی مشتری یا دلیل</label><input id="ops-refund-query" class="filter-exec__control" type="search" name="q" maxlength="100" value="{{ query }}" placeholder="نام مشتری یا متن درخواست"></div><div class="ui-filter-submit"><button class="btn btn-primary" type="submit">اعمال فیلتر</button></div>
     </div>
+  <a class="btn btn-ghost" href="{% url 'operations:refunds' %}">پاک‌کردن فیلترها</a>
   </form>
 </section><div class="ga-empty-state"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="refresh-cw" %}</span><h2>درخواستی با این فیلتر یافت نشد</h2><p>برای مشاهده سایر درخواست‌ها وضعیت را تغییر دهید.</p></div></article>
 {% endif %}
+{% if page_obj.has_other_pages %}<nav class="ops-pager" aria-label="صفحه‌بندی بازپرداخت">{% if page_obj.has_previous %}<a class="btn btn-ghost btn-sm" href="?status={{ filter_status|urlencode }}&amp;q={{ query|urlencode }}&amp;page={{ page_obj.previous_page_number }}">صفحه قبل</a>{% endif %}<span>صفحه {{ page_obj.number|persian_digits }} از {{ page_obj.paginator.num_pages|persian_digits }}</span>{% if page_obj.has_next %}<a class="btn btn-ghost btn-sm" href="?status={{ filter_status|urlencode }}&amp;q={{ query|urlencode }}&amp;page={{ page_obj.next_page_number }}">صفحه بعد</a>{% endif %}</nav>{% endif %}
 </div>
 {% endblock %}

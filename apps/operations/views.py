@@ -285,11 +285,25 @@ def audit_logs(request):
 @login_required
 @staff_ops_required
 def refunds_ops(request):
-    refunds = RefundRequest.objects.select_related("customer", "order").order_by("-created_at")
+    from django.core.paginator import Paginator
+    from django.db.models import Q
+
+    refunds = RefundRequest.objects.select_related("customer", "customer__user", "order").order_by("-created_at", "-id")
     status = request.GET.get("status", "")
+    if status not in RefundRequest.Status.values:
+        status = ""
+    query = request.GET.get("q", "").strip()[:100]
     if status:
         refunds = refunds.filter(status=status)
-    refunds = refunds[:80]
+    if query:
+        refunds = refunds.filter(
+            Q(customer__display_name__icontains=query)
+            | Q(customer__company_name__icontains=query)
+            | Q(customer__user__username__icontains=query)
+            | Q(reason__icontains=query)
+        )
+    page_obj = Paginator(refunds, 25).get_page(request.GET.get("page"))
+    refunds = page_obj.object_list
 
     if request.method == "POST":
         refund_id = request.POST.get("refund_id")
@@ -312,5 +326,6 @@ def refunds_ops(request):
     return render(
         request,
         "operations/refunds.html",
-        {"refunds": refunds, "filter_status": status},
+        {"refunds": refunds, "filter_status": status,
+         "query": query, "page_obj": page_obj},
     )

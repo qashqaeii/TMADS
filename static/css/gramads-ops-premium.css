@@ -158,3 +158,14 @@ body.ui-final.is-app .ga-ops-premium .ops-report-results .data-table td bdi{disp
 body.ui-final.is-app .ga-ops-premium .ops-report-results .ga-panel-head{flex-wrap:wrap}
 @media(max-width:800px){body.ui-final.is-app .ga-ops-premium .ops-report-form{grid-template-columns:minmax(0,1fr)}body.ui-final.is-app .ga-ops-premium .ops-report-form>.field{max-width:none}body.ui-final.is-app .ga-ops-premium .ops-report-form .ops-report-actions{justify-content:start}}
 @media(max-width:530px){body.ui-final.is-app .ga-ops-premium .ops-report-form .ops-report-actions{flex-direction:column}body.ui-final.is-app .ga-ops-premium .ops-report-form .ops-report-actions .btn{width:100%}}
+
+/* Refunds: conservative high-value decisions and document-first layout. */
+body.ui-final.is-app .ga-ops-premium.ops-refund-workspace .ga-refund-decision summary{min-height:38px;display:flex;align-items:center;gap:6px;white-space:nowrap}
+body.ui-final.is-app .ga-ops-premium.ops-refund-workspace .ga-refund-decision[open]{min-width:225px}
+body.ui-final.is-app .ga-ops-premium.ops-refund-workspace .ui-refund-action{display:grid;gap:10px;margin-top:12px}
+body.ui-final.is-app .ga-ops-premium.ops-refund-workspace .ui-refund-buttons{display:flex;gap:6px;flex-wrap:wrap}
+body.ui-final.is-app .ga-ops-premium.ops-refund-workspace .ui-refund-buttons button{flex:1 1 90px;white-space:normal}
+body.ui-final.is-app .ga-ops-premium.ops-refund-workspace .ui-ops-reason{max-width:330px}
+body.ui-final.is-app .ga-ops-premium.ops-refund-workspace .ui-ops-reason summary{cursor:pointer;font-weight:650;color:#365774;max-width:270px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+body.ui-final.is-app .ga-ops-premium.ops-refund-workspace .ui-ops-reason p{white-space:pre-wrap;overflow-wrap:anywhere;color:#66839b;font-size:.77rem;max-width:300px;line-height:1.8}
+body.ui-final.is-app .ga-ops-premium.ops-refund-workspace .data-table{min-width:830px}
