@@ -15,7 +15,7 @@
 
 <div class="ui-ops-api-layout ops-api-layout">
   {% if account %}
-  <section class="ga-panel"><header class="ga-panel-head"><div class="ga-panel-title"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="building-2" %}</span><div><h2>حساب جاری</h2><p>اطلاعات حساب متصل</p></div></div></header><div class="ga-panel-body ga-api-facts">
+  <section class="ga-panel ops-api-account"><header class="ga-panel-head"><div class="ga-panel-title"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="building-2" %}</span><div><h2>حساب جاری</h2><p>اطلاعات حساب متصل</p></div></div></header><div class="ga-panel-body ga-api-facts ops-api-facts">
     <div class="finance-line"><span>عنوان</span><strong>{{ account.title|default:"—" }}</strong></div>
     <div class="finance-line"><span>ارز</span><strong>{{ account.currency|currency_label_fa }}</strong></div>
     <div class="finance-line"><span>مصرف کل</span><strong>{% if account.currency == 'TON' %}{% ton_amount account.spent_budget %} تون{% else %}<bdi>{{ account.spent_budget|default_if_none:"—" }} {{ account.currency|currency_label_fa }}</bdi>{% endif %}</strong></div>
@@ -25,9 +25,10 @@
     <p class="muted" style="font-size:.82rem;margin-top:1rem">واحد اعتبار حساب ممکن است گرام، یورو یا استار تلگرام باشد.</p>
   </div></section>
   {% endif %}
-  <section class="ga-panel ga-data-panel"><header class="ga-panel-head"><div class="ga-panel-title"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="shield-check" %}</span><div><h2>قابلیت‌های سرویس تلگرام</h2><p>نتیجه آزمون‌های فقط‌خواندنی، بدون تغییر حساب</p></div></div></header><div class="ga-panel-body">
+  <section class="ga-panel ga-data-panel ops-api-capabilities"><header class="ga-panel-head"><div class="ga-panel-title"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="shield-check" %}</span><div><h2>قابلیت‌های سرویس تلگرام</h2><p>نتیجه آزمون‌های فقط‌خواندنی، بدون تغییر حساب</p></div></div></header><div class="ga-panel-body">
     <p class="muted" style="font-size:.85rem">این بررسی‌ها فقط اطلاعات را می‌خوانند و هیچ تغییری در حساب ایجاد نمی‌کنند. وضعیت «بررسی‌نشده» به معنی نبود قابلیت نیست.</p>
-    <div class="table-wrap" tabindex="0" role="region" aria-label="قابلیت‌های سرویس تلگرام"><table class="data-table"><caption class="sr-only">قابلیت‌های سرویس تلگرام</caption>
+    <div class="table-wrap" tabindex="0" role="region" aria-label="قابلیت‌های سرویس تلگرام"><table class="data-table ops-api-table"><caption class="sr-only">قابلیت‌های سرویس تلگرام</caption>
+      <colgroup><col class="ops-api-col-key"><col class="ops-api-col-status"><col class="ops-api-col-details"></colgroup>
       <thead><tr><th scope="col">کلید</th><th scope="col">وضعیت</th><th scope="col">جزئیات</th></tr></thead>
       <tbody>
       {% for c in capabilities %}
@@ -41,7 +42,7 @@
       {% endfor %}
       </tbody>
     </table></div>
-    <div class="ops-api-last-seen"><div><span>آخرین ارتباط موفق</span><strong>{{ last_ok.created_at|jalali_datetime }}</strong></div><div><span>آخرین ارتباط ناموفق</span><strong>{{ last_fail.created_at|jalali_datetime }}</strong></div></div>
+    <div class="ops-api-last-seen"><div><span>آخرین ارتباط موفق</span><strong>{{ last_ok.created_at|jalali_datetime|default:"ثبت نشده" }}</strong></div><div><span>آخرین ارتباط ناموفق</span><strong>{{ last_fail.created_at|jalali_datetime|default:"ثبت نشده" }}</strong></div></div>
   </div></section>
 </div>
 

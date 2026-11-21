@@ -314,3 +314,59 @@ body.ui-final.is-app .ga-ops-premium .ops-section-heading p{line-height:1.7}
   body.ui-final.is-app .ga-ops-premium .dash-header__actions{width:100%;justify-content:flex-start}
   body.ui-final.is-app .ga-ops-premium .ops-lead{min-height:0;padding:19px;align-items:flex-start}
 }
+
+
+/* Telegram API facts and capability matrix — long values must never compete for one line. */
+body.ui-final.is-app .ga-ops-premium .ops-api-layout{
+  grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:14px;align-items:start;
+}
+body.ui-final.is-app .ga-ops-premium .ops-api-account,
+body.ui-final.is-app .ga-ops-premium .ops-api-capabilities{min-width:0}
+body.ui-final.is-app .ga-ops-premium .ops-api-facts{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-content:start;gap:9px;
+}
+body.ui-final.is-app .ga-ops-premium .ops-api-facts .finance-line{
+  display:grid;grid-template-columns:minmax(0,1fr);align-content:start;justify-items:stretch;
+  gap:5px;min-width:0;min-height:78px;padding:12px 13px;margin:0;
+  border:1px solid #e2ebf5;border-radius:12px;background:#f7faff;overflow:hidden;
+}
+body.ui-final.is-app .ga-ops-premium .ops-api-facts .finance-line>span{
+  display:block;min-width:0;color:#6b8299;font-size:.7rem;line-height:1.55;
+}
+body.ui-final.is-app .ga-ops-premium .ops-api-facts .finance-line>:is(strong,code,bdi,time){
+  display:block;width:100%;min-width:0;max-width:100%;font-size:.82rem;font-weight:800;
+  color:#173a5d;text-align:start;line-height:1.65;white-space:normal;
+  overflow-wrap:anywhere;word-break:break-word;
+}
+body.ui-final.is-app .ga-ops-premium .ops-api-facts .finance-line>code{
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.7rem;font-weight:650;
+  direction:ltr;text-align:left;unicode-bidi:plaintext;word-break:break-all;letter-spacing:.01em;
+}
+body.ui-final.is-app .ga-ops-premium .ops-api-facts .finance-line>strong bdi{
+  display:inline;max-width:100%;overflow-wrap:anywhere;word-break:break-word;
+}
+body.ui-final.is-app .ga-ops-premium .ops-api-facts>p{grid-column:1/-1;margin:2px 0 0}
+body.ui-final.is-app .ga-ops-premium .ops-api-capabilities .ops-api-table{
+  width:100%;min-width:620px;table-layout:fixed;
+}
+body.ui-final.is-app .ga-ops-premium .ops-api-capabilities .ops-api-col-key{width:29%}
+body.ui-final.is-app .ga-ops-premium .ops-api-capabilities .ops-api-col-status{width:22%}
+body.ui-final.is-app .ga-ops-premium .ops-api-capabilities .ops-api-col-details{width:49%}
+body.ui-final.is-app .ga-ops-premium .ops-api-capabilities .ops-api-table td:nth-child(1),
+body.ui-final.is-app .ga-ops-premium .ops-api-capabilities .ops-api-table td:nth-child(3){
+  overflow-wrap:anywhere;word-break:break-word;
+}
+body.ui-final.is-app .ga-ops-premium .ops-api-capabilities .ops-api-table td:nth-child(2){white-space:nowrap}
+body.ui-final.is-app .ga-ops-premium .ops-api-capabilities .ops-api-table td:nth-child(2) .status{
+  display:inline-flex;max-width:100%;white-space:nowrap;word-break:keep-all;
+  overflow-wrap:normal;line-height:1.4;
+}
+body.ui-final.is-app .ga-ops-premium .ops-api-last-seen strong{min-width:0;overflow-wrap:anywhere;word-break:break-word}
+@media(max-width:1030px){
+  body.ui-final.is-app .ga-ops-premium .ops-api-layout{grid-template-columns:minmax(0,1fr)}
+}
+@media(max-width:560px){
+  body.ui-final.is-app .ga-ops-premium .ops-api-facts{grid-template-columns:minmax(0,1fr)}
+  body.ui-final.is-app .ga-ops-premium .ops-api-facts .finance-line{min-height:0}
+  body.ui-final.is-app .ga-ops-premium .ops-api-last-seen{grid-template-columns:minmax(0,1fr)}
+}
