@@ -80,3 +80,28 @@ body.ui-final.is-app .ga-ops-premium .ops-empty{padding:36px 16px;text-align:cen
 body.ui-final.is-app .ga-ops-premium .ops-empty strong{font-size:.96rem}
 body.ui-final.is-app .ga-ops-premium .ops-empty p{color:#67819a;margin:0 0 8px;font-size:.79rem}
 @media(max-width:620px){body.ui-final.is-app .ga-ops-premium .ops-filter-bar .ui-filter-submit,body.ui-final.is-app .ga-ops-premium .ops-filter-bar .ui-filter-submit button{width:100%}body.ui-final.is-app .ga-ops-premium .ops-pager{flex-wrap:wrap}body.ui-final.is-app .ga-ops-premium .ops-context-strip{align-items:start}}
+
+/* Review detail: policy gates before any irreversible action. */
+body.ui-final.is-app .ga-ops-premium .ops-review-journey{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+body.ui-final.is-app .ga-ops-premium .ops-review-stage{display:flex;align-items:center;gap:11px;min-width:0;padding:13px 15px;border:1px solid #dce8f4;border-radius:14px;background:#fff}
+body.ui-final.is-app .ga-ops-premium .ops-review-stage__icon{display:grid;place-items:center;width:36px;height:36px;flex:none;border-radius:10px;background:#e9f2fd;color:#226cae}
+body.ui-final.is-app .ga-ops-premium .ops-review-stage>div{display:grid;gap:3px;min-width:0}
+body.ui-final.is-app .ga-ops-premium .ops-review-stage strong{font-size:.8rem;color:#214260}
+body.ui-final.is-app .ga-ops-premium .ops-review-stage small{font-size:.7rem;color:#66829a;line-height:1.6}
+body.ui-final.is-app .ga-ops-premium .ops-review-stage--ready{border-color:#c6e7d7;background:#f8fdfb}
+body.ui-final.is-app .ga-ops-premium .ops-review-stage--ready .ops-review-stage__icon{background:#e5f7ed;color:#167252}
+body.ui-final.is-app .ga-ops-premium .ops-review-stage--blocked{border-color:#f2dddd;background:#fffafb}
+body.ui-final.is-app .ga-ops-premium .ops-review-stage--blocked .ops-review-stage__icon{background:#faebec;color:#b04f58}
+body.ui-final.is-app .ga-ops-premium .ops-review-stage--pending{border-color:#f0dbae;background:#fffbf2}
+body.ui-final.is-app .ga-ops-premium .ops-review-stage--pending .ops-review-stage__icon{background:#fff0cf;color:#916717}
+body.ui-final.is-app .ga-ops-premium .ui-ops-review-layout{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(310px,.8fr);gap:16px;align-items:start}
+body.ui-final.is-app .ga-ops-premium .ops-review-detail .ga-panel-body{display:grid;gap:12px}
+body.ui-final.is-app .ga-ops-premium .ops-review-decisions{position:sticky;top:74px}
+body.ui-final.is-app .ga-ops-premium .ops-review-note{padding:12px 14px;background:#f1f7fe;border:1px solid #dcebf8;border-radius:12px}
+body.ui-final.is-app .ga-ops-premium .ops-review-note strong{font-size:.78rem;color:#185a9b}
+body.ui-final.is-app .ga-ops-premium .ops-review-note p{font-size:.73rem;color:#5f7892;line-height:1.8;margin:3px 0 0}
+body.ui-final.is-app .ga-ops-premium .ops-decision-actions{display:flex;flex-wrap:wrap;gap:9px}
+body.ui-final.is-app .ga-ops-premium .ops-decision-actions button{flex:1 1 145px}
+body.ui-final.is-app .ga-ops-premium .ops-review-decisions .card-muted{border:1px solid #e0ebf5;background:#f7fafd;border-radius:12px}
+@media(max-width:1100px){body.ui-final.is-app .ga-ops-premium .ui-ops-review-layout{grid-template-columns:minmax(0,1fr)}body.ui-final.is-app .ga-ops-premium .ops-review-decisions{position:static}}
+@media(max-width:740px){body.ui-final.is-app .ga-ops-premium .ops-review-journey{grid-template-columns:minmax(0,1fr)}body.ui-final.is-app .ga-ops-premium .ops-review-stage{padding:10px 12px}}

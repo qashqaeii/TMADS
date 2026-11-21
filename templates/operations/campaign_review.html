@@ -3,7 +3,7 @@
 {% block page_title %}بررسی کمپین{% endblock %}
 {% block container_class %}container-wide{% endblock %}
 {% block content %}
-<div class="app-stack operations-page ui-ops ga-review-workspace">
+<div class="app-stack operations-page ui-ops ga-ops-premium ga-review-workspace">
 <nav class="ui-breadcrumb" aria-label="مسیر صفحه"><a href="{% url 'operations:campaigns' %}">صف کمپین‌ها</a>{% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}<span aria-current="page">بررسی کمپین</span></nav>
 <header class="dash-header ui-page-heading dash-header--luxe dash-header--rich">
   <div class="dash-header__main">
@@ -17,8 +17,22 @@
     </div>
   </div><a class="btn btn-ghost btn-sm" href="{% url 'operations:remote_operations' %}">صف عملیات تبلیغات</a>
 </header>
+<section class="ops-review-journey" aria-label="وضعیت بررسی و ارسال">
+  <div class="ops-review-stage {% if review_block %}ops-review-stage--blocked{% else %}ops-review-stage--ready{% endif %}">
+    <span class="ops-review-stage__icon">{% include "includes/gramads_workspace_icon.html" with name="clipboard-check" %}</span>
+    <div><strong>۱. بررسی داخلی</strong><small>{% if review_block %}نیازمند تکمیل پیش‌شرط‌ها{% else %}آماده بررسی اپراتور{% endif %}</small></div>
+  </div>
+  <div class="ops-review-stage {% if submit_block %}ops-review-stage--blocked{% else %}ops-review-stage--ready{% endif %}">
+    <span class="ops-review-stage__icon">{% include "includes/gramads_workspace_icon.html" with name="send" %}</span>
+    <div><strong>۲. ارسال به تلگرام</strong><small>{% if submit_block %}ارسال تا رفع محدودیت متوقف است{% else %}پیش‌شرط‌های فعلی برقرارند{% endif %}</small></div>
+  </div>
+  <div class="ops-review-stage {% if allocation_pending %}ops-review-stage--pending{% endif %}">
+    <span class="ops-review-stage__icon">{% include "includes/gramads_workspace_icon.html" with name="wallet" %}</span>
+    <div><strong>۳. تطبیق اعتبار</strong><small>{% if allocation_pending %}نیازمند تطبیق با سند تلگرام{% else %}فقط پس از تخصیص معتبر انجام می‌شود{% endif %}</small></div>
+  </div>
+</section>
 <div class="panel-grid panel-2 ui-ops-review-layout">
-  <section class="ga-panel"><header class="ga-panel-head"><div class="ga-panel-title"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="megaphone" %}</span><div><h2>جزئیات کمپین</h2><p>اطلاعات سفارش و محتوای تبلیغ</p></div></div></header><div class="ga-panel-body">
+  <section class="ga-panel ops-review-detail"><header class="ga-panel-head"><div class="ga-panel-title"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="megaphone" %}</span><div><h2>جزئیات کمپین</h2><p>اطلاعات سفارش و محتوای تبلیغ</p></div></div></header><div class="ga-panel-body">
     <div class="finance-line"><span>مقصد</span><span dir="ltr" class="muted operations-wrap">{{ campaign.destination|default:"—" }}</span></div>
     <div class="finance-line"><span>جایگاه</span><span>{{ campaign.get_placement_display|default:"—" }}</span></div>
     <div class="finance-line"><span>هدف</span><span>{{ campaign.get_objective_display|default:"—" }}</span></div>
@@ -54,13 +68,13 @@
     </ul>
     {% endif %}
   </div></section>
-  <section class="ga-panel ga-review-actions">
-    <header class="ga-panel-head"><div class="ga-panel-title"><span class="ui-target-symbol">{% include "includes/lucide_icon.html" with name="clipboard-check" size="md" %}</span><div><h2>اقدام عملیات</h2><p>تصمیم داخلی، ارسال و تطبیق مالی</p></div></div></header><div class="ga-panel-body form-stack">
+  <section class="ga-panel ga-review-actions ops-review-decisions">
+    <header class="ga-panel-head"><div class="ga-panel-title"><span class="ui-target-symbol">{% include "includes/lucide_icon.html" with name="clipboard-check" size="md" %}</span><div><h2>میز تصمیم‌گیری</h2><p>اقدام‌های حساس با کنترل وضعیت و تأیید نهایی</p></div></div></header><div class="ga-panel-body form-stack">
     {% if review_block %}<div class="card-muted card-pad" role="status"><strong>بررسی داخلی در دسترس نیست</strong><p class="muted">{{ review_block|user_message_fa }}</p></div>{% endif %}
     <form method="post" class="form-stack">{% csrf_token %}
-      <div class="field"><label for="review-reason">دلیل رد (در صورت رد)</label><textarea id="review-reason" name="reason" rows="2" placeholder="توضیح برای مشتری"></textarea></div>
-      <div class="field"><label for="review-internal">مستند بررسی داخلی</label><textarea id="review-internal" name="reason_internal" rows="3" placeholder="توضیح بررسی موارد نیازمند تصمیم اپراتور"></textarea></div>
-      <div class="hero-actions">
+      <div class="ops-review-note"><strong>ثبت تصمیم شفاف</strong><p>در صورت رد، علت قابل‌فهم برای مشتری بنویسید. اطلاعات داخلی را جداگانه ثبت کنید.</p></div><div class="field"><label for="review-reason">توضیح برای مشتری (در صورت رد)</label><textarea id="review-reason" name="reason" rows="2" maxlength="1000" placeholder="علت رد را روشن و محترمانه بنویسید"></textarea></div>
+      <div class="field"><label for="review-internal">مستند بررسی داخلی</label><textarea id="review-internal" name="reason_internal" rows="3" maxlength="2000" placeholder="توضیح بررسی موارد نیازمند تصمیم اپراتور"></textarea></div>
+      <div class="hero-actions ops-decision-actions">
         <button class="btn btn-primary btn-sm" name="action" value="approve" type="submit" {% if review_block %}disabled{% endif %}>تأیید داخلی</button>
         <button class="btn btn-danger btn-sm" name="action" value="reject" type="submit" data-confirm-title="رد کمپین" data-confirm-message="تصمیم رد و دلیل آن برای مشتری ثبت می‌شود. ادامه می‌دهید؟" data-confirm-label="رد کمپین" data-confirm-tone="danger" onclick="return window.tmadsConfirmReady || confirm('تصمیم رد و دلیل آن برای مشتری ثبت می‌شود. ادامه می‌دهید؟');" {% if review_block %}disabled{% endif %}>رد کمپین</button>
         <button class="btn btn-ghost btn-sm" name="action" value="rerun_policy" type="submit">بررسی دوباره قوانین</button>
