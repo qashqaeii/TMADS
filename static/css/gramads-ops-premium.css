@@ -235,3 +235,25 @@ body.ui-final.is-app .ga-ops-premium .ops-api-notes{border-radius:16px}
 body.ui-final.is-app .ga-ops-premium .ops-api-notes li{line-height:1.9;font-size:.78rem}
 @media(max-width:1030px){body.ui-final.is-app .ga-ops-premium .ops-api-layout{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:680px){body.ui-final.is-app .ga-ops-premium .ops-api-pulse{grid-template-columns:minmax(0,1fr)}body.ui-final.is-app .ga-ops-premium .ops-api-last-seen{grid-template-columns:minmax(0,1fr)}}
+
+/* Release readiness: evidence-first checklist with accessible state progress. */
+body.ui-final.is-app .ga-ops-premium .ops-release-summary{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:21px 24px;flex-wrap:wrap;min-width:0}
+body.ui-final.is-app .ga-ops-premium .ops-release-summary>div:first-child{display:grid;gap:9px;flex:1 1 340px;min-width:0}
+body.ui-final.is-app .ga-ops-premium .ops-release-summary h2{font-size:1.03rem;font-weight:850;color:#163e62;margin:0}
+body.ui-final.is-app .ga-ops-premium .ops-release-summary p{color:#627e96;font-size:.76rem;line-height:1.8;margin:0}
+body.ui-final.is-app .ga-ops-premium .ops-readiness-meter{width:min(390px,100%);height:8px;overflow:hidden;border-radius:20px;background:#e7eef6}
+body.ui-final.is-app .ga-ops-premium .ops-readiness-meter__fill{display:block;height:100%;border-radius:inherit;background:#27a47e}
+body.ui-final.is-app .ga-ops-premium .ga-release-blocked .ops-readiness-meter__fill{background:#d9a54a}
+body.ui-final.is-app .ga-ops-premium .ops-release-summary .ui-release-numbers{display:flex;gap:9px;flex-wrap:wrap}
+body.ui-final.is-app .ga-ops-premium .ops-release-summary .ui-release-numbers>span{min-width:92px;padding:12px 15px;border:1px solid #dce9f3;background:#f6faff;border-radius:13px;text-align:center}
+body.ui-final.is-app .ga-ops-premium .ops-release-summary .ui-release-numbers small{font-size:.72rem;color:#5e7790}
+body.ui-final.is-app .ga-ops-premium .ops-release-summary .ui-release-numbers strong{font-size:1.28rem;color:#133c62}
+body.ui-final.is-app .ga-ops-premium .ops-release-checklist .ui-release-checks{display:grid;gap:9px}
+body.ui-final.is-app .ga-ops-premium .ops-release-checklist .ui-release-check{display:grid;grid-template-columns:38px minmax(0,1fr) auto;gap:13px;align-items:center;min-height:71px;padding:13px 14px;border:1px solid #e4edf6;border-radius:12px;background:#fbfdff}
+body.ui-final.is-app .ga-ops-premium .ops-release-checklist .ui-release-check h3{font-size:.85rem;font-weight:800;margin:0 0 4px}
+body.ui-final.is-app .ga-ops-premium .ops-release-checklist .ui-release-check p{font-size:.75rem;line-height:1.7;color:#647f97;margin:0}
+body.ui-final.is-app .ga-ops-premium .ops-release-checklist .ui-release-check--blocked{background:#fff9f8;border-color:#f3dedc}
+body.ui-final.is-app .ga-ops-premium .ops-release-checklist .ui-release-check--pending{background:#fffcf6;border-color:#f0e2bf}
+body.ui-final.is-app .ga-ops-premium .ops-release-checklist .ui-release-check--ready{border-color:#d8eee2}
+body.ui-final.is-app .ga-ops-premium .ops-release-links{display:flex;gap:10px;flex-wrap:wrap}
+@media(max-width:740px){body.ui-final.is-app .ga-ops-premium .ops-release-summary{padding:15px}body.ui-final.is-app .ga-ops-premium .ops-release-summary .ui-release-numbers{width:100%}body.ui-final.is-app .ga-ops-premium .ops-release-summary .ui-release-numbers>span{flex:1 1 85px}body.ui-final.is-app .ga-ops-premium .ops-release-checklist .ui-release-check{grid-template-columns:34px minmax(0,1fr)}body.ui-final.is-app .ga-ops-premium .ops-release-checklist .ui-release-check>.status{grid-column:2;justify-self:start}body.ui-final.is-app .ga-ops-premium .ops-release-links .btn{flex:1}}

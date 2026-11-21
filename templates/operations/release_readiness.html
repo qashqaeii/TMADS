@@ -2,19 +2,23 @@
 {% load core_filters %}
 {% block page_title %}آمادگی انتشار{% endblock %}
 {% block content %}
-<div class="app-stack operations-page ui-ops ui-release ga-release-workspace">
-{% include "includes/dash_header.html" with page_icon="shield-check" title="آمادگی محیط اصلی" subtitle="گزارش مستقل و فقط‌خواندنی پیش‌شرط‌های انتشار" with_sub=1 %}
-<section class="ga-panel ga-release-status ui-release-summary {% if can_launch %}ga-release-ready{% else %}ga-release-blocked{% endif %}">
+<div class="app-stack operations-page ui-ops ga-ops-premium ui-release ga-release-workspace ops-release-page">
+{% include "includes/dash_header.html" with page_icon="shield-check" title="آمادگی انتشار" subtitle="چک‌لیست پیش‌شرط‌های محیط اصلی، با تفکیک موارد مسدود و نیازمند تأیید" with_sub=1 %}
+<div class="ops-context-strip"><div><strong>پایش بدون تغییر تنظیمات</strong><span>این گزارش فقط وضعیت فعلی را نمایش می‌دهد.</span></div><a href="{% url 'operations:overview' %}">مرکز عملیات</a></div>
+<section class="ga-panel ga-release-status ui-release-summary ops-release-summary {% if can_launch %}ga-release-ready{% else %}ga-release-blocked{% endif %}">
   <div><span class="ui-target-symbol">{% include "includes/lucide_icon.html" with name="shield-check" size="md" %}</span>
   <h2>{% if can_launch %}پیش‌شرط‌های قابل‌اندازه‌گیری برقرارند{% else %}انتشار عمومی هنوز مجاز نیست{% endif %}</h2>
-  <p>این صفحه هیچ پرداخت، درخواست نوشتن تلگرام یا تغییر تنظیماتی انجام نمی‌دهد.</p></div>
+  <p>پیش از هر انتشار عمومی، موارد مسدود یا نیازمند تأیید را بررسی کنید. این صفحه هیچ پرداخت یا عملیات نوشتنی انجام نمی‌دهد.</p>
+  <div class="ops-readiness-meter" role="img" aria-label="پیشرفت بررسی: {{ ready|format_count }} مورد آماده، {{ blocked|format_count }} مورد مسدود و {{ pending|format_count }} مورد در انتظار">
+    <span class="ops-readiness-meter__fill" style="width:{% widthratio ready ready|add:blocked|add:pending 100 %}%"></span>
+  </div></div>
   <div class="ui-release-numbers" aria-label="خلاصه وضعیت"><span><small>آماده</small><strong>{{ ready|format_count }}</strong></span><span><small>مسدود</small><strong>{{ blocked|format_count }}</strong></span><span><small>نیازمند تأیید</small><strong>{{ pending|format_count }}</strong></span></div>
 </section>
-<section class="ga-panel">
-  <header class="ga-panel-head"><h2 class="section-title">چک‌لیست انتشار</h2><span class="muted">اطلاعات حساس نمایش داده نمی‌شوند</span></header>
+<section class="ga-panel ops-release-checklist">
+  <header class="ga-panel-head"><div class="ga-panel-title"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="list-checks" %}</span><div><h2 class="section-title">چک‌لیست انتشار</h2><p>هر ردیف یک پیش‌شرط مستقل است، نه تضمین انتشار</p></div></div><span class="muted">اطلاعات محرمانه مخفی هستند</span></header>
   <div class="ui-release-checks ga-panel-body">
   {% for item in items %}
-  <article class="ui-release-check ui-release-check--{{ item.state }}">
+  <article class="ui-release-check ui-release-check--{{ item.state }}" aria-label="{{ item.label }}">
     <span class="ui-release-check__icon" aria-hidden="true">{% if item.state == "ready" %}{% include "includes/lucide_icon.html" with name="check-circle" size="md" %}{% elif item.state == "blocked" %}{% include "includes/lucide_icon.html" with name="x-circle" size="md" %}{% else %}{% include "includes/lucide_icon.html" with name="clock" size="md" %}{% endif %}</span>
     <div><h3>{{ item.label }}</h3><p>{{ item.explanation }}</p></div>
     <span class="status {% if item.state == 'ready' %}status-active{% elif item.state == 'blocked' %}status-danger{% else %}status-warn{% endif %}">{% if item.state == 'ready' %}آماده{% elif item.state == 'blocked' %}مسدود{% else %}در انتظار{% endif %}</span>
@@ -22,6 +26,6 @@
   {% endfor %}
   </div>
 </section>
-<div class="hero-actions"><a href="{% url 'operations:api_status' %}" class="btn btn-ghost">مشاهده وضعیت اتصال تلگرام</a><a href="{% url 'operations:overview' %}" class="btn btn-ghost">بازگشت به مرکز عملیات</a></div>
+<div class="hero-actions ops-release-links"><a href="{% url 'operations:api_status' %}" class="btn btn-ghost">مشاهده وضعیت اتصال تلگرام</a><a href="{% url 'operations:overview' %}" class="btn btn-ghost">بازگشت به مرکز عملیات</a></div>
 </div>
 {% endblock %}
