@@ -443,3 +443,21 @@ class TelegramAdsClient:
                 int(ad_id), float(amount), idempotency_key=idempotency_key,
             )),
         )
+
+
+    def transfer_from_related_account(self, *, account_id: str, amount: float, idempotency_key: str):
+        """Return funds from one related account to the platform main account."""
+        if self.account_id:
+            raise ValueError("Account funding must settle to the platform main account.")
+        if not (settings.TELEGRAM_ADS_WRITE_ENABLED and settings.TELEGRAM_ADS_PAID_SUBMISSION_ENABLED):
+            raise TelegramAdsWriteDisabled("Account funding return is disabled")
+
+        def _transfer(c):
+            result = c.decrease_account_budget(
+                account_id, float(amount), idempotency_key=idempotency_key,
+            )
+            if result.is_pending:
+                result = c.wait_for_transaction(result, timeout=60, interval=2)
+            return _model_to_dict(result)
+
+        return self._run("related_account_funding_return", _transfer)

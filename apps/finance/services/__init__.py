@@ -233,3 +233,40 @@ def verify_fake_payment(payment: Payment) -> bool:
     if not settings.PAYMENT_FAKE_ENABLED or settings.APP_ENV.upper() == "PRODUCTION" or payment.gateway != "fake":
         return False
     return complete_topup_payment(payment, deposit_description="شارژ کیف پول (آزمایشی)")
+
+
+@transaction.atomic
+def credit_wallet_refund(
+    wallet: Wallet,
+    amount_irr: int,
+    idempotency_key: str,
+    *,
+    related_id: uuid.UUID | None = None,
+    description: str = "بازگشت اعتبار تبلیغاتی",
+) -> WalletLedgerEntry:
+    """Credit a verified advertising-budget return exactly once."""
+    wallet = Wallet.objects.select_for_update().get(pk=wallet.pk)
+    if type(amount_irr) is not int or amount_irr <= 0:
+        raise ValueError("مبلغ بازگشت اعتبار باید عدد صحیح مثبت باشد.")
+    existing = WalletLedgerEntry.objects.filter(idempotency_key=idempotency_key).first()
+    if existing:
+        if (
+            existing.wallet_id != wallet.pk
+            or existing.amount_irr != amount_irr
+            or existing.entry_type != WalletLedgerEntry.EntryType.REFUND
+            or existing.related_order_id != related_id
+        ):
+            raise ValueError("کلید بازپرداخت با عملیات مالی دیگری مرتبط است.")
+        return existing
+    wallet.available_irr += amount_irr
+    wallet.save(update_fields=["available_irr", "updated_at"])
+    return WalletLedgerEntry.objects.create(
+        wallet=wallet,
+        entry_type=WalletLedgerEntry.EntryType.REFUND,
+        amount_irr=amount_irr,
+        balance_after_available=wallet.available_irr,
+        balance_after_reserved=wallet.reserved_irr,
+        idempotency_key=idempotency_key,
+        related_order_id=related_id,
+        description=description,
+    )
