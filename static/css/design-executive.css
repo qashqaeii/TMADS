@@ -100,118 +100,52 @@
   --stagger-kpi: 0.025s;
 }
 
-/* —— Lucide icon shell (global) —— */
+/* —— Lucide icon shell — glyph-first baseline; final global rules live in gramads-icon-system.css. —— */
 .icon-shell {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  line-height: 0;
-  vertical-align: middle;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 auto;
+  line-height:0;
+  vertical-align:middle;
+  transform-origin:center;
 }
 .icon-shell svg.lucide-svg,
 .icon-shell svg.df-lucide-svg {
-  display: block;
-  stroke: currentColor;
-  fill: none;
+  display:block;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:1.75;
+  stroke-linecap:round;
+  stroke-linejoin:round;
 }
 .icon-motion {
-  transition:
-    color var(--duration-ui) var(--ease-premium),
-    transform var(--duration-ui) var(--ease-premium),
-    background var(--duration-ui) var(--ease-premium),
-    border-color var(--duration-ui) var(--ease-premium),
-    box-shadow var(--duration-ui) var(--ease-premium),
-    opacity var(--duration-ui) var(--ease-premium);
+  transition:color 220ms cubic-bezier(.2,.72,.25,1),transform 220ms cubic-bezier(.2,.72,.25,1),opacity 220ms cubic-bezier(.2,.72,.25,1),filter 220ms cubic-bezier(.2,.72,.25,1);
 }
-.icon-shell--nav {
-  width: 1.05rem;
-  height: 1.05rem;
-  color: inherit;
-}
-.icon-shell--kpi {
-  width: 1.2rem;
-  height: 1.2rem;
-  color: inherit;
-}
-.icon-shell--sm {
-  width: 1rem;
-  height: 1rem;
-  color: currentColor;
-}
-.icon-shell--md {
-  width: 1.35rem;
-  height: 1.35rem;
-  color: currentColor;
-}
-.icon-shell--btn {
-  width: 1.05rem;
-  height: 1.05rem;
-  color: currentColor;
-}
-.icon-shell--exec {
-  width: 2.15rem;
-  height: 2.15rem;
-  border-radius: var(--radius-sm);
-  color: var(--brand-action);
-  background: color-mix(in srgb, var(--brand-soft) 50%, transparent);
-  border: 1px solid color-mix(in srgb, var(--brand-action) 14%, transparent);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
-}
-.icon-shell--nav svg.lucide-svg,
-.icon-shell--nav svg.df-lucide-svg { width: 1.05rem; height: 1.05rem; }
-.icon-shell--kpi svg.lucide-svg,
-.icon-shell--kpi svg.df-lucide-svg { width: 1.2rem; height: 1.2rem; }
-.icon-shell--sm svg.lucide-svg,
-.icon-shell--sm svg.df-lucide-svg { width: 1rem; height: 1rem; }
-.icon-shell--md svg.lucide-svg,
-.icon-shell--md svg.df-lucide-svg { width: 1.35rem; height: 1.35rem; }
-.icon-shell--btn svg.lucide-svg,
-.icon-shell--btn svg.df-lucide-svg { width: 1.05rem; height: 1.05rem; }
-.icon-shell--exec svg.lucide-svg,
-.icon-shell--exec svg.df-lucide-svg { width: 1rem; height: 1rem; }
-html.motion-ready .icon-shell.icon-motion.icon-shell--ready {
-  animation: icon-gentle-in 0.44s var(--ease-premium) both;
-}
+.icon-shell--nav {width:18px;height:18px;color:inherit}
+.icon-shell--kpi,.icon-shell--md {width:20px;height:20px;color:inherit}
+.icon-shell--sm,.icon-shell--btn {width:16px;height:16px;color:currentColor}
+.icon-shell--exec {width:22px;height:22px;color:var(--brand-action)}
+.icon-shell--nav svg.lucide-svg,.icon-shell--nav svg.df-lucide-svg {width:18px;height:18px}
+.icon-shell--kpi svg.lucide-svg,.icon-shell--kpi svg.df-lucide-svg,.icon-shell--md svg.lucide-svg,.icon-shell--md svg.df-lucide-svg {width:20px;height:20px}
+.icon-shell--sm svg.lucide-svg,.icon-shell--sm svg.df-lucide-svg,.icon-shell--btn svg.lucide-svg,.icon-shell--btn svg.df-lucide-svg {width:16px;height:16px}
+.icon-shell--exec svg.lucide-svg,.icon-shell--exec svg.df-lucide-svg {width:20px;height:20px}
+html.motion-ready .icon-shell.icon-motion.icon-shell--ready {animation:icon-gentle-in .34s cubic-bezier(.2,.72,.25,1) both}
 @keyframes icon-gentle-in {
-  from {
-    opacity: 0.35;
-    transform: scale(0.9) translateY(2px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
+  from {opacity:.62;transform:translate3d(0,2px,0) scale(.94)}
+  to {opacity:1;transform:translate3d(0,0,0) scale(1)}
 }
 .sidebar a.sidebar-link:hover .icon-shell--nav,
-.sidebar a.sidebar-link.active .icon-shell--nav {
-  transform: scale(1.06);
-}
-.sidebar a.sidebar-link.active .icon-shell--nav {
-  color: var(--brand-primary);
-}
-.kpi-exec:hover .icon-shell--exec {
-  transform: translateY(-1px) scale(1.03);
-  background: color-mix(in srgb, var(--brand-soft) 88%, transparent);
-  border-color: color-mix(in srgb, var(--brand-action) 26%, transparent);
-  box-shadow: 0 5px 16px rgba(23, 125, 199, 0.1);
-}
-.dash-kpi-tile:hover .icon-shell--kpi {
-  transform: translateY(-1px) scale(1.05);
-}
+.sidebar a.sidebar-link.active .icon-shell--nav {transform:translate3d(-1px,0,0) scale(1.05)}
+.sidebar a.sidebar-link.active .icon-shell--nav {color:var(--brand-primary)}
+.kpi-exec:hover .icon-shell--exec,
+.dash-kpi-tile:hover .icon-shell--kpi {transform:translate3d(0,-1px,0) scale(1.045)}
 .targeting-board__copy-all:hover .icon-shell--sm,
 .targeting-board__copy-all:focus-visible .icon-shell--sm,
-.targeting-card:hover .icon-shell--sm {
-  transform: scale(1.08);
-}
+.targeting-card:hover .icon-shell--sm,
 .btn:hover .icon-shell--btn,
-.btn:focus-visible .icon-shell--btn {
-  transform: scale(1.06);
-}
-html.motion-reduced .icon-shell {
-  animation: none !important;
-  transform: none !important;
-}
+.btn:focus-visible .icon-shell--btn {transform:scale(1.045)}
+html.motion-reduced .icon-shell {animation:none!important;transform:none!important;transition:none!important;filter:none!important}
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

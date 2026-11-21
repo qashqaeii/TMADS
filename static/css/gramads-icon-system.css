@@ -1,0 +1,295 @@
+/*
+ * GramAds Global Icon System
+ * Glyph-first, frame-free icons across public, advertiser and operator surfaces.
+ * This stylesheet is intentionally loaded after every page-specific stylesheet.
+ */
+body.ui-final {
+  --gm-icon-xs: 14px;
+  --gm-icon-sm: 16px;
+  --gm-icon-nav: 18px;
+  --gm-icon-md: 20px;
+  --gm-icon-lg: 22px;
+  --gm-icon-motion: 220ms;
+  --gm-icon-ease: cubic-bezier(.2,.72,.25,1);
+}
+
+/* Remove icon tiles, outlines and decorative plates without changing the
+   surrounding card, navigation row or semantic status colour. */
+body.ui-final :is(
+  .icon-shell,
+  .ga-ws-icon,
+  .nav-icon,
+  .ga-symbol,
+  .ga-page-heading-icon,
+  .ui-target-symbol,
+  .ui-auth-symbol,
+  .ui-empty__icon,
+  .ui-dialog__symbol,
+  .ui-icon-button,
+  .auth-state-icon,
+  [class*="__icon"],
+  [class*="-icon"],
+  [class*="__glyph"],
+  [class*="__symbol"]
+) {
+  background: transparent !important;
+  background-image: none !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Lucide shell scale: 16 / 18 / 20 / 22px. */
+body.ui-final .icon-shell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  inline-size: var(--gm-icon-md) !important;
+  block-size: var(--gm-icon-md) !important;
+  min-inline-size: var(--gm-icon-md);
+  min-block-size: var(--gm-icon-md);
+  padding: 0 !important;
+  color: currentColor;
+  line-height: 0;
+  vertical-align: middle;
+  transform-origin: center;
+  transition:
+    color var(--gm-icon-motion) var(--gm-icon-ease),
+    transform var(--gm-icon-motion) var(--gm-icon-ease),
+    opacity var(--gm-icon-motion) var(--gm-icon-ease),
+    filter var(--gm-icon-motion) var(--gm-icon-ease);
+}
+body.ui-final .icon-shell--nav {
+  inline-size: var(--gm-icon-nav) !important;
+  block-size: var(--gm-icon-nav) !important;
+  min-inline-size: var(--gm-icon-nav);
+  min-block-size: var(--gm-icon-nav);
+}
+body.ui-final .icon-shell--kpi,
+body.ui-final .icon-shell--md {
+  inline-size: var(--gm-icon-md) !important;
+  block-size: var(--gm-icon-md) !important;
+  min-inline-size: var(--gm-icon-md);
+  min-block-size: var(--gm-icon-md);
+}
+body.ui-final .icon-shell--sm,
+body.ui-final .icon-shell--btn {
+  inline-size: var(--gm-icon-sm) !important;
+  block-size: var(--gm-icon-sm) !important;
+  min-inline-size: var(--gm-icon-sm);
+  min-block-size: var(--gm-icon-sm);
+}
+body.ui-final .icon-shell--exec {
+  inline-size: var(--gm-icon-lg) !important;
+  block-size: var(--gm-icon-lg) !important;
+  min-inline-size: var(--gm-icon-lg);
+  min-block-size: var(--gm-icon-lg);
+}
+body.ui-final .icon-shell svg.lucide-svg,
+body.ui-final .icon-shell svg.df-lucide-svg {
+  display: block;
+  inline-size: inherit !important;
+  block-size: inherit !important;
+  max-inline-size: 100%;
+  max-block-size: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75 !important;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+  transform-origin: center;
+  transition:
+    color var(--gm-icon-motion) var(--gm-icon-ease),
+    transform var(--gm-icon-motion) var(--gm-icon-ease),
+    opacity var(--gm-icon-motion) var(--gm-icon-ease),
+    filter var(--gm-icon-motion) var(--gm-icon-ease);
+}
+
+/* Locally rendered workspace SVGs use the same optical scale and stroke. */
+body.ui-final .ga-ws-icon {
+  display: block;
+  flex: 0 0 auto;
+  inline-size: 18px !important;
+  block-size: 18px !important;
+  max-inline-size: 100%;
+  max-block-size: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75 !important;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+  transform-origin: center;
+  transition:
+    color var(--gm-icon-motion) var(--gm-icon-ease),
+    transform var(--gm-icon-motion) var(--gm-icon-ease),
+    opacity var(--gm-icon-motion) var(--gm-icon-ease),
+    filter var(--gm-icon-motion) var(--gm-icon-ease);
+}
+body.ui-final .ga-ws-icon--md {
+  inline-size: 21px !important;
+  block-size: 21px !important;
+}
+body.ui-final .ga-ws-icon--btn {
+  inline-size: 18px !important;
+  block-size: 18px !important;
+}
+
+/* Icon-only wrappers retain a generous click target, never a visible tile. */
+body.ui-final .ui-icon-button {
+  inline-size: 40px !important;
+  block-size: 40px !important;
+  min-inline-size: 40px !important;
+  min-block-size: 40px !important;
+  padding: 0 !important;
+  color: inherit;
+  cursor: pointer;
+  transition: color var(--gm-icon-motion) var(--gm-icon-ease);
+}
+body.ui-final .ui-icon-button:focus-visible {
+  outline: 2px solid var(--ui-action, #176db5) !important;
+  outline-offset: 3px;
+}
+
+/* Standard icon footprints. The icon glyph remains optically centred. */
+body.ui-final :is(
+  .nav-icon,
+  .ga-symbol,
+  .ga-page-heading-icon,
+  .kpi-exec__icon,
+  .kpi-card__icon,
+  .ops-review-stage__icon,
+  .ops-empty__symbol,
+  .pay-heading-icon,
+  .ga-notifications__symbol,
+  .ga-notification-icon,
+  .ui-release-check__icon
+) {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  inline-size: 28px !important;
+  block-size: 28px !important;
+  min-inline-size: 28px !important;
+  min-block-size: 28px !important;
+  flex: 0 0 28px !important;
+  padding: 0 !important;
+  vertical-align: middle;
+}
+body.ui-final :is(
+  .ui-target-symbol,
+  .ui-auth-symbol,
+  .ui-empty__icon,
+  .ui-dialog__symbol,
+  .auth-state-icon,
+  .feature-card__icon
+) {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  inline-size: 30px !important;
+  block-size: 30px !important;
+  min-inline-size: 30px !important;
+  min-block-size: 30px !important;
+  flex: 0 0 30px !important;
+  padding: 0 !important;
+  vertical-align: middle;
+}
+body.ui-final :is(
+  .campaign-kpi-ribbon__glyph,
+  .dash-kpi-tile__glyph,
+  .campaign-trend-card__glyph,
+  .campaign-analytics-trend__glyph,
+  .sms-kpi__icon
+) {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  inline-size: 24px !important;
+  block-size: 24px !important;
+  min-inline-size: 24px !important;
+  min-block-size: 24px !important;
+  flex: 0 0 24px !important;
+  padding: 0 !important;
+  vertical-align: middle;
+}
+body.ui-final .ui-notice__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 20px;
+  block-size: 20px;
+  flex: 0 0 20px;
+}
+body.ui-final .nav-icon {
+  color: inherit;
+  transition: color var(--gm-icon-motion) var(--gm-icon-ease);
+}
+
+/* Status meaning is carried by the glyph colour, not a coloured square. */
+body.ui-final .ops-review-stage--ready .ops-review-stage__icon,
+body.ui-final .ops-api-signal--ok .ga-symbol {
+  color: #187552 !important;
+}
+body.ui-final .ops-review-stage--blocked .ops-review-stage__icon {
+  color: #b04f58 !important;
+}
+body.ui-final .ops-review-stage--pending .ops-review-stage__icon,
+body.ui-final .ops-api-signal--warn .ga-symbol {
+  color: #a26d22 !important;
+}
+body.ui-final .ga-feature .ga-symbol,
+body.ui-final .kpi-exec--focus .kpi-exec__icon,
+body.ui-final .ops-sms-page .sms-kpi--primary .sms-kpi__icon {
+  color: #fff !important;
+}
+
+/* Quiet motion: a short entrance and a small response to genuine interaction.
+   There is deliberately no perpetual or attention-seeking icon animation. */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes gramads-icon-arrive {
+    from { opacity: .62; transform: translate3d(0,2px,0) scale(.94); }
+    to { opacity: 1; transform: translate3d(0,0,0) scale(1); }
+  }
+  body.ui-final .icon-shell.icon-motion.icon-shell--ready {
+    animation: gramads-icon-arrive 340ms var(--gm-icon-ease) both;
+  }
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  body.ui-final :is(
+    a,
+    button,
+    [role="button"],
+    .card--lift,
+    .feature-card,
+    .ga-link-tile,
+    .sidebar-link,
+    .kpi-exec,
+    .dash-kpi-tile
+  ):not(:disabled):hover :is(.icon-shell, .ga-ws-icon, svg.lucide-svg) {
+    transform: translate3d(0,-1px,0) scale(1.045);
+    filter: drop-shadow(0 2px 3px rgb(20 91 145 / .14));
+  }
+  body.ui-final :is(a,button):not(:disabled):hover .icon-shell--btn {
+    transform: translate3d(-1px,0,0) scale(1.04);
+  }
+  body.ui-final .sidebar-link:not(:disabled):hover .icon-shell--nav {
+    transform: translate3d(-1px,0,0) scale(1.05);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  body.ui-final :is(.icon-shell,.ga-ws-icon,svg.lucide-svg) {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+    filter: none !important;
+  }
+}
+html.motion-reduced body.ui-final :is(.icon-shell,.ga-ws-icon,svg.lucide-svg) {
+  animation: none !important;
+  transition: none !important;
+  transform: none !important;
+  filter: none !important;
+}

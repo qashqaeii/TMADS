@@ -14,6 +14,51 @@ async function login(page, credentials) {
   await page.locator('form button[type="submit"]').first().click();
   await expect(page.locator('.ui-shell')).toBeVisible();
 }
+async function assertGlobalIconSystem(page, route, requireIcons=true) {
+  const result=await page.evaluate(()=>{
+    const selector=[
+      ".icon-shell",".ga-ws-icon",".nav-icon",".ga-symbol",".ga-page-heading-icon",
+      ".ui-target-symbol",".ui-auth-symbol",".ui-empty__icon",".ui-dialog__symbol",
+      ".ui-icon-button",".auth-state-icon",'[class*="__icon"]','[class*="-icon"]',
+      '[class*="__glyph"]','[class*="__symbol"]'
+    ].join(",");
+    const nodes=Array.from(document.querySelectorAll(selector)).filter(el=>
+      el.matches(".icon-shell,.ga-ws-icon") || el.querySelector("svg,.icon-shell,[data-lucide]")
+    );
+    const links=Array.from(document.querySelectorAll('link[rel="stylesheet"]')).map(el=>el.href);
+    return {
+      iconCssLast:links.length>0 && links[links.length-1].includes("gramads-icon-system.css"),
+      nodes:nodes.map(el=>{
+        const style=getComputedStyle(el);
+        const glyph=el.matches("svg")?el:el.querySelector("svg.lucide-svg,svg.ga-ws-icon,svg");
+        const rect=glyph?glyph.getBoundingClientRect():null;
+        return {
+          className:typeof el.className==="string"?el.className:String(el.className),
+          background:style.backgroundColor,
+          backgroundImage:style.backgroundImage,
+          borderWidth:style.borderTopWidth,
+          boxShadow:style.boxShadow,
+          glyphWidth:rect?rect.width:null,
+          glyphHeight:rect?rect.height:null
+        };
+      })
+    };
+  });
+  expect(result.iconCssLast,route+" global icon stylesheet must be last").toBe(true);
+  if(requireIcons) expect(result.nodes.length,route+" icon wrappers").toBeGreaterThan(0);
+  for(const node of result.nodes){
+    expect(node.background,route+" "+node.className+" background").toBe("rgba(0, 0, 0, 0)");
+    expect(node.backgroundImage,route+" "+node.className+" background image").toBe("none");
+    expect(node.borderWidth,route+" "+node.className+" border").toBe("0px");
+    expect(node.boxShadow,route+" "+node.className+" shadow").toBe("none");
+    if(node.glyphWidth!==null){
+      expect(node.glyphWidth,route+" "+node.className+" glyph width").toBeGreaterThan(0);
+      expect(node.glyphWidth,route+" "+node.className+" glyph width").toBeLessThanOrEqual(32);
+      expect(node.glyphHeight,route+" "+node.className+" glyph height").toBeGreaterThan(0);
+      expect(node.glyphHeight,route+" "+node.className+" glyph height").toBeLessThanOrEqual(32);
+    }
+  }
+}
 for (const role of Object.keys(routes)) {
   test(role+' workspace reference — responsive route sweep', async ({page},testInfo) => {
     test.skip(!users[role].every(Boolean),'Requires disposable local '+role+' credentials');
@@ -27,6 +72,7 @@ for (const role of Object.keys(routes)) {
         expect(response.status(),route).toBe(200);
         expect(new URL(page.url()).pathname,route).toBe(route);
         await expect(page.locator('body')).toHaveClass(/ga-workspace-system/);
+        await assertGlobalIconSystem(page, route);
         if (role === 'ops') {
           await expect(page.locator('.sidebar-admin-group')).toHaveAttribute('open', '');
           await expect(page.locator('.ga-ops-premium')).toBeVisible();
@@ -211,5 +257,13 @@ test('operator Telegram account facts wrap long values without overlap', async (
       await page.evaluate(()=>document.fonts.ready);
       await page.screenshot({path:testInfo.outputPath('ops-api-facts-'+width+'.png'),fullPage:true,animations:'disabled'});
     }
+  }
+});
+
+test('public pages inherit the global glyph-only icon system', async ({page}) => {
+  for (const route of ['/','/features/','/how-it-works/','/pricing/']) {
+    const response=await page.goto(route,{waitUntil:'domcontentloaded'});
+    expect(response.status(),route).toBe(200);
+    await assertGlobalIconSystem(page,route,false);
   }
 });
