@@ -491,3 +491,53 @@ body.ui-final.is-app .ga-ops-premium.ops-sms-page .sms-empty{
   body.ui-final.is-app .ga-ops-premium.ops-sms-page .sms-kpi{min-height:108px;padding:12px}
   body.ui-final.is-app .ga-ops-premium.ops-sms-page .sms-kpi>strong{font-size:1.45rem}
 }
+
+
+/* Last visual QA refinements from real Chromium captures. */
+body.ui-final.is-app .ga-ops-premium .ops-remote-filter{
+  display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;
+  width:min(100%,500px);max-width:100%;gap:12px;padding:14px 16px;
+}
+body.ui-final.is-app .ga-ops-premium .ops-remote-filter>.field{
+  min-width:0;max-width:none;width:100%;
+}
+body.ui-final.is-app .ga-ops-premium .ops-remote-filter select{width:100%}
+body.ui-final.is-app .ga-ops-premium .ops-queue-empty{
+  min-height:0;padding:0;
+}
+body.ui-final.is-app .ga-ops-premium .ops-queue-empty .ui-empty{
+  min-height:0;padding:16px 14px;gap:7px;
+}
+body.ui-final.is-app .ga-ops-premium .ops-queue-empty .ui-empty__icon{
+  width:40px;height:40px;border-radius:11px;
+}
+body.ui-final.is-app .ga-ops-premium .ops-queue-empty .ui-empty h2{font-size:.9rem}
+body.ui-final.is-app .ga-ops-premium .ops-queue-empty .ui-empty p{font-size:.74rem}
+body.ui-final.is-app .ga-ops-premium .ops-queue-empty .ui-empty .btn{min-height:32px}
+body.ui-final.is-app .ga-ops-premium .ops-rate-metrics{
+  grid-template-columns:repeat(3,minmax(0,1fr));gap:11px;
+}
+body.ui-final.is-app .ga-ops-premium .ops-rate-metrics .kpi-exec{
+  min-height:104px;padding:14px 16px;
+}
+body.ui-final.is-app .ga-ops-premium .ops-rate-metrics .kpi-exec__value{
+  font-size:clamp(1.05rem,1.25vw,1.3rem);line-height:1.45;
+  overflow-wrap:normal;word-break:normal;
+}
+body.ui-final.is-app .ga-ops-premium .ops-api-layout:not(:has(.ops-api-account)){
+  grid-template-columns:minmax(0,1fr);
+}
+@media(max-width:800px){
+  body.ui-final.is-app .ga-ops-premium .ops-remote-filter{
+    grid-template-columns:minmax(0,1fr);width:100%;gap:10px;
+  }
+  body.ui-final.is-app .ga-ops-premium .ops-remote-filter>.btn{width:100%}
+  body.ui-final.is-app .ga-ops-premium .ops-rate-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:560px){
+  body.ui-final.is-app .ga-ops-premium .ops-rate-metrics{grid-template-columns:minmax(0,1fr)}
+  body.ui-final.is-app .ga-ops-premium .ops-rate-metrics .kpi-exec{
+    min-height:88px;grid-template-columns:minmax(0,1fr) 2.45rem;padding:12px 14px;
+  }
+  body.ui-final.is-app .ga-ops-premium .ops-rate-metrics .kpi-exec__value{font-size:1.15rem}
+}

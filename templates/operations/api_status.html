@@ -16,7 +16,7 @@
 <div class="ui-ops-api-layout ops-api-layout">
   {% if account %}
   <section class="ga-panel ops-api-account"><header class="ga-panel-head"><div class="ga-panel-title"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="building-2" %}</span><div><h2>حساب جاری</h2><p>اطلاعات حساب متصل</p></div></div></header><div class="ga-panel-body ga-api-facts ops-api-facts">
-    <div class="finance-line"><span>عنوان</span><strong>{{ account.title|default:"—" }}</strong></div>
+    <div class="finance-line"><span>عنوان</span><strong><bdi dir="auto">{{ account.title|default:"—" }}</bdi></strong></div>
     <div class="finance-line"><span>ارز</span><strong>{{ account.currency|currency_label_fa }}</strong></div>
     <div class="finance-line"><span>مصرف کل</span><strong>{% if account.currency == 'TON' %}{% ton_amount account.spent_budget %} تون{% else %}<bdi>{{ account.spent_budget|default_if_none:"—" }} {{ account.currency|currency_label_fa }}</bdi>{% endif %}</strong></div>
     <div class="finance-line"><span>باقی‌مانده</span><strong>{% if account.currency == 'TON' %}{% ton_amount account.remaining_budget %} تون{% else %}<bdi>{{ account.remaining_budget|default_if_none:"—" }} {{ account.currency|currency_label_fa }}</bdi>{% endif %}</strong></div>
