@@ -579,3 +579,40 @@ body.ui-final.is-app .ga-ops-premium .ops-rate-metrics .kpi-exec__icon{
 @media(max-width:560px){
   body.ui-final.is-app .ga-ops-premium .ops-rate-metrics .kpi-exec__value{font-size:1rem}
 }
+
+
+/* Rate cards use a simple flex track: icon beside a full-width stacked metric body. */
+body.ui-final.is-app .ga-ops-premium .ops-rate-metrics .kpi-exec{
+  display:flex;direction:rtl;align-items:center;gap:12px;
+  min-width:0;overflow:hidden;
+}
+body.ui-final.is-app .ga-ops-premium .ops-rate-metrics .kpi-exec__icon{
+  display:flex;flex:0 0 38px;align-items:center;justify-content:center;
+  width:38px;height:38px;min-width:38px;max-width:38px;
+}
+body.ui-final.is-app .ga-ops-premium .ops-rate-metrics .kpi-exec__body{
+  display:flex;flex:1 1 0;flex-direction:column;align-items:stretch;
+  width:0;max-width:100%;min-width:0;gap:5px;overflow:hidden;
+}
+body.ui-final.is-app .ga-ops-premium .ops-rate-metrics .kpi-exec__label,
+body.ui-final.is-app .ga-ops-premium .ops-rate-metrics .kpi-exec__value{
+  display:block;width:100%;max-width:100%;min-width:0;grid-area:auto;
+  text-align:right;white-space:normal;overflow-wrap:anywhere;word-break:break-word;
+}
+body.ui-final.is-app .ga-ops-premium .ops-rate-metrics .kpi-exec__label{
+  font-size:.75rem;line-height:1.55;color:#607992;font-weight:750;
+}
+body.ui-final.is-app .ga-ops-premium .ops-rate-metrics .kpi-exec__value{
+  font-size:clamp(1rem,1.2vw,1.25rem);line-height:1.4;font-weight:850;
+}
+body.ui-final.is-app .ga-ops-premium .ops-rate-metrics .ops-rate-number{
+  display:inline;max-width:100%;direction:ltr;unicode-bidi:isolate;
+  white-space:normal;overflow-wrap:anywhere;word-break:break-word;
+}
+body.ui-final.is-app .ga-ops-premium .ops-rate-metrics .kpi-exec__unit{
+  display:inline;white-space:nowrap;font-size:.7rem;
+}
+@media(max-width:560px){
+  body.ui-final.is-app .ga-ops-premium .ops-rate-metrics .kpi-exec{min-height:82px;padding:12px 14px}
+  body.ui-final.is-app .ga-ops-premium .ops-rate-metrics .kpi-exec__value{font-size:1.08rem}
+}
