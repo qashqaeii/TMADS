@@ -67,8 +67,10 @@ def execute_create_ad(
             raise TelegramAdsWriteDisabled("ارسال زنده غیرفعال است.")
         from apps.policies.services.preflight import assert_submission_ready
         from apps.telegram_ads.services.submission_guard import require_submission_order
-        assert_submission_ready(campaign)
-        order = require_submission_order(campaign, claimed=True)
+        from apps.telegram_ads.services.account_connections import campaign_client
+        direct = bool(campaign.telegram_connection_id and campaign.telegram_connection.connection_type == "customer_owned")
+        assert_submission_ready(campaign, check_operator=not direct)
+        order = None if direct else require_submission_order(campaign, claimed=True)
     stable_key = f"tmads-create-{campaign.id}"
     if mode == ExecutionMode.LIVE and idempotency_key not in (None, stable_key):
         raise ValueError("کلید ایجاد تبلیغ باید ثابت باشد.")
@@ -102,13 +104,16 @@ def execute_create_ad(
         APIRequestLog.objects.create(
             operation="create_ad",
             success=True,
-            meta={"campaign_id": str(campaign.id), "idempotency_key": payload.get("idempotency_key")},
+            meta={"campaign_id": str(campaign.id), "connection_id": str(campaign.telegram_connection_id or ""),
+                  "remote_account_id": campaign.telegram_connection.remote_account_id if campaign.telegram_connection_id else "",
+                  "idempotency_key": payload.get("idempotency_key")},
         )
     except Exception as exc:
         APIRequestLog.objects.create(
             operation="create_ad",
             success=False,
-            meta={"campaign_id": str(campaign.id), "error": str(exc)[:300]},
+            meta={"campaign_id": str(campaign.id), "connection_id": str(campaign.telegram_connection_id or ""),
+                  "error": type(exc).__name__},
         )
         raise
 
@@ -124,7 +129,9 @@ def execute_create_ad(
     ad.save()
     APIRequestLog.objects.create(
         operation="create_ad_receipt", success=True,
-        meta={"campaign_id": str(campaign.id), "order_id": str(order.id), "remote_ad_id": remote_id,
-              "idempotency_key": stable_key},
+        meta={"campaign_id": str(campaign.id), "order_id": str(order.id) if order else "",
+              "connection_id": str(campaign.telegram_connection_id or ""),
+              "remote_account_id": campaign.telegram_connection.remote_account_id if campaign.telegram_connection_id else "",
+              "remote_ad_id": remote_id, "idempotency_key": stable_key},
     )
     return {"ok": True, "mode": mode.value, "result": result, "remote_ad_id": remote_id}

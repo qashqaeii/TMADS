@@ -43,7 +43,9 @@ def build_schedule(ad_settings: dict[str, Any]) -> dict[str, Any] | InputAdSched
 
 
 def campaign_initial_budget_ton(campaign: Campaign, order: AdvertisingOrder | None = None) -> float:
-    """Paid allocations are immutable; unpaid diagnostics are estimates only."""
+    """Return the initial budget in the selected Telegram account's currency."""
+    if campaign.telegram_connection_id and campaign.telegram_connection.connection_type == "customer_owned":
+        return float(campaign.account_budget_amount)
     if order is not None:
         return float(order.ton_allocation)
     if campaign.budget_irr <= 0:
@@ -53,6 +55,8 @@ def campaign_initial_budget_ton(campaign: Campaign, order: AdvertisingOrder | No
 
 
 def campaign_daily_budget_limit_ton(campaign: Campaign, order: AdvertisingOrder | None = None) -> float:
+    if campaign.telegram_connection_id and campaign.telegram_connection.connection_type == "customer_owned":
+        return float(campaign.account_daily_budget_limit)
     if order is not None:
         return float(Decimal(order.quote.payload["daily_limit_ton"]))
     if campaign.daily_cap_irr <= 0:
