@@ -49,16 +49,27 @@ def overview(request):
 @login_required
 @staff_ops_required
 def campaign_ops(request):
+    from django.core.paginator import Paginator
+    from django.db.models import Q
+
     status = request.GET.get("status", Campaign.Status.PENDING_REVIEW)
-    campaigns = Campaign.objects.select_related("customer", "customer__user").order_by("-updated_at")
-    if status and status != "all":
+    if status not in Campaign.Status.values and status != "all":
+        status = Campaign.Status.PENDING_REVIEW
+    query = request.GET.get("q", "").strip()[:100]
+    campaigns = Campaign.objects.select_related("customer", "customer__user").order_by("-updated_at", "-id")
+    if status != "all":
         campaigns = campaigns.filter(status=status)
-    elif status == "all":
-        status = ""
+    if query:
+        campaigns = campaigns.filter(
+            Q(name__icontains=query) | Q(customer__display_name__icontains=query)
+            | Q(customer__company_name__icontains=query) | Q(customer__user__username__icontains=query)
+        )
+    page_obj = Paginator(campaigns, 25).get_page(request.GET.get("page"))
     return render(
-        request,
-        "operations/campaigns.html",
-        {"campaigns": campaigns[:80], "filter_status": status},
+        request, "operations/campaigns.html",
+        {"campaigns": page_obj.object_list, "page_obj": page_obj,
+         "filter_status": "" if status == "all" else status,
+         "query": query, "total_results": page_obj.paginator.count},
     )
 
 

@@ -3,11 +3,12 @@
 {% block container_class %}container-wide{% endblock %}
 {% block page_title %}بررسی کمپین{% endblock %}
 {% block content %}
-<div class="app-stack operations-page ui-ops ga-ops-workspace">
-{% include "includes/dash_header.html" with page_icon="megaphone" eyebrow="عملیات" title="بررسی کمپین" %}
+<div class="app-stack operations-page ui-ops ga-ops-premium ga-ops-workspace ga-ops-campaign-list">
+{% include "includes/dash_header.html" with page_icon="megaphone" eyebrow="عملیات" title="بررسی کمپین" subtitle="اولویت‌بندی سفارش‌ها، جستجوی سریع و تصمیم‌گیری امن" %}
+<div class="ops-context-strip"><div><strong>{{ total_results|format_count }} کمپین</strong><span>در محدوده فیلتر انتخابی</span></div><a href="{% url 'operations:overview' %}">بازگشت به مرکز عملیات</a></div>
 
 <article class="ga-panel ga-data-panel ga-ops-table"><header class="ga-panel-head"><div class="ga-panel-title"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="megaphone" %}</span><div><h2>صف کمپین‌ها</h2><p>بررسی سفارش‌ها بر اساس وضعیت فعلی</p></div></div></header><section class="filter-exec-shell ga-ops-table-filter" aria-label="فیلتر کمپین‌ها">
-  <form method="get" class="filter-exec">
+  <form method="get" class="filter-exec ops-filter-bar">
     <div class="filter-exec__grid filter-exec__grid--inline">
       <div class="filter-exec__field">
         <label class="filter-exec__label" for="ops-campaign-status">وضعیت صف</label>
@@ -17,27 +18,31 @@
           <option value="ready_for_submission" {% if filter_status == 'ready_for_submission' %}selected{% endif %}>آماده ارسال</option>
           <option value="submitting" {% if filter_status == "submitting" %}selected{% endif %}>در حال ارسال</option><option value="reconciliation" {% if filter_status == "reconciliation" %}selected{% endif %}>نیازمند تطبیق</option><option value="awaiting_telegram" {% if filter_status == "awaiting_telegram" %}selected{% endif %}>در انتظار تلگرام</option><option value="rejected" {% if filter_status == 'rejected' %}selected{% endif %}>رد شده</option>
         </select>
-      </div><div class="ui-filter-submit"><button class="btn btn-primary" type="submit">اعمال فیلتر</button></div>
+      </div>
+      <div class="filter-exec__field ops-search-field"><label class="filter-exec__label" for="ops-campaign-search">جستجوی کمپین یا مشتری</label><input class="filter-exec__control" type="search" id="ops-campaign-search" name="q" value="{{ query }}" maxlength="100" placeholder="نام کمپین، کسب‌وکار یا نام کاربری"></div>
+      <div class="ui-filter-submit"><button class="btn btn-primary" type="submit">اعمال فیلتر</button></div>
     </div>
+  <a class="btn btn-ghost" href="{% url 'operations:campaigns' %}?status=all">نمایش همه</a>
   </form>
 </section>
   <div class="table-wrap" tabindex="0" role="region" aria-label="صف کمپین‌ها">
     <table class="data-table"><caption class="sr-only">صف کمپین‌ها</caption>
-      <thead><tr><th scope="col">کمپین</th><th scope="col">مشتری</th><th scope="col">وضعیت</th><th scope="col"><span class="sr-only">اقدام</span></th></tr></thead>
+      <thead><tr><th scope="col">کمپین</th><th scope="col">مشتری</th><th scope="col">وضعیت</th><th scope="col">آخرین تغییر</th><th scope="col"><span class="sr-only">اقدام</span></th></tr></thead>
       <tbody>
       {% for c in campaigns %}
         <tr>
           <td><div class="ga-row-identity"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="megaphone" %}</span><strong>{{ c.name|default:"—" }}</strong></div></td>
           <td>{{ c.customer }}</td>
-          <td><span class="status {{ c.status|campaign_status_class }}">{{ c.get_status_display }}</span></td>
-          <td><a class="btn btn-ghost btn-sm" href="{% url 'operations:campaign_review' c.id %}">بررسی</a></td>
+          <td><span class="status {{ c.status|campaign_status_class }}">{{ c.get_status_display }}</span></td><td class="ops-date"><time datetime="{{ c.updated_at|date:'c' }}">{{ c.updated_at|jalali_datetime }}</time></td>
+          <td><a class="btn btn-ghost btn-sm" href="{% url 'operations:campaign_review' c.id %}">مشاهده و بررسی</a></td>
         </tr>
       {% empty %}
-        <tr><td colspan="4"><div class="empty-state"><strong>موردی در صف نیست</strong></div></td></tr>
+        <tr><td colspan="5"><div class="ops-empty"><strong>کمپینی با این مشخصات پیدا نشد</strong><p>فیلتر یا عبارت جستجو را تغییر دهید.</p><a href="{% url 'operations:campaigns' %}?status=all" class="btn btn-ghost btn-sm">نمایش همه کمپین‌ها</a></div></td></tr>
       {% endfor %}
       </tbody>
     </table>
   </div>
+  {% if page_obj.has_other_pages %}<nav class="ops-pager" aria-label="صفحه‌بندی کمپین‌ها">{% if page_obj.has_previous %}<a class="btn btn-ghost btn-sm" href="?status={{ filter_status|default:'all'|urlencode }}&amp;q={{ query|urlencode }}&amp;page={{ page_obj.previous_page_number }}">صفحه قبل</a>{% endif %}<span>صفحه {{ page_obj.number|persian_digits }} از {{ page_obj.paginator.num_pages|persian_digits }}</span>{% if page_obj.has_next %}<a class="btn btn-ghost btn-sm" href="?status={{ filter_status|default:'all'|urlencode }}&amp;q={{ query|urlencode }}&amp;page={{ page_obj.next_page_number }}">صفحه بعد</a>{% endif %}</nav>{% endif %}
 </article>
 </div>
 {% endblock %}
