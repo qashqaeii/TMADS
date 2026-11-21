@@ -460,3 +460,34 @@ body.ui-final.is-app .ga-ops-premium .ops-rate-history .empty-state{
   body.ui-final.is-app .ga-ops-premium .ops-rate-metrics .kpi-exec{padding:11px;min-height:100px;grid-template-columns:minmax(0,1fr) 2.1rem}
   body.ui-final.is-app .ga-ops-premium .ops-rate-metrics .kpi-exec__value{font-size:1rem}
 }
+
+
+/* SMS counters — consistent metric hierarchy, semantic icons and true count formatting. */
+body.ui-final.is-app .ga-ops-premium.ops-sms-page .sms-kpi{
+  min-height:120px;align-content:space-between;gap:9px;padding:16px 17px;
+}
+body.ui-final.is-app .ga-ops-premium.ops-sms-page .sms-kpi__head{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;min-width:0;
+}
+body.ui-final.is-app .ga-ops-premium.ops-sms-page .sms-kpi__head>span:first-child{
+  min-width:0;font-size:.76rem;font-weight:750;line-height:1.55;
+}
+body.ui-final.is-app .ga-ops-premium.ops-sms-page .sms-kpi__icon{
+  display:grid;place-items:center;flex:none;width:32px;height:32px;border-radius:10px;
+  background:#edf5ff;color:#1768b6;
+}
+body.ui-final.is-app .ga-ops-premium.ops-sms-page .sms-kpi>strong{
+  display:block;font-size:clamp(1.55rem,2.1vw,2rem);line-height:1.2;
+  font-weight:850;font-variant-numeric:tabular-nums;letter-spacing:0;
+}
+body.ui-final.is-app .ga-ops-premium.ops-sms-page .sms-kpi>small{font-size:.7rem;line-height:1.65}
+body.ui-final.is-app .ga-ops-premium.ops-sms-page .sms-kpi--primary .sms-kpi__icon{
+  background:#ffffff20;color:#fff;
+}
+body.ui-final.is-app .ga-ops-premium.ops-sms-page .sms-empty{
+  display:block;grid-column:1/-1;text-align:center;padding:18px 12px;color:#71869b;
+}
+@media(max-width:560px){
+  body.ui-final.is-app .ga-ops-premium.ops-sms-page .sms-kpi{min-height:108px;padding:12px}
+  body.ui-final.is-app .ga-ops-premium.ops-sms-page .sms-kpi>strong{font-size:1.45rem}
+}
