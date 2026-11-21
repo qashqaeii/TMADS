@@ -86,6 +86,7 @@ def connection_client(connection: TelegramAdsConnection, *, allow_error: bool = 
     related = connection.related_account
     if (
         not related
+        or related.customer_id != connection.customer_id
         or related.status != RelatedAccountRequest.Status.PROVISIONED
         or not related.remote_account_id
         or related.remote_account_id != connection.remote_account_id
@@ -197,15 +198,16 @@ def ensure_platform_managed_connection(row: RelatedAccountRequest, *, actor=None
     row = RelatedAccountRequest.objects.select_for_update().select_related("customer").get(pk=row.pk)
     if row.status != RelatedAccountRequest.Status.PROVISIONED or not row.remote_account_id:
         raise ValueError("حساب مرتبط هنوز از سوی تلگرام تأیید نشده است.")
-    client = TelegramAdsClient()
-    main = client.get_account()
+    main_client = TelegramAdsClient()
+    main = main_client.get_account()
     if (
         not row.main_account_id
         or str(main.get("account_id") or "") != row.main_account_id
         or row.main_account_id == row.remote_account_id
     ):
         raise ValueError("مالکیت حساب مرکزی و حساب مرتبط قابل تأیید نیست.")
-    snapshot = _account_snapshot(client, expected_id=row.remote_account_id)
+    child_client = TelegramAdsClient(account_id=row.remote_account_id)
+    snapshot = _account_snapshot(child_client, expected_id=row.remote_account_id)
     if snapshot["currency"] != "TON":
         raise ValueError("حساب مدیریت‌شده باید با ارز TON ایجاد شود؛ مسیر مالی فعلی پلتفرم فقط TON را پشتیبانی می‌کند.")
 

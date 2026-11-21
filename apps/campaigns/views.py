@@ -4,6 +4,7 @@ import json
 import uuid
 from decimal import Decimal, ROUND_DOWN
 
+from django.conf import settings
 from django.contrib import messages
 from django.core.cache import cache
 from django.db import transaction
@@ -498,16 +499,19 @@ def campaign_wizard(request, campaign_id=None):
     creative = campaign.creatives.first()
     is_customer_owned = bool(campaign.telegram_connection_id and campaign.telegram_connection.connection_type == "customer_owned")
     wallet = None if is_customer_owned else ensure_wallet(customer)
-    if is_customer_owned and step in {4, max_step}:
+    if campaign.telegram_connection_id and step in {4, max_step}:
         try:
             from apps.telegram_ads.services.account_connections import refresh_connection
             connection = campaign.telegram_connection
             if not connection.last_checked_at or (timezone.now() - connection.last_checked_at).total_seconds() > 30:
                 refresh_connection(connection)
-        except Exception as exc:
+        except Exception:
             messages.warning(request, "وضعیت زنده حساب تلگرام دریافت نشد؛ پیش از ثبت دوباره اتصال را بررسی کنید.")
     account_can_submit = bool(
         is_customer_owned
+        and settings.TELEGRAM_ADS_WRITE_ENABLED
+        and settings.TELEGRAM_ADS_PAID_SUBMISSION_ENABLED
+        and getattr(settings, "TELEGRAM_ADS_CUSTOMER_OWNED_ENABLED", False)
         and campaign.telegram_connection.status == "connected"
         and campaign.budget_currency == campaign.telegram_connection.currency
         and campaign.account_budget_amount > 0
