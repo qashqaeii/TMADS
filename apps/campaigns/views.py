@@ -281,6 +281,7 @@ def campaign_duplicate(request, campaign_id):
     original = get_customer_campaign(request.user.customer_profile, campaign_id)
     clone = Campaign.objects.create(
         customer=original.customer,
+        telegram_connection=original.telegram_connection,
         project=original.project,
         name=f"{(original.name or 'کمپین')[:194]} (کپی)",
         status=Campaign.Status.DRAFT,
@@ -296,6 +297,9 @@ def campaign_duplicate(request, campaign_id):
                      if key in {"impression_frequency", "show_userpic", "additional_info"}},
         budget_irr=original.budget_irr,
         daily_cap_irr=original.daily_cap_irr,
+        account_budget_amount=original.account_budget_amount,
+        account_daily_budget_limit=original.account_daily_budget_limit,
+        budget_currency=original.budget_currency,
         cpm_bid=original.cpm_bid,
     )
     if hasattr(original, "targeting") and original.targeting:
@@ -325,8 +329,14 @@ def campaign_wizard(request, campaign_id=None):
     customer = request.user.customer_profile
 
     if campaign_id is None:
+        from apps.telegram_ads.services.account_connections import default_connection
+        connection = default_connection(customer)
+        if not connection:
+            messages.info(request, "برای ساخت کمپین ابتدا یک حساب تبلیغاتی تلگرام متصل و پیش‌فرض انتخاب کنید.")
+            return redirect("accounts:telegram_connection")
         campaign = Campaign.objects.create(
             customer=customer,
+            telegram_connection=connection,
             name="کمپین جدید",
             wizard_version=2,
         )
@@ -458,7 +468,8 @@ def campaign_wizard(request, campaign_id=None):
     )
 
     creative = campaign.creatives.first()
-    wallet = ensure_wallet(customer)
+    is_customer_owned = bool(campaign.telegram_connection_id and campaign.telegram_connection.connection_type == "customer_owned")
+    wallet = None if is_customer_owned else ensure_wallet(customer)
     ton_rate_display = None
     try:
         from apps.finance.services.ton_exchange_rate import get_cached_snapshot
@@ -484,7 +495,7 @@ def campaign_wizard(request, campaign_id=None):
         strict=False,
     )
     dry_run = None
-    if campaign.budget_irr and campaign.target_type:
+    if (campaign.budget_irr or campaign.account_budget_amount) and campaign.target_type:
         try:
             dry_run = dry_run_create_ad(campaign)
         except Exception:
@@ -509,6 +520,10 @@ def campaign_wizard(request, campaign_id=None):
     from apps.telegram_ads.services.website_photo import website_photo_receipt, website_photo_enabled
     ctx = {
         "campaign": campaign,
+        "telegram_connection": campaign.telegram_connection,
+        "is_customer_owned": is_customer_owned,
+        "account_currency": campaign.telegram_connection.currency if campaign.telegram_connection_id else "",
+        "account_balance": campaign.telegram_connection.remaining_budget if campaign.telegram_connection_id else None,
         "media_uploaded": bool(media_receipt(campaign)),
         "website_photo_uploaded": bool(website_photo_receipt(campaign)),
         "website_photo_enabled": website_photo_enabled(),

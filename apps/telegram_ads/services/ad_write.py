@@ -9,7 +9,7 @@ from typing import Any
 from django.conf import settings
 
 from apps.campaigns.models import Campaign, CampaignStatusHistory, TelegramAdvertisement
-from apps.telegram_ads.client import TelegramAdsClient
+from apps.telegram_ads.services.account_connections import campaign_client
 from apps.telegram_ads.exceptions import TelegramAdsError, TelegramAdsWriteDisabled
 from apps.telegram_ads.models import APIRequestLog
 from apps.telegram_ads.services.ad_payload import build_create_ad_payload, redact_payload_for_display
@@ -96,7 +96,7 @@ def execute_create_ad(
     if not settings.TELEGRAM_ADS_PAID_SUBMISSION_ENABLED:
         raise TelegramAdsWriteDisabled("TELEGRAM_ADS_PAID_SUBMISSION_ENABLED is false")
 
-    client = TelegramAdsClient()
+    client = campaign_client(campaign)
     try:
         result = client.create_advertisement(payload)
         APIRequestLog.objects.create(

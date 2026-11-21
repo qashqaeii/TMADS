@@ -12,6 +12,7 @@ from apps.notifications.services import notify_customer
 from apps.operations.review import require_recorded_approval
 from apps.policies.services.preflight import CampaignPolicyPreflight, assert_submission_ready
 from apps.telegram_ads.client import TelegramAdsClient
+from apps.telegram_ads.services.account_connections import campaign_client
 from apps.telegram_ads.exceptions import TelegramAdsError
 from apps.telegram_ads.services.sync import has_financial_lock, _apply_remote_ad_payload, _sync_campaign_from_remote
 
@@ -171,7 +172,7 @@ def reconcile_operation_readonly(operation_id, *, actor):
     ad = op.advertisement
     if not ad.remote_ad_id.isdigit() or len(ad.remote_ad_id) > 20:
         raise ValueError("شناسه تبلیغ برای بررسی معتبر نیست.")
-    remote = _checked_remote(TelegramAdsClient(), ad)
+    remote = _checked_remote(campaign_client(ad.campaign), ad)
     if not operation_matches_remote(op, remote):
         raise ValueError("انجام عملیات در تلگرام تأیید نشد؛ وضعیت نامطمئن حفظ شد.")
     with transaction.atomic():
@@ -203,7 +204,7 @@ def execute_operation(operation_id, *, actor):
             raise ValueError("درخواست قبلاً بررسی شده است.")
         _guard(campaign,op)
         ad = op.advertisement
-        client = TelegramAdsClient()
+        client = campaign_client(campaign)
         remote = _checked_remote(client,ad)
         payload = _payload(op,remote)
         op.status=Status.EXECUTING

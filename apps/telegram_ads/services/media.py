@@ -9,15 +9,20 @@ from django.db import transaction
 from apps.campaigns.models import Campaign
 from apps.campaigns.media_validation import validate_telegram_creative_media
 from apps.policies.services.preflight import CampaignPolicyPreflight
-from apps.telegram_ads.client import TelegramAdsClient
+from apps.telegram_ads.services.account_connections import campaign_client
 from apps.telegram_ads.models import APIRequestLog
 
 
-def media_upload_enabled():
-    return bool(settings.TELEGRAM_ADS_WRITE_ENABLED and settings.TELEGRAM_ADS_PAID_SUBMISSION_ENABLED
-                and getattr(settings,"TELEGRAM_ADS_MEDIA_UPLOAD_ENABLED",False)
-                and settings.TELEGRAM_ADS_API_TOKEN
-                and CampaignPolicyPreflight.operator_submission_allowed())
+def media_upload_enabled(campaign=None):
+    base = bool(settings.TELEGRAM_ADS_WRITE_ENABLED and settings.TELEGRAM_ADS_PAID_SUBMISSION_ENABLED
+                and getattr(settings, "TELEGRAM_ADS_MEDIA_UPLOAD_ENABLED", False))
+    if not base:
+        return False
+    connection = getattr(campaign, "telegram_connection", None) if campaign else None
+    if connection and connection.connection_type == "customer_owned":
+        return bool(getattr(settings, "TELEGRAM_ADS_CUSTOMER_OWNED_ENABLED", False)
+                    and connection.status == "connected")
+    return bool(settings.TELEGRAM_ADS_API_TOKEN and CampaignPolicyPreflight.operator_submission_allowed())
 
 
 def _signature(campaign, creative):
@@ -43,13 +48,16 @@ def _signature(campaign, creative):
     except (OSError,ValueError):
         return None
     return {"campaign_id":str(campaign.pk),"creative_id":str(creative.pk),
-        "sha256":digest.hexdigest(),"account_scope":sha256(settings.TELEGRAM_ADS_API_TOKEN.encode()).hexdigest(),
+        "sha256":digest.hexdigest(),"account_scope":sha256(
+            f"{campaign.telegram_connection_id}:{campaign.telegram_connection.remote_account_id}".encode()
+            if campaign.telegram_connection_id else settings.TELEGRAM_ADS_API_TOKEN.encode()
+        ).hexdigest(),
         "field":"video_id" if suffix==".mp4" else "photo_id"}
 
 
 def media_receipt(campaign):
     creative=campaign.creatives.first()
-    if not creative or not creative.media or not media_upload_enabled():
+    if not creative or not creative.media or not media_upload_enabled(campaign):
         return None
     sig=_signature(campaign,creative)
     if not sig:
@@ -72,7 +80,7 @@ def upload_saved_media(campaign, *, actor):
     with transaction.atomic():
         campaign = Campaign.objects.select_for_update().get(pk=campaign.pk, customer=profile)
         from apps.campaigns.views import _campaign_editable
-        if not _campaign_editable(campaign) or not media_upload_enabled():
+        if not _campaign_editable(campaign) or not media_upload_enabled(campaign):
             raise ValueError("انتقال رسانه در وضعیت فعلی مجاز نیست.")
         if media_receipt(campaign):
             return media_receipt(campaign)
@@ -98,7 +106,7 @@ def upload_saved_media(campaign, *, actor):
 
     try:
         with creative.media.open("rb") as stream:
-            result = TelegramAdsClient().upload_creative_media(
+            result = campaign_client(campaign).upload_creative_media(
                 stream,
                 filename="creative" + Path(creative.media.name).suffix.lower(),
                 is_video=sig["field"] == "video_id",
