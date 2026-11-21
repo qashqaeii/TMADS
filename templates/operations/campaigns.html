@@ -13,14 +13,14 @@
       <div class="filter-exec__field">
         <label class="filter-exec__label" for="ops-campaign-status">وضعیت صف</label>
         <select id="ops-campaign-status" class="filter-exec__control" name="status">
-          <option value="all" {% if not filter_status %}selected{% endif %}>همه</option>
+          <option value="all" {% if filter_status == 'all' or not filter_status %}selected{% endif %}>همه</option>
           {% for value,label in status_choices %}<option value="{{ value }}" {% if filter_status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
         </select>
       </div>
       <div class="filter-exec__field ops-search-field"><label class="filter-exec__label" for="ops-campaign-search">جستجوی کمپین یا مشتری</label><input class="filter-exec__control" type="search" id="ops-campaign-search" name="q" value="{{ query }}" maxlength="100" placeholder="نام کمپین، کسب‌وکار یا نام کاربری"></div>
-      <div class="ui-filter-submit"><button class="btn btn-primary" type="submit">اعمال فیلتر</button></div>
+      <div class="ops-filter-actions"><div class="ui-filter-submit"><button class="btn btn-primary" type="submit">اعمال فیلتر</button></div>
+        <a class="btn btn-ghost btn-sm" href="{% url 'operations:campaigns' %}?status=all">نمایش همه</a></div>
     </div>
-  <a class="btn btn-ghost" href="{% url 'operations:campaigns' %}?status=all">نمایش همه</a>
   </form>
 </section>
   <div class="table-wrap" tabindex="0" role="region" aria-label="صف کمپین‌ها">
@@ -35,7 +35,7 @@
           <td><a class="btn btn-ghost btn-sm" href="{% url 'operations:campaign_review' c.id %}">مشاهده و بررسی</a></td>
         </tr>
       {% empty %}
-        <tr><td colspan="5"><div class="ops-empty"><strong>کمپینی با این مشخصات پیدا نشد</strong><p>فیلتر یا عبارت جستجو را تغییر دهید.</p><a href="{% url 'operations:campaigns' %}?status=all" class="btn btn-ghost btn-sm">نمایش همه کمپین‌ها</a></div></td></tr>
+        <tr><td colspan="5"><div class="ops-empty"><span class="ga-symbol ops-empty__symbol">{% include "includes/gramads_workspace_icon.html" with name="megaphone" %}</span><strong>کمپینی با این مشخصات پیدا نشد</strong><p>فیلتر یا عبارت جستجو را تغییر دهید.</p><a href="{% url 'operations:campaigns' %}?status=all" class="btn btn-ghost btn-sm">نمایش همه کمپین‌ها</a></div></td></tr>
       {% endfor %}
       </tbody>
     </table>

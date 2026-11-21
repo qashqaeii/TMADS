@@ -20,9 +20,9 @@
           <option value="approved" {% if filter_status == "approved" %}selected{% endif %}>تأیید شده</option><option value="paid" {% if filter_status == 'paid' %}selected{% endif %}>پرداخت‌شده</option>
           <option value="rejected" {% if filter_status == 'rejected' %}selected{% endif %}>رد شده</option>
         </select>
-      </div><div class="filter-exec__field ops-search-field"><label class="filter-exec__label" for="ops-refund-query">جستجوی مشتری یا دلیل</label><input id="ops-refund-query" class="filter-exec__control" type="search" name="q" maxlength="100" value="{{ query }}" placeholder="نام مشتری یا متن درخواست"></div><div class="ui-filter-submit"><button class="btn btn-primary" type="submit">اعمال فیلتر</button></div>
+      </div><div class="filter-exec__field ops-search-field"><label class="filter-exec__label" for="ops-refund-query">جستجوی مشتری یا دلیل</label><input id="ops-refund-query" class="filter-exec__control" type="search" name="q" maxlength="100" value="{{ query }}" placeholder="نام مشتری یا متن درخواست"></div><div class="ops-filter-actions"><div class="ui-filter-submit"><button class="btn btn-primary" type="submit">اعمال فیلتر</button></div>
+      <a class="btn btn-ghost btn-sm" href="{% url 'operations:refunds' %}">پاک‌کردن فیلترها</a></div>
     </div>
-  <a class="btn btn-ghost" href="{% url 'operations:refunds' %}">پاک‌کردن فیلترها</a>
   </form>
 </section>
   <div class="table-wrap" tabindex="0" role="region" aria-label="درخواست‌های بازپرداخت">
@@ -64,9 +64,9 @@
           <option value="approved" {% if filter_status == "approved" %}selected{% endif %}>تأیید شده</option><option value="paid" {% if filter_status == 'paid' %}selected{% endif %}>پرداخت‌شده</option>
           <option value="rejected" {% if filter_status == 'rejected' %}selected{% endif %}>رد شده</option>
         </select>
-      </div><div class="filter-exec__field ops-search-field"><label class="filter-exec__label" for="ops-refund-query">جستجوی مشتری یا دلیل</label><input id="ops-refund-query" class="filter-exec__control" type="search" name="q" maxlength="100" value="{{ query }}" placeholder="نام مشتری یا متن درخواست"></div><div class="ui-filter-submit"><button class="btn btn-primary" type="submit">اعمال فیلتر</button></div>
+      </div><div class="filter-exec__field ops-search-field"><label class="filter-exec__label" for="ops-refund-query">جستجوی مشتری یا دلیل</label><input id="ops-refund-query" class="filter-exec__control" type="search" name="q" maxlength="100" value="{{ query }}" placeholder="نام مشتری یا متن درخواست"></div><div class="ops-filter-actions"><div class="ui-filter-submit"><button class="btn btn-primary" type="submit">اعمال فیلتر</button></div>
+      <a class="btn btn-ghost btn-sm" href="{% url 'operations:refunds' %}">پاک‌کردن فیلترها</a></div>
     </div>
-  <a class="btn btn-ghost" href="{% url 'operations:refunds' %}">پاک‌کردن فیلترها</a>
   </form>
 </section><div class="ga-empty-state"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="refresh-cw" %}</span><h2>درخواستی با این فیلتر یافت نشد</h2><p>برای مشاهده سایر درخواست‌ها وضعیت را تغییر دهید.</p></div></article>
 {% endif %}

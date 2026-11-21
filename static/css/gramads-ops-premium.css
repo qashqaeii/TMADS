@@ -370,3 +370,39 @@ body.ui-final.is-app .ga-ops-premium .ops-api-last-seen strong{min-width:0;overf
   body.ui-final.is-app .ga-ops-premium .ops-api-facts .finance-line{min-height:0}
   body.ui-final.is-app .ga-ops-premium .ops-api-last-seen{grid-template-columns:minmax(0,1fr)}
 }
+
+
+/* Queue and filter ergonomics — keep all controls on a single intentional row. */
+body.ui-final.is-app .ga-ops-premium .ops-filter-bar .filter-exec__grid{display:flex;align-items:end;gap:12px;flex-wrap:wrap}
+body.ui-final.is-app .ga-ops-premium .ops-filter-bar .ops-filter-actions{display:flex;align-items:center;gap:8px;flex:0 0 auto;flex-wrap:wrap}
+body.ui-final.is-app .ga-ops-premium .ops-filter-bar .ops-filter-actions .ui-filter-submit{flex:none}
+body.ui-final.is-app .ga-ops-premium .ops-filter-bar .ops-filter-actions .btn{white-space:nowrap}
+body.ui-final.is-app .ga-ops-premium .ops-remote-filter{
+  width:fit-content;max-width:100%;align-self:start;display:flex;align-items:end;
+  gap:12px;padding:14px 16px;
+}
+body.ui-final.is-app .ga-ops-premium .ops-remote-filter>.field{flex:1 1 250px;min-width:220px;max-width:340px}
+body.ui-final.is-app .ga-ops-premium .ops-remote-filter select{width:100%}
+body.ui-final.is-app .ga-ops-premium .ops-queue-empty .ui-empty{
+  min-height:0;padding:23px 16px;gap:8px;
+}
+body.ui-final.is-app .ga-ops-premium .ops-queue-empty .ui-empty__icon{width:44px;height:44px;border-radius:12px}
+body.ui-final.is-app .ga-ops-premium .ops-queue-empty .ui-empty p{max-width:46ch;line-height:1.75}
+body.ui-final.is-app .ga-ops-premium .ops-queue-empty .ui-empty .btn{margin-top:2px}
+body.ui-final.is-app .ga-ops-premium .ops-empty{
+  min-height:0;padding:23px 16px;display:grid;place-items:center;gap:8px;
+}
+body.ui-final.is-app .ga-ops-premium .ops-empty__symbol{width:42px;height:42px;border-radius:12px}
+body.ui-final.is-app .ga-ops-premium .ops-empty p{margin:0;color:#6b8299;font-size:.77rem;line-height:1.7}
+body.ui-final.is-app .ga-ops-premium .ops-accounts-page .ui-studio-warning{
+  margin:0;padding:10px 13px;border-radius:11px;line-height:1.8;font-size:.77rem;
+}
+@media(max-width:740px){
+  body.ui-final.is-app .ga-ops-premium .ops-remote-filter{width:100%;align-items:stretch;flex-direction:column}
+  body.ui-final.is-app .ga-ops-premium .ops-remote-filter>.field{max-width:none;min-width:0}
+}
+@media(max-width:620px){
+  body.ui-final.is-app .ga-ops-premium .ops-filter-bar .ops-filter-actions{width:100%;flex:1 1 100%}
+  body.ui-final.is-app .ga-ops-premium .ops-filter-bar .ops-filter-actions>*{flex:1 1 130px}
+  body.ui-final.is-app .ga-ops-premium .ops-filter-bar .ops-filter-actions .ui-filter-submit button{width:100%}
+}
