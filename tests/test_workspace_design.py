@@ -1,6 +1,7 @@
 """Server-rendered internal UI contract; no financial or provider writes."""
 import pytest
 from django.templatetags.static import static
+from django.contrib.staticfiles import finders
 from django.urls import reverse
 
 CUSTOMER_PAGES = [
@@ -28,6 +29,7 @@ def test_workspace_visual_contract(client, customer_user, path, marker):
     assert marker in html
     assert static("css/gramads-workspace-pages.css") in html
     assert static("css/gramads-workspace-composition.css") in html
+    assert static("css/gramads-workspace-background.css") in html
     assert 'is-app ga-workspace-system' in html
     assert html.count('id="ui-confirmation"') == 1
     assert "ga-confirm-dialog" in html
@@ -63,3 +65,11 @@ def test_dedicated_compositions(client, customer_user, path, marker):
     response = client.get(path)
     assert response.status_code == 200
     assert marker in response.content.decode()
+
+
+def test_gramads_main_background_asset_is_valid_webp():
+    image = finders.find("img/backgrounds/gramads-dashboard-main-background.webp")
+    assert image is not None
+    with open(image, "rb") as asset:
+        assert asset.read(4) == b"RIFF"
+    assert __import__("os").path.getsize(image) < 100_000

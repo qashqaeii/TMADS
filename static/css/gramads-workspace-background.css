@@ -1,0 +1,32 @@
+/* GramAds workspace canvas. Background asset is already tracked under static/img/backgrounds.
+   Apply to <main> only; the sticky topbar and dark sidebar remain independent.
+   One subtle gradient keeps text readable without washing out the ambient blue arcs. */
+body.ui-final.is-app .ui-shell > .app-main > main.app-content {
+  background-color: #edf4fc;
+  background-image:
+    linear-gradient(180deg, rgba(247, 250, 255, .19) 0%, rgba(246, 250, 255, .38) 52%, rgba(244, 248, 254, .51) 100%),
+    url("../img/backgrounds/gramads-dashboard-main-background.webp");
+  background-repeat: no-repeat, no-repeat;
+  background-position: center top, center top;
+  background-size: cover, cover;
+  background-attachment: scroll, fixed;
+}
+/* Older canvas pseudo-layers are no longer needed and would add redundant paint. */
+body.ui-final.is-app .ui-shell > .app-main::before,
+body.ui-final.is-app .ui-shell > .app-main::after {
+  content: none;
+}
+/* Fixed attachment is unreliable on touch browsers; use normal scrolling there. */
+@media (max-width: 900px), (hover: none) and (pointer: coarse) {
+  body.ui-final.is-app .ui-shell > .app-main > main.app-content {
+    background-attachment: scroll, scroll;
+    background-position: center top, 68% top;
+    background-size: cover, cover;
+  }
+}
+/* Respect Windows high-contrast / forced-colors mode. */
+@media (forced-colors: active) {
+  body.ui-final.is-app .ui-shell > .app-main > main.app-content {
+    background-image: none;
+  }
+}
