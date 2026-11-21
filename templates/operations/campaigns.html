@@ -14,9 +14,7 @@
         <label class="filter-exec__label" for="ops-campaign-status">وضعیت صف</label>
         <select id="ops-campaign-status" class="filter-exec__control" name="status">
           <option value="all" {% if not filter_status %}selected{% endif %}>همه</option>
-          <option value="pending_review" {% if filter_status == 'pending_review' %}selected{% endif %}>در انتظار بررسی</option>
-          <option value="ready_for_submission" {% if filter_status == 'ready_for_submission' %}selected{% endif %}>آماده ارسال</option>
-          <option value="submitting" {% if filter_status == "submitting" %}selected{% endif %}>در حال ارسال</option><option value="reconciliation" {% if filter_status == "reconciliation" %}selected{% endif %}>نیازمند تطبیق</option><option value="awaiting_telegram" {% if filter_status == "awaiting_telegram" %}selected{% endif %}>در انتظار تلگرام</option><option value="rejected" {% if filter_status == 'rejected' %}selected{% endif %}>رد شده</option>
+          {% for value,label in status_choices %}<option value="{{ value }}" {% if filter_status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
         </select>
       </div>
       <div class="filter-exec__field ops-search-field"><label class="filter-exec__label" for="ops-campaign-search">جستجوی کمپین یا مشتری</label><input class="filter-exec__control" type="search" id="ops-campaign-search" name="q" value="{{ query }}" maxlength="100" placeholder="نام کمپین، کسب‌وکار یا نام کاربری"></div>

@@ -69,7 +69,8 @@ def campaign_ops(request):
         request, "operations/campaigns.html",
         {"campaigns": page_obj.object_list, "page_obj": page_obj,
          "filter_status": "" if status == "all" else status,
-         "query": query, "total_results": page_obj.paginator.count},
+         "query": query, "total_results": page_obj.paginator.count,
+         "status_choices": Campaign.Status.choices},
     )
 
 
