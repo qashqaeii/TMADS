@@ -3,7 +3,8 @@
 {% block page_title %}حساب تبلیغاتی{% endblock %}
 {% block content %}
 <div class="app-stack ui-account-page ga-account-workspace">
-  {% include "includes/dash_header.html" with page_icon="building-2" title="حساب تبلیغاتی" subtitle="مدیریت حساب اختصاصی تلگرام" %}
+  {% include "includes/dash_header.html" with page_icon="building-2" title="حساب تبلیغاتی" subtitle="مدیریت حساب‌های تبلیغاتی تلگرام" %}
+  <p class="muted">اگر حساب Telegram Ads خودتان را دارید، می‌توانید بدون استفاده از کیف پول TMADS آن را متصل کنید: <a href="{% url 'accounts:telegram_connection' %}">مدیریت اتصال حساب‌ها</a>.</p>
   <div class="ga-account-top">
     <section class="ga-feature" aria-label="وضعیت حساب اختصاصی">
       <div class="ga-feature-head"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="building-2" size="md" %}</span><span class="ga-account-label">حساب اختصاصی</span></div>

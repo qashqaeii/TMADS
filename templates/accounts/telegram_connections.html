@@ -1,0 +1,61 @@
+{% extends "app_shell.html" %}
+{% load core_filters %}
+{% block page_title %}حساب‌های تبلیغاتی{% endblock %}
+{% block content %}
+<div class="app-stack ui-account-page ga-account-workspace">
+  {% include "includes/dash_header.html" with page_icon="plug-zap" eyebrow="اتصال حساب" title="حساب‌های تبلیغاتی تلگرام" subtitle="انتخاب حسابی که کمپین‌های شما در آن اجرا می‌شوند" %}
+  <section class="ga-panel">
+    <header class="ga-panel-head">
+      <div class="ga-panel-title"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="key-round" size="md" %}</span><div><h2>اتصال حساب شخصی</h2><p>استفاده از API و موجودی حساب خودتان</p></div></div>
+      <span class="status {% if customer_owned_enabled and encryption_ready %}status-active{% else %}status-draft{% endif %}">{% if customer_owned_enabled and encryption_ready %}آماده اتصال{% else %}غیرفعال در تنظیمات سرور{% endif %}</span>
+    </header>
+    <div class="ga-panel-body form-stack">
+      <p>توکن API را از بخش API Access حساب Telegram Ads خود دریافت کنید. توکن فقط روی سرور رمزنگاری و نگهداری می‌شود و هرگز در مرورگر یا گزارش‌ها نمایش داده نمی‌شود.</p>
+      {% if customer_owned_enabled and encryption_ready %}
+      <form method="post" class="form-stack" autocomplete="off">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="connect">
+        <div class="field">
+          <label for="telegram-api-token">Access Token</label>
+          <input id="telegram-api-token" name="api_token" type="password" dir="ltr" autocomplete="new-password" maxlength="4096" required placeholder="توکن API تلگرام ادز">
+          <p class="field-help">با اتصال، اطلاعات حساب و موجودی به‌صورت خواندنی بررسی می‌شود. هیچ کمپین آزمایشی ساخته نخواهد شد.</p>
+        </div>
+        <button class="btn btn-primary" type="submit">اتصال و بررسی حساب</button>
+      </form>
+      {% else %}
+      <p class="ui-studio-warning">برای فعال‌شدن این امکان، مدیر سامانه باید قابلیت حساب شخصی و کلید رمزنگاری سرور را تنظیم کند.</p>
+      {% endif %}
+    </div>
+  </section>
+
+  <section class="ga-panel">
+    <header class="ga-panel-head"><div class="ga-panel-title"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="wallet" size="md" %}</span><div><h2>حساب‌های متصل</h2><p>هر کمپین به حسابی که هنگام ساخت انتخاب شده متصل می‌ماند.</p></div></div></header>
+    <div class="ga-panel-body form-stack">
+      {% for connection in connections %}
+      <article class="card card-pad form-stack">
+        <div class="ui-remote-summary">
+          <div><h3 class="section-title">{{ connection.account_title|default:"حساب تبلیغاتی" }}</h3><p class="muted">{{ connection.get_connection_type_display }} · <bdi>{{ connection.remote_account_id }}</bdi></p></div>
+          <span class="status {% if connection.status == 'connected' %}status-active{% elif connection.status == 'error' %}status-warn{% else %}status-draft{% endif %}">{{ connection.get_status_display }}</span>
+        </div>
+        <div class="finance-line"><span>موجودی آخرین بررسی</span><strong dir="ltr">{{ connection.remaining_budget|floatformat:2 }} {{ connection.currency|default:"—" }}</strong></div>
+        {% if connection.is_default %}<span class="status status-active">حساب پیش‌فرض کمپین‌های جدید</span>{% endif %}
+        {% if connection.last_error %}<p class="ui-studio-warning">{{ connection.last_error }}</p>{% endif %}
+        <div class="hero-actions">
+          <form method="post">{% csrf_token %}<input type="hidden" name="action" value="refresh"><input type="hidden" name="connection_id" value="{{ connection.pk }}"><button class="btn btn-ghost btn-sm" type="submit">به‌روزرسانی موجودی</button></form>
+          {% if not connection.is_default and connection.status == "connected" %}
+          <form method="post">{% csrf_token %}<input type="hidden" name="action" value="default"><input type="hidden" name="connection_id" value="{{ connection.pk }}"><button class="btn btn-primary btn-sm" type="submit">انتخاب برای کمپین‌های جدید</button></form>
+          {% endif %}
+          <a class="btn btn-ghost btn-sm" href="{% url 'accounts:related_ads' %}">مشاهده تبلیغات</a>
+        </div>
+      </article>
+      {% empty %}
+      <div class="ui-empty"><span class="ui-empty__icon">{% include "includes/lucide_icon.html" with name="plug-zap" size="md" %}</span><h2>هنوز حسابی متصل نشده است</h2><p>حساب شخصی خود را متصل کنید یا از حساب مدیریت‌شده TMADS استفاده کنید.</p></div>
+      {% endfor %}
+    </div>
+  </section>
+  <section class="ga-panel">
+    <header class="ga-panel-head"><div class="ga-panel-title"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="building-2" size="md" %}</span><div><h2>حساب مدیریت‌شده TMADS</h2><p>بدون نیاز به داشتن حساب تبلیغاتی شخصی</p></div></div></header>
+    <div class="ga-panel-body"><p>در این روش، حساب مرکزی پلتفرم برای هر مشتری یک حساب مرتبط مستقل ایجاد می‌کند. موجودی کمپین از کیف پول TMADS تأمین و پس از انتقال به حساب مرتبط، تبلیغ در همان حساب اجرا می‌شود.</p><a class="btn btn-ghost" href="{% url 'accounts:related_account' %}">درخواست حساب مدیریت‌شده</a></div>
+  </section>
+</div>
+{% endblock %}

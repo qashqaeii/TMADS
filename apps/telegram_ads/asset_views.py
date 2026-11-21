@@ -23,7 +23,7 @@ def customer_assets(request):
     section=request.GET.get("section","audiences")
     if section not in {"audiences","pixel","events"}:
         section="audiences"
-    ctx={"row":row,"section":section,"enabled":enabled(),"event_types":EVENT_TYPES,"loaded":False}
+    ctx={"row":row,"section":section,"enabled":enabled(row),"event_types":EVENT_TYPES,"loaded":False}
     if row:
         ctx.update(nonce=issue_nonce(row),operations=row.asset_operations.all()[:10],
             unresolved=row.asset_operations.filter(state__in=["executing","uncertain"]).exists())
@@ -31,7 +31,7 @@ def customer_assets(request):
             try:
                 offset=max(0,min(10000,int(request.GET.get("offset","0"))))
                 client=verified_client(row)
-                kwargs={"account_id":row.remote_account_id}
+                kwargs={"account_id": None if row.connection_type == "customer_owned" else row.remote_account_id}
                 if section=="pixel":
                     ctx["pixel"]=client.get_pixel_info(**kwargs)
                 else:

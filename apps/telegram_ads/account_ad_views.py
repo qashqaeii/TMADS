@@ -27,7 +27,7 @@ def related_account_ads(request):
     try:
         client = verified_client(row)
         page = client.get_account_ads_page(
-            account_id=row.remote_account_id, offset=cursor, limit=40,
+            account_id=None, offset=cursor, limit=40,
         )
         if not isinstance(page, dict) or not isinstance(page.get("ads"), list):
             raise ValueError("ساختار اطلاعات تبلیغات معتبر نیست.")
