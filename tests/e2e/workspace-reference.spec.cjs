@@ -59,8 +59,21 @@ for (const role of Object.keys(routes)) {
           if (route === '/ops/remote-operations/' || route === '/ops/related-accounts/') {
             await expect(page.locator('.ops-queue-empty')).toBeVisible();
             await expect(page.locator('.ops-pager')).toHaveCount(0);
+            const emptyHeight = (await page.locator('.ops-queue-empty').boundingBox()).height;
+            expect(emptyHeight).toBeLessThan(190);
+            if (route === '/ops/remote-operations/') {
+              const filterHeight = (await page.locator('.ops-remote-filter').boundingBox()).height;
+              expect(filterHeight).toBeLessThan(width < 800 ? 180 : 125);
+            }
+          }
+          if (route === '/ops/api-status/' && !(await page.locator('.ops-api-account').count())) {
+            const layout = await page.locator('.ops-api-layout').boundingBox();
+            const capabilities = await page.locator('.ops-api-capabilities').boundingBox();
+            expect(capabilities.width).toBeGreaterThan(layout.width * .95);
           }
           if (route === '/ops/exchange-rates/') {
+            const columns = await page.locator('.ops-rate-metrics').evaluate(el => getComputedStyle(el).gridTemplateColumns.trim().split(' ').length);
+            expect(columns).toBe(width <= 560 ? 1 : width <= 800 ? 2 : 3);
             const metrics = page.locator('.ops-rate-metrics .kpi-exec');
             await expect(metrics).toHaveCount(5);
             for (const card of await metrics.all()) {
@@ -85,6 +98,15 @@ for (const role of Object.keys(routes)) {
           }
         }
         await expect(page.locator('#main-content')).toBeVisible();
+        const titleRow = page.locator('.ga-ops-premium .dash-header__title-row').first();
+        const subtitle = page.locator('.ga-ops-premium .dash-header .page-sub').first();
+        const titleCount = await titleRow.count();
+        const subtitleCount = await subtitle.count();
+        if (titleCount && subtitleCount) {
+          const titleBox = await titleRow.boundingBox();
+          const subtitleBox = await subtitle.boundingBox();
+          expect(subtitleBox.y).toBeGreaterThanOrEqual(titleBox.y + titleBox.height - 1);
+        }
         await expect(page.locator('#ui-confirmation')).toHaveCount(1);
         expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2),route+' @ '+width).toBe(true);
         const css=await page.locator('body').evaluate(el=>getComputedStyle(el).getPropertyValue('--gw-radius').trim());
