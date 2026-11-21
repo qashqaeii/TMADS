@@ -3,10 +3,11 @@
 {% block container_class %}container-wide{% endblock %}
 {% block page_title %}نرخ گرام{% endblock %}
 {% block content %}
-<div class="app-stack operations-page ui-ops ga-ops-workspace ga-rate-workspace">
-{% include "includes/dash_header.html" with page_icon="wallet" eyebrow="عملیات" title="نرخ گرام" %}
+<div class="app-stack operations-page ui-ops ga-ops-premium ga-ops-workspace ga-rate-workspace ops-rates-page">
+{% include "includes/dash_header.html" with page_icon="wallet" eyebrow="مالی" title="نرخ گرام" subtitle="شفافیت مبنای نرخ‌گذاری و کنترل تغییرات دستی" %}
+<div class="ops-context-strip"><div><strong>{% if live_rate %}{% if live_rate.is_fresh %}نرخ جاری به‌روز است{% else %}نرخ جاری نیازمند بازبینی است{% endif %}{% else %}نرخ فعلی در دسترس نیست{% endif %}</strong><span>تغییر نرخ مستقیماً بر محاسبات بعدی اثر می‌گذارد.</span></div><a href="{% url 'operations:overview' %}">مرکز عملیات</a></div>
 {% if live_rate %}
-<div class="kpi-exec-grid kpi-exec-grid--5 ui-ops-kpis">
+<div class="kpi-exec-grid kpi-exec-grid--5 ui-ops-kpis ops-rate-metrics">
   <article class="kpi-exec">
     <span class="kpi-exec__icon">{% include "includes/kpi_icon.html" with name="click" %}</span>
     <div class="kpi-exec__body">
@@ -48,7 +49,7 @@
   <p class="muted" style="margin:0">نرخی در کش نیست — بروزرسانی نوبیتکس را بزنید یا نرخ دستی ثبت کنید.</p>
 </article>
 {% endif %}
-<div class="ga-split">
+<div class="ga-split ops-rate-panels">
   <section class="ga-panel"><header class="ga-panel-head"><div class="ga-panel-title"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="activity" %}</span><div><h2>منبع نرخ</h2><p>نوبیتکس</p></div></div></header><div class="ga-panel-body form-stack">
     <p class="muted" style="font-size:.85rem">جفت آمار: گرام به ریال · دفتر سفارش گرام و ریال</p>
     <form method="post" class="form-stack">{% csrf_token %}<input type="hidden" name="action" value="refresh_nobitex">
@@ -57,15 +58,15 @@
     <p class="muted" style="margin-top:1rem;font-size:.82rem">کارمزد پلتفرم: {{ fee_percent|persian_digits }}٪ · بافر نوسان: {{ buffer_percent|persian_digits }}٪</p>
     {% if live_rate %}<p class="muted" style="font-size:.82rem">آخرین دریافت: {{ live_rate.fetched_at|jalali_datetime }}</p>{% endif %}
   </div></section>
-  <section class="ga-panel"><header class="ga-panel-head"><div class="ga-panel-title"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="settings" %}</span><div><h2>نرخ دستی جایگزین</h2><p>تغییر مؤثر بر قیمت‌گذاری</p></div></div></header><div class="ga-panel-body">
+  <section class="ga-panel ops-rate-manual"><header class="ga-panel-head"><div class="ga-panel-title"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="settings" %}</span><div><h2>نرخ دستی جایگزین</h2><p>اقدام حساس؛ نیازمند بررسی دلیل و مقدار</p></div></div></header><div class="ga-panel-body">
     <form method="post" class="form-stack">{% csrf_token %}<input type="hidden" name="action" value="manual">
-      <div class="field"><label for="manual-rate">ریال به ازای یک گرام</label><input id="manual-rate" name="irr_per_ton" type="number" inputmode="numeric" min="1" step="1" dir="ltr" required></div>
-      <div class="field"><label for="manual-rate-reason">دلیل</label><input id="manual-rate-reason" name="reason" placeholder="قطعی ارتباط، سیاست موقت…"></div>
+      <div class="ops-review-note"><strong>پیش از تغییر نرخ</strong><p>نرخ جدید به مدت ۲۴ ساعت اولویت دارد. برای جلوگیری از خطای قیمت‌گذاری، مقدار را با منبع معتبر تطبیق دهید.</p></div><div class="field"><label for="manual-rate">ریال به ازای هر گرام</label><input id="manual-rate" name="irr_per_ton" type="number" inputmode="numeric" min="1" max="9223372036854775807" step="1" dir="ltr" required placeholder="مبلغ به ریال"></div>
+      <div class="field"><label for="manual-rate-reason">دلیل</label><input id="manual-rate-reason" name="reason" maxlength="200" placeholder="مثلاً قطعی منبع قیمت‌گذاری" autocomplete="off"><small class="field-help">دلیل اقدام برای پیگیری در سوابق ثبت می‌شود.</small></div>
       <button class="btn btn-ghost" type="submit" data-confirm-title="نرخ دستی" data-confirm-message="نرخ دستی در قیمت‌گذاری اثر می‌گذارد. مقدار و دلیل را بررسی کرده‌اید؟" data-confirm-label="ثبت نرخ" data-confirm-tone="primary" onclick="return window.tmadsConfirmReady || confirm('نرخ دستی در قیمت‌گذاری اثر می‌گذارد. مقدار و دلیل را بررسی کرده‌اید؟');">ثبت جایگزین ۲۴ ساعته</button>
     </form>
   </div></section>
 </div>
-<section class="ga-panel ga-data-panel"><header class="ga-panel-head"><div class="ga-panel-title"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="chart-no-axes-combined" %}</span><div><h2>تاریخچه نرخ</h2><p>سوابق نرخ‌های ثبت‌شده</p></div></div></header>
+<section class="ga-panel ga-data-panel ops-rate-history"><header class="ga-panel-head"><div class="ga-panel-title"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="chart-no-axes-combined" %}</span><div><h2>تاریخچه نرخ</h2><p>سوابق زمان‌دار برای ممیزی و مقایسه تغییرات</p></div></div></header>
   <div class="table-wrap" tabindex="0" role="region" aria-label="تاریخچه نرخ گرام"><table class="data-table"><caption class="sr-only">تاریخچه نرخ گرام</caption>
     <thead><tr><th scope="col">منبع</th><th scope="col">نرخ (ریال)</th><th scope="col">فعال</th><th scope="col">زمان</th></tr></thead>
     <tbody>

@@ -169,3 +169,19 @@ body.ui-final.is-app .ga-ops-premium.ops-refund-workspace .ui-ops-reason{max-wid
 body.ui-final.is-app .ga-ops-premium.ops-refund-workspace .ui-ops-reason summary{cursor:pointer;font-weight:650;color:#365774;max-width:270px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 body.ui-final.is-app .ga-ops-premium.ops-refund-workspace .ui-ops-reason p{white-space:pre-wrap;overflow-wrap:anywhere;color:#66839b;font-size:.77rem;max-width:300px;line-height:1.8}
 body.ui-final.is-app .ga-ops-premium.ops-refund-workspace .data-table{min-width:830px}
+
+/* Exchange-rate oversight: stable number geometry and visible action boundaries. */
+body.ui-final.is-app .ga-ops-premium .ops-rate-metrics{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+body.ui-final.is-app .ga-ops-premium .ops-rate-metrics .kpi-exec{min-width:0;min-height:110px;display:flex;align-items:center;gap:11px}
+body.ui-final.is-app .ga-ops-premium .ops-rate-metrics .kpi-exec__value{font-size:clamp(.93rem,1.4vw,1.45rem);overflow-wrap:anywhere}
+body.ui-final.is-app .ga-ops-premium .ops-rate-metrics .kpi-exec__unit{font-size:.71rem;font-weight:500}
+body.ui-final.is-app .ga-ops-premium .ops-rate-panels{grid-template-columns:repeat(2,minmax(0,1fr))}
+body.ui-final.is-app .ga-ops-premium .ops-rate-manual{border-color:#d4e5fa}
+body.ui-final.is-app .ga-ops-premium .ops-rate-manual .ga-panel-head{background:#f5f9ff}
+body.ui-final.is-app .ga-ops-premium .ops-rate-manual .btn{width:100%}
+body.ui-final.is-app .ga-ops-premium .ops-rate-manual .field-help{font-size:.71rem;color:#647f9b;line-height:1.8}
+body.ui-final.is-app .ga-ops-premium .ops-rate-history .data-table{min-width:570px}
+body.ui-final.is-app .ga-ops-premium .ops-rate-history tbody tr:has(td:nth-child(3)){height:54px}
+@media(max-width:1150px){body.ui-final.is-app .ga-ops-premium .ops-rate-metrics{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:800px){body.ui-final.is-app .ga-ops-premium .ops-rate-panels{grid-template-columns:minmax(0,1fr)}body.ui-final.is-app .ga-ops-premium .ops-rate-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:450px){body.ui-final.is-app .ga-ops-premium .ops-rate-metrics .kpi-exec{display:grid;gap:8px}body.ui-final.is-app .ga-ops-premium .ops-rate-metrics .kpi-exec__value{font-size:1rem}}
