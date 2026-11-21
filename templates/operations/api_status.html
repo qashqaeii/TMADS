@@ -3,12 +3,17 @@
 {% block container_class %}container-wide{% endblock %}
 {% block page_title %}وضعیت اتصال تلگرام{% endblock %}
 {% block content %}
-<div class="app-stack operations-page ui-ops ga-ops-workspace ga-api-workspace">
+<div class="app-stack operations-page ui-ops ga-ops-premium ga-ops-workspace ga-api-workspace ops-api-page">
 {% url 'operations:telegram_account' as report_url %}
 {% include "includes/dash_header.html" with page_icon="activity" eyebrow="عملیات" title="وضعیت اتصال تلگرام" action_url=report_url action_label="گزارش حساب تلگرام" %}
+<section class="ops-api-pulse" aria-label="وضعیت سرویس">
+  <article class="ops-api-signal {% if account %}ops-api-signal--ok{% else %}ops-api-signal--warn{% endif %}"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="activity" %}</span><div><span>وضعیت حساب مرکزی</span><strong>{% if account %}اطلاعات دریافت شد{% else %}ارتباط قابل تأیید نیست{% endif %}</strong></div></article>
+  <article class="ops-api-signal"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="check-circle" %}</span><div><span>قابلیت‌های تأییدشده</span><strong>{{ supported_count|format_count }} از {{ capability_count|format_count }}</strong></div></article>
+  <article class="ops-api-signal"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="shield-check" %}</span><div><span>قابلیت‌های محدودشده</span><strong>{{ blocked_count|format_count }}</strong></div></article>
+</section>
 {% if error %}<article class="card card-pad operations-error" role="alert"><strong>خطا</strong><p class="muted">{{ error|user_message_fa }}</p></article>{% endif %}
 
-<div class="ui-ops-api-layout">
+<div class="ui-ops-api-layout ops-api-layout">
   {% if account %}
   <section class="ga-panel"><header class="ga-panel-head"><div class="ga-panel-title"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="building-2" %}</span><div><h2>حساب جاری</h2><p>اطلاعات حساب متصل</p></div></div></header><div class="ga-panel-body ga-api-facts">
     <div class="finance-line"><span>عنوان</span><strong>{{ account.title|default:"—" }}</strong></div>
@@ -20,7 +25,7 @@
     <p class="muted" style="font-size:.82rem;margin-top:1rem">واحد اعتبار حساب ممکن است گرام، یورو یا استار تلگرام باشد.</p>
   </div></section>
   {% endif %}
-  <section class="ga-panel ga-data-panel"><header class="ga-panel-head"><div class="ga-panel-title"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="shield-check" %}</span><div><h2>قابلیت‌های سرویس تلگرام</h2><p>آزمون‌های فقط‌خواندنی</p></div></div></header><div class="ga-panel-body">
+  <section class="ga-panel ga-data-panel"><header class="ga-panel-head"><div class="ga-panel-title"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="shield-check" %}</span><div><h2>قابلیت‌های سرویس تلگرام</h2><p>نتیجه آزمون‌های فقط‌خواندنی، بدون تغییر حساب</p></div></div></header><div class="ga-panel-body">
     <p class="muted" style="font-size:.85rem">این بررسی‌ها فقط اطلاعات را می‌خوانند و هیچ تغییری در حساب ایجاد نمی‌کنند. وضعیت «بررسی‌نشده» به معنی نبود قابلیت نیست.</p>
     <div class="table-wrap" tabindex="0" role="region" aria-label="قابلیت‌های سرویس تلگرام"><table class="data-table"><caption class="sr-only">قابلیت‌های سرویس تلگرام</caption>
       <thead><tr><th scope="col">کلید</th><th scope="col">وضعیت</th><th scope="col">جزئیات</th></tr></thead>
@@ -36,11 +41,11 @@
       {% endfor %}
       </tbody>
     </table></div>
-    <p class="muted" style="margin-top:1rem;font-size:.85rem">آخرین ارتباط موفق: {{ last_ok.created_at|jalali_datetime|default:"—" }} · آخرین ارتباط ناموفق: {{ last_fail.created_at|jalali_datetime|default:"—" }}</p>
+    <div class="ops-api-last-seen"><div><span>آخرین ارتباط موفق</span><strong>{{ last_ok.created_at|jalali_datetime }}</strong></div><div><span>آخرین ارتباط ناموفق</span><strong>{{ last_fail.created_at|jalali_datetime }}</strong></div></div>
   </div></section>
 </div>
 
-<article class="card card--lift card-pad">
+<article class="card card--lift card-pad ops-api-notes">
   <h2 class="section-title">مستندات داخلی</h2>
   <ul class="muted" style="margin:0;padding-inline-start:1.2rem">
     <li>مستندات فنی سرویس تلگرام</li>

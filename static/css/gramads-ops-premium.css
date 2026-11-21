@@ -213,3 +213,25 @@ body.ui-final.is-app .ga-ops-premium.ops-sms-page .sms-log li small{color:#6d839
 body.ui-final.is-app .ga-ops-premium.ops-sms-page .ops-sms-error{color:#ab444f}
 @media(max-width:1020px){body.ui-final.is-app .ga-ops-premium.ops-sms-page .ops-sms-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}body.ui-final.is-app .ga-ops-premium.ops-sms-page .ops-sms-panels{grid-template-columns:minmax(0,1fr)}body.ui-final.is-app .ga-ops-premium.ops-sms-page .sms-log li{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:560px){body.ui-final.is-app .ga-ops-premium.ops-sms-page .sms-log li{grid-template-columns:minmax(0,1fr);gap:7px}body.ui-final.is-app .ga-ops-premium.ops-sms-page .ops-sms-filter{flex-wrap:wrap;width:100%}body.ui-final.is-app .ga-ops-premium.ops-sms-page .ops-sms-filter select{flex:1;min-width:0}body.ui-final.is-app .ga-ops-premium.ops-sms-page .sms-kpi{padding:12px;min-height:100px}body.ui-final.is-app .ga-ops-premium.ops-sms-page .sms-kpi strong{font-size:1.35rem}}
+
+/* API health: honest connection signal, never conflating untested with disabled. */
+body.ui-final.is-app .ga-ops-premium .ops-api-pulse{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+body.ui-final.is-app .ga-ops-premium .ops-api-signal{display:flex;align-items:center;gap:12px;padding:16px;border:1px solid #e1ebf6;background:#fff;border-radius:16px}
+body.ui-final.is-app .ga-ops-premium .ops-api-signal .ga-symbol{flex:none}
+body.ui-final.is-app .ga-ops-premium .ops-api-signal>div{display:grid;gap:4px;min-width:0}
+body.ui-final.is-app .ga-ops-premium .ops-api-signal span{font-size:.74rem;color:#67829b}
+body.ui-final.is-app .ga-ops-premium .ops-api-signal strong{font-size:.94rem;font-weight:800;color:#183b5e}
+body.ui-final.is-app .ga-ops-premium .ops-api-signal--ok{border-color:#c9e8d9;background:#f7fcfa}
+body.ui-final.is-app .ga-ops-premium .ops-api-signal--ok .ga-symbol{background:#ddf5e9;color:#187552}
+body.ui-final.is-app .ga-ops-premium .ops-api-signal--warn{border-color:#f0dcc0;background:#fffcf6}
+body.ui-final.is-app .ga-ops-premium .ops-api-signal--warn .ga-symbol{background:#fff0d7;color:#a26d22}
+body.ui-final.is-app .ga-ops-premium .ops-api-layout{display:grid;grid-template-columns:minmax(290px,.83fr) minmax(0,1.17fr);gap:16px;align-items:start}
+body.ui-final.is-app .ga-ops-premium .ops-api-layout>section{min-width:0}
+body.ui-final.is-app .ga-ops-premium .ops-api-last-seen{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:16px}
+body.ui-final.is-app .ga-ops-premium .ops-api-last-seen>div{display:grid;gap:7px;padding:11px 13px;border:1px solid #e2ecf6;border-radius:12px;background:#f7faff}
+body.ui-final.is-app .ga-ops-premium .ops-api-last-seen span{font-size:.71rem;color:#64829c}
+body.ui-final.is-app .ga-ops-premium .ops-api-last-seen strong{font-size:.8rem;color:#284d72}
+body.ui-final.is-app .ga-ops-premium .ops-api-notes{border-radius:16px}
+body.ui-final.is-app .ga-ops-premium .ops-api-notes li{line-height:1.9;font-size:.78rem}
+@media(max-width:1030px){body.ui-final.is-app .ga-ops-premium .ops-api-layout{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:680px){body.ui-final.is-app .ga-ops-premium .ops-api-pulse{grid-template-columns:minmax(0,1fr)}body.ui-final.is-app .ga-ops-premium .ops-api-last-seen{grid-template-columns:minmax(0,1fr)}}

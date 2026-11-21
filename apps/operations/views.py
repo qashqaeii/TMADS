@@ -271,6 +271,9 @@ def api_status(request):
             "last_ok": last_ok,
             "last_fail": last_fail,
             "capabilities": capabilities,
+            "capability_count": capabilities.count(),
+            "supported_count": capabilities.filter(state=APICapability.State.SUPPORTED).count(),
+            "blocked_count": capabilities.filter(state__in=[APICapability.State.UNSUPPORTED, APICapability.State.PERMISSION_DENIED]).count(),
         },
     )
 
