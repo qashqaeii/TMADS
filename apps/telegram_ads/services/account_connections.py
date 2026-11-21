@@ -103,14 +103,15 @@ def _apply_snapshot(connection: TelegramAdsConnection, snapshot: dict) -> None:
     connection.status = TelegramAdsConnection.Status.CONNECTED
     connection.last_checked_at = timezone.now()
     connection.last_error = ""
-    connection.capabilities = {
-        **(connection.capabilities or {}),
+    capabilities = dict(connection.capabilities or {})
+    capabilities.update({
         "account.read": "supported",
         "account.info": "supported",
         # Telegram exposes no safe, non-mutating createAd permission probe.
-        "ads.create": "unverified",
+        "ads.create": capabilities.get("ads.create") or "unverified",
         "ads.create_probe": "not_performed_to_avoid_creating_a_real_ad",
-    }
+    })
+    connection.capabilities = capabilities
 
 
 def refresh_connection(connection: TelegramAdsConnection) -> TelegramAdsConnection:
@@ -160,6 +161,8 @@ def connect_customer_owned_account(actor, raw_token: str) -> TelegramAdsConnecti
 
     if existing:
         connection = existing
+        if connection.token_fingerprint != fingerprint:
+            connection.capabilities = {**(connection.capabilities or {}), "ads.create": "unverified"}
         connection.encrypted_access_token = encrypted
         connection.token_fingerprint = fingerprint
         connection.remote_account_id = snapshot["account_id"]

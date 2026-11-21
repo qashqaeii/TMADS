@@ -7,6 +7,7 @@ from enum import Enum
 from typing import Any
 
 from django.conf import settings
+from django.utils import timezone
 
 from apps.campaigns.models import Campaign, CampaignStatusHistory, TelegramAdvertisement
 from apps.telegram_ads.services.account_connections import campaign_client
@@ -127,6 +128,17 @@ def execute_create_ad(
     ad.placement = campaign.placement
     ad.promotion_url = campaign.destination
     ad.save()
+    if campaign.telegram_connection_id:
+        connection = campaign.telegram_connection
+        capabilities = dict(connection.capabilities or {})
+        capabilities["ads.create"] = "verified"
+        connection.capabilities = capabilities
+        connection.status = "connected"
+        connection.last_error = ""
+        connection.last_checked_at = timezone.now()
+        connection.save(update_fields=[
+            "capabilities", "status", "last_error", "last_checked_at", "updated_at",
+        ])
     APIRequestLog.objects.create(
         operation="create_ad_receipt", success=True,
         meta={"campaign_id": str(campaign.id), "order_id": str(order.id) if order else "",

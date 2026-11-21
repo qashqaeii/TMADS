@@ -38,6 +38,7 @@
           <span class="status {% if connection.status == 'connected' %}status-active{% elif connection.status == 'error' %}status-warn{% else %}status-draft{% endif %}">{{ connection.get_status_display }}</span>
         </div>
         <div class="finance-line"><span>موجودی آخرین بررسی</span><strong dir="ltr">{{ connection.remaining_budget|floatformat:2 }} {{ connection.currency|default:"—" }}</strong></div>
+        {% if connection.capabilities.ads.create == "verified" %}<span class="status status-active">مجوز ساخت تبلیغ با موفقیت تأیید شده است</span>{% else %}<p class="muted">اعتبار توکن و موجودی در اتصال بررسی شده‌اند؛ مجوز ساخت تبلیغ با اولین ثبت واقعی و پاسخ تلگرام تأیید می‌شود.</p>{% endif %}
         {% if connection.is_default %}<span class="status status-active">حساب پیش‌فرض کمپین‌های جدید</span>{% endif %}
         {% if connection.last_error %}<p class="ui-studio-warning">{{ connection.last_error }}</p>{% endif %}
         <div class="hero-actions">

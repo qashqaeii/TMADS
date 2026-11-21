@@ -720,6 +720,22 @@ def execute_operation(operation_id, *, actor):
                 "before_remaining_budget": str(before),
                 "currency": "TON",
             }
+            if op.action == Action.INCREASE_BUDGET:
+                quote = op.request_payload.get("quote") or {}
+                try:
+                    total = int(quote["total_irr"])
+                    reserved = int(op.request_payload["wallet_reserved_irr"])
+                except (KeyError, TypeError, ValueError):
+                    raise ValueError("پیش‌فاکتور افزایش بودجه معتبر نیست.") from None
+                wallet = ensure_wallet(campaign.customer)
+                if (
+                    total <= 0 or total != reserved
+                    or outstanding_order_reservation(wallet, op.pk) != total
+                    or wallet.reserved_irr < total
+                ):
+                    raise ValueError("رزرو کامل مبلغ افزایش بودجه در کیف پول تأیید نشد.")
+            elif int(op.request_payload.get("refund_irr") or 0) <= 0:
+                raise ValueError("مبلغ بازگشت اعتبار کاهش بودجه معتبر نیست.")
             payload = {}
         else:
             payload = _payload(op, remote)
