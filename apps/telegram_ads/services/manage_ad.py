@@ -265,8 +265,16 @@ def _customer_owned_guard(campaign, actor, op):
         raise ValueError("مدیریت مستقیم حساب مشتری در تنظیمات پلتفرم غیرفعال است.")
     if has_financial_lock(campaign) or campaign.status in {Campaign.Status.CANCELLED, Campaign.Status.FAILED, Campaign.Status.DRAFT}:
         raise ValueError("کمپین نیازمند تطبیق وضعیت است.")
-    if not (campaign.ad_settings or {}).get("terms_accepted"):
-        raise ValueError("پذیرش شرایط استفاده برای مدیریت تبلیغ ثبت نشده است.")
+    from apps.policies.constants import POLICY_SUMMARY_VERSION, TMADS_TERMS_VERSION
+    from apps.policies.models import CampaignPolicyAcceptance
+    from apps.policies.services.policy_versions import get_active_policy_version
+    if not CampaignPolicyAcceptance.objects.filter(
+        campaign=campaign, customer=campaign.customer,
+        tmads_terms_version=TMADS_TERMS_VERSION,
+        policy_summary_version=POLICY_SUMMARY_VERSION,
+        policy_version=get_active_policy_version(),
+    ).exists():
+        raise ValueError("پذیرش شرایط و سیاست‌های جاری برای مدیریت تبلیغ ثبت نشده است.")
     if op.action in (Action.INCREASE_BUDGET, Action.DECREASE_BUDGET) and campaign.budget_currency != connection.currency:
         raise ValueError("ارز کمپین با حساب تلگرام یکسان نیست.")
 

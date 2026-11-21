@@ -48,6 +48,8 @@ def _claim_customer_owned_submission(campaign_id):
             raise ValueError("این کمپین قبلاً به تبلیغ تلگرام متصل شده است.")
         if not campaign.telegram_connection_id or not _is_customer_owned(campaign):
             raise ValueError("اتصال اختصاصی مشتری برای این کمپین ثبت نشده است.")
+        if not getattr(settings, "TELEGRAM_ADS_CUSTOMER_OWNED_ENABLED", False):
+            raise TelegramAdsWriteDisabled("مدیریت حساب اختصاصی مشتری در تنظیمات پلتفرم غیرفعال است.")
         if campaign.customer.is_suspended:
             raise ValueError("حساب مشتری غیرفعال است.")
         if AdvertisingOrder.objects.filter(campaign_id=campaign.pk).exists():
