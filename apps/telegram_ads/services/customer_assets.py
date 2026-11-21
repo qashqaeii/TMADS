@@ -7,37 +7,70 @@ from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from apps.telegram_ads.client import TelegramAdsClient
 from apps.telegram_ads.exceptions import TelegramAdsError
-from apps.telegram_ads.models import RelatedAccountRequest, AccountAssetOperation
+from apps.telegram_ads.models import TelegramAdsConnection, AccountAssetOperation
+from apps.telegram_ads.services.account_connections import connection_client, refresh_connection
 from apps.policies.services.preflight import CampaignPolicyPreflight
 
 EVENT_TYPES=("page_view","add_to_cart","add_to_wishlist","customize_product","initiate_checkout","add_payment_info","purchase","contact","lead","schedule","complete_registration","submit_application","start_trial","subscribe","view_content","search","find_location","donate","custom")
 SALT="tmads.customer-assets.v1"
 
 def owned_account(actor):
-    profile=getattr(actor,"customer_profile",None)
+    profile = getattr(actor, "customer_profile", None)
     if not profile or profile.is_suspended:
         raise PermissionDenied
-    return RelatedAccountRequest.objects.filter(customer=profile,status="provisioned").exclude(remote_account_id="").first()
+    return TelegramAdsConnection.objects.filter(
+        customer=profile, status=TelegramAdsConnection.Status.CONNECTED,
+    ).filter(is_default=True).first() or TelegramAdsConnection.objects.filter(
+        customer=profile, status=TelegramAdsConnection.Status.CONNECTED,
+    ).first()
 
-def verified_client(row):
-    client=TelegramAdsClient()
-    if (not row.main_account_id or row.main_account_id==row.remote_account_id
-            or client.get_account().get("account_id")!=row.main_account_id
-            or client.get_account_info(account_id=row.remote_account_id).get("account_id")!=row.remote_account_id):
-        raise ValueError("هویت حساب اختصاصی قابل تأیید نیست.")
+
+def _account_id(connection):
+    return None if connection.connection_type == TelegramAdsConnection.Type.CUSTOMER_OWNED else connection.remote_account_id
+
+
+def verified_client(connection):
+    if not connection.currency:
+        refresh_connection(connection)
+    client = connection_client(connection)
+    account = client.get_account()
+    info = client.get_account_info()
+    if (
+        str(account.get("account_id") or "") != connection.remote_account_id
+        or (info.get("account_id") and str(info.get("account_id")) != connection.remote_account_id)
+        or str(account.get("currency") or "").upper() != connection.currency
+    ):
+        raise ValueError("هویت یا ارز حساب تلگرام قابل تأیید نیست.")
+    if connection.connection_type == TelegramAdsConnection.Type.PLATFORM_MANAGED:
+        related = connection.related_account
+        main = TelegramAdsClient().get_account()
+        if (
+            not related or related.remote_account_id != connection.remote_account_id
+            or str(main.get("account_id") or "") != related.main_account_id
+            or related.customer_id != connection.customer_id
+        ):
+            raise ValueError("مالکیت حساب مرکزی و حساب مرتبط قابل تأیید نیست.")
     return client
 
-def enabled():
-    return bool(settings.TELEGRAM_ADS_WRITE_ENABLED and settings.TELEGRAM_ADS_PAID_SUBMISSION_ENABLED
-        and getattr(settings,"TELEGRAM_ADS_CUSTOMER_ASSETS_ENABLED",False)
-        and CampaignPolicyPreflight.operator_submission_allowed())
+
+def enabled(connection=None):
+    base = bool(
+        settings.TELEGRAM_ADS_WRITE_ENABLED
+        and settings.TELEGRAM_ADS_PAID_SUBMISSION_ENABLED
+        and getattr(settings, "TELEGRAM_ADS_CUSTOMER_ASSETS_ENABLED", False)
+    )
+    if not base:
+        return False
+    if connection and connection.connection_type == TelegramAdsConnection.Type.CUSTOMER_OWNED:
+        return bool(getattr(settings, "TELEGRAM_ADS_CUSTOMER_OWNED_ENABLED", False))
+    return CampaignPolicyPreflight.operator_submission_allowed()
 
 def issue_nonce(row):
     return signing.dumps({"account":str(row.pk),"operation":str(uuid.uuid4())},salt=SALT)
 
 def create_asset(actor, data):
     row=owned_account(actor)
-    if not row or not enabled():
+    if not row or not enabled(row):
         raise ValueError("ایجاد منابع در وضعیت فعلی مجاز نیست.")
     action=data.get("action")
     title=data.get("title","").strip()
@@ -56,15 +89,15 @@ def create_asset(actor, data):
     except (signing.BadSignature,ValueError,KeyError,TypeError):
         raise ValueError("فرم منقضی یا نامعتبر است.") from None
     with transaction.atomic():
-        row=RelatedAccountRequest.objects.select_for_update().get(pk=row.pk,customer=actor.customer_profile)
-        if row.status!="provisioned" or row.customer.is_suspended:
+        row=TelegramAdsConnection.objects.select_for_update().get(pk=row.pk,customer=actor.customer_profile)
+        if row.status!=TelegramAdsConnection.Status.CONNECTED or row.customer.is_suspended:
             raise PermissionDenied
         if AccountAssetOperation.objects.filter(pk=operation_id).exists() or row.asset_operations.filter(state__in=["executing","uncertain"]).exists():
             raise ValueError("عملیات تکراری یا دارای نتیجه نامشخص است.")
         client=verified_client(row)
-        op=AccountAssetOperation.objects.create(pk=operation_id,account=row,action=action)
+        op=AccountAssetOperation.objects.create(pk=operation_id,connection=row,action=action)
     try:
-        result=client.create_customer_asset(account_id=row.remote_account_id,action=action,title=title,
+        result=client.create_customer_asset(account_id=_account_id(row),action=action,title=title,
             event_type=event_type,operation_id=operation_id)
         field={"audience":"audience_id","pixel":"pixel_id","event":"event_id"}[action]
         ident=result.get(field)
@@ -100,7 +133,7 @@ def change_audience_contacts(actor, data):
     Telegram does not specify a universal normalization contract.
     """
     row = owned_account(actor)
-    if not row or not enabled() or data.get("consent") != "on" or data.get("data_rights") != "on":
+    if not row or not enabled(row) or data.get("consent") != "on" or data.get("data_rights") != "on":
         raise ValueError("حساب اختصاصی، مجوز و رضایت استفاده از مخاطبان لازم است.")
     action = data.get("action")
     if action not in {"add", "remove"}:
@@ -121,25 +154,25 @@ def change_audience_contacts(actor, data):
         raise ValueError("فرم منقضی یا نامعتبر است.") from None
 
     with transaction.atomic():
-        row = RelatedAccountRequest.objects.select_for_update().get(pk=row.pk, customer=actor.customer_profile)
-        if row.status != RelatedAccountRequest.Status.PROVISIONED or row.customer.is_suspended:
+        row = TelegramAdsConnection.objects.select_for_update().get(pk=row.pk, customer=actor.customer_profile)
+        if row.status != TelegramAdsConnection.Status.CONNECTED or row.customer.is_suspended:
             raise PermissionDenied
         if (AccountAssetOperation.objects.filter(pk=operation_id).exists() or
                 row.asset_operations.filter(state__in=["executing", "uncertain"]).exists()):
             raise ValueError("عملیات دیگری در جریان یا نیازمند تطبیق است.")
         client = verified_client(row)
-        records = client.get_audiences_by_ids([audience_id], account_id=row.remote_account_id)
+        records = client.get_audiences_by_ids([audience_id], account_id=_account_id(row))
         if (not isinstance(records, list) or len(records) != 1
                 or str(records[0].get("audience_id")) != str(audience_id)):
             raise ValueError("این گروه مخاطب در حساب اختصاصی شما تأیید نشد.")
         op = AccountAssetOperation.objects.create(
-            pk=operation_id, account=row, action="audience_" + action,
+            pk=operation_id, connection=row, action="audience_" + action,
             remote_id=str(audience_id),
         )
 
     try:
         result = client.edit_audience_hashes(
-            account_id=row.remote_account_id, audience_id=audience_id,
+            account_id=_account_id(row), audience_id=audience_id,
             action=action, hashes=hashes,
         )
         if not isinstance(result, dict) or str(result.get("audience_id")) != str(audience_id):
@@ -159,7 +192,7 @@ def delete_unused_audience(actor, data):
     remote mutation; ambiguous outcomes never trigger an automatic retry.
     """
     row = owned_account(actor)
-    if not row or not enabled() or data.get("consent") != "on":
+    if not row or not enabled(row) or data.get("consent") != "on":
         raise ValueError("مجوز مدیریت حساب و تأیید حذف لازم است.")
     try:
         audience_id = int(data.get("audience_id") or "")
@@ -171,14 +204,14 @@ def delete_unused_audience(actor, data):
         raise ValueError("شناسه یا اعتبار فرم حذف نامعتبر است.") from None
 
     with transaction.atomic():
-        row = RelatedAccountRequest.objects.select_for_update().get(pk=row.pk, customer=actor.customer_profile)
-        if row.status != RelatedAccountRequest.Status.PROVISIONED or row.customer.is_suspended:
+        row = TelegramAdsConnection.objects.select_for_update().get(pk=row.pk, customer=actor.customer_profile)
+        if row.status != TelegramAdsConnection.Status.CONNECTED or row.customer.is_suspended:
             raise PermissionDenied
         if (AccountAssetOperation.objects.filter(pk=op_id).exists() or
                 row.asset_operations.filter(state__in=["executing", "uncertain"]).exists()):
             raise ValueError("یک عملیات قبلی در جریان است یا نیازمند تطبیق است.")
         client = verified_client(row)
-        records = client.get_audiences_by_ids([audience_id], account_id=row.remote_account_id)
+        records = client.get_audiences_by_ids([audience_id], account_id=_account_id(row))
         if not isinstance(records, list) or len(records) != 1:
             raise ValueError("گروه متعلق به این حساب تأیید نشد.")
         source = records[0]
@@ -188,11 +221,11 @@ def delete_unused_audience(actor, data):
         if type(source.get("ads_count")) is not int or source["ads_count"] != 0:
             raise ValueError("گروه مورد استفاده تبلیغات است یا تعداد تبلیغات آن تأیید نشده است.")
         operation = AccountAssetOperation.objects.create(
-            pk=op_id, account=row, action="audience_delete", remote_id=str(audience_id),
+            pk=op_id, connection=row, action="audience_delete", remote_id=str(audience_id),
         )
 
     try:
-        if client.delete_unused_audience(account_id=row.remote_account_id, audience_id=audience_id) is not True:
+        if client.delete_unused_audience(account_id=_account_id(row), audience_id=audience_id) is not True:
             raise ValueError("حذف گروه از API تأیید نشد.")
         AccountAssetOperation.objects.filter(pk=operation.pk).update(state="completed")
         return operation
@@ -209,7 +242,7 @@ def manage_pixel_event(actor, data):
     response, and the event is never silently recreated or deleted twice.
     """
     row = owned_account(actor)
-    if not row or not enabled() or data.get("consent") != "on":
+    if not row or not enabled(row) or data.get("consent") != "on":
         raise ValueError("مجوز حساب و تأیید مدیریت رویداد لازم است.")
     action = data.get("action")
     if action not in {"rename", "delete"}:
@@ -229,15 +262,15 @@ def manage_pixel_event(actor, data):
         raise ValueError("فرم منقضی یا نامعتبر است.") from None
 
     with transaction.atomic():
-        row = RelatedAccountRequest.objects.select_for_update().get(
+        row = TelegramAdsConnection.objects.select_for_update().get(
             pk=row.pk, customer=actor.customer_profile)
-        if row.status != RelatedAccountRequest.Status.PROVISIONED or row.customer.is_suspended:
+        if row.status != TelegramAdsConnection.Status.CONNECTED or row.customer.is_suspended:
             raise PermissionDenied
         if (AccountAssetOperation.objects.filter(pk=operation_id).exists() or
                 row.asset_operations.filter(state__in=["executing", "uncertain"]).exists()):
             raise ValueError("یک عملیات دیگر در جریان یا نیازمند تطبیق است.")
         client = verified_client(row)
-        events = client.get_pixel_events_by_ids([event_id], account_id=row.remote_account_id)
+        events = client.get_pixel_events_by_ids([event_id], account_id=_account_id(row))
         if not isinstance(events, list) or len(events) != 1:
             raise ValueError("رویداد در حساب اختصاصی تأیید نشد.")
         event = events[0]
@@ -249,11 +282,11 @@ def manage_pixel_event(actor, data):
         if action == "delete" and (type(event.get("ads_count")) is not int or event["ads_count"] != 0):
             raise ValueError("رویداد در تبلیغ استفاده می‌شود یا تعداد تبلیغات آن مشخص نیست.")
         operation = AccountAssetOperation.objects.create(
-            pk=operation_id, account=row, action="event_" + action, remote_id=event_id,
+            pk=operation_id, connection=row, action="event_" + action, remote_id=event_id,
         )
     try:
         outcome = client.change_pixel_event(
-            account_id=row.remote_account_id, event_id=event_id, action=action,
+            account_id=_account_id(row), event_id=event_id, action=action,
             title=title if action == "rename" else None,
         )
         if action == "rename":
@@ -276,7 +309,7 @@ def reset_unused_audience(actor, data):
     Does not accept user supplied audience counts; no contact data is logged.
     """
     row = owned_account(actor)
-    if not row or not enabled() or data.get("consent") != "on" or data.get("confirm_text", "").strip() not in {"حذف کامل", "RESET"}:
+    if not row or not enabled(row) or data.get("consent") != "on" or data.get("confirm_text", "").strip() not in {"حذف کامل", "RESET"}:
         raise ValueError("برای تأیید، عبارت «حذف کامل» و مجوز حساب اختصاصی لازم است.")
     try:
         audience_id = int(data.get("audience_id") or "")
@@ -288,25 +321,25 @@ def reset_unused_audience(actor, data):
         raise ValueError("شناسه گروه یا اعتبار فرم معتبر نیست.") from None
 
     with transaction.atomic():
-        row = RelatedAccountRequest.objects.select_for_update().get(pk=row.pk, customer=actor.customer_profile)
-        if row.status != RelatedAccountRequest.Status.PROVISIONED or row.customer.is_suspended:
+        row = TelegramAdsConnection.objects.select_for_update().get(pk=row.pk, customer=actor.customer_profile)
+        if row.status != TelegramAdsConnection.Status.CONNECTED or row.customer.is_suspended:
             raise PermissionDenied
         if (AccountAssetOperation.objects.filter(pk=operation_id).exists() or
                 row.asset_operations.filter(state__in=["executing", "uncertain"]).exists()):
             raise ValueError("عملیات قبلی در جریان یا نیازمند تطبیق است.")
         client = verified_client(row)
-        items = client.get_audiences_by_ids([audience_id], account_id=row.remote_account_id)
+        items = client.get_audiences_by_ids([audience_id], account_id=_account_id(row))
         if (not isinstance(items, list) or len(items) != 1 or
                 not isinstance(items[0], dict) or str(items[0].get("audience_id")) != str(audience_id)
                 or type(items[0].get("ads_count")) is not int
                 or items[0]["ads_count"] != 0):
             raise ValueError("گروه قابل خالی‌سازی نیست؛ مالکیت یا نبود تبلیغ مرتبط تأیید نشد.")
         op = AccountAssetOperation.objects.create(
-            pk=operation_id, account=row, action="audience_reset", remote_id=str(audience_id),
+            pk=operation_id, connection=row, action="audience_reset", remote_id=str(audience_id),
         )
     try:
         outcome = client.reset_unused_audience(
-            account_id=row.remote_account_id, audience_id=audience_id,
+            account_id=_account_id(row), audience_id=audience_id,
         )
         if not isinstance(outcome, dict) or str(outcome.get("audience_id")) != str(audience_id):
             raise ValueError("نتیجه خالی‌سازی از API تأیید نشد.")

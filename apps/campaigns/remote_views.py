@@ -6,7 +6,11 @@ from django.views.decorators.http import require_http_methods, require_POST
 from apps.accounts.permissions import customer_required, staff_ops_required
 from apps.campaigns.ownership import get_customer_campaign
 from apps.campaigns.models import RemoteAdOperation
-from apps.telegram_ads.services.manage_ad import request_operation, execute_operation, reject_operation, withdraw_operation, reconcile_operation_readonly
+from apps.telegram_ads.services.manage_ad import (
+    request_operation, execute_operation, reject_operation, withdraw_operation,
+    reconcile_operation_readonly, execute_customer_operation,
+    reconcile_customer_operation_readonly,
+)
 from apps.telegram_ads.exceptions import TelegramAdsError
 from django.shortcuts import get_object_or_404
 
@@ -18,11 +22,21 @@ def remote_management(request, campaign_id):
     campaign=get_customer_campaign(request.user.customer_profile,campaign_id)
     if request.method=="POST":
         try:
+            if request.POST.get("action")=="reconcile_customer":
+                reconcile_customer_operation_readonly(uuid.UUID(request.POST.get("operation_id","")), actor=request.user)
+                messages.success(request, "نتیجه عملیات از طریق استعلام خواندنی تلگرام تأیید شد.")
+                return redirect("campaigns:remote_management", campaign_id=campaign.pk)
             if request.POST.get("action")=="withdraw":
                 withdraw_operation(campaign.pk,uuid.UUID(request.POST.get("operation_id","")),actor=request.user)
                 messages.success(request,"درخواست پیش از اجرا پس گرفته شد.")
                 return redirect("campaigns:remote_management",campaign_id=campaign.pk)
             if request.POST.get("action") in {"increase_budget","decrease_budget"}:
+                if campaign.telegram_connection_id and campaign.telegram_connection.connection_type == "customer_owned":
+                    op = request_operation(campaign.pk, actor=request.user,
+                                           action=request.POST["action"], value=request.POST.get("value", ""))
+                    execute_customer_operation(op.pk, actor=request.user)
+                    messages.success(request, "تغییر بودجه در حساب تلگرام شما انجام و با سند تراکنش تأیید شد.")
+                    return redirect("campaigns:remote_management", campaign_id=campaign.pk)
                 from apps.finance.budget_management import preview_budget
                 from apps.finance.exceptions import PricingError
                 try:
@@ -33,16 +47,23 @@ def remote_management(request, campaign_id):
             if request.POST.get("action")=="confirm_budget_proposal":
                 from apps.finance.budget_management import submit_budget_proposal
                 submit_budget_proposal(campaign.pk,actor=request.user,token=request.POST.get("token",""))
-                messages.success(request,"درخواست بررسی بودجه ثبت شد؛ هیچ مبلغی کسر یا منتقل نشده است.")
+                messages.success(request,"درخواست بودجه ثبت شد. برای افزایش، مبلغ پیش‌فاکتور در کیف پول رزرو می‌شود و انتقال فقط پس از تأیید اپراتور انجام خواهد شد؛ بازگشت اعتبار کاهش نیز پس از تأیید انتقال انجام می‌شود.")
                 return redirect("campaigns:remote_management",campaign_id=campaign.pk)
-            request_operation(campaign.pk,actor=request.user,action=request.POST.get("action",""),value=request.POST.get("value",""))
-            messages.success(request,"درخواست ثبت شد؛ هنوز تغییری در تلگرام انجام نشده است.")
+            op = request_operation(campaign.pk,actor=request.user,action=request.POST.get("action",""),value=request.POST.get("value",""))
+            if campaign.telegram_connection_id and campaign.telegram_connection.connection_type == "customer_owned":
+                execute_customer_operation(op.pk, actor=request.user)
+                messages.success(request, "عملیات در حساب تلگرام شما اجرا و تأیید شد.")
+            else:
+                messages.success(request,"درخواست ثبت شد؛ هنوز تغییری در تلگرام انجام نشده است.")
         except ValueError as exc:
             messages.error(request,str(exc))
         return redirect("campaigns:remote_management",campaign_id=campaign.pk)
     ads=list(campaign.remote_ads.exclude(remote_ad_id="")[:2])
+    is_customer_owned = bool(campaign.telegram_connection_id and campaign.telegram_connection.connection_type == "customer_owned")
     return render(request,"campaigns/remote_management.html",{
         "campaign":campaign,"ad":ads[0] if len(ads)==1 else None,
+        "is_customer_owned":is_customer_owned,
+        "account_currency":campaign.telegram_connection.currency if campaign.telegram_connection_id else "TON",
         "operations":RemoteAdOperation.objects.filter(advertisement__campaign=campaign)[:30],
     })
 

@@ -52,6 +52,7 @@ class Campaign(TenantOwnedModel):
         CHANNELS = "channels", "کانال‌ها"
 
     customer = models.ForeignKey(CustomerProfile, on_delete=models.CASCADE, related_name="campaigns")
+    telegram_connection = models.ForeignKey("telegram_ads.TelegramAdsConnection", on_delete=models.PROTECT, null=True, blank=True, related_name="campaigns")
     project = models.ForeignKey(
         AdvertisingProject,
         on_delete=models.SET_NULL,
@@ -74,6 +75,9 @@ class Campaign(TenantOwnedModel):
 
     budget_irr = models.BigIntegerField(default=0)
     daily_cap_irr = models.BigIntegerField(default=0)
+    account_budget_amount = models.DecimalField(max_digits=24, decimal_places=9, default=0)
+    account_daily_budget_limit = models.DecimalField(max_digits=24, decimal_places=9, default=0)
+    budget_currency = models.CharField(max_length=8, blank=True)
     cpm_bid = models.DecimalField(max_digits=12, decimal_places=4, null=True, blank=True)
     schedule_start = models.DateTimeField(null=True, blank=True)
     schedule_end = models.DateTimeField(null=True, blank=True)

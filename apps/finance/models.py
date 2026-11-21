@@ -161,3 +161,58 @@ class RefundRequest(TenantOwnedModel):
     amount_irr = models.BigIntegerField()
     status = models.CharField(max_length=16, choices=Status.choices, default=Status.OPEN)
     reason = models.TextField(blank=True)
+
+
+class AccountFundingTransfer(UUIDModel, TimeStampedModel):
+    """Idempotent funding receipt for platform-managed customer child accounts."""
+
+    class Status(models.TextChoices):
+        EXECUTING = "executing", "در حال انتقال"
+        COMPLETED = "completed", "تأییدشده"
+        UNCERTAIN = "uncertain", "نیازمند تطبیق"
+        FAILED = "failed", "ناموفق"
+
+    class Direction(models.TextChoices):
+        MAIN_TO_RELATED = "main_to_related", "از حساب مرکزی به حساب مرتبط"
+        RELATED_TO_MAIN = "related_to_main", "از حساب مرتبط به حساب مرکزی"
+
+    order = models.OneToOneField(
+        AdvertisingOrder,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="account_funding_transfer",
+    )
+    operation = models.OneToOneField(
+        "campaigns.RemoteAdOperation",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="account_funding_transfer",
+    )
+    direction = models.CharField(max_length=24, choices=Direction.choices, default=Direction.MAIN_TO_RELATED)
+    connection = models.ForeignKey(
+        "telegram_ads.TelegramAdsConnection",
+        on_delete=models.PROTECT,
+        related_name="funding_transfers",
+    )
+    status = models.CharField(max_length=16, choices=Status.choices, default=Status.EXECUTING)
+    amount = models.DecimalField(max_digits=24, decimal_places=9)
+    currency = models.CharField(max_length=8)
+    idempotency_key = models.CharField(max_length=128, unique=True)
+    transaction_id = models.CharField(max_length=256, blank=True)
+    response_payload = models.JSONField(default=dict, blank=True)
+    error_code = models.CharField(max_length=120, blank=True)
+    confirmed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        constraints = [
+            models.CheckConstraint(
+                condition=(
+                    models.Q(order__isnull=False, operation__isnull=True)
+                    | models.Q(order__isnull=True, operation__isnull=False)
+                ),
+                name="account_funding_transfer_has_one_source",
+            ),
+        ]

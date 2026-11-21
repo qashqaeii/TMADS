@@ -348,6 +348,34 @@
       {% include "campaigns/includes/policy_panel.html" %}
 
       {% elif step == 4 %}
+      {% if is_customer_owned %}
+      <div class="studio-context-note studio-context-note--finance">
+        <span class="studio-context-note__icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="wallet" size="sm" %}</span>
+        <div><strong>بودجه از حساب شخصی تلگرام شما</strong><p>کیف پول TMADS و پرداخت ریالی در این روش استفاده نمی‌شود. مبلغ تبلیغ مستقیماً از موجودی همین حساب تلگرام تأمین خواهد شد.</p></div>
+      </div>
+      <article class="card card-pad card-muted">
+        <div class="finance-line"><span>حساب متصل</span><strong>{{ telegram_connection.account_title|default:"حساب تلگرام شما" }}</strong></div>
+        <div class="finance-line"><span>موجودی فعلی تلگرام</span><strong dir="ltr">{{ account_balance|floatformat:2 }} {{ account_currency }}</strong></div>
+        <div class="finance-line"><span>شناسه حساب</span><strong dir="ltr">{{ telegram_connection.remote_account_id }}</strong></div>
+      </article>
+      <div class="panel-grid panel-2">
+        <div class="field">
+          <label for="studio-direct-budget">بودجه کل ({{ account_currency }})</label>
+          <input id="studio-direct-budget" name="account_budget_amount" type="number"
+                 min="{% if account_currency == 'XTR' %}1{% else %}0.01{% endif %}"
+                 step="{% if account_currency == 'XTR' %}1{% else %}0.01{% endif %}"
+                 value="{{ campaign.account_budget_amount|default:'0' }}" dir="ltr" required>
+        </div>
+        <div class="field">
+          <label for="studio-direct-daily">سقف روزانه ({{ account_currency }})</label>
+          <input id="studio-direct-daily" name="account_daily_budget_limit" type="number" min="0"
+                 step="{% if account_currency == 'XTR' %}1{% else %}0.01{% endif %}"
+                 value="{{ campaign.account_daily_budget_limit|default:'0' }}" dir="ltr">
+        </div>
+      </div>
+      <div class="field"><label for="studio-control-18">هزینه هر هزار نمایش ({{ account_currency }})</label><input id="studio-control-18" name="cpm_bid" type="number" min="{% if account_currency == 'XTR' %}1{% else %}0.01{% endif %}" step="{% if account_currency == 'XTR' %}1{% else %}0.01{% endif %}" value="{{ campaign.cpm_bid|default:'1' }}" dir="ltr"></div>
+      <p class="muted" style="font-size:.85rem">موجودی حساب هنگام ثبت نهایی دوباره از API تلگرام بررسی می‌شود. در صورت کافی نبودن موجودی، کمپین ارسال نخواهد شد.</p>
+      {% else %}
       <div class="studio-context-note studio-context-note--finance">
         <span class="studio-context-note__icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="wallet" size="sm" %}</span>
         <div><strong>شفافیت مالی پیش از پرداخت</strong><p>مبلغ نهایی با نرخ معتبر و کارمزد محاسبه می‌شود. در این مرحله هیچ مبلغی از کیف پول کسر نخواهد شد.</p></div>
@@ -394,12 +422,13 @@
         <div class="finance-line"><span>جمع</span><strong>{{ quote_totals.total_irr|irr_to_toman|format_irr }} تومان</strong></div>
       </article>
       {% endif %}
+      {% endif %}
       {% include "campaigns/includes/policy_panel.html" %}
 
       {% elif step == 5 %}
       <div class="studio-context-note studio-context-note--review">
         <span class="studio-context-note__icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="shield-check" size="sm" %}</span>
-        <div><strong>آخرین بررسی پیش از پرداخت</strong><p>پیش‌فاکتور معتبر، موجودی کیف پول و وضعیت بررسی قوانین را کنترل کنید. ثبت نهایی فقط با تأیید شما انجام می‌شود.</p></div>
+        <div><strong>{% if is_customer_owned %}آخرین بررسی حساب تلگرام{% else %}آخرین بررسی پیش از پرداخت{% endif %}</strong><p>{% if is_customer_owned %}موجودی حساب شخصی و بودجه انتخاب‌شده بررسی می‌شود؛ هیچ پرداخت یا شارژی از طریق TMADS انجام نمی‌شود.{% else %}پیش‌فاکتور معتبر، موجودی کیف پول و وضعیت بررسی قوانین را کنترل کنید. ثبت نهایی فقط با تأیید شما انجام می‌شود.{% endif %}</p></div>
       </div>
       <div class="studio-review card-muted card-pad" aria-label="خلاصه کمپین">
         <div class="studio-review__row">
@@ -427,6 +456,21 @@
         </div>
         {% endif %}
       </div>
+      {% if is_customer_owned %}
+      <article class="card card-pad studio-finance-card" aria-label="وضعیت حساب تلگرام">
+        <h3 class="section-title" style="font-size:.95rem;margin:0 0 .65rem">حساب تبلیغاتی شخصی شما</h3>
+        <div class="finance-line"><span>حساب</span><strong>{{ telegram_connection.account_title|default:"حساب تلگرام شما" }}</strong></div>
+        <div class="finance-line"><span>ارز حساب</span><strong dir="ltr">{{ account_currency }}</strong></div>
+        <div class="finance-line"><span>موجودی تأییدشده در آخرین بررسی</span><strong dir="ltr">{{ account_balance|floatformat:2 }} {{ account_currency }}</strong></div>
+        <div class="finance-line"><span>بودجه این کمپین</span><strong dir="ltr">{% if account_currency == 'XTR' %}{{ campaign.account_budget_amount|floatformat:0 }}{% else %}{{ campaign.account_budget_amount|floatformat:2 }}{% endif %} {{ account_currency }}</strong></div>
+        {% if account_can_submit %}
+          <p class="status status-active" role="status">موجودی آخرین بررسی برای بودجه انتخاب‌شده کافی است.</p>
+        {% else %}
+          <p class="ui-studio-warning" role="status">موجودی کافی نیست یا اتصال نیازمند بررسی است. حساب تلگرام را شارژ یا اتصال را به‌روزرسانی کنید.</p>
+        {% endif %}
+        <p class="muted studio-hint">مبلغ فقط در حساب تلگرام خودتان مصرف می‌شود. TMADS کیف پول شما را شارژ، برداشت یا رزرو نمی‌کند.</p>
+      </article>
+      {% else %}
       {% if quote_ready %}
       <input type="hidden" name="quote_nonce" value="{{ quote.payload.quote_nonce }}">
       <article class="card card-pad card-muted studio-finance-card" aria-label="پیش‌فاکتور معتبر">
@@ -446,6 +490,7 @@
       </article>
       {% endif %}
       {% if wallet %}<div class="ui-studio-wallet"><span>موجودی قابل استفاده</span><strong class="tabnums">{{ wallet.available_irr|irr_to_toman|format_irr }} تومان</strong><a class="btn btn-ghost btn-sm" href="{% url 'finance:topup' %}">شارژ کیف پول</a></div>{% if quote_ready and wallet.available_irr < quote_totals.total_irr %}<p class="ui-studio-warning" role="status">موجودی برای پرداخت این پیش‌فاکتور کافی نیست؛ ابتدا کیف پول را شارژ کنید.</p>{% endif %}{% endif %}
+      {% endif %}
       {% include "campaigns/includes/policy_panel.html" %}
       <div class="ui-terms-panel" id="field-terms">
         <label class="choice-card"><input type="checkbox" name="terms_accepted" value="1" required aria-describedby="ui-terms-links"> شرایط استفاده و مسئولیت بررسی نهایی تلگرام را می‌پذیرم.</label>
@@ -462,7 +507,7 @@
 
       <footer class="studio-footer">
         <p class="studio-footer__hint">
-          {% if step == 5 %}با تأیید پرداخت، درخواست کمپین برای بررسی ارسال می‌شود؛ انتشار نهایی تابع تأیید تلگرام است.
+          {% if step == 5 %}{% if is_customer_owned %}با ثبت کمپین، تبلیغ در حساب تلگرام خودتان ایجاد می‌شود؛ بررسی و انتشار نهایی تابع تلگرام است.{% else %}با تأیید پرداخت، درخواست کمپین برای بررسی ارسال می‌شود؛ انتشار نهایی تابع تأیید تلگرام است.{% endif %}
           {% else %}پیش‌نویس شما محفوظ می‌ماند و می‌توانید بعداً از همین‌جا ادامه دهید.{% endif %}
         </p>
         <div class="hero-actions studio-actions-bar">
@@ -475,8 +520,8 @@
             {% include "includes/lucide_icon.html" with name="save" size="sm" %}<span>ذخیره پیش‌نویس</span>
           </button>
           {% if step == 5 %}
-            <button class="btn btn-primary studio-action-primary" name="action" value="pay" type="submit" {% if not quote_ready %}disabled{% endif %}>
-              <span>تأیید و پرداخت</span>{% include "includes/lucide_icon.html" with name="wallet" size="sm" %}
+            <button class="btn btn-primary studio-action-primary" name="action" value="pay" type="submit" {% if is_customer_owned %}{% if not account_can_submit %}disabled{% endif %}{% elif not quote_ready %}disabled{% endif %}>
+              <span>{% if is_customer_owned %}ثبت در حساب تلگرام{% else %}تأیید و پرداخت{% endif %}</span>{% if is_customer_owned %}{% include "includes/lucide_icon.html" with name="send" size="sm" %}{% else %}{% include "includes/lucide_icon.html" with name="wallet" size="sm" %}{% endif %}
             </button>
             <button class="btn btn-ghost studio-action-review-save" name="action" value="next" type="submit">ذخیره بازبینی</button>
           {% elif step < 5 %}

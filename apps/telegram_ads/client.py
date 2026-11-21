@@ -76,8 +76,9 @@ def _model_to_dict(obj: Any) -> dict[str, Any]:
 class TelegramAdsClient:
     """Wrapper around telead.Client with environment write gates."""
 
-    def __init__(self, token: str | None = None):
+    def __init__(self, token: str | None = None, *, account_id: str | None = None):
         self.token = token or settings.TELEGRAM_ADS_API_TOKEN
+        self.account_id = account_id
 
     def _ensure_configured(self) -> None:
         if not self.token:
@@ -89,7 +90,7 @@ class TelegramAdsClient:
             from telead import Client
         except ImportError as exc:
             raise TelegramAdsNotConfigured("telead package not installed") from exc
-        return Client(self.token)
+        return Client(self.token, account_id=self.account_id)
 
     def _run(self, operation: str, fn: Callable[..., Any]) -> Any:
         with self._client() as client:
@@ -120,8 +121,22 @@ class TelegramAdsClient:
                 logger.warning("Telegram Ads API %s failed: %s", operation, exc, exc_info=True)
                 raise TelegramAdsError(_humanize_api_error(exc)) from exc
 
-    def get_account(self) -> dict[str, Any]:
-        return self._run("get_account", lambda client: _model_to_dict(client.get_current_account()))
+    def get_account(self, *, account_id: str | None = None) -> dict[str, Any]:
+        """Read the token's current account or one explicitly scoped related account."""
+        target_id = account_id or self.account_id
+
+        def _read(client):
+            if target_id:
+                rows = client.get_accounts_by_id([target_id])
+                if len(rows) != 1:
+                    raise TelegramAdsError("حساب تبلیغاتی موردنظر از تلگرام تأیید نشد.")
+                account = _model_to_dict(rows[0])
+                if str(account.get("account_id") or "") != str(target_id):
+                    raise TelegramAdsError("شناسه حساب برگشتی با حساب درخواستی یکسان نیست.")
+                return account
+            return _model_to_dict(client.get_current_account())
+
+        return self._run("get_account", _read)
 
     def list_advertisements(self) -> list[dict[str, Any]]:
         def _list(client):
@@ -191,11 +206,17 @@ class TelegramAdsClient:
 
         return self._run("get_ad_statistics", _stats)
 
-    def get_ad_transactions(self, ad_id: str, *, limit: int = 20) -> dict[str, Any]:
-        return self._run(
-            "get_ad_transactions",
-            lambda client: _model_to_dict(client.get_ad_transactions_list(int(ad_id), limit=limit)),
-        )
+    def get_ad_transactions(self, ad_id: str, *, limit: int = 100) -> dict[str, Any]:
+        """Return a complete bounded history; truncated histories are never treated as evidence."""
+        def _read(client):
+            rows = []
+            for item in client.iter_ad_transactions(int(ad_id), page_size=min(max(int(limit), 1), 100)):
+                rows.append(_model_to_dict(item))
+                if len(rows) > 5000:
+                    return {"transactions": rows[:5000], "total_count": len(rows), "next_offset": "truncated"}
+            return {"transactions": rows, "total_count": len(rows), "next_offset": None}
+
+        return self._run("get_ad_transactions", _read)
 
     def get_target_languages(self) -> list[dict[str, Any]]:
         return self._run("get_target_languages", lambda client: [_model_to_dict(x) for x in client.get_target_languages_list()])
@@ -282,9 +303,9 @@ class TelegramAdsClient:
     def get_account_statistics(self, *, from_time, to_time, interval=86400):
         return self._run("account_stats", lambda c: [_model_to_dict(x) for x in c.get_account_stats(from_time,to_time,interval)])
 
-    def get_account_ads_page(self, *, account_id, offset=None, limit=50):
-        if not account_id or not isinstance(account_id, str):
-            raise ValueError("Related account ID required")
+    def get_account_ads_page(self, *, account_id=None, offset=None, limit=50):
+        if account_id is not None and (not isinstance(account_id, str) or not account_id):
+            raise ValueError("Invalid account ID")
         if type(limit) is not int or not 1 <= limit <= 100:
             raise ValueError("Invalid ad list limit")
         return self._run("related_account_ads",
@@ -300,7 +321,7 @@ class TelegramAdsClient:
             lambda c: [_model_to_dict(item) for item in c.get_audiences_by_id(ids, account_id=account_id)])
 
     def reset_unused_audience(self, *, account_id, audience_id):
-        if not account_id or not (settings.TELEGRAM_ADS_WRITE_ENABLED
+        if not (settings.TELEGRAM_ADS_WRITE_ENABLED
                 and settings.TELEGRAM_ADS_PAID_SUBMISSION_ENABLED
                 and getattr(settings, "TELEGRAM_ADS_CUSTOMER_ASSETS_ENABLED", False)):
             raise TelegramAdsWriteDisabled("Audience reset is disabled")
@@ -310,7 +331,7 @@ class TelegramAdsClient:
             ))
 
     def delete_unused_audience(self, *, account_id, audience_id):
-        if not account_id or not (settings.TELEGRAM_ADS_WRITE_ENABLED
+        if not (settings.TELEGRAM_ADS_WRITE_ENABLED
                 and settings.TELEGRAM_ADS_PAID_SUBMISSION_ENABLED
                 and getattr(settings, "TELEGRAM_ADS_CUSTOMER_ASSETS_ENABLED", False)):
             raise TelegramAdsWriteDisabled("Audience deletion is disabled")
@@ -319,7 +340,7 @@ class TelegramAdsClient:
         ))
 
     def edit_audience_hashes(self, *, account_id, audience_id, action, hashes):
-        if not account_id or not (settings.TELEGRAM_ADS_WRITE_ENABLED
+        if not (settings.TELEGRAM_ADS_WRITE_ENABLED
                 and settings.TELEGRAM_ADS_PAID_SUBMISSION_ENABLED
                 and getattr(settings, "TELEGRAM_ADS_CUSTOMER_ASSETS_ENABLED", False)):
             raise TelegramAdsWriteDisabled("Audience management is disabled")
@@ -336,7 +357,7 @@ class TelegramAdsClient:
             lambda c: [_model_to_dict(item) for item in c.get_pixel_events_by_id(ids, account_id=account_id)])
 
     def change_pixel_event(self, *, account_id, event_id, action, title=None):
-        if not account_id or not (settings.TELEGRAM_ADS_WRITE_ENABLED
+        if not (settings.TELEGRAM_ADS_WRITE_ENABLED
                 and settings.TELEGRAM_ADS_PAID_SUBMISSION_ENABLED
                 and getattr(settings, "TELEGRAM_ADS_CUSTOMER_ASSETS_ENABLED", False)):
             raise TelegramAdsWriteDisabled("Pixel event management is disabled")
@@ -365,7 +386,7 @@ class TelegramAdsClient:
 
 
     def create_customer_asset(self, *, account_id, action, title, event_type, operation_id):
-        if not account_id or not (settings.TELEGRAM_ADS_WRITE_ENABLED
+        if not (settings.TELEGRAM_ADS_WRITE_ENABLED
                 and settings.TELEGRAM_ADS_PAID_SUBMISSION_ENABLED
                 and getattr(settings, "TELEGRAM_ADS_CUSTOMER_ASSETS_ENABLED", False)):
             raise TelegramAdsWriteDisabled("Customer assets are disabled")
@@ -379,3 +400,64 @@ class TelegramAdsClient:
                 return _model_to_dict(client.create_pixel_event(title, event_type, account_id=account_id, idempotency_key=key))
             raise ValueError("Unknown asset action")
         return self._run("customer_asset_create", perform)
+
+
+    def transfer_to_related_account(self, *, account_id: str, amount: float, idempotency_key: str):
+        """Transfer platform funds from the main account to one related account."""
+        if self.account_id:
+            raise ValueError("Account funding must originate from the platform main account.")
+        if not (settings.TELEGRAM_ADS_WRITE_ENABLED and settings.TELEGRAM_ADS_PAID_SUBMISSION_ENABLED):
+            raise TelegramAdsWriteDisabled("Account funding is disabled")
+        def _transfer(c):
+            result = c.increase_account_budget(
+                account_id, float(amount), idempotency_key=idempotency_key,
+            )
+            if result.is_pending:
+                result = c.wait_for_transaction(result, timeout=60, interval=2)
+            return _model_to_dict(result)
+
+        return self._run("related_account_funding", _transfer)
+
+    def get_account_transaction_status(self, transaction_id: str):
+        return self._run(
+            "account_transaction_status",
+            lambda c: _model_to_dict(c.get_transaction_status(transaction_id)),
+        )
+
+    def increase_ad_budget(self, ad_id: str, amount: float, *, idempotency_key: str):
+        if not (settings.TELEGRAM_ADS_WRITE_ENABLED and settings.TELEGRAM_ADS_PAID_SUBMISSION_ENABLED):
+            raise TelegramAdsWriteDisabled("Ad budget changes are disabled")
+        return self._run(
+            "increase_ad_budget",
+            lambda c: _model_to_dict(c.increase_ad_budget(
+                int(ad_id), float(amount), idempotency_key=idempotency_key,
+            )),
+        )
+
+    def decrease_ad_budget(self, ad_id: str, amount: float, *, idempotency_key: str):
+        if not (settings.TELEGRAM_ADS_WRITE_ENABLED and settings.TELEGRAM_ADS_PAID_SUBMISSION_ENABLED):
+            raise TelegramAdsWriteDisabled("Ad budget changes are disabled")
+        return self._run(
+            "decrease_ad_budget",
+            lambda c: _model_to_dict(c.decrease_ad_budget(
+                int(ad_id), float(amount), idempotency_key=idempotency_key,
+            )),
+        )
+
+
+    def transfer_from_related_account(self, *, account_id: str, amount: float, idempotency_key: str):
+        """Return funds from one related account to the platform main account."""
+        if self.account_id:
+            raise ValueError("Account funding must settle to the platform main account.")
+        if not (settings.TELEGRAM_ADS_WRITE_ENABLED and settings.TELEGRAM_ADS_PAID_SUBMISSION_ENABLED):
+            raise TelegramAdsWriteDisabled("Account funding return is disabled")
+
+        def _transfer(c):
+            result = c.decrease_account_budget(
+                account_id, float(amount), idempotency_key=idempotency_key,
+            )
+            if result.is_pending:
+                result = c.wait_for_transaction(result, timeout=60, interval=2)
+            return _model_to_dict(result)
+
+        return self._run("related_account_funding_return", _transfer)

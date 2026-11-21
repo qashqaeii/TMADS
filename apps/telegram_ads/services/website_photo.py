@@ -15,7 +15,7 @@ from apps.campaigns.media_validation import validate_website_photo
 from apps.telegram_ads.models import APIRequestLog
 from apps.telegram_ads.services.media import media_upload_enabled
 from apps.telegram_ads.targeting.website import is_external
-from apps.telegram_ads.client import TelegramAdsClient
+from apps.telegram_ads.services.account_connections import campaign_client
 from apps.telegram_ads.exceptions import TelegramAdsError
 
 
@@ -36,16 +36,19 @@ def _signature(campaign, creative):
         "campaign_id": str(campaign.pk),
         "creative_id": str(creative.pk),
         "sha256": digest.hexdigest(),
-        "account_scope": sha256(settings.TELEGRAM_ADS_API_TOKEN.encode()).hexdigest(),
+        "account_scope": sha256(
+            f"{campaign.telegram_connection_id}:{campaign.telegram_connection.remote_account_id}".encode()
+            if campaign.telegram_connection_id else settings.TELEGRAM_ADS_API_TOKEN.encode()
+        ).hexdigest(),
     }
 
 
-def website_photo_enabled():
-    return media_upload_enabled() and bool(getattr(settings, "TELEGRAM_ADS_WEBSITE_ENABLED", False))
+def website_photo_enabled(campaign=None):
+    return media_upload_enabled(campaign) and bool(getattr(settings, "TELEGRAM_ADS_WEBSITE_ENABLED", False))
 
 
 def website_photo_receipt(campaign):
-    if not website_photo_enabled():
+    if not website_photo_enabled(campaign):
         return None
     sig = _signature(campaign, campaign.creatives.first())
     if not sig:
@@ -68,7 +71,7 @@ def upload_saved_website_photo(campaign, *, actor):
     with transaction.atomic():
         campaign = Campaign.objects.select_for_update().get(pk=campaign.pk, customer=profile)
         from apps.campaigns.views import _campaign_editable
-        if not _campaign_editable(campaign) or not website_photo_enabled():
+        if not _campaign_editable(campaign) or not website_photo_enabled(campaign):
             raise ValueError("بارگذاری تصویر وب‌سایت در این حساب مجاز نیست.")
         if not (campaign.ad_settings or {}).get("destination_rights_confirmed"):
             raise ValueError("حق استفاده از مقصد و تصویر را ابتدا تأیید و ذخیره کنید.")
@@ -96,7 +99,7 @@ def upload_saved_website_photo(campaign, *, actor):
     # another upload by the same campaign without explicit reconciliation.
     try:
         with creative.website_photo.open("rb") as file:
-            response = TelegramAdsClient().upload_website_photo(
+            response = campaign_client(campaign).upload_website_photo(
                 file, filename="site" + Path(creative.website_photo.name).suffix.lower(),
             )
         photo_id = response.get("photo_id") if isinstance(response, dict) else None

@@ -4,7 +4,7 @@
 {% block content %}
 <div class="app-stack ui-account-page ga-profile-workspace">
 {% include "includes/dash_header.html" with page_icon="user" eyebrow="حساب" title="پروفایل" %}
-<section class="ui-profile-summary ga-profile-identity" aria-label="حساب شما"><span class="ui-profile-avatar" aria-hidden="true">{{ user.get_username|slice:":1" }}</span><div><h2>{{ user.get_full_name|default:user.get_username }}</h2><p class="muted">{{ user.get_role_display }}</p></div><span class="ui-profile-handle" dir="ltr">{{ user.get_username }}</span></section>
+<section class="ui-profile-summary ga-profile-identity" aria-label="حساب شما"><span class="ui-profile-avatar" aria-hidden="true">{{ user.get_username|slice:":1" }}</span><div><h2>{{ user.get_full_name|default:user.get_username }}</h2><p class="muted">{{ user.get_role_display }}</p></div><span class="ui-profile-handle" dir="ltr">{{ user.get_username }}</span><a class="btn btn-primary btn-sm" href="{% url 'accounts:telegram_connection' %}">حساب‌های تبلیغاتی</a></section>
 <div class="ga-split ga-profile-settings account-settings">
   <form method="post" class="ga-panel">
     {% csrf_token %}

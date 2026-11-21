@@ -1,11 +1,12 @@
 """Budget change proposals, not payments. No wallet or Telegram writes."""
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal, InvalidOperation, ROUND_DOWN
 from django.core import signing
 from django.db import transaction
 from django.core.exceptions import PermissionDenied
 from django.utils.crypto import salted_hmac
 from apps.campaigns.models import Campaign, RemoteAdOperation
 from apps.finance.services.campaign_pricing import build_campaign_quote, quote_expired
+from apps.finance.services import ensure_wallet, reserve_for_order
 from apps.telegram_ads.services.manage_ad import OPEN, _audit
 from apps.telegram_ads.services.sync import has_financial_lock
 
@@ -21,6 +22,14 @@ def _eligible(campaign, actor):
     if len(ads)!=1:
         raise ValueError("تبلیغ متصل یکتا یافت نشد.")
     ad=ads[0]
+    if campaign.telegram_connection_id and campaign.telegram_connection.connection_type == "customer_owned":
+        raise ValueError("حساب شخصی بودجه را مستقیماً از API مدیریت می‌کند؛ مسیر پیش‌فاکتور پلتفرم مجاز نیست.")
+    if campaign.telegram_connection_id and (
+        campaign.telegram_connection.connection_type != "platform_managed"
+        or campaign.telegram_connection.status != "connected"
+        or campaign.telegram_connection.currency != "TON"
+    ):
+        raise ValueError("حساب مدیریت‌شده یا ارز آن تأیید نشده است.")
     if ad.remote_status_raw.get("currency") != "TON":
         raise ValueError("ارز حساب تبلیغ هنوز تأیید نشده یا TON نیست.")
     if ad.operations.filter(status__in=OPEN).exists():
@@ -50,7 +59,18 @@ def preview_budget(campaign, *, actor, action, value):
         remaining=_amount(ad.remote_status_raw.get("remaining_budget"))
         if amount>remaining:
             raise ValueError("مقدار درخواستی بیشتر از مانده گزارش‌شده تبلیغ است.")
-        data={"amount_ton":str(amount)}
+        from apps.finance.services.ton_exchange_rate import get_pricing_snapshot
+        snapshot = get_pricing_snapshot(require_fresh=True)
+        refund_irr = int((amount * snapshot.best_ask_irr).to_integral_value(rounding=ROUND_DOWN))
+        if refund_irr <= 0:
+            raise ValueError("مبلغ بازگشت اعتبار برای این مقدار TON قابل محاسبه نیست.")
+        data={
+            "amount_ton":str(amount),
+            "refund_irr":refund_irr,
+            "refund_rate_irr":str(snapshot.best_ask_irr),
+            "refund_rate_source":snapshot.source,
+            "refund_policy":"wallet_credit_after_telegram_transfer",
+        }
     else:
         raise ValueError("نوع درخواست معتبر نیست.")
     data.update({"action":action,"campaign_id":str(campaign.pk),"ad_id":str(ad.pk),"customer_id":str(campaign.customer_id)})
@@ -58,7 +78,7 @@ def preview_budget(campaign, *, actor, action, value):
 
 @transaction.atomic
 def submit_budget_proposal(campaign_id, *, actor, token):
-    campaign=Campaign.objects.select_for_update().get(pk=campaign_id)
+    campaign=Campaign.objects.select_for_update().select_related("telegram_connection").get(pk=campaign_id)
     ad=_eligible(campaign,actor)
     try:
         data=signing.loads(token,salt=SALT,max_age=300)
@@ -76,6 +96,14 @@ def submit_budget_proposal(campaign_id, *, actor, token):
         raise ValueError("این پیش‌نمایش قبلاً ثبت شده است.")
     op=RemoteAdOperation.objects.create(advertisement=ad,action=action,
         request_payload={**data,"proposal_key":fingerprint},
-        note="درخواست بررسی مالی؛ هنوز هیچ مبلغی برداشت یا منتقل نشده است.")
+        note=("درخواست افزایش بودجه؛ مبلغ پیش‌فاکتور برای اجرای امن رزرو می‌شود."
+              if action=="increase_budget" else
+              "درخواست کاهش بودجه؛ بازگشت اعتبار پس از انتقال تأییدشده به حساب مرکزی انجام می‌شود."))
+    if action == "increase_budget":
+        total_irr = int(data["quote"]["total_irr"])
+        wallet = ensure_wallet(campaign.customer)
+        reserve_for_order(wallet, total_irr, op.pk, f"budget-reserve-{op.pk}")
+        op.request_payload = {**op.request_payload, "wallet_reserved_irr": total_irr}
+        op.save(update_fields=["request_payload", "updated_at"])
     _audit(op,actor,"budget_proposed")
     return op
