@@ -18,7 +18,6 @@
 
     <div class="sidebar-scroll">
       <nav class="sidebar-nav" aria-label="منوی اصلی">
-        <p class="sidebar-group-label">اصلی</p>
         <a href="{% url 'dashboard:home' %}" class="sidebar-link {% if request.path == '/app/' or request.path == '/app' %}active{% endif %}"{% if request.path == '/app/' or request.path == '/app' %} aria-current="page"{% endif %}>
           <span class="nav-icon">{% include "includes/nav_icon.html" with icon="dashboard" %}</span>
           <span class="nav-label">داشبورد</span>
@@ -28,10 +27,8 @@
           <span class="nav-label">کمپین‌ها</span>
         </a>
 
-        <p class="sidebar-group-label">حساب و مخاطبان</p>
         <a href="{% url 'accounts:related_account' %}" class="sidebar-link {% if '/accounts/advertiser-account' in request.path %}active{% endif %}"><span class="nav-icon">{% include "includes/lucide_icon.html" with name="building-2" size="sm" %}</span><span class="nav-label">حساب تبلیغاتی</span></a>
         <a href="{% url 'accounts:advertiser_assets' %}" class="sidebar-link {% if '/accounts/advertiser-assets' in request.path %}active{% endif %}"{% if '/accounts/advertiser-assets' in request.path %} aria-current="page"{% endif %}><span class="nav-icon">{% include "includes/lucide_icon.html" with name="users" size="sm" %}</span><span class="nav-label">مخاطبان و تبدیل</span></a>
-        <p class="sidebar-group-label">مالی</p>
         <a href="{% url 'finance:wallet' %}" class="sidebar-link {% if '/finance/wallet' in request.path or '/finance/topup' in request.path or '/finance/transactions' in request.path %}active{% endif %}"{% if '/finance/wallet' in request.path or '/finance/topup' in request.path or '/finance/transactions' in request.path %} aria-current="page"{% endif %}>
           <span class="nav-icon">{% include "includes/nav_icon.html" with icon="wallet" %}</span>
           <span class="nav-label">کیف پول</span>
@@ -45,7 +42,6 @@
           <span class="nav-label">بازپرداخت</span>
         </a>
 
-        <p class="sidebar-group-label">راهنما</p>
         <a href="{% url 'policies:ad_policies' %}" class="sidebar-link {% if '/app/ad-policies' in request.path %}active{% endif %}"{% if '/app/ad-policies' in request.path %} aria-current="page"{% endif %}>
           <span class="nav-icon">{% include "includes/nav_icon.html" with icon="check" %}</span>
           <span class="nav-label">قوانین تبلیغ</span>
