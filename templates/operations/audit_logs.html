@@ -3,26 +3,34 @@
 {% block container_class %}container-wide{% endblock %}
 {% block page_title %}ممیزی{% endblock %}
 {% block content %}
-<div class="app-stack operations-page ui-ops ga-ops-workspace">
-{% include "includes/dash_header.html" with page_icon="file-text" eyebrow="امنیت" title="ممیزی" %}
+<div class="app-stack operations-page ui-ops ga-ops-premium ga-ops-workspace ops-audit-page">
+{% include "includes/dash_header.html" with page_icon="file-text" eyebrow="امنیت" title="ممیزی عملیات" subtitle="ردیابی تصمیم‌های مدیریتی بدون افشای اطلاعات حساس" %}
+<div class="ops-context-strip"><div><strong>{{ page_obj.paginator.count|format_count }} رویداد</strong><span>در محدوده جستجوی فعلی</span></div><a href="{% url 'operations:overview' %}">مرکز عملیات</a></div>
+<form method="get" class="ga-panel ga-panel-body ops-audit-filter" aria-label="جستجو و فیلتر رویدادها">
+  <div class="field"><label for="audit-search">جستجوی کاربر یا اقدام</label><input id="audit-search" type="search" name="q" value="{{ query }}" maxlength="100" placeholder="نام کاربری یا عنوان عملیات"></div>
+  <div class="field"><label for="audit-entity">نوع رویداد</label><select id="audit-entity" name="entity"><option value="">همه رویدادها</option>{% for value,label in entity_choices %}<option value="{{ value }}" {% if entity == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+  <button class="btn btn-primary" type="submit">اعمال فیلتر</button>
+  <a class="btn btn-ghost" href="{% url 'operations:audit' %}">پاک‌کردن فیلترها</a>
+</form>
 <article class="ga-panel ga-data-panel ga-ops-table"><header class="ga-panel-head"><div class="ga-panel-title"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="shield-check" %}</span><div><h2>رویدادهای ممیزی</h2><p>اقدام، کاربر، موجودیت و زمان ثبت</p></div></div></header>
   <div class="table-wrap" tabindex="0" role="region" aria-label="رویدادهای ممیزی">
     <table class="data-table"><caption class="sr-only">رویدادهای ممیزی</caption>
-      <thead><tr><th scope="col">اقدام</th><th scope="col">کاربر</th><th scope="col">موجودیت</th><th scope="col">زمان</th></tr></thead>
+      <thead><tr><th scope="col">اقدام</th><th scope="col">اجراکننده</th><th scope="col">نوع و شناسه</th><th scope="col">زمان (شمسی)</th></tr></thead>
       <tbody>
         {% for log in logs %}
           <tr>
             <td><div class="ga-row-identity"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="file-text" %}</span><span class="ui-audit-action">{{ log.action|audit_action_fa }}</span></div></td>
-            <td>{{ log.actor|default:"—" }}</td>
-            <td>{{ log.entity_type|audit_entity_type_fa }} <bdi>{{ log.entity_id|default:"" }}</bdi></td>
+            <td><strong class="ops-audit-actor">{{ log.actor|default:"کاربر سیستمی" }}</strong></td>
+            <td><span class="ops-audit-type">{{ log.entity_type|audit_entity_type_fa }}</span>{% if log.entity_id %}<small class="ops-audit-id" dir="ltr">{{ log.entity_id }}</small>{% endif %}</td>
             <td><time datetime="{{ log.created_at|date:'c' }}">{{ log.created_at|jalali_datetime }}</time></td>
           </tr>
         {% empty %}
-          <tr><td colspan="4"><div class="empty-state"><strong>رکوردی نیست</strong></div></td></tr>
+          <tr><td colspan="4"><div class="ops-empty"><strong>رویدادی با این فیلتر پیدا نشد</strong><p>محدوده جستجو را تغییر دهید.</p><a href="{% url 'operations:audit' %}" class="btn btn-ghost btn-sm">نمایش همه رویدادها</a></div></td></tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
+  {% if page_obj.has_other_pages %}<nav class="ops-pager" aria-label="صفحه‌بندی ممیزی">{% if page_obj.has_previous %}<a class="btn btn-ghost btn-sm" href="?q={{ query|urlencode }}&amp;entity={{ entity|urlencode }}&amp;page={{ page_obj.previous_page_number }}">صفحه قبل</a>{% endif %}<span>صفحه {{ page_obj.number|persian_digits }} از {{ page_obj.paginator.num_pages|persian_digits }}</span>{% if page_obj.has_next %}<a class="btn btn-ghost btn-sm" href="?q={{ query|urlencode }}&amp;entity={{ entity|urlencode }}&amp;page={{ page_obj.next_page_number }}">صفحه بعد</a>{% endif %}</nav>{% endif %}
 </article>
 </div>
 {% endblock %}

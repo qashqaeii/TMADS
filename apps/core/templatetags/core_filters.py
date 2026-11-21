@@ -324,7 +324,8 @@ def audit_action_fa(value):
 _ENTITY_TYPE_LABELS_FA = {
     "campaign": "کمپین",
     "Campaign": "کمپین",
-    "ExchangeRate": "نرخ ارز",
+    "ExchangeRate": "نرخ گرام",
+    "refund": "بازپرداخت",
     "RefundRequest": "درخواست بازپرداخت",
     "AdvertisingOrder": "سفارش تبلیغ",
     "CustomerProfile": "حساب مشتری",

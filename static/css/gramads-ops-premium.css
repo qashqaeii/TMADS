@@ -257,3 +257,16 @@ body.ui-final.is-app .ga-ops-premium .ops-release-checklist .ui-release-check--p
 body.ui-final.is-app .ga-ops-premium .ops-release-checklist .ui-release-check--ready{border-color:#d8eee2}
 body.ui-final.is-app .ga-ops-premium .ops-release-links{display:flex;gap:10px;flex-wrap:wrap}
 @media(max-width:740px){body.ui-final.is-app .ga-ops-premium .ops-release-summary{padding:15px}body.ui-final.is-app .ga-ops-premium .ops-release-summary .ui-release-numbers{width:100%}body.ui-final.is-app .ga-ops-premium .ops-release-summary .ui-release-numbers>span{flex:1 1 85px}body.ui-final.is-app .ga-ops-premium .ops-release-checklist .ui-release-check{grid-template-columns:34px minmax(0,1fr)}body.ui-final.is-app .ga-ops-premium .ops-release-checklist .ui-release-check>.status{grid-column:2;justify-self:start}body.ui-final.is-app .ga-ops-premium .ops-release-links .btn{flex:1}}
+
+/* Audit: fast forensic scan with compact provenance and readable pagination. */
+body.ui-final.is-app .ga-ops-premium .ops-audit-filter{display:grid;grid-template-columns:minmax(240px,1.8fr) minmax(165px,1fr) auto auto;align-items:end;gap:12px}
+body.ui-final.is-app .ga-ops-premium .ops-audit-filter .field{min-width:0}
+body.ui-final.is-app .ga-ops-premium .ops-audit-filter :is(input,select){width:100%}
+body.ui-final.is-app .ga-ops-premium .ops-audit-page .data-table{min-width:740px}
+body.ui-final.is-app .ga-ops-premium .ops-audit-page .data-table td:last-child{white-space:nowrap;color:#5c7894;font-size:.78rem}
+body.ui-final.is-app .ga-ops-premium .ops-audit-actor{display:block;font-size:.8rem;color:#234560;font-weight:750}
+body.ui-final.is-app .ga-ops-premium .ops-audit-type{display:block;font-size:.79rem;color:#234967;font-weight:750}
+body.ui-final.is-app .ga-ops-premium .ops-audit-id{display:block;margin-top:4px;color:#8295aa;font-size:.67rem;overflow-wrap:anywhere;max-width:240px}
+body.ui-final.is-app .ga-ops-premium .ui-audit-action{font-weight:800;color:#275c91;font-size:.8rem}
+@media(max-width:930px){body.ui-final.is-app .ga-ops-premium .ops-audit-filter{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:570px){body.ui-final.is-app .ga-ops-premium .ops-audit-filter{grid-template-columns:minmax(0,1fr)}}

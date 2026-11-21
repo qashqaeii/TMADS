@@ -281,8 +281,31 @@ def api_status(request):
 @login_required
 @staff_ops_required
 def audit_logs(request):
-    logs = AuditLog.objects.select_related("actor").order_by("-created_at")[:100]
-    return render(request, "operations/audit_logs.html", {"logs": logs})
+    from django.core.paginator import Paginator
+    from django.db.models import Q
+
+    query = request.GET.get("q", "").strip()[:100]
+    entity = request.GET.get("entity", "").strip()
+    entity_choices = [
+        ("campaign", "کمپین"),
+        ("refund", "بازپرداخت"),
+        ("ExchangeRate", "نرخ گرام"),
+        ("RelatedAccountRequest", "حساب مرتبط"),
+    ]
+    allowed = {value for value, _ in entity_choices}
+    if entity not in allowed:
+        entity = ""
+    logs = AuditLog.objects.select_related("actor").order_by("-created_at", "-id")
+    if query:
+        logs = logs.filter(Q(actor__username__icontains=query)
+                           | Q(action__icontains=query) | Q(entity_type__icontains=query))
+    if entity:
+        logs = logs.filter(entity_type=entity)
+    page_obj = Paginator(logs, 30).get_page(request.GET.get("page"))
+    return render(request, "operations/audit_logs.html", {
+        "logs": page_obj.object_list, "page_obj": page_obj,
+        "query": query, "entity": entity, "entity_choices": entity_choices,
+    })
 
 
 @login_required
