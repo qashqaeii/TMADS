@@ -406,3 +406,57 @@ body.ui-final.is-app .ga-ops-premium .ops-accounts-page .ui-studio-warning{
   body.ui-final.is-app .ga-ops-premium .ops-filter-bar .ops-filter-actions>*{flex:1 1 130px}
   body.ui-final.is-app .ga-ops-premium .ops-filter-bar .ops-filter-actions .ui-filter-submit button{width:100%}
 }
+
+
+/* Telegram report workspace — tabs remain visible and empty states stay proportional. */
+body.ui-final.is-app .ga-ops-premium .ops-report-tabs{
+  flex-wrap:wrap;overflow:visible;white-space:normal;overscroll-behavior:initial;
+  justify-content:flex-start;row-gap:6px;
+}
+body.ui-final.is-app .ga-ops-premium .ops-report-tabs>a{flex:0 0 auto;white-space:nowrap}
+body.ui-final.is-app .ga-ops-premium .ops-report-empty .ui-empty{min-height:0;padding:25px 18px;gap:9px}
+body.ui-final.is-app .ga-ops-premium .ops-report-empty .ui-empty__icon{width:46px;height:46px;border-radius:13px}
+body.ui-final.is-app .ga-ops-premium .ops-report-empty .ui-empty p{max-width:54ch;line-height:1.8}
+body.ui-final.is-app .ga-ops-premium .ops-report-results .data-table{min-width:640px}
+body.ui-final.is-app .ga-ops-premium .ops-report-results .ops-result-meta{margin:0;line-height:1.7}
+
+/* Rate KPIs: label and value form a vertical reading pair, not adjacent flex items. */
+body.ui-final.is-app .ga-ops-premium .ops-rate-metrics .kpi-exec{
+  display:grid;grid-template-columns:minmax(0,1fr) 2.45rem;
+  grid-template-areas:"body icon";align-items:center;gap:10px;
+  min-width:0;min-height:112px;padding:14px 13px;
+}
+body.ui-final.is-app .ga-ops-premium .ops-rate-metrics .kpi-exec__icon{
+  grid-area:icon;grid-column:auto;grid-row:auto;justify-self:end;align-self:center;
+}
+body.ui-final.is-app .ga-ops-premium .ops-rate-metrics .kpi-exec__body{
+  grid-area:body;grid-column:auto;grid-row:auto;display:grid;gap:6px;min-width:0;
+}
+body.ui-final.is-app .ga-ops-premium .ops-rate-metrics .kpi-exec__label,
+body.ui-final.is-app .ga-ops-premium .ops-rate-metrics .kpi-exec__value{
+  grid-area:auto;display:block;min-width:0;width:100%;
+}
+body.ui-final.is-app .ga-ops-premium .ops-rate-metrics .kpi-exec__label{
+  font-size:.72rem;line-height:1.55;color:#607992;font-weight:750;
+}
+body.ui-final.is-app .ga-ops-premium .ops-rate-metrics .kpi-exec__value{
+  font-size:clamp(1rem,1.18vw,1.25rem);line-height:1.4;font-weight:850;
+  font-variant-numeric:tabular-nums;letter-spacing:0;overflow-wrap:anywhere;word-break:normal;
+}
+body.ui-final.is-app .ga-ops-premium .ops-rate-metrics .kpi-exec__unit{
+  display:inline-block;font-size:.69rem;white-space:nowrap;color:#71869a;
+}
+body.ui-final.is-app .ga-ops-premium .ops-rate-history .empty-state{
+  min-height:0;padding:18px 14px;border:0;background:transparent;
+}
+@media(max-width:1150px){
+  body.ui-final.is-app .ga-ops-premium .ops-rate-metrics{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:800px){
+  body.ui-final.is-app .ga-ops-premium .ops-rate-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+  body.ui-final.is-app .ga-ops-premium .ops-report-tabs{flex-wrap:nowrap;overflow-x:auto;white-space:nowrap;scrollbar-width:thin}
+}
+@media(max-width:460px){
+  body.ui-final.is-app .ga-ops-premium .ops-rate-metrics .kpi-exec{padding:11px;min-height:100px;grid-template-columns:minmax(0,1fr) 2.1rem}
+  body.ui-final.is-app .ga-ops-premium .ops-rate-metrics .kpi-exec__value{font-size:1rem}
+}
