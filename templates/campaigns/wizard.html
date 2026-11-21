@@ -3,18 +3,68 @@
 {% block page_title %}استودیو ساخت تبلیغ{% endblock %}
 {% block container_class %}container-wide{% endblock %}
 {% block extra_head %}{{ block.super }}{% if ai_available %}<link rel="stylesheet" href="{% static 'css/ui-ai.css' %}">{% endif %}{% endblock %}
+{% block page_styles %}{{ block.super }}<link rel="stylesheet" href="{% static 'css/campaign-studio-premium.css' %}">{% endblock %}
 {% block content %}
 <div id="campaign-studio" class="wizard-shell studio-shell ui-studio ga-studio-workspace">
-  {% include "includes/dash_header.html" with page_icon="megaphone" title="استودیو ساخت تبلیغ" subtitle=campaign.name|default:"پیش‌نویس جدید" with_sub=1 %}
-  <section class="ga-panel ga-studio-progress"><header class="ga-panel-head"><div class="ga-panel-title"><h2>مسیر ساخت تبلیغ</h2><span class="muted">مرحله {{ step|persian_digits }} از {{ steps|length|persian_digits }}</span></div><span class="ga-step-indicator" aria-hidden="true">{% widthratio step steps|length 100 %}٪</span></header><div class="ga-progress-line" aria-hidden="true"><span style="width:{% widthratio step steps|length 100 %}%"></span></div>
-  <nav class="wizard-progress wizard-progress--exec" aria-label="مراحل">
-    {% for key, label in steps %}
-      <span {% if forloop.counter == step %}aria-current="step"{% endif %} class="wizard-step {% if forloop.counter == step %}is-active{% elif forloop.counter < step %}is-complete{% endif %}"><span class="ui-step-number">{% if forloop.counter < step %}{% include "includes/lucide_icon.html" with name="check" size="sm" %}{% else %}{{ forloop.counter|persian_digits }}{% endif %}</span><span class="ui-step-label">{{ label }}</span></span>
-    {% endfor %}
-  </nav></section>
+  <header class="studio-masthead">
+    <div class="studio-masthead__top">
+      <a class="studio-masthead__back" href="{% url 'campaigns:list' %}">
+        {% include "includes/lucide_icon.html" with name="arrow-right" size="sm" %}
+        <span>بازگشت به کمپین‌ها</span>
+      </a>
+      <div class="studio-masthead__brand" aria-label="GramAds Campaign Studio">
+        <span class="studio-masthead__brand-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="sparkles" size="md" %}</span>
+        <span><strong>GRAMADS</strong><small>CAMPAIGN STUDIO</small></span>
+      </div>
+    </div>
+    <div class="studio-masthead__body">
+      <div class="studio-masthead__copy">
+        <span class="studio-masthead__eyebrow">CAMPAIGN WORKSPACE</span>
+        <h1>استودیو ساخت کمپین</h1>
+        <p>از انتخاب مخاطب تا پرداخت؛ همه‌چیز در یک مسیر روشن، دقیق و قابل کنترل.</p>
+      </div>
+      <div class="studio-masthead__draft">
+        <span class="studio-masthead__draft-label"><i></i> پیش‌نویس فعال</span>
+        <strong dir="auto">{{ campaign.name|default:"کمپین جدید" }}</strong>
+        <small>تغییرات شما به‌صورت مرحله‌ای ذخیره می‌شوند.</small>
+      </div>
+    </div>
+    <span class="studio-masthead__orb studio-masthead__orb--one" aria-hidden="true"></span>
+    <span class="studio-masthead__orb studio-masthead__orb--two" aria-hidden="true"></span>
+  </header>
+  <section class="studio-progress-panel" aria-label="پیشرفت ساخت کمپین">
+    <div class="studio-progress-panel__top">
+      <div class="studio-progress-panel__title">
+        <span class="studio-progress-panel__eyebrow">YOUR CAMPAIGN JOURNEY</span>
+        <strong>از ایده تا کمپین آماده ثبت</strong>
+      </div>
+      <div class="studio-progress-panel__count">
+        <strong>{{ step|persian_digits }}</strong><span>/ {{ steps|length|persian_digits }}</span>
+        <small>{% widthratio step steps|length 100 %}٪ تکمیل</small>
+      </div>
+    </div>
+    <div class="studio-progress-track" role="progressbar" aria-label="میزان پیشرفت ساخت کمپین" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{% widthratio step steps|length 100 %}">
+      <span style="width:{% widthratio step steps|length 100 %}%"></span>
+    </div>
+    <nav class="studio-stepper" aria-label="مراحل ساخت کمپین">
+      <ol class="studio-stepper__list">
+        {% for key, label in steps %}
+        <li class="studio-stepper__item {% if forloop.counter == step %}is-active{% elif forloop.counter < step %}is-complete{% endif %}" {% if forloop.counter == step %}aria-current="step"{% endif %}>
+          <span class="studio-stepper__number">
+            {% if forloop.counter < step %}{% include "includes/lucide_icon.html" with name="check" size="sm" %}{% else %}{{ forloop.counter|persian_digits }}{% endif %}
+          </span>
+          <span class="studio-stepper__copy">
+            <strong>{{ label }}</strong>
+            <small>{% if key == "goal" %}روش و مقصد{% elif key == "audience" %}انتخاب مخاطب{% elif key == "creative" %}پیام و رسانه{% elif key == "budget" %}هزینه و زمان{% else %}تأیید و پرداخت{% endif %}</small>
+          </span>
+        </li>
+        {% endfor %}
+      </ol>
+    </nav>
+  </section>
   <div class="studio-layout">
-    <form method="post" enctype="multipart/form-data" class="card card--lift wizard-form studio-form form-stack"
-          data-autosave-url="{% url 'campaigns:autosave' campaign.id %}"
+    <form method="post" enctype="multipart/form-data" id="campaign-studio-form" class="card card--lift wizard-form studio-form form-stack"
+          data-studio-step="{{ step }}" data-autosave-url="{% url 'campaigns:autosave' campaign.id %}"
           data-policy-preview-url="{{ policy_preview_url }}"
           data-studio-mode="{{ studio_mode }}"
           data-catalog-locations="{% url 'campaigns:catalog_locations' %}"
@@ -24,24 +74,53 @@
       <input type="hidden" name="draft_revision" value="{{ campaign.draft_revision }}">
       <input type="hidden" name="studio_step" value="{{ step }}">
 
-      <div class="ui-studio-form-head"><span class="ui-step-kicker">مرحله {{ step|persian_digits }} از {{ steps|length|persian_digits }}</span><a class="ui-preview-link" href="#studio-preview-panel">پیش‌نمایش {% include "includes/lucide_icon.html" with name="arrow-down" size="sm" %}</a></div>
-      <fieldset class="studio-mode-toggle" aria-label="حالت ساخت تبلیغ">
-        <legend class="sr-only">حالت ساخت</legend>
-        <label class="choice-card {% if studio_mode == 'simple' %}is-selected{% endif %}">
+      <div class="studio-form-topbar">
+        <div class="studio-form-topbar__step">
+          <span class="studio-form-topbar__index">{{ step|stringformat:"02d"|persian_digits }}</span>
+          <span>گام {{ step|persian_digits }} از {{ steps|length|persian_digits }}</span>
+        </div>
+        <div class="studio-form-topbar__tools">
+          <div class="studio-draft-state">
+            <span class="studio-draft-state__dot" aria-hidden="true"></span>
+            <p id="draft-save-status" class="studio-draft-status" aria-live="polite">{% if campaign.draft_saved_at %}آخرین ذخیره: {{ campaign.draft_saved_at|timesince }} پیش{% else %}آماده ذخیره خودکار{% endif %}</p>
+          </div>
+          <a class="studio-preview-jump" href="#studio-preview-panel">{% include "includes/lucide_icon.html" with name="smartphone" size="sm" %}<span>پیش‌نمایش</span></a>
+        </div>
+      </div>
+      <div class="studio-step-heading" id="studio-step-heading">
+        <span class="studio-step-heading__eyebrow">STEP 0{{ step }} / CAMPAIGN SETUP</span>
+        <h2 id="studio-step-title">
+          {% if step == 1 %}هدف و مقصد کمپین را مشخص کنید
+          {% elif step == 2 %}مخاطب مناسب را انتخاب کنید
+          {% elif step == 3 %}پیام تبلیغ را بسازید
+          {% elif step == 4 %}بودجه و زمان اجرا را تنظیم کنید
+          {% else %}پیش از ثبت، همه‌چیز را مرور کنید{% endif %}
+        </h2>
+        <p>
+          {% if step == 1 %}روش نمایش را متناسب با هدف کسب‌وکار انتخاب کنید و مقصد تبلیغ را مشخص کنید.
+          {% elif step == 2 %}جایگاه و ویژگی‌های مخاطب را انتخاب کنید؛ تنظیمات دقیق‌تر در صورت نیاز در دسترس‌اند.
+          {% elif step == 3 %}متن، مقصد و رسانه تبلیغ را آماده کنید. می‌توانید از پیشنهادهای هوشمند و قالب‌های آماده کمک بگیرید.
+          {% elif step == 4 %}بودجه و زمان نمایش را تعیین کنید؛ مبلغ قطعی پیش از پرداخت دوباره بررسی می‌شود.
+          {% else %}جزئیات کمپین، قوانین تبلیغ و پیش‌فاکتور را یک‌جا بررسی و سپس درباره پرداخت تصمیم بگیرید.{% endif %}
+        </p>
+      </div>
+      <fieldset class="studio-mode-toggle" aria-label="سطح تنظیمات کمپین">
+        <legend class="sr-only">سطح تنظیمات</legend>
+        <label class="choice-card studio-mode-option {% if studio_mode == 'simple' %}is-selected{% endif %}">
           <input type="radio" name="studio_mode" value="simple" {% if studio_mode == 'simple' %}checked{% endif %}>
-          <strong>ساخت سریع تبلیغ</strong>
-          <p class="muted" style="margin:.3rem 0 0;font-size:.8rem">فقط تصمیم‌های اصلی؛ مناسب شروع سریع.</p>
+          <span class="studio-mode-option__icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="zap" size="md" %}</span>
+          <span class="studio-mode-option__copy"><strong>ساخت سریع</strong><small>فقط گزینه‌های ضروری برای شروع</small></span>
+          <span class="studio-mode-option__check" aria-hidden="true">{% include "includes/lucide_icon.html" with name="check-circle-2" size="sm" %}</span>
         </label>
-        <label class="choice-card {% if studio_mode == 'professional' %}is-selected{% endif %}">
+        <label class="choice-card studio-mode-option {% if studio_mode == 'professional' %}is-selected{% endif %}">
           <input type="radio" name="studio_mode" value="professional" {% if studio_mode == 'professional' %}checked{% endif %}>
-          <strong>تنظیمات حرفه‌ای</strong>
-          <p class="muted" style="margin:.3rem 0 0;font-size:.8rem">کنترل دقیق مخاطب، محتوا و زمان نمایش.</p>
+          <span class="studio-mode-option__icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="sliders-horizontal" size="md" %}</span>
+          <span class="studio-mode-option__copy"><strong>تنظیمات پیشرفته</strong><small>کنترل دقیق‌تر روی مخاطب و نمایش</small></span>
+          <span class="studio-mode-option__check" aria-hidden="true">{% include "includes/lucide_icon.html" with name="check-circle-2" size="sm" %}</span>
         </label>
       </fieldset>
 
       {% if step == 1 %}
-      <h2 class="section-title">نوع هدف‌گیری و مقصد</h2>
-      <p class="muted">یکی از چهار روش رسمی Telegram Ads را انتخاب کنید.</p>
       {% if ai_available %}{% include "campaigns/includes/ai_planner.html" %}{% endif %}
       <div class="target-grid">
         {% for value, label in target_type_choices %}
@@ -66,7 +145,12 @@
       {% include "campaigns/includes/policy_panel.html" %}
 
       {% elif step == 2 %}
-      <h2 class="section-title">مخاطبان و جایگاه</h2>
+      <div class="studio-context-note">
+        <span class="studio-context-note__icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="info" size="sm" %}</span>
+        <div><strong>{% if campaign.target_type == 'search' %}عبارت‌های جستجو{% elif campaign.target_type == 'bots' %}ربات‌های هدف{% elif campaign.target_type == 'users' %}ویژگی‌های مخاطب{% else %}استراتژی کانال‌ها{% endif %}</strong>
+          <p>{% if campaign.target_type == 'search' %}عبارت‌هایی را وارد کنید که مخاطب در تلگرام جستجو می‌کند؛ حداکثر ۱۰ عبارت قابل انتخاب است.{% elif campaign.target_type == 'bots' %}نام کاربری ربات را وارد کنید تا وضعیت و امکان هدف‌گیری آن از سرویس رسمی بررسی شود.{% elif campaign.target_type == 'users' %}برای شروع کشور و موضوعات مرتبط را انتخاب کنید؛ جزئیات بیشتر در تنظیمات پیشرفته قرار دارد.{% else %}می‌توانید کانال‌ها را بر اساس زبان، موضوع یا فهرست کانال‌های مشخص انتخاب کنید.{% endif %}</p>
+        </div>
+      </div>
       {% if campaign.target_type != 'search' %}
       <div class="field">
         <label>جایگاه نمایش</label>
@@ -210,7 +294,10 @@
       {% include "campaigns/includes/policy_panel.html" %}
 
       {% elif step == 3 %}
-      <h2 class="section-title">محتوای تبلیغ</h2>
+      <div class="studio-context-note studio-context-note--creative">
+        <span class="studio-context-note__icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="lightbulb" size="sm" %}</span>
+        <div><strong>یک پیام روشن، یک اقدام مشخص</strong><p>متن تبلیغ حداکثر ۱۶۰ کاراکتر است. پیشنهادهای هوشمند را ویرایش و پیش از استفاده از نظر قوانین بررسی کنید.</p></div>
+      </div>
       {% if campaign.target_type != 'search' %}
       {% if ai_available %}{% include "campaigns/includes/ai_creative.html" %}{% endif %}
       <div class="template-pills">{% for t in creative_templates %}<button type="button" class="btn btn-ghost btn-sm" data-creative-template-text="{{ t.text }}" data-creative-template-cta="{{ t.cta_label }}">{{ t.title }}</button>{% endfor %}</div>
@@ -261,7 +348,10 @@
       {% include "campaigns/includes/policy_panel.html" %}
 
       {% elif step == 4 %}
-      <h2 class="section-title">بودجه و زمان‌بندی</h2>
+      <div class="studio-context-note studio-context-note--finance">
+        <span class="studio-context-note__icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="wallet" size="sm" %}</span>
+        <div><strong>شفافیت مالی پیش از پرداخت</strong><p>مبلغ نهایی با نرخ معتبر و کارمزد محاسبه می‌شود. در این مرحله هیچ مبلغی از کیف پول کسر نخواهد شد.</p></div>
+      </div>
       <div class="panel-grid panel-2">
         <div class="field"><label for="studio-control-16">بودجه کل (هزار تومان)</label><input id="studio-control-16" name="budget_toman" type="number" min="100" step="1" value="{% widthratio campaign.budget_irr 10000 1 %}" dir="ltr"></div>
         <div class="field"><label for="studio-control-17">سقف روزانه تبلیغ (هزار تومان)</label><input id="studio-control-17" name="daily_cap_toman" type="number" min="0" step="1" value="{% if campaign.daily_cap_irr %}{% widthratio campaign.daily_cap_irr 10000 1 %}{% endif %}" dir="ltr"></div>
@@ -308,8 +398,10 @@
       {% include "campaigns/includes/policy_panel.html" %}
 
       {% elif step == 5 %}
-      <h2 class="section-title">بررسی نهایی تبلیغ</h2>
-      <p class="studio-hint studio-hint--tight">قبل از پرداخت، خلاصهٔ زیر را با پیش‌نمایش کنار صفحه مقایسه کنید.</p>
+      <div class="studio-context-note studio-context-note--review">
+        <span class="studio-context-note__icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="shield-check" size="sm" %}</span>
+        <div><strong>آخرین بررسی پیش از پرداخت</strong><p>پیش‌فاکتور معتبر، موجودی کیف پول و وضعیت بررسی قوانین را کنترل کنید. ثبت نهایی فقط با تأیید شما انجام می‌شود.</p></div>
+      </div>
       <div class="studio-review card-muted card-pad" aria-label="خلاصه کمپین">
         <div class="studio-review__row">
           <span class="studio-review__label">نوع هدف‌گیری</span>
@@ -369,22 +461,33 @@
       {% endif %}
       {% endif %}
 
-      <div class="ui-studio-footer">
-      <p id="draft-save-status" class="muted studio-draft-status" aria-live="polite">
-        {% if campaign.draft_saved_at %}آخرین ذخیره: {{ campaign.draft_saved_at|timesince }} پیش{% else %}آماده ذخیره خودکار{% endif %}
-      </p>
-
-      <div class="hero-actions studio-actions-bar">
-        {% if step > 1 %}<button class="btn btn-ghost" name="action" value="back" type="submit" formnovalidate>قبلی</button>{% endif %}
-        <button class="btn btn-ghost" name="action" value="save_draft" type="submit" formnovalidate>ذخیره پیش‌نویس</button>
-        {% if step == 5 %}
-          <button class="btn btn-primary" name="action" value="pay" type="submit" {% if not quote_ready %}disabled{% endif %}>تأیید و پرداخت</button>
-          <button class="btn btn-ghost" name="action" value="next" type="submit">فقط ذخیره بازبینی</button>
-        {% elif step < 5 %}
-          <button class="btn btn-primary" name="action" value="next" type="submit">بعدی</button>
-        {% endif %}
-      </div>
-      </div>
+      <footer class="studio-footer">
+        <p class="studio-footer__hint">
+          {% if step == 5 %}با تأیید پرداخت، درخواست کمپین برای بررسی ارسال می‌شود؛ انتشار نهایی تابع تأیید تلگرام است.
+          {% else %}پیش‌نویس شما محفوظ می‌ماند و می‌توانید بعداً از همین‌جا ادامه دهید.{% endif %}
+        </p>
+        <div class="hero-actions studio-actions-bar">
+          {% if step > 1 %}
+          <button class="btn btn-ghost studio-action-back" name="action" value="back" type="submit" formnovalidate>
+            {% include "includes/lucide_icon.html" with name="arrow-right" size="sm" %}<span>مرحله قبل</span>
+          </button>
+          {% endif %}
+          <button class="btn btn-ghost studio-action-save" name="action" value="save_draft" type="submit" formnovalidate>
+            {% include "includes/lucide_icon.html" with name="save" size="sm" %}<span>ذخیره پیش‌نویس</span>
+          </button>
+          {% if step == 5 %}
+            <button class="btn btn-primary studio-action-primary" name="action" value="pay" type="submit" {% if not quote_ready %}disabled{% endif %}>
+              <span>تأیید و پرداخت</span>{% include "includes/lucide_icon.html" with name="wallet" size="sm" %}
+            </button>
+            <button class="btn btn-ghost studio-action-review-save" name="action" value="next" type="submit">ذخیره بازبینی</button>
+          {% elif step < 5 %}
+            <button class="btn btn-primary studio-action-primary" name="action" value="next" type="submit">
+              <span>{% if step == 1 %}ادامه به مخاطبان{% elif step == 2 %}ادامه به محتوای تبلیغ{% elif step == 3 %}ادامه به بودجه{% else %}بازبینی نهایی{% endif %}</span>
+              {% include "includes/lucide_icon.html" with name="arrow-left" size="sm" %}
+            </button>
+          {% endif %}
+        </div>
+      </footer>
     </form>
     {% include "campaigns/includes/studio_preview.html" %}
   </div>

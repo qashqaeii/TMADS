@@ -36,6 +36,7 @@
   <link rel="stylesheet" href="{% static 'css/gramads-workspace-composition.css' %}">
   <link rel="stylesheet" href="{% static 'css/gramads-workspace-background.css' %}">
   <link rel="stylesheet" href="{% static 'css/gramads-sidebar.css' %}">
+  {% block page_styles %}{% endblock %}
   {% block charts_head %}{% endblock %}
 </head>
 <body class="app-body ui-final {% block body_class %}{% endblock %}">
