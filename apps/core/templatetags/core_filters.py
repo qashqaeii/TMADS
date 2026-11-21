@@ -107,7 +107,10 @@ _TELEGRAM_REMOTE_STATUS_FA = {
 
 @register.filter
 def telegram_remote_status_fa(value):
-    return _TELEGRAM_REMOTE_STATUS_FA.get(str(value or "").strip().lower(), "وضعیت نامشخص")
+    key = str(value or "").strip().lower()
+    if not key:
+        return "—"
+    return _TELEGRAM_REMOTE_STATUS_FA.get(key, "وضعیت نامشخص")
 
 
 @register.filter

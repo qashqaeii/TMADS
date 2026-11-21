@@ -9,21 +9,26 @@ from .forms import LoginForm, RegisterForm
 from .permissions import customer_required
 
 
+def _account_landing(user):
+    """Operators do not require customer profiles; redirect to their workspace."""
+    return "operations:overview" if user.is_platform_manager else "dashboard:home"
+
+
 def register_view(request):
     if request.user.is_authenticated:
-        return redirect("dashboard:home")
+        return redirect(_account_landing(request.user))
     form = RegisterForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         user = form.save()
         login(request, user)
         messages.success(request, "خوش آمدید! حساب شما ایجاد شد.")
-        return redirect("dashboard:home")
+        return redirect(_account_landing(request.user))
     return render(request, "accounts/register.html", {"form": form})
 
 
 def login_view(request):
     if request.user.is_authenticated:
-        return redirect("dashboard:home")
+        return redirect(_account_landing(request.user))
     form = LoginForm(request, data=request.POST or None)
     if request.method == "POST" and form.is_valid():
         login(request, form.get_user())
@@ -33,7 +38,7 @@ def login_view(request):
             url=next_url, allowed_hosts={request.get_host()}, require_https=request.is_secure()
         ) and next_url.startswith("/") and not next_url.startswith("//"):
             return redirect(next_url)
-        return redirect("dashboard:home")
+        return redirect(_account_landing(request.user))
     return render(request, "accounts/login.html", {"form": form})
 
 
