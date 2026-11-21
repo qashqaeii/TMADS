@@ -17,7 +17,7 @@
 {% if has_any_campaigns and not has_portfolio_chart %}
 <p class="campaigns-portfolio-note" role="status">
   <span class="campaigns-portfolio-note__icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="info" size="sm" %}</span>
-  <span>نمودار روند پورتفولیو پس از اتصال تبلیغ به API و همگام‌سازی آمار نمایش داده می‌شود.</span>
+  <span>نمودار روند عملکرد کمپین‌ها پس از اتصال تبلیغ به سرویس تلگرام و همگام‌سازی آمار نمایش داده می‌شود.</span>
 </p>
 {% endif %}
 
@@ -245,14 +245,14 @@
     <span class="campaign-portfolio-disclosure__lead">
       <span class="campaign-portfolio-disclosure__glyph" aria-hidden="true">{% include "includes/lucide_icon.html" with name="line-chart" size="sm" %}</span>
       <span class="campaign-portfolio-disclosure__titles">
-        <span class="campaign-portfolio-disclosure__title">تحلیل پورتفولیو (۳۰ روز)</span>
+        <span class="campaign-portfolio-disclosure__title">تحلیل عملکرد کمپین‌ها (۳۰ روز)</span>
         <span class="campaign-portfolio-disclosure__hint muted">جمع نمایش و کلیک — برای باز کردن کلیک کنید</span>
       </span>
     </span>
     <span class="campaign-portfolio-disclosure__chevron" aria-hidden="true">{% include "includes/lucide_icon.html" with name="chevron-down" size="sm" %}</span>
   </summary>
   <div class="campaign-portfolio-disclosure__body">
-    <div id="portfolio-chart" class="chart-box chart-box--medium chart-box--compact-list campaign-portfolio-disclosure__chart" role="img" aria-label="روند پورتفولیو"></div>
+    <div id="portfolio-chart" class="chart-box chart-box--medium chart-box--compact-list campaign-portfolio-disclosure__chart" role="img" aria-label="روند عملکرد کمپین‌ها"></div>
   </div>
 </details>
 {% endif %}

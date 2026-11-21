@@ -15,7 +15,7 @@ def test_ads_pagination(monkeypatch):
 
 @pytest.mark.django_db
 def test_account_report_access(client,customer_user):
-    url=reverse("operations:telegram_account")+"?section=report&load=1"
+    url=reverse("operations:telegram_account")+"?section=report&load=1&period=2026-11"
     client.force_login(customer_user)
     with patch("apps.operations.account_reports.TelegramAdsClient") as api:
         assert client.get(url).status_code==403
@@ -27,4 +27,7 @@ def test_account_report_access(client,customer_user):
         response=client.get(url)
         assert response.status_code==200
         assert b"report example" in response.content
-        assert b"XTR" in response.content
+        assert "استار تلگرام".encode() in response.content
+        assert b"XTR" not in response.content
+        assert "از ۱۰ آبان تا ۹ آذر ۱۴۰۵".encode() in response.content
+        api.return_value.get_account_report.assert_called_once_with(2026, 11)

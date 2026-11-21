@@ -6,7 +6,7 @@
 {% include "includes/dash_header.html" with page_icon="wallet" title="بررسی تغییر اعتبار" subtitle="برآورد و تأیید درخواست بررسی مالی" with_sub=1 %}
 <div class="ui-finance-flow">
 <section class="card card-pad form-stack"><h2 class="section-title">{{ campaign.name }}</h2>
-<div class="ui-invoice-total"><span>اعتبار درخواستی</span><strong dir="ltr">{{ proposal.amount_ton }} TON</strong></div>
+<div class="ui-invoice-total"><span>اعتبار درخواستی</span><strong dir="ltr">{{ proposal.amount_ton|persian_digits }} تون</strong></div>
 {% if proposal.quote %}<div class="finance-line"><span>هزینه اعتبار</span><strong>{{ proposal.quote.advertising_budget_irr|irr_to_toman|format_irr }} تومان</strong></div>
 <div class="finance-line"><span>کارمزد</span><strong>{{ proposal.quote.service_fee_irr|irr_to_toman|format_irr }} تومان</strong></div><div class="finance-line"><span>ذخیره ریسک</span><strong>{{ proposal.quote.risk_buffer_irr|irr_to_toman|format_irr }} تومان</strong></div><div class="finance-line ui-quote-total"><span>برآورد جمع</span><strong>{{ proposal.quote.total_irr|irr_to_toman|format_irr }} تومان</strong></div>{% endif %}
 <form method="post" class="hero-actions">{% csrf_token %}<input type="hidden" name="token" value="{{ token }}"><button class="btn btn-primary" name="action" value="confirm_budget_proposal" type="submit">ثبت درخواست بررسی</button><a class="btn btn-ghost" href="{% url 'campaigns:remote_management' campaign.pk %}">انصراف</a></form></section>

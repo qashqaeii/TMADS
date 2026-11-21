@@ -3,7 +3,7 @@
 {% block page_title %}آمادگی انتشار{% endblock %}
 {% block content %}
 <div class="app-stack operations-page ui-ops ui-release ga-release-workspace">
-{% include "includes/dash_header.html" with page_icon="shield-check" title="آمادگی محیط Production" subtitle="گزارش مستقل و فقط‌خواندنی پیش‌شرط‌های انتشار" with_sub=1 %}
+{% include "includes/dash_header.html" with page_icon="shield-check" title="آمادگی محیط اصلی" subtitle="گزارش مستقل و فقط‌خواندنی پیش‌شرط‌های انتشار" with_sub=1 %}
 <section class="ga-panel ga-release-status ui-release-summary {% if can_launch %}ga-release-ready{% else %}ga-release-blocked{% endif %}">
   <div><span class="ui-target-symbol">{% include "includes/lucide_icon.html" with name="shield-check" size="md" %}</span>
   <h2>{% if can_launch %}پیش‌شرط‌های قابل‌اندازه‌گیری برقرارند{% else %}انتشار عمومی هنوز مجاز نیست{% endif %}</h2>
@@ -22,6 +22,6 @@
   {% endfor %}
   </div>
 </section>
-<div class="hero-actions"><a href="{% url 'operations:api_status' %}" class="btn btn-ghost">مشاهده وضعیت API</a><a href="{% url 'operations:overview' %}" class="btn btn-ghost">بازگشت به مرکز عملیات</a></div>
+<div class="hero-actions"><a href="{% url 'operations:api_status' %}" class="btn btn-ghost">مشاهده وضعیت اتصال تلگرام</a><a href="{% url 'operations:overview' %}" class="btn btn-ghost">بازگشت به مرکز عملیات</a></div>
 </div>
 {% endblock %}

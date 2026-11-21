@@ -16,6 +16,9 @@ from django.urls import reverse
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET, require_POST
 from django.utils import timezone
+from urllib.parse import quote
+
+from apps.core.dates import jalali_date_string, parse_local_datetime
 
 from apps.accounts.permissions import customer_required
 from apps.core.models import AuditLog
@@ -647,11 +650,11 @@ def _apply_step(campaign: Campaign, step: int, data) -> None:
         start_raw = (data.get("schedule_start") or "").strip()
         end_raw = (data.get("schedule_end") or "").strip()
         if start_raw:
-            campaign.schedule_start = timezone.datetime.fromisoformat(start_raw)
+            campaign.schedule_start = parse_local_datetime(start_raw)
             if timezone.is_naive(campaign.schedule_start):
                 campaign.schedule_start = timezone.make_aware(campaign.schedule_start)
         if end_raw:
-            campaign.schedule_end = timezone.datetime.fromisoformat(end_raw)
+            campaign.schedule_end = parse_local_datetime(end_raw)
             if timezone.is_naive(campaign.schedule_end):
                 campaign.schedule_end = timezone.make_aware(campaign.schedule_end)
         campaign.save(
@@ -995,14 +998,14 @@ def campaign_export_csv(request, campaign_id):
         .values("snapshot_date", "impressions", "clicks", "actions", "spent_ton")
     )
     response = HttpResponse(content_type="text/csv; charset=utf-8")
-    response["Content-Disposition"] = f'attachment; filename="campaign-{campaign.id}.csv"'
+    response["Content-Disposition"] = "attachment; filename*=UTF-8''" + quote("گزارش-کمپین-" + str(campaign.id) + ".csv")
     response.write("\ufeff")
     writer = csv.writer(response)
-    writer.writerow(["date", "impressions", "clicks", "actions", "spent_ton"])
+    writer.writerow(["تاریخ شمسی", "نمایش", "کلیک", "اقدام", "هزینه (تون)"])
     for row in snapshots:
         writer.writerow(
             [
-                row["snapshot_date"].isoformat(),
+                jalali_date_string(row["snapshot_date"]),
                 row["impressions"],
                 row["clicks"],
                 row["actions"],

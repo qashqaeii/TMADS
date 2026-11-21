@@ -12,9 +12,9 @@
       <tbody>
         {% for log in logs %}
           <tr>
-            <td><div class="ga-row-identity"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="file-text" %}</span><code class="ui-audit-action" dir="ltr">{{ log.action }}</code></div></td>
+            <td><div class="ga-row-identity"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="file-text" %}</span><span class="ui-audit-action">{{ log.action|audit_action_fa }}</span></div></td>
             <td>{{ log.actor|default:"—" }}</td>
-            <td dir="ltr">{{ log.entity_type }} {{ log.entity_id|default:"" }}</td>
+            <td>{{ log.entity_type|audit_entity_type_fa }} <bdi>{{ log.entity_id|default:"" }}</bdi></td>
             <td><time datetime="{{ log.created_at|date:'c' }}">{{ log.created_at|jalali_datetime }}</time></td>
           </tr>
         {% empty %}

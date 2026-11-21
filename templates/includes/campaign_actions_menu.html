@@ -4,11 +4,11 @@
     <span class="campaign-detail__action-label">بیشتر</span>
   </summary>
   <div class="exec-menu__panel">
-    {% if can_edit_campaign %}<a class="exec-menu__item" href="{% url 'campaigns:wizard' campaign.id %}">ویرایش ویزارد</a>{% endif %}
+    {% if can_edit_campaign %}<a class="exec-menu__item" href="{% url 'campaigns:wizard' campaign.id %}">ویرایش مراحل ساخت</a>{% endif %}
     <form method="post" action="{% url 'campaigns:duplicate' campaign.id %}" class="exec-menu__item">
       {% csrf_token %}<button type="submit">کپی به پیش‌نویس جدید</button>
     </form>
-    <a class="exec-menu__item" href="{% url 'campaigns:export_csv' campaign.id %}">خروجی CSV</a>
+    <a class="exec-menu__item" href="{% url 'campaigns:export_csv' campaign.id %}">دریافت فایل گزارش</a>
     {% if can_delete_draft %}
     <form method="post" action="{% url 'campaigns:delete' campaign.id %}" class="exec-menu__item exec-menu__item--danger" data-confirm-title="حذف پیش‌نویس" data-confirm-message="این پیش‌نویس برای همیشه حذف می‌شود و قابل بازیابی نیست." data-confirm-label="حذف پیش‌نویس" onsubmit="return window.tmadsConfirmReady || confirm('این پیش‌نویس برای همیشه حذف شود؟');">
       {% csrf_token %}

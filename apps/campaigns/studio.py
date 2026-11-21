@@ -10,6 +10,7 @@ from typing import Any
 from django.utils import timezone
 
 from apps.campaigns.models import AdCreative, Campaign, CampaignTargeting
+from apps.core.dates import parse_local_datetime
 from apps.telegram_ads.constants import TMADS_TO_API_PLACEMENT
 from apps.telegram_ads.targeting.compatibility import default_placement_for_target
 from apps.telegram_ads.targeting.normalize import normalize_search_query, normalize_username, parse_promote_url
@@ -274,7 +275,7 @@ def apply_studio_step(campaign: Campaign, step: int, data, files=None) -> None:
         campaign.ad_settings = settings
         for key in ("schedule_start", "schedule_end"):
             if key in data:
-                value = datetime.fromisoformat(data[key]) if data[key] else None
+                value = parse_local_datetime(data[key])
                 if value and timezone.is_naive(value):
                     value = timezone.make_aware(value)
                 setattr(campaign, key, value)
@@ -323,7 +324,7 @@ def validate_budget_inputs(campaign, data, *, strict):
     for key, previous in (("schedule_start", campaign.schedule_start), ("schedule_end", campaign.schedule_end)):
         raw = data.get(key)
         try:
-            value = previous if raw is None else datetime.fromisoformat(raw) if raw else None
+            value = previous if raw is None else parse_local_datetime(raw)
             if value and timezone.is_naive(value):
                 value = timezone.make_aware(value)
             dates.append(value)

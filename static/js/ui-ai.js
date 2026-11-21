@@ -43,7 +43,7 @@
         summary.append(node(
           "small",
           "tm-ai-hint",
-          "زمان آخرین آمار: " + date.toLocaleString("fa-IR", { timeZone: "Asia/Tehran" })
+          "زمان آخرین آمار: " + date.toLocaleString("fa-IR", { calendar: "persian", numberingSystem: "arabext", timeZone: "Asia/Tehran" })
         ));
       }
     }
@@ -197,7 +197,8 @@
         });
         var payload = await response.json();
         if (!response.ok || !payload.ok) {
-          status.textContent = payload.message || "دریافت پیشنهاد ممکن نیست.";
+          var message = typeof payload.message === "string" ? payload.message.trim() : "";
+        status.textContent = !message || /[A-Za-z]{3,}/.test(message) ? "دریافت پیشنهاد ممکن نیست؛ لطفاً کمی بعد دوباره تلاش کنید." : message;
           return;
         }
 

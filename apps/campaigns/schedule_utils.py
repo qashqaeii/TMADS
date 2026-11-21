@@ -105,4 +105,20 @@ def preset_business_hours() -> list[int]:
 
 def schedule_timezone_choices():
     from telead.limits import SCHEDULE_TIMEZONES
-    return [(offset, "UTC" if offset==0 else f"UTC{'+' if offset>0 else '-'}{abs(offset)//3600:02d}:{abs(offset)%3600//60:02d}") for offset in sorted(SCHEDULE_TIMEZONES)]
+    from apps.core.dates import to_persian_digits
+
+    choices = []
+    for offset in sorted(SCHEDULE_TIMEZONES):
+        if offset == 0:
+            label = "گرینویچ (بدون اختلاف)"
+        elif offset == IRAN_SCHEDULE_TIMEZONE_SEC:
+            label = "ایران (۳:۳۰+)"
+        else:
+            sign = "+" if offset > 0 else "−"
+            hours, remainder = divmod(abs(offset), 3600)
+            minutes = remainder // 60
+            hour_text = to_persian_digits(str(hours).zfill(2))
+            minute_text = to_persian_digits(str(minutes).zfill(2))
+            label = f"اختلاف با گرینویچ: {sign}{hour_text}:{minute_text}"
+        choices.append((offset, label))
+    return choices

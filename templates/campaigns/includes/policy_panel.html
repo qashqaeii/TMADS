@@ -4,7 +4,7 @@
   {% with counts=policy_run.counts %}
   <header class="policy-panel__head">
     <h3 class="section-title ui-policy-title">{% include "includes/lucide_icon.html" with name="shield-check" size="md" %}<span>بررسی قوانین تبلیغ</span></h3>
-    <p class="policy-panel__version">نسخه قوانین: <bdi>{{ policy_run.policy_version_code }}</bdi></p>
+    <p class="policy-panel__version">نسخه جاری قوانین</p>
   </header>
   <div class="ui-policy-counts" role="group" aria-label="خلاصه نتیجه بررسی قوانین">
     <span class="status status-danger">مسدود: {{ counts.blocked|default:0 }}</span>

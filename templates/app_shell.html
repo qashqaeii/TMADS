@@ -10,7 +10,7 @@
         {% include "includes/brand_mark.html" %}
         <span class="sidebar-brand-text">
           <strong>{{ PRODUCT_NAME }}</strong>
-          <small lang="en" dir="ltr">GRAMADS / WORKSPACE</small>
+          <small lang="en" dir="ltr">فضای کار</small>
         </span>
       </a>
       <button type="button" class="sidebar-close mobile-only" @click="open = false" aria-label="بستن منو">{% include "includes/lucide_icon.html" with name="x" size="btn" %}</button>
@@ -84,7 +84,7 @@
           <a href="{% url 'operations:sms' %}" class="sidebar-link {% if '/ops/sms/' in request.path %}active{% endif %}"{% if '/ops/sms/' in request.path %} aria-current="page"{% endif %}><span class="nav-icon">{% include "includes/lucide_icon.html" with name="message-square" size="sm" %}</span><span class="nav-label">مدیریت پیامک</span></a>
           <a href="{% url 'operations:api_status' %}" class="sidebar-link {% if '/ops/api-status' in request.path %}active{% endif %}"{% if '/ops/api-status' in request.path %} aria-current="page"{% endif %}>
             <span class="nav-icon">{% include "includes/nav_icon.html" with icon="api" %}</span>
-            <span class="nav-label">وضعیت API</span>
+            <span class="nav-label">وضعیت اتصال تلگرام</span>
           </a>
           <a href="{% url 'operations:release_readiness' %}" class="sidebar-link {% if '/ops/release-readiness' in request.path %}active{% endif %}"{% if '/ops/release-readiness' in request.path %} aria-current="page"{% endif %}><span class="nav-icon">{% include "includes/lucide_icon.html" with name="shield-check" size="sm" %}</span><span class="nav-label">آمادگی انتشار</span></a>
           <a href="{% url 'operations:audit' %}" class="sidebar-link {% if '/ops/audit' in request.path %}active{% endif %}"{% if '/ops/audit' in request.path %} aria-current="page"{% endif %}>

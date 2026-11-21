@@ -41,3 +41,13 @@ def test_campaign_studio_renders_premium_guided_steps(client, customer_user, ste
     assert heading in html
     assert field in html
     assert html.count('aria-current="step"') == 1
+    assert "CAMPAIGN WORKSPACE" not in html
+    assert "LIVE CAMPAIGN PREVIEW" not in html
+    assert "Telegram Ads" not in html
+    assert "Sponsored placement" not in html
+    assert "timesince" not in html
+    assert 'type="datetime-local"' not in html
+    if step == 4:
+        assert 'name="schedule_start" type="text"' in html
+        assert 'name="schedule_end" type="text"' in html
+        assert "۱۴۰۵/۰۹/۳۰" in html

@@ -13,7 +13,7 @@
     هر خانه یک ساعت کامل است. منطقه زمانی را انتخاب کنید؛ با کلیدهای جهت‌دار بین ساعت‌ها حرکت کنید.
   </p>
   <input type="hidden" name="schedule_json" data-schedule-json value="{{ schedule_json|escape }}">
-  <div class="field"><label for="schedule-zone">منطقه زمانی ساعات نمایش</label><select id="schedule-zone" name="schedule_timezone">{% for offset,label in schedule_timezones %}<option value="{{ offset }}" {% if offset == schedule_timezone %}selected{% endif %}>{{ label }}{% if offset == 12600 %} — ایران{% endif %}</option>{% endfor %}</select></div>
+  <div class="field"><label for="schedule-zone">منطقه زمانی ساعات نمایش</label><select id="schedule-zone" name="schedule_timezone">{% for offset,label in schedule_timezones %}<option value="{{ offset }}" {% if offset == schedule_timezone %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
   {% if campaign.target_type == "users" %}<label class="choice-card"><input type="checkbox" name="schedule_viewer_timezone" value="1" {% if schedule_viewer_timezone %}checked{% endif %}> ساعت محلی هر مخاطب (به‌جای منطقه ثابت)</label>{% endif %}
   <div class="schedule-presets" role="group" aria-label="پیش‌تنظیم‌ها">
     <button type="button" class="btn btn-ghost btn-sm" data-schedule-preset="all">هر روز ۲۴ ساعته</button>

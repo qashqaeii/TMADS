@@ -276,8 +276,8 @@ def reset_unused_audience(actor, data):
     Does not accept user supplied audience counts; no contact data is logged.
     """
     row = owned_account(actor)
-    if not row or not enabled() or data.get("consent") != "on" or data.get("confirm_text") != "RESET":
-        raise ValueError("تأیید صریح RESET و مجوز حساب اختصاصی لازم است.")
+    if not row or not enabled() or data.get("consent") != "on" or data.get("confirm_text", "").strip() not in {"حذف کامل", "RESET"}:
+        raise ValueError("برای تأیید، عبارت «حذف کامل» و مجوز حساب اختصاصی لازم است.")
     try:
         audience_id = int(data.get("audience_id") or "")
         nonce = signing.loads(data.get("nonce", ""), salt=SALT, max_age=900)

@@ -212,7 +212,7 @@
                 <span class="campaign-overview-facts__label">وضعیت در تلگرام</span>
                 <span class="campaign-overview-facts__value">
                   {{ ad.remote_status|telegram_remote_status_fa }}
-                  {% if ad.remote_status %}<span class="campaign-overview-facts__meta muted" dir="ltr" title="کد API">({{ ad.remote_status }})</span>{% endif %}
+                  
                 </span>
               </div>
             </li>
@@ -419,7 +419,7 @@
             <p class="muted">روزهای فاقد هزینه تأییدشده به گرام، بدون مقدار نمایش داده می‌شوند.</p>
             <div class="campaign-analytics-spend__legend" aria-hidden="true">
               <span class="campaign-analytics-spend__legend-swatch"></span>
-              <span class="campaign-analytics-spend__legend-text">مصرف هر روز (TON)</span>
+              <span class="campaign-analytics-spend__legend-text">مصرف روزانه (تون)</span>
             </div>
             <div class="campaign-analytics-spend__canvas">
               <div id="campaign-spend-chart" class="chart-box chart-box--spend-luxe" role="img" aria-label="نمودار مصرف روزانه"></div>
@@ -502,7 +502,7 @@
         <div class="campaign-detail-panel__empty">
           <span class="campaign-detail-panel__empty-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="file-text" size="kpi" %}</span>
           <p class="campaign-detail-panel__empty-title">محتوای تبلیغ ثبت نشده</p>
-          <p class="campaign-detail-panel__empty-text muted">متن، عنوان و دکمه را در ویزارد ثبت کنید یا از تلگرام import کنید.</p>
+          <p class="campaign-detail-panel__empty-text muted">متن، عنوان و دکمه را در مرحله ساخت کمپین ثبت کنید؛ اطلاعات دریافت‌شده از تلگرام نیز اینجا نمایش داده می‌شود.</p>
           {% if can_edit_campaign %}<a class="campaign-detail__action campaign-detail-panel__empty-btn" href="{% url 'campaigns:wizard' campaign.id %}">تکمیل در ویزارد</a>{% endif %}
         </div>
         {% endif %}
@@ -528,7 +528,7 @@
         <div class="campaign-detail-panel__empty">
           <span class="campaign-detail-panel__empty-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="users" size="kpi" %}</span>
           <p class="campaign-detail-panel__empty-title">هدف‌گیری ثبت نشده</p>
-          <p class="campaign-detail-panel__empty-text muted">در ویزارد تنظیم کنید یا پس از اتصال به تلگرام import شود.</p>
+          <p class="campaign-detail-panel__empty-text muted">در مرحله ساخت کمپین تنظیم کنید یا پس از دریافت اطلاعات از تلگرام تکمیل می‌شود.</p>
           {% if can_edit_campaign %}<a class="campaign-detail__action campaign-detail-panel__empty-btn" href="{% url 'campaigns:wizard' campaign.id %}">تنظیم در ویزارد</a>{% endif %}
         </div>
         {% endif %}
@@ -556,7 +556,7 @@
             <span class="campaign-detail-panel__glyph" aria-hidden="true">{% include "includes/lucide_icon.html" with name="wallet" size="sm" %}</span>
             <div class="campaign-detail-panel__head-text">
               <h2 class="campaign-detail-panel__title">بودجه و سفارش</h2>
-              <p class="campaign-detail-panel__hint muted">مبالغ ریالی، تخصیص TON و وضعیت پرداخت</p>
+              <p class="campaign-detail-panel__hint muted">مبالغ ریالی، تخصیص اعتبار تون و وضعیت پرداخت</p>
             </div>
           </header>
           <ul class="campaign-detail-finance-kpis tabnums" role="list">
@@ -590,7 +590,7 @@
               <span class="campaign-detail-finance-rows__value" dir="ltr">{{ order.service_fee_irr|irr_to_toman|format_irr }} تومان</span>
             </li>
             <li class="campaign-detail-finance-rows__row">
-              <span class="campaign-detail-finance-rows__label">تخصیص TON</span>
+              <span class="campaign-detail-finance-rows__label">تخصیص اعتبار تون</span>
               <span class="campaign-detail-finance-rows__value">{% ton_amount order.ton_allocation exchange_rate_id=order_exchange_rate_id hint=0 %}</span>
             </li>
             <li class="campaign-detail-finance-rows__row">
@@ -599,7 +599,7 @@
             </li>
           </ul>
           {% else %}
-          <p class="campaign-detail-panel__foot-note muted">سفارش ریالی برای برخی کمپین‌های importشده ثبت نشده است؛ مصرف از آمار تلگرام قابل مشاهده است.</p>
+          <p class="campaign-detail-panel__foot-note muted">برای برخی کمپین‌هایی که پیش‌تر در تلگرام ایجاد شده‌اند، سفارش ریالی در این سامانه ثبت نشده است؛ میزان مصرف از آمار تلگرام قابل مشاهده است.</p>
           {% endif %}
         </section>
       </div>

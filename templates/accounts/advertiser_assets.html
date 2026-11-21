@@ -11,9 +11,9 @@
 <div class="ui-assets-toolbar"><nav class="ui-section-tabs" aria-label="منابع حساب"><a href="?section=audiences" {% if section == 'audiences' %}aria-current="page"{% endif %}>مخاطبان</a><a href="?section=pixel" {% if section == 'pixel' %}aria-current="page"{% endif %}>پیکسل</a><a href="?section=events" {% if section == 'events' %}aria-current="page"{% endif %}>رویدادها</a></nav><a class="btn btn-primary" href="?section={{ section }}&amp;load=1">{% include "includes/lucide_icon.html" with name="refresh-cw" size="sm" %} دریافت از تلگرام</a></div>
 <p class="muted"><a class="btn btn-ghost btn-sm" href="{% url 'accounts:related_ads' %}">مشاهده تبلیغات حساب</a></p>
 <p class="muted">منابع فقط از حساب اختصاصی شما خوانده می‌شوند. اتصال این منابع به کمپین و انتقال اعتبار هنوز فعال نیست. تغییر اعضا فقط با هش معتبر، مجوز فعال و تأیید شرایط پردازش داده امکان‌پذیر است.</p>
-{% if load_error %}<p class="ui-studio-warning" role="alert">{{ load_error }}</p>{% endif %}
-{% if loaded %}{% if section == 'pixel' %}<div class="finance-line"><span>شناسه پیکسل</span><bdi>{{ pixel.pixel_id|default:"—" }}</bdi></div>{% if pixel.code_snippet %}<div class="field"><label for="pixel-code">کد دریافتی (فقط متن)</label><textarea id="pixel-code" readonly dir="ltr">{{ pixel.code_snippet }}</textarea></div>{% endif %}
-{% else %}<div class="table-scroll" tabindex="0" role="region" aria-label="منابع تبلیغاتی"><table class="data-table"><thead><tr><th scope="col">عنوان</th><th scope="col">شناسه</th><th scope="col">اندازه یا نوع</th></tr></thead><tbody>{% for item in items %}<tr><td>{{ item.title }}</td><td><bdi>{% if section == 'audiences' %}{{ item.audience_id }}{% else %}{{ item.event_id }}{% endif %}</bdi></td><td>{% if section == 'audiences' %}{{ item.size|default_if_none:"—" }}{% else %}{{ item.type }}{% endif %}</td></tr>{% empty %}<tr><td colspan="3">منبعی در این صفحه یافت نشد.</td></tr>{% endfor %}</tbody></table></div><div class="hero-actions">{% if previous != None %}<a class="btn btn-ghost" href="?section={{ section }}&load=1&offset={{ previous }}">صفحه قبل</a>{% endif %}{% if next_offset != None %}<a class="btn btn-ghost" href="?section={{ section }}&load=1&offset={{ next_offset }}">صفحه بعد</a>{% endif %}</div>{% endif %}{% endif %}
+{% if load_error %}<p class="ui-studio-warning" role="alert">{{ load_error|user_message_fa }}</p>{% endif %}
+{% if loaded %}{% if section == 'pixel' %}<div class="finance-line"><span>شناسه پیکسل</span><bdi>{{ pixel.pixel_id|default:"—" }}</bdi></div>{% if pixel.code_snippet %}<details class="field"><summary>کد نصب پیکسل (ویژه تیم فنی)</summary><textarea id="pixel-code" readonly dir="ltr">{{ pixel.code_snippet }}</textarea></details>{% endif %}
+{% else %}<div class="table-scroll" tabindex="0" role="region" aria-label="منابع تبلیغاتی"><table class="data-table"><thead><tr><th scope="col">عنوان</th><th scope="col">شناسه</th><th scope="col">اندازه یا نوع</th></tr></thead><tbody>{% for item in items %}<tr><td>{{ item.title }}</td><td><bdi>{% if section == 'audiences' %}{{ item.audience_id }}{% else %}{{ item.event_id }}{% endif %}</bdi></td><td>{% if section == 'audiences' %}{{ item.size|default_if_none:"—" }}{% else %}{{ item.type|telegram_event_type_fa }}{% endif %}</td></tr>{% empty %}<tr><td colspan="3">منبعی در این صفحه یافت نشد.</td></tr>{% endfor %}</tbody></table></div><div class="hero-actions">{% if previous != None %}<a class="btn btn-ghost" href="?section={{ section }}&load=1&offset={{ previous }}">صفحه قبل</a>{% endif %}{% if next_offset != None %}<a class="btn btn-ghost" href="?section={{ section }}&load=1&offset={{ next_offset }}">صفحه بعد</a>{% endif %}</div>{% endif %}{% endif %}
 </section>
 <section class="ga-panel ga-panel-body form-stack"><div class="ga-panel-title"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="plus" %}</span><h2 class="section-title">ایجاد منبع جدید</h2></div>
 {% if enabled and not unresolved %}<form method="post" class="form-stack">{% csrf_token %}<input type="hidden" name="nonce" value="{{ nonce }}"><input type="hidden" name="action" value="{% if section == 'audiences' %}audience{% elif section == 'pixel' %}pixel{% else %}event{% endif %}">
@@ -24,14 +24,14 @@
 </section>
 </div>{% if section == 'audiences' %}
 <section class="card card-pad form-stack ui-audience-editor">
-  <div class="ui-form-intro"><span class="ui-target-symbol">{% include "includes/lucide_icon.html" with name="users" size="md" %}</span><div><h2>مدیریت اعضای مخاطبان اختصاصی</h2><p>فقط هش SHA-256 و حساب متعلق به شما؛ هیچ شماره خامی در گرام‌ادز ذخیره نمی‌شود.</p></div></div>
+  <div class="ui-form-intro"><span class="ui-target-symbol">{% include "includes/lucide_icon.html" with name="users" size="md" %}</span><div><h2>مدیریت اعضای مخاطبان اختصاصی</h2><p>فقط کدهای هش ۲۵۶ بیتی و حساب متعلق به شما؛ هیچ شماره خامی در گرام‌ادز ذخیره نمی‌شود.</p></div></div>
   {% if enabled and not unresolved %}
   <form method="post" action="{% url 'accounts:audience_update' %}" class="form-stack">{% csrf_token %}
     <input type="hidden" name="nonce" value="{{ nonce }}">
     <div class="field"><label for="audience-id">شناسه گروه مخاطب</label><input id="audience-id" name="audience_id" inputmode="numeric" pattern="[0-9]+" maxlength="10" required autocomplete="off" placeholder="شناسه گروه در حساب خودتان"></div>
     <div class="field"><label for="audience-mode">نوع تغییر</label><select id="audience-mode" name="action"><option value="add">افزودن اعضا</option><option value="remove">حذف اعضا (درخواست عدم استفاده)</option></select></div>
-    <div class="field"><label for="audience-hashes">هش‌های SHA-256 — هر سطر یک هش</label>
-      <textarea id="audience-hashes" name="sha256_list" rows="6" maxlength="650000" dir="ltr" spellcheck="false" autocomplete="off" required placeholder="64 hex characters per line" aria-describedby="audience-hash-help"></textarea>
+    <div class="field"><label for="audience-hashes">کدهای هش ۲۵۶ بیتی — هر سطر یک کد</label>
+      <textarea id="audience-hashes" name="sha256_list" rows="6" maxlength="650000" dir="ltr" spellcheck="false" autocomplete="off" required placeholder="کد هش‌شده را در هر سطر وارد کنید" aria-describedby="audience-hash-help"></textarea>
       <p id="audience-hash-help" class="field-help">حداکثر ۱۰٬۰۰۰ هش یکتا در هر درخواست. الگوریتم استانداردسازی شماره پیش از هش‌کردن باید با داده‌های تلگرام سازگار باشد؛ هش‌کردن به معنی ناشناس‌شدن کامل اطلاعات نیست.</p>
     </div>
     <label class="choice-card"><input type="checkbox" name="data_rights" required> برای پردازش این داده‌ها مبنای قانونی و رضایت لازم دارم.</label>
@@ -39,17 +39,17 @@
     <button class="btn btn-primary" type="submit" data-confirm-title="ویرایش مخاطبان" data-confirm-message="هش‌های واردشده به تلگرام ارسال می‌شوند؛ اگر نتیجه نامشخص شود، تکرار خودکار انجام نمی‌شود." data-confirm-label="تأیید و ارسال" data-confirm-tone="primary">ثبت تغییر مخاطبان</button>
   </form>
   {% elif unresolved %}<p class="ui-studio-warning">عملیات قبلی نیازمند تطبیق است و ارسال دوباره موقتاً مسدود شده است.</p>
-  {% else %}<p class="ui-studio-warning">مدیریت اعضای مخاطبان تا فعال‌شدن مجوز API و حساب اختصاصی غیرفعال است.</p>{% endif %}
+  {% else %}<p class="ui-studio-warning">مدیریت اعضای مخاطبان تا فعال‌شدن مجوز سرویس تلگرام و حساب اختصاصی غیرفعال است.</p>{% endif %}
 </section>
 {% endif %}
 {% if section == 'audiences' %}
 <details class="card card-pad ui-sensitive-panel ui-audience-delete"><summary><span>حذف گروه استفاده‌نشده</span><span class="status status-danger">بازگشت‌ناپذیر</span>{% include "includes/lucide_icon.html" with name="chevron-down" size="sm" %}</summary><div class="form-stack ui-sensitive-body">
-  <div class="ui-form-intro"><span class="ui-target-symbol">{% include "includes/lucide_icon.html" with name="trash-2" size="md" %}</span><div><h2>حذف گروه استفاده‌نشده</h2><p>فقط گروهی قابل حذف است که API تلگرام تعداد تبلیغات متصل به آن را صراحتاً صفر گزارش کند.</p></div></div>
+  <div class="ui-form-intro"><span class="ui-target-symbol">{% include "includes/lucide_icon.html" with name="trash-2" size="md" %}</span><div><h2>حذف گروه استفاده‌نشده</h2><p>فقط گروهی قابل حذف است که تلگرام تعداد تبلیغات متصل به آن را صراحتاً صفر گزارش کند.</p></div></div>
   {% if enabled and not unresolved %}
   <form method="post" action="{% url 'accounts:audience_delete' %}" class="form-stack">{% csrf_token %}
     <input type="hidden" name="nonce" value="{{ nonce }}">
     <div class="field"><label for="delete-audience-id">شناسه گروه مخاطبان</label><input id="delete-audience-id" name="audience_id" type="text" inputmode="numeric" pattern="[0-9]+" maxlength="10" autocomplete="off" required></div>
-    <label class="choice-card"><input name="consent" type="checkbox" required> متوجه هستم حذف گروه قابل بازگشت نیست و تنها پس از کنترل API انجام می‌شود.</label>
+    <label class="choice-card"><input name="consent" type="checkbox" required> متوجه هستم حذف گروه قابل بازگشت نیست و تنها پس از بررسی وضعیت آن در تلگرام انجام می‌شود.</label>
     <button class="btn btn-danger-soft" type="submit" data-confirm-title="حذف گروه مخاطبان" data-confirm-message="این عملیات باعث حذف دائمی گروه در تلگرام می‌شود. تنها در صورت نبود تبلیغ مرتبط و با مجوز فعال اجرا خواهد شد." data-confirm-label="حذف گروه">درخواست حذف گروه</button>
   </form>
   {% else %}<p class="ui-studio-warning">حذف گروه تا تعیین تکلیف عملیات قبلی و فعال بودن مجوز متوقف است.</p>{% endif %}
@@ -62,7 +62,7 @@
   <form method="post" class="form-stack" action="{% url 'accounts:audience_reset' %}">{% csrf_token %}
     <input type="hidden" name="nonce" value="{{ nonce }}">
     <div class="field"><label for="reset-audience-id">شناسه گروه</label><input id="reset-audience-id" name="audience_id" inputmode="numeric" pattern="[0-9]+" maxlength="10" required autocomplete="off"></div>
-    <div class="field"><label for="reset-audience-phrase">برای تأیید، عبارت RESET را وارد کنید</label><input id="reset-audience-phrase" name="confirm_text" required pattern="RESET" maxlength="5" dir="ltr" autocomplete="off" spellcheck="false"></div>
+    <div class="field"><label for="reset-audience-phrase">برای تأیید، عبارت «حذف کامل» را وارد کنید</label><input id="reset-audience-phrase" name="confirm_text" required pattern="حذف کامل" maxlength="10" dir="rtl" autocomplete="off" spellcheck="false"></div>
     <label class="choice-card"><input type="checkbox" name="consent" required> حذف تمام اعضای این گروه را تأیید می‌کنم.</label>
     <button type="submit" class="btn btn-danger-soft" data-confirm-title="خالی‌کردن گروه" data-confirm-message="همه مخاطبان گروه از تلگرام حذف می‌شوند و این تغییر بازگشت‌پذیر نیست. فقط گروه بدون تبلیغ مرتبط خالی می‌شود." data-confirm-label="خالی‌کردن گروه">تأیید خالی‌سازی</button>
   </form>
@@ -90,7 +90,7 @@ function update(){var rename=s.value==="rename";w.hidden=!rename;i.required=rena
 s.addEventListener("change",update);update();})();
 </script>
 {% endif %}
-<section class="card card-pad form-stack"><h2 class="section-title">تاریخچه عملیات منابع</h2>{% for op in operations %}<div class="finance-line"><span>{{ op.action }} · {{ op.created_at|jalali_datetime }}</span><span class="status {% if op.state == 'completed' %}status-active{% else %}status-warn{% endif %}">{% if op.state == 'completed' %}شناسه دریافت شد{% else %}نیازمند بررسی{% endif %}</span></div>{% empty %}<p class="muted">هنوز عملیاتی ثبت نشده است.</p>{% endfor %}</section>
+<section class="card card-pad form-stack"><h2 class="section-title">تاریخچه عملیات منابع</h2>{% for op in operations %}<div class="finance-line"><span>{{ op.action|asset_operation_label_fa }} · {{ op.created_at|jalali_datetime }}</span><span class="status {% if op.state == 'completed' %}status-active{% else %}status-warn{% endif %}">{% if op.state == 'completed' %}شناسه دریافت شد{% else %}نیازمند بررسی{% endif %}</span></div>{% empty %}<p class="muted">هنوز عملیاتی ثبت نشده است.</p>{% endfor %}</section>
 {% endif %}
 </div>
 {% endblock %}
