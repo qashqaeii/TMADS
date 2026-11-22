@@ -91,9 +91,15 @@ class BotEligibilityResult:
         }
 
 
-def _cache_key(username: str) -> str:
-    account_scope = hashlib.sha256(settings.TELEGRAM_ADS_API_TOKEN.encode()).hexdigest()[:16]
-    return f"tmads:bot_elig:v2:{account_scope}:{username.casefold().lstrip('@')}"
+def _default_account_scope() -> str:
+    return hashlib.sha256(settings.TELEGRAM_ADS_API_TOKEN.encode()).hexdigest()[:16]
+
+
+def _cache_key(username: str, *, account_scope: str | None = None) -> str:
+    scope = (account_scope or "").strip() or _default_account_scope()
+    # Bound key length; scopes may include child account ids.
+    scope_digest = hashlib.sha256(scope.encode()).hexdigest()[:24]
+    return f"tmads:bot_elig:v2:{scope_digest}:{username.casefold().lstrip('@')}"
 
 
 def _metadata_from_payload(data: dict[str, Any]) -> BotMetadata:
@@ -157,7 +163,12 @@ def _classify_api_error(code: str | None, description: str | None = None) -> Bot
     )
 
 
-def check_bot_eligibility(value: str, *, use_cache: bool = True) -> BotEligibilityResult:
+def check_bot_eligibility(
+    value: str,
+    *,
+    use_cache: bool = True,
+    account_scope: str | None = None,
+) -> BotEligibilityResult:
     """Resolve bot metadata and classify eligibility via official ``getTargetBot``."""
     query = (value or "").strip()
     username_at, api_peer = parse_bot_peer_input(query)
@@ -172,8 +183,9 @@ def check_bot_eligibility(value: str, *, use_cache: bool = True) -> BotEligibili
             verified=True,
         )
 
+    cache_key = _cache_key(username_at, account_scope=account_scope)
     if use_cache:
-        cached = cache.get(_cache_key(username_at))
+        cached = cache.get(cache_key)
         if isinstance(cached, dict):
             cached["query"] = query
             return BotEligibilityResult(**{**cached, "query": query})
@@ -206,7 +218,7 @@ def check_bot_eligibility(value: str, *, use_cache: bool = True) -> BotEligibili
         base.query = query
         base.username = username_at
         if use_cache and base.eligibility in {"insufficient_audience", "invalid_bot"}:
-            cache.set(_cache_key(username_at), _result_cache_payload(base), CACHE_TTL_SECONDS)
+            cache.set(cache_key, _result_cache_payload(base), CACHE_TTL_SECONDS)
         return base
     except TelegramAdsError as exc:
         logger.warning("bot eligibility unexpected telegram error: %s", exc)
@@ -238,7 +250,7 @@ def check_bot_eligibility(value: str, *, use_cache: bool = True) -> BotEligibili
         bot=bot_payload,
     )
     if use_cache:
-        cache.set(_cache_key(username_at), _result_cache_payload(result), CACHE_TTL_SECONDS)
+        cache.set(cache_key, _result_cache_payload(result), CACHE_TTL_SECONDS)
     return result
 
 
@@ -256,13 +268,13 @@ def _result_cache_payload(result: BotEligibilityResult) -> dict[str, Any]:
     }
 
 
-def cached_bot_checks(bot_ids: list[str]) -> dict[str, Any]:
+def cached_bot_checks(bot_ids: list[str], *, account_scope: str | None = None) -> dict[str, Any]:
     """Display-only snapshots from our own server cache; never trust posted flags."""
     checks = {}
     for raw in bot_ids[:100]:
         at, _ = parse_bot_peer_input(raw)
         if at:
-            cached = cache.get(_cache_key(at))
+            cached = cache.get(_cache_key(at, account_scope=account_scope))
             if isinstance(cached, dict):
                 checks[at] = cached
     return checks

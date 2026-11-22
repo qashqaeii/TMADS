@@ -63,3 +63,27 @@ class AccountAssetOperation(UUIDModel, TimeStampedModel):
         ordering = ["-created_at"]
         constraints = [models.UniqueConstraint(fields=["account"],
             condition=models.Q(state__in=["executing","uncertain"]),name="one_unresolved_asset_operation")]
+
+
+class TargetBotCatalogEntry(UUIDModel, TimeStampedModel):
+    """Curated internal bot catalog for Similar Bots recommendations (not Telegram HTML)."""
+
+    username = models.CharField(max_length=64, unique=True, db_index=True)
+    title = models.CharField(max_length=200, blank=True)
+    photo_url = models.URLField(max_length=500, blank=True)
+    category = models.CharField(max_length=64, blank=True, db_index=True)
+    language_codes = models.JSONField(default=list, blank=True)
+    topic_ids = models.JSONField(default=list, blank=True)
+    tags = models.JSONField(default=list, blank=True)
+    related_usernames = models.JSONField(default=list, blank=True)
+    monthly_users = models.PositiveIntegerField(null=True, blank=True)
+    priority = models.IntegerField(default=0)
+    is_active = models.BooleanField(default=True, db_index=True)
+
+    class Meta:
+        ordering = ["-priority", "username"]
+        verbose_name = "Target bot catalog entry"
+        verbose_name_plural = "Target bot catalog entries"
+
+    def __str__(self) -> str:
+        return self.username

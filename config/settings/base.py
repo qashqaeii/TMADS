@@ -176,6 +176,8 @@ TELEGRAM_ADS_MEDIA_UPLOAD_ENABLED = env.bool("TELEGRAM_ADS_MEDIA_UPLOAD_ENABLED"
 TELEGRAM_ADS_RELATED_ACCOUNTS_ENABLED = env.bool("TELEGRAM_ADS_RELATED_ACCOUNTS_ENABLED", default=False)
 TELEGRAM_ADS_WEBSITE_ENABLED = env.bool("TELEGRAM_ADS_WEBSITE_ENABLED", default=False)
 TELEGRAM_ADS_CUSTOMER_ASSETS_ENABLED = env.bool("TELEGRAM_ADS_CUSTOMER_ASSETS_ENABLED", default=False)
+# Similar Bots — catalog recommendations gated by official getTargetBot (no web-panel session).
+SIMILAR_BOTS_ENABLED = env.bool("SIMILAR_BOTS_ENABLED", default=True)
 
 # Transactional SMS — off until separate GramAds credentials/patterns are approved.
 SMS_ENABLED = env.bool("SMS_ENABLED", default=False)
