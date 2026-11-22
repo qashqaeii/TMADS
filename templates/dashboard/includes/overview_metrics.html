@@ -19,5 +19,5 @@
       <div class="ga-home-metric-value ga-home-metric-active-value tabnums">{{ active_count|format_count }} <small>از {{ total_campaigns|format_count }} کمپین</small></div>
     </article>
   </div>
-  <p class="ga-home-coverage" role="status">{% include "includes/gramads_workspace_icon.html" with name="info" size="sm" %}<span>آمار {{ portfolio.stats_count|format_count }} از {{ portfolio.linked_count|format_count }} کمپین متصل · خط تیره: داده ناموجود{% if portfolio.any_stale %} · بخشی از آمار نیازمند همگام‌سازی است{% endif %}</span></p>
+  <p class="ga-home-coverage" role="status">{% include "includes/gramads_workspace_icon.html" with name="info" size="sm" %}<span>آمار {{ portfolio.stats_count|format_count }} از {{ portfolio.linked_count|format_count }} کمپین متصل · خط تیره: داده ناموجود · همگام‌سازی خودکار در هر بار بارگذاری</span></p>
 </section>

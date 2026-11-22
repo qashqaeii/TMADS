@@ -182,7 +182,8 @@
 .ui-final.public-premium .ui-auth-card .pp-auth-context{border-top:1px solid var(--pp-line);padding-top:14px}
 .public-premium .pp-password-row{position:relative}
 .public-premium .pp-password-row input{padding-inline-end:82px}
-.public-premium .pp-password-toggle{position:absolute;inset-inline-end:5px;top:50%;transform:translateY(-50%);min-height:40px;min-width:64px;border:0;border-radius:8px;background:var(--pp-soft);color:var(--pp-blue);font:inherit;font-size:.83rem;cursor:pointer}
+.public-premium .pp-password-toggle{position:absolute;inset-inline-end:6px;top:50%;transform:translateY(-50%);display:inline-flex;align-items:center;justify-content:center;width:34px;min-width:34px;height:34px;min-height:34px;padding:0;border:0;border-radius:10px;background:transparent;color:var(--pp-blue);cursor:pointer}
+.public-premium .pp-password-toggle:hover,.public-premium .pp-password-toggle[aria-pressed=true]{background:var(--pp-soft)}
 .public-premium .pp-password-toggle[hidden]{display:none}
 .ui-final.public-premium .pp-auth-recovery .ui-auth-card{max-width:480px;border-radius:22px;padding:clamp(24px,4vw,38px)}
 .public-premium .pp-auth-back{display:inline-flex;gap:6px;min-height:44px;align-items:center;color:var(--pp-blue);font-size:.9rem;justify-content:center}

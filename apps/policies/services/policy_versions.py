@@ -14,11 +14,11 @@ def get_active_policy_version() -> PolicyVersion:
     return PolicyVersion.objects.get_or_create(
         code=CURRENT_POLICY_VERSION,
         defaults={
-            "label_fa": "نسخه اولیه قوانین تبلیغ تلگرام (TMADS)",
+            "label_fa": "نسخه اولیه قوانین تبلیغ تلگرام (گرام‌ادز)",
             "guidelines_url": SOURCE_GUIDELINES,
             "effective_from": today,
             "is_active": True,
             "source_fingerprint": "guidelines-2025-11-11-fetch",
-            "notes": "خلاصهٔ داخلی TMADS؛ متن رسمی تلگرام مرجع است.",
+            "notes": "خلاصهٔ داخلی گرام‌ادز؛ متن رسمی تلگرام مرجع است.",
         },
     )[0]

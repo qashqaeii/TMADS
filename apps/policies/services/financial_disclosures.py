@@ -5,13 +5,13 @@ from apps.policies.services.types import PolicyFindingDTO
 
 
 def budget_step_guidance() -> list[PolicyFindingDTO]:
-    """Non-blocking customer education (TMADS wallet vs Telegram balance)."""
+    """Non-blocking customer education (گرام‌ادز wallet vs Telegram balance)."""
     return [
         PolicyFindingDTO(
             rule_id="TG-TOS-007",
             severity=FindingSeverity.INFO,
             field_key="budget",
-            message_fa="موجودی رزرو شده در TMADS با اعتبار تبلیغاتی حساب تلگرام اپراتور متفاوت است؛ بازپرداخت طبق قرارداد TMADS است نه مستقیماً از تلگرام.",
+            message_fa="موجودی رزرو شده در گرام‌ادز با اعتبار تبلیغاتی حساب تلگرام اپراتور متفاوت است؛ بازپرداخت طبق قرارداد گرام‌ادز است نه مستقیماً از تلگرام.",
             source_document="Telegram Ad Platform ToS",
             source_clause="§4.3",
             source_url=SOURCE_ADS_TOS,

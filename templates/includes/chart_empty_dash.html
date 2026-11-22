@@ -20,16 +20,11 @@
     <ul class="dash-chart-empty__steps muted">
       {% if show_steps %}
       <li>کمپین را منتشر یا از تلگرام وارد کنید</li>
-      <li>در صفحه کمپین‌ها، «بروزرسانی آمار» را بزنید</li>
+      <li>آمار به‌صورت خودکار هنگام باز کردن داشبورد همگام می‌شود</li>
       <li>پس از چند روز فعالیت، نقاط روزانه اینجا ظاهر می‌شوند</li>
       {% endif %}
     </ul>
     <div class="dash-chart-empty__actions">
-      {% if has_linked_ads %}
-      <form method="post" action="{% url 'campaigns:refresh_stats' %}">{% csrf_token %}
-        <button type="submit" class="btn btn-primary btn-sm">بروزرسانی آمار</button>
-      </form>
-      {% endif %}
       <a class="btn btn-ghost btn-sm" href="{% url 'campaigns:list' %}">کمپین‌ها</a>
       {% if not has_linked_ads %}
       <a class="btn btn-primary btn-sm" href="{% url 'campaigns:wizard_new' %}">کمپین جدید</a>

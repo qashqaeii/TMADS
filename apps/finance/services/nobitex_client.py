@@ -30,9 +30,16 @@ def _d(value: Any) -> Decimal | None:
 class NobitexClient:
     """Read-only Nobitex public API client (no trading, no token)."""
 
-    def __init__(self, *, timeout: float | None = None, base_url: str | None = None):
+    def __init__(
+        self,
+        *,
+        timeout: float | None = None,
+        retries: int | None = None,
+        base_url: str | None = None,
+    ):
         self.base_url = (base_url or settings.NOBITEX_API_BASE_URL).rstrip("/")
         self.timeout = timeout or settings.NOBITEX_HTTP_TIMEOUT_SECONDS
+        self.retries = settings.NOBITEX_HTTP_RETRIES if retries is None else max(0, int(retries))
         self.stats_src = settings.NOBITEX_STATS_SRC_CURRENCY
         self.stats_dst = settings.NOBITEX_STATS_DST_CURRENCY
         self.stats_pair = settings.NOBITEX_STATS_PAIR
@@ -41,7 +48,7 @@ class NobitexClient:
     def _get(self, path: str, *, params: dict | None = None) -> dict:
         url = f"{self.base_url}{path}"
         last_exc = None
-        for attempt in range(settings.NOBITEX_HTTP_RETRIES + 1):
+        for attempt in range(self.retries + 1):
             try:
                 with httpx.Client(timeout=self.timeout) as client:
                     response = client.get(url, params=params)
@@ -61,7 +68,8 @@ class NobitexClient:
                 return data
             except httpx.HTTPError as exc:
                 last_exc = exc
-                time.sleep(0.3)
+                if attempt < self.retries:
+                    time.sleep(0.3)
         raise NobitexAPIError(str(last_exc or "request_failed"))
 
     def fetch_market_stats(self) -> dict[str, Any]:

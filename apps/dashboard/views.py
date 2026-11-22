@@ -2,8 +2,10 @@ import json
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
+from django.views.decorators.http import require_GET
 
 from apps.accounts.permissions import customer_required
+from apps.campaigns.live_data import customer_has_linked_ads
 from apps.campaigns.metrics import aggregate_portfolio_kpis, build_campaign_list_rows, optimize_campaign_list_queryset
 from apps.campaigns.models import Campaign, CampaignStatusHistory
 from apps.finance.services import ensure_wallet
@@ -34,19 +36,16 @@ def home(request):
     ctr = portfolio["weighted_ctr"]
 
     from apps.campaigns.analytics import portfolio_timeseries
-    from apps.campaigns.models import TelegramAdvertisement
 
     chart = portfolio_timeseries(customer, days=30)
     has_chart = bool(chart.get("dates"))
-    has_linked_ads = TelegramAdvertisement.objects.filter(campaign__customer=customer).exclude(
-        remote_ad_id=""
-    ).exists()
+    has_linked_ads = customer_has_linked_ads(customer)
 
     ton_rate_display = None
     try:
-        from apps.finance.services.ton_exchange_rate import get_cached_snapshot
+        from apps.finance.services.ton_exchange_rate import get_ui_rate_snapshot
 
-        ton_rate_display = get_cached_snapshot(allow_stale_display=True)
+        ton_rate_display = get_ui_rate_snapshot()
     except Exception:
         pass
 
@@ -68,7 +67,28 @@ def home(request):
             "chart_json": json.dumps(chart, ensure_ascii=False),
             "has_chart": has_chart,
             "has_linked_ads": has_linked_ads,
+            "ga_live_boot": True,
+            "ga_live_stats": has_linked_ads,
         },
+    )
+
+
+@login_required
+@customer_required
+@require_GET
+def live_gram_rate(request):
+    """HTML fragment: fresh Gram/TON rate chip for live UI panels."""
+    ton_rate_display = None
+    try:
+        from apps.finance.services.ton_exchange_rate import get_ui_rate_snapshot
+
+        ton_rate_display = get_ui_rate_snapshot(refresh=True)
+    except Exception:
+        ton_rate_display = None
+    return render(
+        request,
+        "includes/live_gram_rate_chip.html",
+        {"ton_rate_display": ton_rate_display},
     )
 
 

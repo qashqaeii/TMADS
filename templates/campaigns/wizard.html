@@ -383,7 +383,7 @@
       <div class="field studio-pro-only"><label for="studio-control-21">شناسه تبلیغ</label><input id="studio-control-21" name="additional_info" maxlength="64" value="{{ campaign.ad_settings.additional_info|default:'' }}"></div>
       {% if ton_rate_display %}
       <article class="card card-pad card-muted" style="margin-top:1rem">
-        <p class="muted" style="margin:0 0 .5rem;font-size:.85rem">نرخ هر گرام</p>
+        <p class="muted" style="margin:0 0 .5rem;font-size:.85rem">نرخ هر گرام{% if ton_rate_display.is_fresh %} · زنده{% endif %}</p>
         <div class="finance-line"><span>هر گرام</span><strong>{{ ton_rate_display.irr_per_ton|format_count }} ریال</strong></div>
       </article>
       {% endif %}

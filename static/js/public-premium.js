@@ -17,19 +17,7 @@
       }, {threshold: 0.06});
       root.querySelectorAll('[data-pp-reveal], .ui-landing-section-head, .ui-editorial-head').forEach(function(el){observer.observe(el);});
     }
-    root.querySelectorAll('[data-pp-password-toggle]').forEach(function(button){
-      var input = document.getElementById(button.getAttribute('aria-controls'));
-      if (!input || input.type !== 'password') return;
-      button.hidden = false;
-      button.setAttribute("aria-pressed", "false");
-      button.addEventListener('click',function(){
-        var show = input.type === 'password';
-        input.type = show ? 'text' : 'password';
-        button.textContent = show ? 'پنهان' : 'نمایش';
-        button.setAttribute('aria-pressed', String(show));
-        button.setAttribute('aria-label',show ? 'پنهان کردن رمز عبور' : 'نمایش رمز عبور');
-      });
-    });
+    // Password eye toggle is handled by ui-auth.js (icon-only).
     var search = root.querySelector('[data-pp-faq-search]');
     if (search && !root.classList.contains('orbit-faq')) {
       var input = search.querySelector('input');

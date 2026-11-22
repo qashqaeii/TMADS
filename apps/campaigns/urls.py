@@ -7,6 +7,7 @@ app_name = "campaigns"
 urlpatterns = [
     path("", views.campaign_list, name="list"),
     path("refresh-stats/", views.campaign_refresh_stats, name="refresh_stats"),
+    path("live-stats/", views.campaign_live_stats, name="live_stats"),
     path("new/", views.campaign_wizard, name="wizard_new"),
     path("<uuid:campaign_id>/", views.campaign_detail, name="detail"),
     path("<uuid:campaign_id>/intraday/", intraday_views.campaign_intraday, name="intraday"),

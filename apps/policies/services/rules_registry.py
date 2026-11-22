@@ -74,7 +74,7 @@ RULES: dict[str, RuleMeta] = {
         "targets": ("bots", "users", "channels"),
     },
     "TMADS-ACC-001": {
-        "document": "TMADS Terms",
+        "document": "GramAds Terms",
         "clause": "Customer acceptance",
         "url": "/terms/",
         "auto": True,

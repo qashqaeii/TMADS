@@ -6,12 +6,15 @@
 {% if has_portfolio_chart %}{% include "includes/charts_exec_scripts.html" %}{% endif %}
 {% endblock %}
 {% block content %}
+{% include "includes/ga_live_boot.html" %}
 <div class="app-stack campaigns-page campaigns-page--luxe ui-campaign-list ga-campaign-workspace">
 <div class="campaigns-list-hero-shell motion-reveal">
 {% include "campaigns/includes/list_page_header.html" %}
 </div>
 
+<div class="ga-live-panel" data-ga-live-panel>
 {% include "includes/portfolio_metric_strip.html" %}
+</div>
 
 
 {% if has_any_campaigns and not has_portfolio_chart %}
@@ -51,35 +54,35 @@
     </div>
   </header>
 
-  <section class="campaigns-filter campaigns-filter--luxe ga-campaign-filter" aria-label="فیلتر کمپین‌ها">
+  <section class="campaigns-filter campaigns-filter--luxe ga-campaign-filter" aria-label="جستجو و فیلتر">
   <form method="get" class="filter-exec campaigns-filter__form">
   <div class="campaigns-filter__bar">
     <div class="campaigns-filter__field campaigns-filter__field--search">
       <label class="campaigns-filter__label" for="campaign-filter-q">جستجو</label>
       <div class="campaigns-filter__input-wrap">
         <span class="campaigns-filter__input-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="search" size="sm" %}</span>
-        <input id="campaign-filter-q" class="filter-exec__control campaigns-filter__control campaigns-filter__control--search" type="search" name="q" value="{{ request.GET.q }}" placeholder="نام یا لینک مقصد" autocomplete="off">
+        <input id="campaign-filter-q" class="filter-exec__control campaigns-filter__control campaigns-filter__control--search" type="search" name="q" value="{{ request.GET.q }}" placeholder="نام کمپین یا لینک مقصد" autocomplete="off">
       </div>
     </div>
     <div class="campaigns-filter__field campaigns-filter__field--select">
       <label class="campaigns-filter__label" for="campaign-filter-status">وضعیت</label>
       <select id="campaign-filter-status" class="filter-exec__control campaigns-filter__control campaigns-filter__control--select" name="status">
-        <option value="">همه</option>
+        <option value="">همه وضعیت‌ها</option>
         {% for val,label in status_choices %}<option value="{{ val }}" {% if request.GET.status == val %}selected{% endif %}>{{ label }}</option>{% endfor %}
       </select>
     </div>
     <div class="campaigns-filter__field campaigns-filter__field--select">
       <label class="campaigns-filter__label" for="campaign-filter-placement">جایگاه</label>
       <select id="campaign-filter-placement" class="filter-exec__control campaigns-filter__control campaigns-filter__control--select" name="placement">
-        <option value="">همه</option>
+        <option value="">همه جایگاه‌ها</option>
         {% for val,label in placement_choices %}<option value="{{ val }}" {% if request.GET.placement == val %}selected{% endif %}>{{ label }}</option>{% endfor %}
       </select>
     </div>
     <input type="hidden" name="sort" value="{{ sort }}">
     <div class="campaigns-filter__actions">
-      <button class="campaigns-filter__btn campaigns-filter__btn--apply" type="submit">{% include "includes/lucide_icon.html" with name="filter" size="sm" %} اعمال فیلتر</button>
+      <button class="btn btn-primary campaigns-filter__btn campaigns-filter__btn--apply" type="submit">اعمال</button>
       {% if request.GET.q or request.GET.status or request.GET.placement %}
-      <a class="campaigns-filter__btn campaigns-filter__btn--clear" href="{% url 'campaigns:list' %}">پاک‌سازی</a>
+      <a class="campaigns-filter__btn campaigns-filter__btn--clear" href="{% url 'campaigns:list' %}">پاک کردن</a>
       {% endif %}
     </div>
   </div>

@@ -8,20 +8,85 @@
   {% include "includes/dash_header.html" with page_icon="wallet" eyebrow="مالی" title="شارژ کیف پول" subtitle="به اندازه نیاز کمپین‌هایتان اعتبار اضافه کنید." with_sub=1 %}
   {% include "finance/includes/payment_rail.html" with stage=1 %}
   <div class="pay-checkout-grid">
-    <form method="post" class="pay-checkout-form ga-panel" data-topup-form>
+    <form method="post" class="pay-checkout-form" data-topup-form>
       {% csrf_token %}<input type="hidden" name="payment_nonce" value="{{ payment_nonce }}">
-      <div class="pay-heading"><span class="pay-heading-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="wallet" size="md" %}</span><div><h2>انتخاب مبلغ شارژ</h2><p>مبلغ را به تومان وارد کنید.</p></div></div>
-      <div class="pay-amount-field field"><label for="topup-amount">مبلغ شارژ (تومان)</label><div class="pay-input-wrap"><input id="topup-amount" aria-describedby="topup-help" inputmode="numeric" name="amount_toman" type="number" min="1000" step="1" dir="ltr" placeholder="0" required><span>تومان</span></div><p id="topup-help" class="field-help">حداقل مبلغ شارژ ۱٬۰۰۰ تومان است.</p></div>
-      <div data-quick-amounts-box hidden><p class="pay-quick-label">انتخاب سریع</p><div class="ui-quick-amounts" role="group" aria-label="مبالغ پیشنهادی" data-quick-amounts hidden><button type="button" class="btn btn-ghost" data-amount="50000" aria-pressed="false">۵۰ هزار</button><button type="button" class="btn btn-ghost" data-amount="100000" aria-pressed="false">۱۰۰ هزار</button><button type="button" class="btn btn-ghost" data-amount="500000" aria-pressed="false">۵۰۰ هزار</button></div></div>
-      {% if payment_gateway == 'zibal' %}<div class="pay-provider"><span class="pay-provider-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="shield-check" size="md" %}</span><div><strong>پرداخت آنلاین با زیبال</strong><small>انتقال به صفحه بانکی برای تکمیل پرداخت</small></div></div>{% elif payment_gateway == 'fake' %}<p class="ui-studio-warning" role="status">در محیط آزمایشی، پرداخت شبیه‌سازی می‌شود.</p>{% else %}<div class="pay-provider"><span class="pay-provider-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="shield-check" size="md" %}</span><div><strong>پرداخت آنلاین</strong><small>انتقال به صفحه بانکی</small></div></div>{% endif %}
-      <div class="ui-topup-total" aria-live="polite" data-topup-total hidden><span>مبلغ انتخاب‌شده</span><strong data-topup-value>—</strong></div>
-      <div><button class="btn btn-primary pay-main-action" type="submit" data-payment-submit><span data-pay-submit-label>ادامه پرداخت</span>{% include "includes/lucide_icon.html" with name="arrow-left" size="btn" %}</button><a class="pay-secondary" href="{% url 'finance:wallet' %}">{% include "includes/lucide_icon.html" with name="arrow-right" size="sm" %} بازگشت به کیف پول</a></div>
+      <div class="pay-heading">
+        <span class="pay-heading-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="wallet" size="md" %}</span>
+        <div>
+          <h2>انتخاب مبلغ شارژ</h2>
+          <p>مبلغ را به تومان وارد کنید یا از پیشنهادهای سریع استفاده کنید.</p>
+        </div>
+      </div>
+      <div class="pay-amount-field">
+        <label for="topup-amount">مبلغ شارژ</label>
+        <div class="pay-input-wrap">
+          <input
+            id="topup-amount"
+            aria-describedby="topup-help"
+            inputmode="numeric"
+            autocomplete="off"
+            name="amount_toman"
+            type="text"
+            dir="ltr"
+            placeholder="۰"
+            required
+            data-topup-amount
+          >
+          <span>تومان</span>
+        </div>
+        <p id="topup-help" class="field-help">حداقل مبلغ شارژ ۱٬۰۰۰ تومان است.</p>
+      </div>
+      <div data-quick-amounts-box>
+        <p class="pay-quick-label">انتخاب سریع</p>
+        <div class="ui-quick-amounts" role="group" aria-label="مبالغ پیشنهادی" data-quick-amounts>
+          <button type="button" class="btn btn-ghost" data-amount="50000" aria-pressed="false">۵۰٬۰۰۰</button>
+          <button type="button" class="btn btn-ghost" data-amount="100000" aria-pressed="false">۱۰۰٬۰۰۰</button>
+          <button type="button" class="btn btn-ghost" data-amount="500000" aria-pressed="false">۵۰۰٬۰۰۰</button>
+        </div>
+      </div>
+      {% if payment_gateway == 'zibal' %}
+      <div class="pay-provider">
+        <span class="pay-provider-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="shield-check" size="md" %}</span>
+        <div><strong>پرداخت آنلاین با زیبال</strong><small>انتقال به صفحه بانکی برای تکمیل پرداخت</small></div>
+      </div>
+      {% elif payment_gateway == 'fake' %}
+      <p class="ui-studio-warning" role="status">در محیط آزمایشی، پرداخت شبیه‌سازی می‌شود.</p>
+      {% else %}
+      <div class="pay-provider">
+        <span class="pay-provider-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="shield-check" size="md" %}</span>
+        <div><strong>پرداخت آنلاین</strong><small>انتقال به صفحه بانکی</small></div>
+      </div>
+      {% endif %}
+      <div class="ui-topup-total" aria-live="polite" data-topup-total>
+        <span>مبلغ انتخاب‌شده</span>
+        <strong data-topup-value>—</strong>
+      </div>
+      <div>
+        <button class="btn btn-primary pay-main-action" type="submit" data-payment-submit>
+          <span data-pay-submit-label>ادامه پرداخت</span>
+          {% include "includes/lucide_icon.html" with name="arrow-left" size="btn" %}
+        </button>
+        <a class="pay-secondary" href="{% url 'finance:wallet' %}">
+          {% include "includes/lucide_icon.html" with name="arrow-right" size="sm" %}
+          بازگشت به کیف پول
+        </a>
+      </div>
     </form>
-    <aside class="pay-summary-card ga-panel" aria-label="خلاصه کیف پول و راهنما">
+    <aside class="pay-summary-card" aria-label="خلاصه کیف پول و راهنما">
       <h2>خلاصه کیف پول</h2>
-      <div class="pay-balance"><small>موجودی قابل استفاده</small><strong>{{ wallet.available_irr|irr_to_toman|format_irr }} <small>تومان</small></strong></div>
-      <ol class="pay-process"><li><span class="pay-process-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="wallet" size="sm" %}</span> مبلغ مورد نظر را انتخاب کنید.</li><li><span class="pay-process-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="lock" size="sm" %}</span> پرداخت را در صفحه بانکی تکمیل کنید.</li><li><span class="pay-process-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="check-circle" size="sm" %}</span> پس از تأیید، اعتبار و فاکتور در حساب شما ثبت می‌شود.</li></ol>
-      <div class="pay-note"><span aria-hidden="true">{% include "includes/lucide_icon.html" with name="info" size="sm" %}</span><span>اگر مبلغی کسر شد و نتیجه نامشخص بود، ابتدا همان پرداخت را از کیف پول پیگیری کنید.</span></div>
+      <div class="pay-balance">
+        <small>موجودی قابل استفاده</small>
+        <strong>{{ wallet.available_irr|irr_to_toman|format_irr }} <small>تومان</small></strong>
+      </div>
+      <ol class="pay-process">
+        <li><span class="pay-process-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="wallet" size="sm" %}</span> مبلغ مورد نظر را انتخاب کنید.</li>
+        <li><span class="pay-process-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="lock" size="sm" %}</span> پرداخت را در صفحه بانکی تکمیل کنید.</li>
+        <li><span class="pay-process-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="check-circle" size="sm" %}</span> پس از تأیید، اعتبار و فاکتور در حساب شما ثبت می‌شود.</li>
+      </ol>
+      <div class="pay-note">
+        <span aria-hidden="true">{% include "includes/lucide_icon.html" with name="info" size="sm" %}</span>
+        <span>اگر مبلغی کسر شد و نتیجه نامشخص بود، ابتدا همان پرداخت را از کیف پول پیگیری کنید.</span>
+      </div>
       <a class="pay-inline-link" href="{% url 'finance:wallet' %}">پیگیری پرداخت‌های قبلی {% include "includes/lucide_icon.html" with name="arrow-left" size="sm" %}</a>
     </aside>
   </div>

@@ -107,7 +107,9 @@ def campaign_list(request):
         campaign_ids=[row.campaign.pk for row in rows])
     paginator = Paginator(rows, 20)
     page_obj = paginator.get_page(request.GET.get("page"))
+    from apps.campaigns.live_data import customer_has_linked_ads
 
+    has_linked = customer_has_linked_ads(customer)
     return render(
         request,
         "campaigns/list.html",
@@ -123,6 +125,9 @@ def campaign_list(request):
             "status_choices": Campaign.Status.choices,
             "has_any_campaigns": has_any_campaigns,
             "filter_active": filter_active,
+            "ga_live_boot": has_linked,
+            "ga_live_stats": has_linked,
+            "ga_live_rate": False,
         },
     )
 
@@ -132,51 +137,53 @@ def campaign_list(request):
 @require_POST
 def campaign_refresh_stats(request):
     """Read-only sync of linked Telegram ads + statistics for current customer."""
-    from apps.telegram_ads.exceptions import TelegramAdsError
-    from apps.telegram_ads.services.sync import (
-        stats_sync_days,
-        sync_ad_statistics_for,
-    )
+    from apps.campaigns.live_data import customer_has_linked_ads, refresh_customer_live_stats
 
     customer = request.user.customer_profile
     campaign_id = (request.POST.get("campaign_id") or "").strip()
     campaign = get_customer_campaign(customer, campaign_id) if campaign_id else None
-    if campaign:
-        ads = TelegramAdvertisement.objects.filter(campaign=campaign).exclude(remote_ad_id="")
-    else:
-        ads = TelegramAdvertisement.objects.filter(campaign__customer=customer).exclude(remote_ad_id="")
-    if not ads.exists():
+    if not customer_has_linked_ads(customer, campaign=campaign):
         messages.info(request, "تبلیغ متصلی برای بروزرسانی نیست.")
         if campaign:
             return redirect("campaigns:detail", campaign_id=campaign.id)
         return redirect("campaigns:list")
 
-    # A customer may only refresh their own linked ads, not the central account.
-    if not cache.add(f"campaign-refresh:{customer.pk}", True, timeout=60):
+    result = refresh_customer_live_stats(customer, campaign=campaign, force=True)
+    if result.get("reason") == "locked":
         messages.info(request, "درخواست بروزرسانی اخیر ثبت شده است؛ لطفاً یک دقیقه صبر کنید.")
-        if campaign:
-            return redirect("campaigns:detail", campaign_id=campaign.id)
-        return redirect("campaigns:list")
-
-    refreshed = 0
-    failed = 0
-    from apps.telegram_ads.services.sync import sync_advertisement_detail
-
-    for ad in ads.select_related("campaign"):
-        try:
-            sync_advertisement_detail(ad)
-            sync_ad_statistics_for(ad, days=stats_sync_days(ad, ad.campaign))
-            refreshed += 1
-        except Exception:
-            failed += 1
-
-    if refreshed:
-        messages.success(request, f"آمار {refreshed} تبلیغ بروزرسانی شد.")
-    if failed:
-        messages.warning(request, f"{failed} تبلیغ بدون آمار جدید (API یا محدودیت).")
+    else:
+        refreshed = int(result.get("refreshed") or 0)
+        failed = int(result.get("failed") or 0)
+        if refreshed:
+            messages.success(request, f"آمار {refreshed} تبلیغ بروزرسانی شد.")
+        if failed:
+            messages.warning(request, f"{failed} تبلیغ بدون آمار جدید (API یا محدودیت).")
     if campaign:
         return redirect("campaigns:detail", campaign_id=campaign.id)
     return redirect("campaigns:list")
+
+
+@login_required
+@customer_required
+@require_POST
+def campaign_live_stats(request):
+    """JSON endpoint: ensure campaign/portfolio stats are fresh for the current page load."""
+    from apps.campaigns.live_data import refresh_customer_live_stats
+
+    customer = request.user.customer_profile
+    campaign_id = (request.POST.get("campaign_id") or "").strip()
+    campaign = get_customer_campaign(customer, campaign_id) if campaign_id else None
+    result = refresh_customer_live_stats(customer, campaign=campaign, force=False)
+    return JsonResponse(
+        {
+            "ok": True,
+            "needed": bool(result.get("needed")),
+            "skipped": bool(result.get("skipped")),
+            "refreshed": int(result.get("refreshed") or 0),
+            "failed": int(result.get("failed") or 0),
+            "reason": result.get("reason") or "",
+        }
+    )
 
 
 @login_required
@@ -214,6 +221,7 @@ def campaign_detail(request, campaign_id):
     from apps.ai.provider import available as ai_available
     from apps.ai.features import analysis_eligible
     ai_campaign_ready = ai_available() and analysis_eligible(campaign, metrics)
+    has_linked_remote = remote_ads.exclude(remote_ad_id="").exists()
     return render(
         request,
         "campaigns/detail.html",
@@ -243,6 +251,10 @@ def campaign_detail(request, campaign_id):
             "can_delete_draft": can_delete_draft_campaign(campaign)[0],
             "order_exchange_rate_id": order_exchange_rate_id,
             "ton_irr_per_ton": int(ton_irr_per_ton) if ton_irr_per_ton else 0,
+            "ga_live_boot": has_linked_remote,
+            "ga_live_stats": has_linked_remote,
+            "ga_live_rate": False,
+            "ga_live_campaign_id": str(campaign.id) if has_linked_remote else "",
         },
     )
 
@@ -420,7 +432,7 @@ def campaign_wizard(request, campaign_id=None):
                             return redirect("campaigns:wizard", campaign_id=campaign.id)
                         acceptance = (
                             "مشتری تأیید می‌کند حق تبلیغ مقصد را دارد، محتوا دقیق است، "
-                            "بررسی نهایی با تلگرام است و تأیید TMADS تضمین نمایش نیست."
+                            "بررسی نهایی با تلگرام است و تأیید گرام‌ادز تضمین نمایش نیست."
                         )
                         campaign.refresh_from_db()
                         CampaignPolicyPreflight.record_acceptance(
@@ -461,11 +473,9 @@ def campaign_wizard(request, campaign_id=None):
     wallet = ensure_wallet(customer)
     ton_rate_display = None
     try:
-        from apps.finance.services.ton_exchange_rate import get_cached_snapshot
+        from apps.finance.services.ton_exchange_rate import get_ui_rate_snapshot
 
-        snap = get_cached_snapshot(allow_stale_display=True)
-        if snap:
-            ton_rate_display = snap
+        ton_rate_display = get_ui_rate_snapshot()
     except Exception:
         pass
     from apps.telegram_ads.services.ad_write import dry_run_create_ad

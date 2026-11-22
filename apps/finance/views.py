@@ -37,15 +37,25 @@ def wallet_view(request):
     )
 
 
+def _parse_toman_amount(raw) -> int:
+    """Accept ASCII/Persian digits and thousand separators from the top-up UI."""
+    text = str(raw or "").strip()
+    translated = text.translate(str.maketrans("۰۱۲۳۴۵۶۷۸۹٠١٢٣٤٥٦٧٨٩", "01234567890123456789"))
+    digits = "".join(ch for ch in translated if ch.isdigit())
+    if not digits:
+        return 0
+    try:
+        return int(digits)
+    except ValueError:
+        return 0
+
+
 @login_required
 @customer_required
 def topup_view(request):
     wallet = ensure_wallet(request.user.customer_profile)
     if request.method == "POST":
-        try:
-            amount_toman = int(request.POST.get("amount_toman", "0"))
-        except ValueError:
-            amount_toman = 0
+        amount_toman = _parse_toman_amount(request.POST.get("amount_toman"))
         amount_irr = amount_toman * 10
         if amount_irr > 9223372036854775807:
             messages.error(request, "مبلغ شارژ از محدوده مجاز بیشتر است.")

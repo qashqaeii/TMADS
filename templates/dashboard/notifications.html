@@ -3,27 +3,64 @@
 {% block page_title %}اعلان‌ها{% endblock %}
 {% block container_class %}container-wide{% endblock %}
 {% block content %}
-<div class="app-stack ui-notifications ga-notifications">
-<header class="ga-notifications__hero"><div class="ga-notifications__lead"><span class="ga-notifications__symbol" aria-hidden="true">{% include "includes/gramads_workspace_icon.html" with name="bell" size="md" %}</span><div><h1>اعلان‌ها</h1><p>به‌روزرسانی کمپین‌ها و پیام‌های حساب در یک نگاه</p></div></div>
-{% if notifications %}<form method="post">{% csrf_token %}<button class="btn btn-ghost btn-sm" type="submit">{% include "includes/lucide_icon.html" with name="check-check" size="sm" %} خواندن همهٔ اعلان‌ها</button></form>{% endif %}</header>
-<article class="card card--lift notification-panel"><header class="ga-notifications__panel-head"><h2>آخرین اعلان‌ها</h2><span>{{ notifications|length|format_count }} اعلان</span></header>
-  <ul class="activity-feed">
-    {% for n in notifications %}
-    <li class="activity-feed__item notification-item {% if not n.is_read %}is-unread{% endif %}">
-      <span class="ga-notification-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="bell" size="sm" %}</span>
-      <div class="activity-feed__body">
-        <div class="ui-notification-heading"><strong>{{ n.title }}</strong>{% if not n.is_read %}<span class="status status-info">جدید</span>{% endif %}</div>
-        {% if n.body %}<p class="ui-notification-message">{{ n.body }}</p>{% endif %}
-        <time class="activity-feed__time muted" datetime="{{ n.created_at|date:'c' }}">{{ n.created_at|jalali_datetime }}</time>
+<div class="app-stack ui-notifications ga-notifications ga-notifications--minimal">
+  <header class="ga-notifications__hero">
+    <div class="ga-notifications__lead">
+      <span class="ga-notifications__symbol" aria-hidden="true">{% include "includes/gramads_workspace_icon.html" with name="bell" size="md" %}</span>
+      <div>
+        <h1>اعلان‌ها</h1>
+        <p>به‌روزرسانی کمپین‌ها و پیام‌های حساب</p>
       </div>
-    </li>
-    {% empty %}
-    <li class="activity-feed__empty ui-empty">
-      <span class="ui-empty__icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="bell" size="md" %}</span><h2>اعلانی نیست</h2>
-      <p class="section-description">وقتی کمپین یا پرداختی ثبت شود، اینجا نمایش داده می‌شود.</p>
-    </li>
-    {% endfor %}
-  </ul>
-</article>
+    </div>
+    {% if notifications %}
+    <form method="post" class="ga-notifications__mark">
+      {% csrf_token %}
+      <button class="btn btn-ghost btn-sm" type="submit">
+        {% include "includes/lucide_icon.html" with name="check-check" size="sm" %}
+        خواندن همه
+      </button>
+    </form>
+    {% endif %}
+  </header>
+
+  <section class="ga-notifications__stream" aria-label="فهرست اعلان‌ها">
+    <div class="ga-notifications__meta">
+      <h2>صندوق پیام</h2>
+      <span class="tabnums">{{ notifications|length|format_count }} مورد</span>
+    </div>
+
+    {% if notifications %}
+    <ul class="ga-notify-list">
+      {% for n in notifications %}
+      <li class="ga-notify-item {% if not n.is_read %}is-unread{% endif %}">
+        <span class="ga-notify-item__accent" aria-hidden="true"></span>
+        <span class="ga-notify-item__icon" aria-hidden="true">
+          {% if "موفق" in n.title or "شارژ" in n.title %}
+          {% include "includes/lucide_icon.html" with name="wallet" size="sm" %}
+          {% elif "کمپین" in n.title or "تبلیغ" in n.title %}
+          {% include "includes/lucide_icon.html" with name="megaphone" size="sm" %}
+          {% else %}
+          {% include "includes/lucide_icon.html" with name="bell" size="sm" %}
+          {% endif %}
+        </span>
+        <div class="ga-notify-item__body">
+          <div class="ga-notify-item__top">
+            <strong>{{ n.title }}</strong>
+            {% if not n.is_read %}<span class="ga-notify-item__badge">جدید</span>{% endif %}
+          </div>
+          {% if n.body %}<p>{{ n.body }}</p>{% endif %}
+          <time datetime="{{ n.created_at|date:'c' }}">{{ n.created_at|jalali_datetime }}</time>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <div class="ga-notify-empty" role="status">
+      <span class="ga-notify-empty__icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="bell-off" size="md" %}</span>
+      <h2>هنوز اعلانی نیست</h2>
+      <p>وقتی کمپین یا پرداختی ثبت شود، اینجا نمایش داده می‌شود.</p>
+    </div>
+    {% endif %}
+  </section>
 </div>
 {% endblock %}

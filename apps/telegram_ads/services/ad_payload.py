@@ -85,7 +85,7 @@ def build_create_ad_payload(
 
     settings = campaign.ad_settings or {}
     text = None if target_type == "search" else (creative.ad_text if creative else "")
-    title = (campaign.name or (creative.title if creative else "") or "TMADS").strip()
+    title = (campaign.name or (creative.title if creative else "") or "GramAds").strip()
 
     payload: dict[str, Any] = {
         "title": title,

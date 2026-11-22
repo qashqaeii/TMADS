@@ -36,10 +36,13 @@
   <link rel="stylesheet" href="{% static 'css/gramads-workspace-composition.css' %}">
   <link rel="stylesheet" href="{% static 'css/gramads-workspace-background.css' %}">
   <link rel="stylesheet" href="{% static 'css/gramads-sidebar.css' %}">
+  <link rel="stylesheet" href="{% static 'css/ga-live-loader.css' %}">
   {% block page_styles %}{% endblock %}
   {% block charts_head %}{% endblock %}
   {# Global icon rules must be last so every page uses the same glyph-only treatment. #}
   <link rel="stylesheet" href="{% static 'css/gramads-icon-system.css' %}">
+  <link rel="stylesheet" href="{% static 'css/gramads-ui-polish.css' %}">
+  <script defer src="{% static 'js/ga-live-panels.js' %}"></script>
 </head>
 <body class="app-body ui-final {% block body_class %}{% endblock %}">
   <a class="skip-link" href="#main-content">رفتن به محتوای اصلی</a>

@@ -1,5 +1,7 @@
 from django.contrib.auth.models import AbstractUser
+from django.core.validators import MinLengthValidator
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 from apps.core.models import TimeStampedModel, UUIDModel
 
@@ -13,6 +15,17 @@ class User(AbstractUser):
         ADMIN = "admin", "مدیر"
         SUPERADMIN = "superadmin", "مدیر ارشد"
 
+    # Free-form username: any characters, just more than 5 (min length 6).
+    username = models.CharField(
+        _("username"),
+        max_length=150,
+        unique=True,
+        help_text=_("Required. 150 characters or fewer."),
+        validators=[MinLengthValidator(6)],
+        error_messages={
+            "unique": _("A user with that username already exists."),
+        },
+    )
     role = models.CharField(
         max_length=32,
         choices=Role.choices,

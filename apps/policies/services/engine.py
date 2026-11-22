@@ -23,11 +23,11 @@ def _studio_validation_errors(campaign: Campaign, *, strict: bool) -> list[Polic
     for err in vr.errors:
         findings.append(
             PolicyFindingDTO(
-                rule_id="TMADS-API-000",
+                rule_id="GA-API-000",
                 severity=FindingSeverity.BLOCKED,
                 field_key="form",
                 message_fa=err,
-                source_document="TMADS API alignment",
+                source_document="GramAds API alignment",
                 source_clause="createAd validation",
                 source_url="",
             )
@@ -35,7 +35,7 @@ def _studio_validation_errors(campaign: Campaign, *, strict: bool) -> list[Polic
     for warn in vr.warnings:
         findings.append(
             PolicyFindingDTO(
-                rule_id="TMADS-API-000",
+                rule_id="GA-API-000",
                 severity=FindingSeverity.WARNING,
                 field_key="form",
                 message_fa=warn,
@@ -44,7 +44,7 @@ def _studio_validation_errors(campaign: Campaign, *, strict: bool) -> list[Polic
     if not findings and not vr.ok:
         findings.append(
             PolicyFindingDTO(
-                rule_id="TMADS-API-000",
+                rule_id="GA-API-000",
                 severity=FindingSeverity.UNKNOWN,
                 field_key="form",
                 message_fa="اعتبارسنجی فنی کامل نیست.",
@@ -85,8 +85,8 @@ def _terms_gate(campaign: Campaign, *, strict: bool) -> PolicyFindingDTO | None:
             rule_id="TMADS-ACC-001",
             severity=FindingSeverity.INFO,
             field_key="terms",
-            message_fa="قبل از ثبت نهایی، شرایط TMADS و راهنمای تبلیغ را بپذیرید.",
-            source_document="TMADS Terms",
+            message_fa="قبل از ثبت نهایی، شرایط گرام‌ادز و راهنمای تبلیغ را بپذیرید.",
+            source_document="GramAds Terms",
             source_clause="Acceptance",
             source_url="/terms/",
         )
@@ -94,8 +94,8 @@ def _terms_gate(campaign: Campaign, *, strict: bool) -> PolicyFindingDTO | None:
         rule_id="TMADS-ACC-001",
         severity=FindingSeverity.BLOCKED,
         field_key="terms",
-        message_fa="پذیرش قوانین TMADS قبل از ثبت سفارش الزامی است.",
-        source_document="TMADS Terms",
+        message_fa="پذیرش قوانین گرام‌ادز قبل از ثبت سفارش الزامی است.",
+        source_document="GramAds Terms",
         source_clause="Acceptance",
         source_url="/terms/",
     )

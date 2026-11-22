@@ -1,5 +1,11 @@
 from django import forms
-from django.contrib.auth.forms import AuthenticationForm, UserCreationForm, UsernameField
+from django.contrib.auth.forms import (
+    AuthenticationForm,
+    PasswordChangeForm,
+    UserCreationForm,
+    UsernameField,
+)
+from django.core.validators import MaxLengthValidator, MinLengthValidator
 from django.db.models import Q
 
 from apps.notifications.faraz import normalize_mobile
@@ -7,21 +13,49 @@ from apps.notifications.faraz import normalize_mobile
 from .models import User
 
 
+class PasswordChangeFormFa(PasswordChangeForm):
+    """Persian labels and compact help text for the profile security panel."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        labels = {
+            "old_password": "رمز عبور فعلی",
+            "new_password1": "رمز عبور جدید",
+            "new_password2": "تکرار رمز عبور جدید",
+        }
+        for name, label in labels.items():
+            field = self.fields[name]
+            field.label = label
+            field.error_messages["required"] = "تکمیل این فیلد الزامی است."
+            field.widget.attrs.update({"dir": "ltr"})
+        self.fields["old_password"].widget.attrs["autocomplete"] = "current-password"
+        self.fields["new_password1"].widget.attrs["autocomplete"] = "new-password"
+        self.fields["new_password2"].widget.attrs["autocomplete"] = "new-password"
+        self.fields["new_password1"].help_text = "حداقل ۸ نویسه؛ از اطلاعات شخصی خیلی شبیه استفاده نکنید."
+        self.fields["new_password2"].help_text = ""
+
+
 class RegisterForm(UserCreationForm):
-    email = forms.EmailField(required=True, label="ایمیل")
+    mobile = forms.CharField(
+        label="شماره تماس",
+        max_length=20,
+        error_messages={"required": "تکمیل این فیلد الزامی است."},
+    )
 
     class Meta:
         model = User
-        fields = ("username", "email", "password1", "password2")
+        fields = ("username", "password1", "password2")
         widgets = {
             "username": forms.TextInput(attrs={"autocomplete": "username"}),
         }
+
+    field_order = ("username", "mobile", "password1", "password2")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         labels = {
             "username": "نام کاربری",
-            "email": "ایمیل",
+            "mobile": "شماره تماس",
             "password1": "رمز عبور",
             "password2": "تکرار رمز عبور",
         }
@@ -30,16 +64,45 @@ class RegisterForm(UserCreationForm):
             field.label = label
             field.error_messages["required"] = "تکمیل این فیلد الزامی است."
             field.widget.attrs.update({"dir": "ltr"})
-        self.fields["username"].widget.attrs.update({"dir": "auto", "placeholder": "نام کاربری دلخواه"})
-        self.fields["email"].widget.attrs.update({"autocomplete": "email", "placeholder": "name@example.com"})
-        self.fields["username"].help_text = "حداکثر ۱۵۰ نویسه؛ حروف، اعداد و نشانه‌های مجاز."
-        self.fields["password1"].help_text = "حداقل ۸ نویسه؛ غیرعددیِ صرف، غیررایج و متفاوت از اطلاعات شخصی."
+        username = self.fields["username"]
+        username.widget.attrs.update({"dir": "auto", "placeholder": "نام کاربری دلخواه", "minlength": "6"})
+        # Allow any characters; only enforce length (more than 5 → min 6).
+        username.validators = [
+            MinLengthValidator(6, message="نام کاربری باید بیشتر از ۵ نویسه باشد."),
+            MaxLengthValidator(150, message="نام کاربری حداکثر ۱۵۰ نویسه است."),
+        ]
+        username.help_text = "حداقل ۶ نویسه"
+        self.fields["mobile"].widget.attrs.update(
+            {
+                "autocomplete": "tel",
+                "inputmode": "tel",
+                "placeholder": "09123456789",
+            }
+        )
+        self.fields["mobile"].help_text = "مثال: ۰۹۱۲۳۴۵۶۷۸۹"
+        self.fields["password1"].help_text = "حداقل ۸ نویسه"
         self.fields["password2"].help_text = ""
-        self.fields["email"].error_messages["invalid"] = "نشانی ایمیل معتبر وارد کنید."
+
+    def clean_username(self):
+        username = (self.cleaned_data.get("username") or "").strip()
+        if len(username) < 6:
+            raise forms.ValidationError("نام کاربری باید بیشتر از ۵ نویسه باشد.")
+        if len(username) > 150:
+            raise forms.ValidationError("نام کاربری حداکثر ۱۵۰ نویسه است.")
+        return username
+
+    def clean_mobile(self):
+        mobile = normalize_mobile(self.cleaned_data.get("mobile"))
+        if not mobile:
+            raise forms.ValidationError("شماره موبایل معتبر وارد کنید (مثال: ۰۹۱۲۳۴۵۶۷۸۹).")
+        if User.objects.filter(mobile=mobile).exists():
+            raise forms.ValidationError("این شماره تماس قبلاً ثبت شده است.")
+        return mobile
 
     def save(self, commit=True):
         user = super().save(commit=False)
-        user.email = self.cleaned_data["email"]
+        user.mobile = self.cleaned_data["mobile"]
+        user.email = ""
         user.role = User.Role.CUSTOMER
         if commit:
             user.save()

@@ -10,7 +10,7 @@ from django.urls import reverse
 @pytest.mark.django_db
 @pytest.mark.parametrize("route, fields, art", [
     ("accounts:login", ("username", "password"), "img/features/telegram_glassmorphism_analytics_hero.webp"),
-    ("accounts:register", ("username", "email", "password1", "password2"), "img/workflow/tmads_workflow_hero.webp"),
+    ("accounts:register", ("username", "mobile", "password1", "password2"), "img/workflow/tmads_workflow_hero.webp"),
 ])
 def test_auth_orbit_shell(client, route, fields, art):
     response = client.get(reverse(route))
@@ -57,9 +57,10 @@ def test_auth_validation_keeps_errors_and_masks_passwords(client):
     assert b'role="alert"' in response.content
     assert b'test-only-invalid' not in response.content
     response = client.post(reverse("accounts:register"), {
-        "username": "orbit_new_user", "email": "not-email",
+        "username": "orbit_new_user", "mobile": "not-a-phone",
         "password1": "Distinct-test-value-234!", "password2": "different",
     })
     assert response.status_code == 200
     assert b'role="alert"' in response.content
     assert b'Distinct-test-value-234!' not in response.content
+    assert b'name="email"' not in response.content

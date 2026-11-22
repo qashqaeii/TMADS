@@ -7,10 +7,13 @@
 {% if has_chart %}{% include "includes/charts_exec_scripts.html" %}{% endif %}
 {% endblock %}
 {% block content %}
+{% include "includes/ga_live_boot.html" %}
 <div class="dash-home--premium gramads-overview ga-command ga-workspace-system">
   {% include "dashboard/includes/overview_header.html" %}
 
+  <div class="ga-live-panel" data-ga-live-panel>
   {% include "dashboard/includes/overview_metrics.html" with active_count=active_count total_campaigns=total_campaigns impressions=impressions clicks=clicks ctr=ctr %}
+  </div>
 
   <section class="ga-home-workspace" aria-label="تحلیل و کیف پول">
     <article class="ga-home-panel ga-home-chart">

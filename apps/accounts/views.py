@@ -1,11 +1,10 @@
 from django.contrib import messages
 from django.contrib.auth import login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import PasswordChangeForm
 from django.shortcuts import redirect, render
 from django.utils.http import url_has_allowed_host_and_scheme
 
-from .forms import LoginForm, RegisterForm
+from .forms import LoginForm, PasswordChangeFormFa, RegisterForm
 from .permissions import customer_required
 
 
@@ -52,11 +51,11 @@ def logout_view(request):
 @customer_required
 def profile_view(request):
     profile = request.user.customer_profile
-    password_form = PasswordChangeForm(request.user)
+    password_form = PasswordChangeFormFa(request.user)
     if request.method == "POST":
         action = request.POST.get("action", "profile")
         if action == "password":
-            password_form = PasswordChangeForm(request.user, request.POST)
+            password_form = PasswordChangeFormFa(request.user, request.POST)
             if password_form.is_valid():
                 user = password_form.save()
                 update_session_auth_hash(request, user)

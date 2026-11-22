@@ -1,0 +1,10 @@
+{% if ga_live_boot %}
+{% csrf_token %}
+<div
+  hidden
+  data-ga-live-boot
+  {% if ga_live_rate != False %}data-ga-live-rate-url="{% url 'dashboard:live_gram_rate' %}"{% endif %}
+  {% if ga_live_stats %}data-ga-live-stats-url="{% url 'campaigns:live_stats' %}"{% endif %}
+  {% if ga_live_campaign_id %}data-ga-live-campaign-id="{{ ga_live_campaign_id }}"{% endif %}
+></div>
+{% endif %}

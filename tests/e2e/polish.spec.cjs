@@ -37,9 +37,9 @@ test('customer workspace and local-only amount selector', async ({page}) => {
   }
   await assertPage(page, '/finance/wallet/topup/');
   await page.locator('[data-amount="100000"]').click();
-  await expect(page.locator('#topup-amount')).toHaveValue('100000');
+  await expect(page.locator('#topup-amount')).toHaveValue('۱۰۰٬۰۰۰');
   await expect(page.locator('[data-amount="100000"]')).toHaveAttribute('aria-pressed','true');
-  await expect(page.locator('[data-topup-value]')).toBeVisible();
+  await expect(page.locator('[data-topup-value]')).toContainText('تومان');
   // Deliberately do not submit payment, deletion, or Telegram actions.
 });
 

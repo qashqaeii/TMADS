@@ -7,6 +7,7 @@
 {% endblock %}
 {% block extra_head %}{{ block.super }}{% if ai_analysis_available %}<link rel="stylesheet" href="{% static 'css/ui-ai.css' %}">{% endif %}{% endblock %}
 {% block content %}
+{% include "includes/ga_live_boot.html" %}
 <div class="app-stack campaign-detail campaign-detail--luxe ui-campaign-detail ga-campaign-detail-workspace">
   <nav class="ui-breadcrumb" aria-label="مسیر صفحه"><a href="{% url 'campaigns:list' %}">کمپین‌ها</a>{% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}<span aria-current="page">جزئیات کمپین</span></nav>
   <article class="campaign-detail__brief campaign-detail__hero campaign-detail__hero--exec campaign-detail__hero--luxe campaign-detail__hero--ref campaign-detail__hero--minimal" aria-label="خلاصه کمپین">
@@ -80,20 +81,13 @@
         <span class="campaign-detail__toolbar-sep" aria-hidden="true"></span>
         {% include "includes/campaign_actions_menu.html" %}
       </div>
-      {% if budget.has_remote %}
-      <form method="post" action="{% url 'campaigns:refresh_stats' %}" class="campaign-detail__actions-form campaign-detail__toolbar-aux">{% csrf_token %}
-        <input type="hidden" name="campaign_id" value="{{ campaign.id }}">
-        <button type="submit" class="campaign-detail__action campaign-detail__action--refresh" title="بروزرسانی آمار">
-          <span class="campaign-detail__action-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="refresh-cw" size="sm" %}</span>
-          <span class="campaign-detail__action-label">بروزرسانی</span>
-        </button>
-      </form>
-      {% endif %}
     </header>
   </article>
 
 
+  <div class="ga-live-panel" data-ga-live-panel>
   {% include "includes/campaign_metrics_strip.html" with kpi_ribbon_mode="ref" %}
+  </div>
   {% if budget.has_remote %}
   <details class="ga-panel ga-budget-settings"><summary class="ga-budget-summary"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="bell" %}</span><span><strong>هشدار باقی‌مانده بودجه</strong><small>تنظیم حد هشدار</small></span>{% include "includes/lucide_icon.html" with name="chevron-down" size="sm" %}</summary><div class="ui-budget-alert-card" aria-label="تنظیم هشدار بودجه">
     <div class="ui-budget-alert-card__lead">
@@ -279,11 +273,7 @@
         <div class="campaign-trend-card__empty">
           <span class="campaign-trend-card__empty-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="chart-column" size="kpi" %}</span>
           <p class="campaign-trend-card__empty-title">روند روزانه هنوز ذخیره نشده</p>
-          <p class="campaign-trend-card__empty-text muted">پس از اتصال تبلیغ، روند روزانه از تلگرام دریافت می‌شود.</p>
-          <form method="post" action="{% url 'campaigns:refresh_stats' %}" class="campaign-trend-card__empty-form">{% csrf_token %}
-            <input type="hidden" name="campaign_id" value="{{ campaign.id }}">
-            <button type="submit" class="campaign-detail__action campaign-trend-card__empty-btn">بروزرسانی آمار</button>
-          </form>
+          <p class="campaign-trend-card__empty-text muted">پس از اتصال تبلیغ، آمار روزانه به‌صورت خودکار هنگام باز کردن صفحه همگام می‌شود.</p>
         </div>
         {% endif %}
       </section>
@@ -341,21 +331,13 @@
           <div class="campaign-analytics-trend__empty">
             <span class="campaign-analytics-trend__empty-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="chart-column" size="kpi" %}</span>
             <p class="campaign-analytics-trend__empty-title">دادهٔ نمودار کافی نیست</p>
-            <p class="campaign-analytics-trend__empty-text muted">پس از اتصال تبلیغ، آمار را بروزرسانی کنید.</p>
-            <form method="post" action="{% url 'campaigns:refresh_stats' %}" class="campaign-analytics-trend__empty-form">{% csrf_token %}
-              <input type="hidden" name="campaign_id" value="{{ campaign.id }}">
-              <button type="submit" class="campaign-detail__action campaign-analytics-trend__empty-btn">بروزرسانی آمار</button>
-            </form>
+            <p class="campaign-analytics-trend__empty-text muted">پس از اتصال تبلیغ، آمار به‌صورت خودکار هنگام باز کردن صفحه همگام می‌شود.</p>
           </div>
           {% else %}
           <div class="campaign-analytics-trend__empty">
             <span class="campaign-analytics-trend__empty-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="line-chart" size="kpi" %}</span>
             <p class="campaign-analytics-trend__empty-title">روند روزانه ذخیره نشده</p>
-            <p class="campaign-analytics-trend__empty-text muted">پس از دریافت آمار روزانه، نمودار نمایش داده می‌شود.</p>
-            <form method="post" action="{% url 'campaigns:refresh_stats' %}" class="campaign-analytics-trend__empty-form">{% csrf_token %}
-              <input type="hidden" name="campaign_id" value="{{ campaign.id }}">
-              <button type="submit" class="campaign-detail__action campaign-analytics-trend__empty-btn">بروزرسانی آمار</button>
-            </form>
+            <p class="campaign-analytics-trend__empty-text muted">پس از دریافت خودکار آمار روزانه، نمودار اینجا نمایش داده می‌شود.</p>
           </div>
           {% endif %}
         </section>
@@ -428,7 +410,7 @@
             <div class="campaign-analytics-spend__empty">
               <span class="campaign-analytics-spend__empty-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="coins" size="kpi" %}</span>
               <p class="campaign-analytics-spend__empty-title">هزینه روزانه به گرام هنوز تأیید نشده</p>
-              <p class="campaign-analytics-spend__empty-text muted">پس از اتصال تبلیغ و بروزرسانی آمار، هزینهٔ روزانه اینجا نمایش داده می‌شود.</p>
+              <p class="campaign-analytics-spend__empty-text muted">پس از اتصال تبلیغ، هزینهٔ روزانه با همگام‌سازی خودکار آمار اینجا نمایش داده می‌شود.</p>
             </div>
             <div id="campaign-spend-chart" class="campaign-analytics-spend__host--sr" hidden aria-hidden="true"></div>
             {% endif %}
