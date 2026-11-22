@@ -9708,7 +9708,7 @@ html.motion-ready .campaigns-insights--premium.is-revealed .campaigns-insights__
 }
 .campaigns-table__actions {
   white-space: nowrap;
-  overflow: hidden;
+  overflow: visible;
 }
 .campaigns-table__actions .row-actions {
   justify-content: center;
@@ -9777,7 +9777,7 @@ html.motion-ready .campaigns-insights--premium.is-revealed .campaigns-insights__
   border-radius: 14px;
   box-shadow: none;
   background: var(--surface-primary);
-  overflow: hidden;
+  overflow: visible;
   transition:
     border-color 0.22s var(--ease-premium),
     background 0.22s var(--ease-premium);

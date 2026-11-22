@@ -4,7 +4,8 @@
   class="ga-home-chip tabnums"
   title="{% if ton_rate_display.is_fresh %}نرخ لحظه‌ای هر گرام{% else %}آخرین نرخ ثبت‌شده در سیستم{% endif %}"
 >
-  {% include "includes/gramads_workspace_icon.html" with name="wallet" size="sm" %}<span class="ga-home-chip-label">گرام</span>
+  {% include "includes/gram_icon.html" with size="sm" decorative=1 %}
+  <span class="ga-home-chip-label">گرام</span>
   <span class="ga-home-chip-value">{{ ton_rate_display.irr_per_ton|irr_to_toman|format_count }}</span>
   <span class="ga-home-chip-unit">تومان</span>
   {% if ton_rate_display.is_fresh %}
@@ -14,5 +15,8 @@
   {% endif %}
 </p>
 {% else %}
-<p class="ga-home-chip ga-home-chip--empty" role="status">نرخ گرام در دسترس نیست</p>
+<p class="ga-home-chip ga-home-chip--empty" role="status">
+  {% include "includes/gram_icon.html" with size="sm" decorative=1 %}
+  نرخ گرام در دسترس نیست
+</p>
 {% endif %}

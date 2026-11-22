@@ -31,7 +31,7 @@
 
   <section class="policy-accordion" aria-label="قوانین به تفکیک موضوع">
     {% for cat in categories %}
-    <details class="policy-accordion__item" {% if forloop.first %}open{% endif %}>
+    <details class="policy-accordion__item" id="policy-{{ cat.id }}" {% if forloop.first %}open{% endif %}>
       <summary class="policy-accordion__head">
         <span class="ui-policy-topic"><strong>{{ cat.title }}</strong><small>{{ cat.summary }}</small></span><span class="ui-policy-chevron" aria-hidden="true">{% include "includes/lucide_icon.html" with name="chevron-down" size="sm" %}</span>
       </summary>
@@ -47,6 +47,19 @@
           </article>
         </div>
         <p class="muted" style="margin:.75rem 0 0;font-size:.85rem">{{ cat.why }}</p>
+        {% if cat.details %}
+        <div class="policy-detail-list">
+          {% for detail in cat.details %}
+          <article class="policy-detail" id="policy-{{ cat.id }}-{{ detail.id }}">
+            <header>
+              <span class="policy-detail__clause">بند {{ detail.clause }}</span>
+              <h4>{{ detail.title }}</h4>
+            </header>
+            <p>{{ detail.body }}</p>
+          </article>
+          {% endfor %}
+        </div>
+        {% endif %}
       </div>
     </details>
     {% endfor %}
@@ -76,4 +89,32 @@
     </div>
   </section></aside></div>
 </div>
+<script>
+(function () {
+  function openHashTarget() {
+    var hash = window.location.hash;
+    if (!hash) return;
+    var el = document.querySelector(hash);
+    if (!el) return;
+    var details = el.closest("details") || (el.tagName === "DETAILS" ? el : null);
+    if (details) details.open = true;
+    el.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", openHashTarget);
+  else openHashTarget();
+  window.addEventListener("hashchange", openHashTarget);
+})();
+</script>
+{% endblock %}
+{% block page_styles %}{{ block.super }}
+<style>
+.policy-detail-list{display:grid;gap:10px;margin-top:14px}
+.policy-detail{padding:12px 14px;border:1px solid #e5edf5;border-radius:12px;background:#fbfcfe}
+.policy-detail header{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.policy-detail__clause{flex:none;padding:2px 7px;border-radius:6px;background:#edf4fb;color:#2f6ea0;font-size:.68rem;font-weight:750}
+.policy-detail h4{margin:0;font-size:.86rem;color:#243f59}
+.policy-detail p{margin:0;color:#5f7388;font-size:.8rem;line-height:1.85}
+.policy-accordion__item:target,
+.policy-detail:target{outline:2px solid #2a8fd4;outline-offset:3px}
+</style>
 {% endblock %}

@@ -21,7 +21,7 @@ class PolicyFindingDTO:
     def to_dict(self) -> dict[str, Any]:
         return {
             "rule_id": self.rule_id,
-            "severity": self.severity,
+            "severity": str(self.severity),
             "message_fa": self.message_fa,
             "field_key": self.field_key,
             "suggestion_fa": self.suggestion_fa,

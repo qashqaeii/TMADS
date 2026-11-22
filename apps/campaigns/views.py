@@ -501,6 +501,7 @@ def campaign_wizard(request, campaign_id=None):
             dry_run = None
 
     from apps.policies.services.engine import evaluate_campaign
+    from apps.policies.services.serialize import serialize_policy_finding
 
     policy_run = evaluate_campaign(
         campaign,
@@ -508,6 +509,7 @@ def campaign_wizard(request, campaign_id=None):
         include_budget_info=(step == 4),
         check_operator=False,
     )
+    policy_findings = [serialize_policy_finding(f) for f in policy_run.findings]
 
     ad_settings = campaign.ad_settings or {}
     schedule_obj = ad_settings.get("schedule") or {}
@@ -547,6 +549,7 @@ def campaign_wizard(request, campaign_id=None):
         ),
         "dry_run_json": json.dumps(dry_run.get("payload") if isinstance(dry_run, dict) and dry_run.get("payload") else {}, ensure_ascii=False),
         "policy_run": policy_run,
+        "policy_findings": policy_findings,
         "studio_mode": studio_mode,
         "catalog_countries_json": json.dumps(get_countries() if step == 2 and campaign.target_type == "users" else [], ensure_ascii=False),
         "catalog_languages_json": json.dumps(get_languages() if step == 2 and campaign.target_type in {"channels", "users"} else [], ensure_ascii=False),
@@ -959,8 +962,8 @@ def campaign_policy_preview(request, campaign_id):
         return JsonResponse({"ok": False, "message": "نسخه پیش‌نویس تغییر کرده است."}, status=409)
     rate_key = f"tmads:policy_preview:{request.user.pk}"
     if cache.get(rate_key):
-        return JsonResponse({"ok": False, "message": "لطفاً چند ثانیه صبر کنید."}, status=429)
-    cache.set(rate_key, 1, 3)
+        return JsonResponse({"ok": False, "retry": True, "message": "لطفاً چند لحظه صبر کنید."}, status=429)
+    cache.set(rate_key, 1, 1)
     step = ensure_studio_step(campaign)
     try:
         errors = validate_studio_step(campaign, step, request.POST, strict=False)
@@ -979,14 +982,9 @@ def campaign_policy_preview(request, campaign_id):
         check_operator=False,
         include_budget_info=(step >= 4),
     )
-    findings = [
-        {
-            "severity": f.severity,
-            "message_fa": f.message_fa,
-            "field_key": f.field_key,
-        }
-        for f in run.findings
-    ]
+    from apps.policies.services.serialize import serialize_policy_finding
+
+    findings = [serialize_policy_finding(f) for f in run.findings]
     transaction.set_rollback(True)  # policy preview must never persist campaign/creative changes
     return JsonResponse(
         {

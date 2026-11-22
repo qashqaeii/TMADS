@@ -40,7 +40,7 @@
     </article>
     <article class="campaign-kpi-ribbon__cell campaign-kpi-ribbon__cell--finance" role="listitem" style="--kpi-accent: #8794a7;">
       <p class="campaign-kpi-ribbon__meta">
-        <span class="campaign-kpi-ribbon__glyph" aria-hidden="true">{% include "includes/lucide_icon.html" with name="coins" size="kpi" %}</span>
+        <span class="campaign-kpi-ribbon__glyph campaign-kpi-ribbon__glyph--gram" aria-hidden="true">{% include "includes/gram_icon.html" with size="sm" decorative=1 %}</span>
         <span class="campaign-kpi-ribbon__name">هزینه</span>
       </p>
       <p class="campaign-kpi-ribbon__value campaign-kpi-ribbon__value--ton">{% ton_amount metrics.spent_ton exchange_rate_id=order_exchange_rate_id hint=0 %}</p>

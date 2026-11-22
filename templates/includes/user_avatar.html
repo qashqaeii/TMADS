@@ -1,0 +1,28 @@
+{% load static %}
+{% with key=avatar|default:"male" %}
+<span class="{{ class_name|default:'ui-user-avatar' }}" aria-hidden="true">
+  {% if key == "female" %}
+  <img src="{% static 'img/avatars/female.svg' %}" alt="" width="{{ size|default:40 }}" height="{{ size|default:40 }}" decoding="async">
+  {% elif key == "male_formal" %}
+  <img src="{% static 'img/avatars/male_formal.svg' %}" alt="" width="{{ size|default:40 }}" height="{{ size|default:40 }}" decoding="async">
+  {% elif key == "male_wine" %}
+  <img src="{% static 'img/avatars/male_wine.svg' %}" alt="" width="{{ size|default:40 }}" height="{{ size|default:40 }}" decoding="async">
+  {% elif key == "male_blue" %}
+  <img src="{% static 'img/avatars/male_blue.svg' %}" alt="" width="{{ size|default:40 }}" height="{{ size|default:40 }}" decoding="async">
+  {% elif key == "male_curly" %}
+  <img src="{% static 'img/avatars/male_curly.svg' %}" alt="" width="{{ size|default:40 }}" height="{{ size|default:40 }}" decoding="async">
+  {% elif key == "male_locks" %}
+  <img src="{% static 'img/avatars/male_locks.svg' %}" alt="" width="{{ size|default:40 }}" height="{{ size|default:40 }}" decoding="async">
+  {% elif key == "female_red" %}
+  <img src="{% static 'img/avatars/female_red.svg' %}" alt="" width="{{ size|default:40 }}" height="{{ size|default:40 }}" decoding="async">
+  {% elif key == "female_hijab" %}
+  <img src="{% static 'img/avatars/female_hijab.svg' %}" alt="" width="{{ size|default:40 }}" height="{{ size|default:40 }}" decoding="async">
+  {% elif key == "female_gold" %}
+  <img src="{% static 'img/avatars/female_gold.svg' %}" alt="" width="{{ size|default:40 }}" height="{{ size|default:40 }}" decoding="async">
+  {% elif key == "female_bun" %}
+  <img src="{% static 'img/avatars/female_bun.svg' %}" alt="" width="{{ size|default:40 }}" height="{{ size|default:40 }}" decoding="async">
+  {% else %}
+  <img src="{% static 'img/avatars/male.svg' %}" alt="" width="{{ size|default:40 }}" height="{{ size|default:40 }}" decoding="async">
+  {% endif %}
+</span>
+{% endwith %}

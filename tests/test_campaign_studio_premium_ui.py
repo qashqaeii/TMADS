@@ -8,11 +8,11 @@ from apps.campaigns.models import Campaign
 @pytest.mark.parametrize(
     ("step", "heading", "field"),
     [
-        (1, "هدف و مقصد کمپین را مشخص کنید", 'name="target_type"'),
-        (2, "مخاطب مناسب را انتخاب کنید", 'name="channel_mode"'),
-        (3, "پیام تبلیغ را بسازید", 'name="ad_text"'),
-        (4, "بودجه و زمان اجرا را تنظیم کنید", 'name="budget_toman"'),
-        (5, "پیش از ثبت، همه‌چیز را مرور کنید", 'name="terms_accepted"'),
+        (1, "کجا می‌خوای تبلیغ نمایش داده بشه؟", 'name="target_type"'),
+        (2, "می‌خوای کی این تبلیغ رو ببینه؟", 'name="channel_mode"'),
+        (3, "متن تبلیغت چی باشه؟", 'name="ad_text"'),
+        (4, "چقدر می‌خوای هزینه کنی و از کی شروع بشه؟", 'name="budget_toman"'),
+        (5, "همه‌چی درسته؟ یه نگاه آخر بنداز", 'name="terms_accepted"'),
     ],
 )
 def test_campaign_studio_renders_premium_guided_steps(client, customer_user, step, heading, field):
@@ -36,6 +36,8 @@ def test_campaign_studio_renders_premium_guided_steps(client, customer_user, ste
     assert 'class="studio-stepper__list"' in html
     assert 'id="draft-save-status"' in html
     assert 'id="studio-preview-panel"' in html
+    assert "tg-ads-preview" in html
+    assert "telegramWallpaper" in html
     assert "campaign-studio-premium" in html
     assert "campaign-studio-refinements" in html
     assert heading in html

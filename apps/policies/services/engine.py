@@ -87,7 +87,7 @@ def _terms_gate(campaign: Campaign, *, strict: bool) -> PolicyFindingDTO | None:
             field_key="terms",
             message_fa="قبل از ثبت نهایی، شرایط گرام‌ادز و راهنمای تبلیغ را بپذیرید.",
             source_document="GramAds Terms",
-            source_clause="Acceptance",
+            source_clause="پذیرش شرایط",
             source_url="/terms/",
         )
     return PolicyFindingDTO(
@@ -96,7 +96,7 @@ def _terms_gate(campaign: Campaign, *, strict: bool) -> PolicyFindingDTO | None:
         field_key="terms",
         message_fa="پذیرش قوانین گرام‌ادز قبل از ثبت سفارش الزامی است.",
         source_document="GramAds Terms",
-        source_clause="Acceptance",
+        source_clause="پذیرش شرایط",
         source_url="/terms/",
     )
 

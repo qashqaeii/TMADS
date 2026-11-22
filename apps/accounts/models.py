@@ -54,6 +54,19 @@ class User(AbstractUser):
 
 
 class CustomerProfile(UUIDModel, TimeStampedModel):
+    class Avatar(models.TextChoices):
+        MALE = "male", "مرد"
+        FEMALE = "female", "زن"
+        MALE_FORMAL = "male_formal", "مرد رسمی"
+        MALE_WINE = "male_wine", "مرد زرشکی"
+        MALE_BLUE = "male_blue", "مرد آبی"
+        MALE_CURLY = "male_curly", "مرد موفر"
+        MALE_LOCKS = "male_locks", "مرد با موهای فر"
+        FEMALE_RED = "female_red", "زن قرمز"
+        FEMALE_HIJAB = "female_hijab", "زن مشکی"
+        FEMALE_GOLD = "female_gold", "زن طلایی"
+        FEMALE_BUN = "female_bun", "زن با شینیون"
+
     user = models.OneToOneField(
         User,
         on_delete=models.CASCADE,
@@ -61,8 +74,19 @@ class CustomerProfile(UUIDModel, TimeStampedModel):
     )
     display_name = models.CharField(max_length=120, blank=True)
     company_name = models.CharField(max_length=200, blank=True)
+    avatar = models.CharField(
+        max_length=32,
+        choices=Avatar.choices,
+        default=Avatar.MALE,
+        db_index=True,
+    )
     is_suspended = models.BooleanField(default=False)
     internal_notes = models.TextField(blank=True)
+
+    @property
+    def avatar_static_path(self) -> str:
+        key = self.avatar if self.avatar in self.Avatar.values else self.Avatar.MALE
+        return f"img/avatars/{key}.svg"
 
     def __str__(self) -> str:
         return self.display_name or self.user.get_full_name() or self.user.username

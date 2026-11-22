@@ -3,38 +3,68 @@
 {% block page_title %}پروفایل{% endblock %}
 {% block container_class %}container-wide{% endblock %}
 {% block content %}
-<div class="app-stack ui-account-page ga-profile-workspace">
-  {% include "includes/dash_header.html" with page_icon="user" eyebrow="حساب" title="پروفایل" subtitle="هویت نمایشی و امنیت ورود به پنل گرام‌ادز." with_sub=1 %}
-
-  <section class="ui-profile-summary ga-profile-identity" aria-label="حساب شما">
-    <span class="ui-profile-avatar" aria-hidden="true">{{ user.get_username|slice:":1"|upper }}</span>
-    <div>
-      <h2>{{ user.get_full_name|default:user.get_username }}</h2>
-      <p>{{ user.get_role_display }}{% if profile.company_name %} · {{ profile.company_name }}{% endif %}</p>
+<div class="app-stack ga-profile-page" data-profile-page>
+  <section class="ga-profile-hero" aria-label="هویت حساب">
+    <div class="ga-profile-hero__glow" aria-hidden="true"></div>
+    <div class="ga-profile-hero__main">
+      <button
+        type="button"
+        class="ga-profile-hero__avatar-btn"
+        data-avatar-open
+        aria-haspopup="dialog"
+        aria-controls="profile-avatar-dialog"
+        title="تغییر آواتار"
+      >
+        <span class="ga-profile-hero__avatar" data-profile-hero-avatar>
+          {% include "includes/user_avatar.html" with avatar=profile.avatar class_name="ga-profile-hero__portrait ui-user-avatar" size=96 %}
+        </span>
+        <span class="ga-profile-hero__avatar-edit">
+          {% include "includes/lucide_icon.html" with name="camera" size="sm" %}
+          <span>تغییر آواتار</span>
+        </span>
+      </button>
+      <div class="ga-profile-hero__copy">
+        <p class="ga-profile-hero__eyebrow">حساب کاربری گرام‌ادز</p>
+        <h1 data-profile-hero-name>{{ profile.display_name|default:user.get_full_name|default:user.get_username }}</h1>
+        <p class="ga-profile-hero__meta">
+          <span>{{ user.get_role_display }}</span>
+          {% if profile.company_name %}<span data-profile-hero-company>{{ profile.company_name }}</span>{% else %}<span data-profile-hero-company hidden></span>{% endif %}
+        </p>
+        <p class="ga-profile-hero__handle" dir="ltr">@{{ user.get_username }}</p>
+      </div>
     </div>
-    <span class="ui-profile-handle" dir="ltr">@{{ user.get_username }}</span>
+    <ul class="ga-profile-hero__chips" aria-label="وضعیت حساب">
+      <li class="ga-profile-chip {% if user.mobile %}is-ok{% endif %}">
+        <span>{% if user.mobile %}موبایل ثبت شده{% else %}موبایل ثبت نشده{% endif %}</span>
+      </li>
+      <li class="ga-profile-chip {% if user.email %}is-ok{% else %}is-muted{% endif %}">
+        <span>{% if user.email %}ایمیل دارد{% else %}ایمیل خالی است{% endif %}</span>
+      </li>
+      <li class="ga-profile-chip is-ok" data-profile-avatar-chip>
+        <span>آواتار: {{ profile.get_avatar_display }}</span>
+      </li>
+    </ul>
   </section>
 
-  <div class="ga-split ga-profile-settings account-settings">
-    <form method="post" class="ga-panel">
+  <div class="ga-profile-layout">
+    <form method="post" class="ga-profile-card ga-profile-card--identity" data-profile-identity-form>
       {% csrf_token %}
-      <header class="ga-panel-head">
-        <div class="ga-panel-title">
-          <span class="ui-target-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="user" size="md" %}</span>
-          <div>
-            <h2>اطلاعات نمایشی</h2>
-            <p>نام و مشخصات کسب‌وکار در پنل</p>
-          </div>
+      <input type="hidden" name="action" value="profile">
+      <header class="ga-profile-card__head">
+        <div>
+          <h2>چی تو پنل دیده بشه؟</h2>
+          <p>نام نمایشی و مشخصات کسب‌وکارت رو اینجا تنظیم کن. برای آواتار روی عکس بالای صفحه بزن.</p>
         </div>
       </header>
-      <div class="ga-panel-body ga-form-grid">
+
+      <div class="ga-profile-fields">
         <div class="field">
-          <label for="profile-display-name">نام نمایشی</label>
-          <input id="profile-display-name" autocomplete="name" name="display_name" value="{{ profile.display_name }}" placeholder="نامی که در پنل دیده می‌شود">
+          <label for="profile-display-name">اسم نمایشی‌ات چی باشه؟</label>
+          <input id="profile-display-name" autocomplete="name" name="display_name" value="{{ profile.display_name }}" placeholder="مثلاً حسین کشکولی" data-profile-display-name>
         </div>
         <div class="field">
-          <label for="profile-company">نام کسب‌وکار</label>
-          <input id="profile-company" autocomplete="organization" name="company_name" value="{{ profile.company_name }}" placeholder="اختیاری">
+          <label for="profile-company">اسم کسب‌وکارت؟</label>
+          <input id="profile-company" autocomplete="organization" name="company_name" value="{{ profile.company_name }}" placeholder="اختیاری" data-profile-company-name>
         </div>
         <div class="field">
           <label for="profile-email">ایمیل</label>
@@ -43,28 +73,25 @@
         <div class="field">
           <label for="profile-mobile">موبایل</label>
           <input id="profile-mobile" dir="ltr" value="{{ user.mobile|default:'—' }}" disabled>
-          <a href="{% url 'accounts:mobile_settings' %}">تأیید موبایل و تنظیم اعلان پیامکی</a>
+          <a class="ga-profile-inline-link" href="{% url 'accounts:mobile_settings' %}">تأیید موبایل و تنظیم پیامک</a>
         </div>
       </div>
-      <footer class="ga-panel-foot">
-        <small class="muted">فقط اطلاعات نمایشی ذخیره می‌شود</small>
+
+      <footer class="ga-profile-card__foot">
+        <p>فقط اطلاعات نمایشی ذخیره می‌شود.</p>
         <button class="btn btn-primary" type="submit">ذخیره تغییرات</button>
       </footer>
     </form>
 
-    <section class="ga-panel ga-profile-password">
-      <header class="ga-panel-head">
-        <div class="ga-panel-title">
-          <span class="ui-target-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="shield-check" size="md" %}</span>
-          <div>
-            <h2>امنیت حساب</h2>
-            <p>تغییر رمز عبور ورود</p>
-          </div>
+    <section class="ga-profile-card ga-profile-card--security">
+      <header class="ga-profile-card__head">
+        <div>
+          <h2>امنیت ورود</h2>
+          <p>رمز عبوری بگذار که جای دیگری استفاده نمی‌کنی.</p>
         </div>
       </header>
-      <div class="ga-panel-body">
-        <p class="section-description">رمزی انتخاب کنید که در سرویس دیگری استفاده نمی‌کنید و حداقل ۸ نویسه داشته باشد.</p>
-        <form method="post" class="form-stack">
+      <div class="ga-profile-card__body">
+        <form method="post" class="ga-profile-password-form form-stack">
           {% csrf_token %}
           <input type="hidden" name="action" value="password">
           {% if password_form.non_field_errors %}
@@ -78,5 +105,96 @@
       </div>
     </section>
   </div>
+
+  <dialog class="ui-dialog ga-avatar-dialog" id="profile-avatar-dialog" aria-labelledby="profile-avatar-title">
+    <form method="post" class="ui-dialog__inner ga-avatar-dialog__form" data-avatar-form>
+      {% csrf_token %}
+      <input type="hidden" name="action" value="avatar">
+      <header class="ui-dialog__header ga-avatar-dialog__head">
+        <div>
+          <h2 id="profile-avatar-title">آواتار خودت رو انتخاب کن</h2>
+          <p>یکی رو بزن و ذخیره کن؛ پیش‌فرض مرد است.</p>
+        </div>
+        <button type="button" class="ui-icon-button ga-avatar-dialog__close" data-avatar-close aria-label="بستن">{% include "includes/lucide_icon.html" with name="x" size="sm" %}</button>
+      </header>
+      <div class="ga-avatar-dialog__options" role="radiogroup" aria-label="انتخاب آواتار">
+        {% for value, label in avatar_choices %}
+        <label class="ga-avatar-dialog__option {% if profile.avatar == value %}is-selected{% endif %}" title="{{ label }}">
+          <input type="radio" name="avatar" value="{{ value }}" {% if profile.avatar == value %}checked{% endif %} data-avatar-option="{{ value }}">
+          <span class="ga-avatar-dialog__frame">
+            {% include "includes/user_avatar.html" with avatar=value class_name="ga-avatar-dialog__img ui-user-avatar" size=72 %}
+          </span>
+          <span class="sr-only">{{ label }}</span>
+        </label>
+        {% endfor %}
+      </div>
+      <footer class="ui-dialog__actions ga-avatar-dialog__actions">
+        <button type="button" class="btn btn-ghost" data-avatar-close>انصراف</button>
+        <button type="submit" class="btn btn-primary">ذخیره آواتار</button>
+      </footer>
+    </form>
+  </dialog>
 </div>
+<script>
+(function () {
+  var root = document.querySelector("[data-profile-page]");
+  if (!root) return;
+  var dialog = document.getElementById("profile-avatar-dialog");
+  var openBtn = root.querySelector("[data-avatar-open]");
+  var heroAvatar = root.querySelector("[data-profile-hero-avatar] img");
+  var heroName = root.querySelector("[data-profile-hero-name]");
+  var heroCompany = root.querySelector("[data-profile-hero-company]");
+  var nameInput = root.querySelector("[data-profile-display-name]");
+  var companyInput = root.querySelector("[data-profile-company-name]");
+  var options = root.querySelectorAll("[data-avatar-option]");
+
+  function syncName() {
+    if (!heroName || !nameInput) return;
+    var value = (nameInput.value || "").trim();
+    heroName.textContent = value || heroName.dataset.fallback || heroName.textContent;
+  }
+  function syncCompany() {
+    if (!heroCompany || !companyInput) return;
+    var value = (companyInput.value || "").trim();
+    if (value) {
+      heroCompany.hidden = false;
+      heroCompany.textContent = value;
+    } else {
+      heroCompany.hidden = true;
+      heroCompany.textContent = "";
+    }
+  }
+  function markSelected(input) {
+    root.querySelectorAll(".ga-avatar-dialog__option").forEach(function (el) {
+      el.classList.toggle("is-selected", el.contains(input) && input.checked);
+    });
+  }
+  function openDialog() {
+    if (!dialog) return;
+    if (typeof dialog.showModal === "function") dialog.showModal();
+    else dialog.setAttribute("open", "open");
+  }
+  function closeDialog() {
+    if (!dialog) return;
+    if (typeof dialog.close === "function") dialog.close();
+    else dialog.removeAttribute("open");
+  }
+
+  if (heroName) heroName.dataset.fallback = heroName.textContent;
+  if (nameInput) nameInput.addEventListener("input", syncName);
+  if (companyInput) companyInput.addEventListener("input", syncCompany);
+  if (openBtn) openBtn.addEventListener("click", openDialog);
+  root.querySelectorAll("[data-avatar-close]").forEach(function (btn) {
+    btn.addEventListener("click", closeDialog);
+  });
+  if (dialog) {
+    dialog.addEventListener("click", function (event) {
+      if (event.target === dialog) closeDialog();
+    });
+  }
+  options.forEach(function (input) {
+    input.addEventListener("change", function () { markSelected(input); });
+  });
+})();
+</script>
 {% endblock %}

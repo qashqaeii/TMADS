@@ -946,32 +946,242 @@
 
   function initPolicyRefresh(form) {
     var url = form.getAttribute("data-policy-preview-url");
+    var panel = form.querySelector("[data-policy-panel]");
     var btn = form.querySelector("[data-policy-refresh]");
     var status = form.querySelector("[data-policy-refresh-status]");
-    if (!url || !btn) return;
-    btn.addEventListener("click", function () {
-      if (status) status.textContent = "در حال بررسی…";
+    if (!url || !panel) return;
+
+    var pending = null;
+    var retryTimer = null;
+    var requestSeq = 0;
+    var severityLabel = {
+      blocked: "نیازمند اصلاح",
+      review_required: "نیازمند بررسی",
+      warning: "هشدار",
+      info: "راهنما",
+    };
+
+    function toPersianDigits(value) {
+      return String(value == null ? 0 : value).replace(/\d/g, function (d) {
+        return "۰۱۲۳۴۵۶۷۸۹"[d];
+      });
+    }
+
+    function setStatus(text) {
+      if (status) status.textContent = text || "";
+    }
+
+    function updateCounts(counts) {
+      var map = counts || {};
+      panel.querySelectorAll("[data-policy-count]").forEach(function (el) {
+        var key = el.getAttribute("data-policy-count");
+        var value = toPersianDigits(map[key] || 0);
+        var strong = el.querySelector("strong");
+        if (strong) {
+          strong.textContent = value;
+          return;
+        }
+        var labels = {
+          blocked: "مسدود",
+          review_required: "بررسی",
+          warning: "هشدار",
+        };
+        el.textContent = (labels[key] || key) + ": " + value;
+      });
+    }
+
+    function updateFindings(findings) {
+      var list = panel.querySelector("[data-policy-findings]");
+      if (!list) return;
+      list.replaceChildren();
+      var items = findings || [];
+      if (!items.length) {
+        var empty = document.createElement("li");
+        empty.className = "policy-findings__empty";
+        empty.textContent = "مورد مهمی یافت نشد. می‌توانید ادامه دهید.";
+        list.appendChild(empty);
+        return;
+      }
+      items.forEach(function (finding) {
+        var li = document.createElement("li");
+        var severity = finding.severity || "info";
+        li.className = "policy-findings__item policy-findings__item--" + severity;
+
+        var top = document.createElement("div");
+        top.className = "policy-findings__top";
+        var badge = document.createElement("span");
+        badge.className = "policy-findings__badge";
+        badge.textContent = severityLabel[severity] || severity;
+        top.appendChild(badge);
+        var clause = finding.source_clause_label || "";
+        if (clause) {
+          var clauseEl = document.createElement("span");
+          clauseEl.className = "policy-findings__clause";
+          clauseEl.textContent = clause;
+          top.appendChild(clauseEl);
+        }
+        li.appendChild(top);
+
+        if (finding.rule_title_fa) {
+          var ruleTitle = document.createElement("p");
+          ruleTitle.className = "policy-findings__rule-title";
+          ruleTitle.textContent = finding.rule_title_fa;
+          li.appendChild(ruleTitle);
+        }
+
+        var message = document.createElement("p");
+        message.className = "policy-findings__message";
+        message.textContent = finding.message_fa || "";
+        li.appendChild(message);
+
+        if (finding.suggestion_fa) {
+          var hint = document.createElement("p");
+          hint.className = "policy-findings__hint";
+          hint.textContent = finding.suggestion_fa;
+          li.appendChild(hint);
+        }
+
+        var links = document.createElement("div");
+        links.className = "policy-findings__links";
+        if (finding.field_key) {
+          var targetId = "field-" + finding.field_key;
+          if (document.getElementById(targetId)) {
+            var jump = document.createElement("a");
+            jump.className = "policy-findings__jump";
+            jump.href = "#" + targetId;
+            jump.setAttribute("data-policy-jump", finding.field_key);
+            jump.textContent = "رفتن به فیلد";
+            links.appendChild(jump);
+          }
+        }
+        if (finding.guide_url) {
+          var ruleLink = document.createElement("a");
+          ruleLink.className = "policy-findings__rule";
+          ruleLink.href = finding.guide_url;
+          ruleLink.target = "_blank";
+          ruleLink.rel = "noopener";
+          ruleLink.textContent = finding.guide_label || "مشاهده قانون";
+          links.appendChild(ruleLink);
+        }
+        if (finding.source_url && finding.source_url !== finding.guide_url) {
+          var sourceLink = document.createElement("a");
+          sourceLink.className = "policy-findings__source";
+          sourceLink.href = finding.source_url;
+          sourceLink.target = "_blank";
+          sourceLink.rel = "noopener";
+          sourceLink.textContent = "منبع رسمی";
+          links.appendChild(sourceLink);
+        }
+        if (links.childNodes.length) li.appendChild(links);
+
+        list.appendChild(li);
+      });
+    }
+
+    function focusPolicyField(fieldKey) {
+      if (!fieldKey) return false;
+      var target = document.getElementById("field-" + fieldKey);
+      if (!target) return false;
+      target.scrollIntoView({ behavior: "smooth", block: "center" });
+      target.classList.add("is-policy-focus");
+      var focusable = target.matches("input, textarea, select, button")
+        ? target
+        : target.querySelector("input:not([type='hidden']), textarea, select, button");
+      if (focusable && typeof focusable.focus === "function") {
+        try {
+          focusable.focus({ preventScroll: true });
+        } catch (err) {
+          focusable.focus();
+        }
+      }
+      window.clearTimeout(focusPolicyField._timer);
+      focusPolicyField._timer = window.setTimeout(function () {
+        target.classList.remove("is-policy-focus");
+      }, 2200);
+      return true;
+    }
+
+    panel.addEventListener("click", function (event) {
+      var jump = event.target.closest("[data-policy-jump]");
+      if (!jump || !panel.contains(jump)) return;
+      var key = jump.getAttribute("data-policy-jump");
+      if (!focusPolicyField(key)) return;
+      event.preventDefault();
+    });
+
+    function refresh(options) {
+      var opts = options || {};
+      if (pending && !opts.force) return;
+      clearTimeout(retryTimer);
+      var seq = ++requestSeq;
+      panel.setAttribute("aria-busy", "true");
+      panel.classList.add("is-refreshing");
+      setStatus("در حال بررسی…");
       var data = new FormData(form);
       data.delete("creative_media");
-      fetch(url, { method: "POST", body: data, credentials: "same-origin" })
+      pending = fetch(url, { method: "POST", body: data, credentials: "same-origin" })
         .then(function (r) {
-          return r.json();
+          return r.json().then(function (body) {
+            return { ok: r.ok, status: r.status, body: body };
+          });
         })
-        .then(function (j) {
-          if (!j.ok) {
-            if (status) status.textContent = j.message || "خطا";
+        .then(function (response) {
+          if (seq !== requestSeq) return;
+          var body = response.body || {};
+          if (response.status === 429 || body.retry) {
+            setStatus(body.message || "چند لحظه بعد دوباره…");
+            retryTimer = setTimeout(function () {
+              refresh({ force: true });
+            }, 1200);
             return;
           }
-          var blocked = (j.counts && j.counts.blocked) || 0;
-          var review = (j.counts && j.counts.review_required) || 0;
-          if (status)
-            status.textContent = j.ready
-              ? "از نظر ساختاری آماده است."
-              : blocked + " مسدود · " + review + " نیازمند بررسی";
+          if (!response.ok || !body.ok) {
+            setStatus(body.message || "بررسی ناموفق");
+            return;
+          }
+          updateCounts(body.counts);
+          updateFindings(body.findings);
+          var blocked = (body.counts && body.counts.blocked) || 0;
+          var review = (body.counts && body.counts.review_required) || 0;
+          setStatus(
+            body.ready
+              ? "از نظر ساختاری آماده‌ست."
+              : toPersianDigits(blocked) + " مسدود · " + toPersianDigits(review) + " نیازمند بررسی"
+          );
         })
         .catch(function () {
-          if (status) status.textContent = "بررسی ناموفق";
+          if (seq === requestSeq) setStatus("بررسی ناموفق");
+        })
+        .finally(function () {
+          if (seq === requestSeq) {
+            pending = null;
+            panel.removeAttribute("aria-busy");
+            panel.classList.remove("is-refreshing");
+          }
         });
+    }
+
+    var scheduleRefresh = debounce(function () {
+      refresh();
+    }, 700);
+
+    if (btn) {
+      btn.addEventListener("click", function () {
+        refresh({ force: true });
+      });
+    }
+
+    form.addEventListener("input", function (event) {
+      var target = event.target;
+      if (!target || !target.name) return;
+      if (target.type === "file" || target.name === "creative_media" || target.name === "website_photo") return;
+      scheduleRefresh();
+    });
+    form.addEventListener("change", function (event) {
+      var target = event.target;
+      if (!target || !target.name) return;
+      if (target.type === "file") return;
+      scheduleRefresh();
     });
   }
 

@@ -22,4 +22,5 @@ def site_settings(request):
         "APP_ENV": settings.APP_ENV,
         "unread_notifications": unread,
         "wallet_hint": wallet_hint,
+        "customer_profile": profile,
     }

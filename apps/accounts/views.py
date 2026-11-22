@@ -5,6 +5,7 @@ from django.shortcuts import redirect, render
 from django.utils.http import url_has_allowed_host_and_scheme
 
 from .forms import LoginForm, PasswordChangeFormFa, RegisterForm
+from .models import CustomerProfile
 from .permissions import customer_required
 
 
@@ -61,6 +62,14 @@ def profile_view(request):
                 update_session_auth_hash(request, user)
                 messages.success(request, "رمز عبور تغییر کرد.")
                 return redirect("accounts:profile")
+        elif action == "avatar":
+            avatar = request.POST.get("avatar", CustomerProfile.Avatar.MALE)
+            if avatar not in CustomerProfile.Avatar.values:
+                avatar = CustomerProfile.Avatar.MALE
+            profile.avatar = avatar
+            profile.save(update_fields=["avatar", "updated_at"])
+            messages.success(request, "آواتار ذخیره شد.")
+            return redirect("accounts:profile")
         else:
             profile.display_name = request.POST.get("display_name", "").strip()
             profile.company_name = request.POST.get("company_name", "").strip()
@@ -70,5 +79,9 @@ def profile_view(request):
     return render(
         request,
         "accounts/profile.html",
-        {"profile": profile, "password_form": password_form},
+        {
+            "profile": profile,
+            "password_form": password_form,
+            "avatar_choices": CustomerProfile.Avatar.choices,
+        },
     )

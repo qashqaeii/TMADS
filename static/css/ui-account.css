@@ -17,7 +17,8 @@
 .ui-password-toggle[aria-pressed=true] { background:#eaf4fb; }
 .ui-password-toggle .ui-password-toggle__icon { display:block; }
 .ui-profile-summary { display:flex;align-items:center;gap:14px;padding:20px;border:1px solid var(--ui-border);border-radius:var(--ui-radius);background:#fff;min-width:0; }
-.ui-profile-avatar { display:grid;place-items:center;width:58px;height:58px;background:#e8f3fb;color:var(--ui-action);font-size:1.35rem;font-weight:750;border-radius:14px;flex:none; }
+.ui-profile-avatar { display:grid;place-items:center;width:58px;height:58px;background:#e8f3fb;color:var(--ui-action);font-size:1.35rem;font-weight:750;border-radius:14px;flex:none;overflow:hidden;padding:0; }
+.ui-profile-avatar img,.ui-user-avatar img { width:100%;height:100%;object-fit:cover;display:block; }
 .ui-profile-summary h2 { margin:0;font-size:1.1rem;font-weight:750;overflow-wrap:anywhere; }
 .ui-profile-summary p { margin:4px 0 0;font-size:.82rem; }
 .ui-profile-handle { margin-inline-start:auto;color:var(--ui-muted);font-size:.82rem;overflow-wrap:anywhere; }

@@ -2,21 +2,21 @@
 <section class="schedule-editor studio-pro-only" data-schedule-editor
          data-timezone="{{ schedule_timezone|default:12600 }}">
   <div class="schedule-editor__head">
-    <h3 class="section-title" style="font-size:.92rem;margin:0">زمان‌بندی هفتگی نمایش</h3>
+    <h3 class="section-title" style="font-size:.92rem;margin:0">تو چه ساعت‌هایی نشون بده؟</h3>
     <label class="choice-card schedule-editor__toggle">
       <input type="checkbox" name="schedule_enabled" value="1"
              {% if schedule_enabled %}checked{% endif %} data-schedule-enabled>
-      محدود کردن ساعات نمایش
+      فقط تو بعضی ساعت‌ها نشون بده
     </label>
   </div>
   <p class="muted" style="font-size:.8rem;margin:.35rem 0 .75rem">
-    هر خانه یک ساعت کامل است. منطقه زمانی را انتخاب کنید؛ با کلیدهای جهت‌دار بین ساعت‌ها حرکت کنید.
+    هر خونه یک ساعته. منطقه زمانی رو انتخاب کن؛ با فلش‌های کیبورد هم می‌تونی بین ساعت‌ها جابه‌جا بشی.
   </p>
   <input type="hidden" name="schedule_json" data-schedule-json value="{{ schedule_json|escape }}">
-  <div class="field"><label for="schedule-zone">منطقه زمانی ساعات نمایش</label><select id="schedule-zone" name="schedule_timezone">{% for offset,label in schedule_timezones %}<option value="{{ offset }}" {% if offset == schedule_timezone %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
-  {% if campaign.target_type == "users" %}<label class="choice-card"><input type="checkbox" name="schedule_viewer_timezone" value="1" {% if schedule_viewer_timezone %}checked{% endif %}> ساعت محلی هر مخاطب (به‌جای منطقه ثابت)</label>{% endif %}
-  <div class="schedule-presets" role="group" aria-label="پیش‌تنظیم‌ها">
-    <button type="button" class="btn btn-ghost btn-sm" data-schedule-preset="all">هر روز ۲۴ ساعته</button>
+  <div class="field"><label for="schedule-zone">ساعت‌ها بر اساس کدوم منطقه زمانی؟</label><select id="schedule-zone" name="schedule_timezone">{% for offset,label in schedule_timezones %}<option value="{{ offset }}" {% if offset == schedule_timezone %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+  {% if campaign.target_type == "users" %}<label class="choice-card"><input type="checkbox" name="schedule_viewer_timezone" value="1" {% if schedule_viewer_timezone %}checked{% endif %}> ساعت محلی هر نفر (نه یه منطقه ثابت)</label>{% endif %}
+  <div class="schedule-presets" role="group" aria-label="انتخاب سریع">
+    <button type="button" class="btn btn-ghost btn-sm" data-schedule-preset="all">همه روز، ۲۴ ساعته</button>
     <button type="button" class="btn btn-ghost btn-sm" data-schedule-preset="business">ساعات اداری (۹–۱۷)</button>
     <button type="button" class="btn btn-ghost btn-sm" data-schedule-preset="evening">عصرها (۱۸–۲۲)</button>
     <button type="button" class="btn btn-ghost btn-sm" data-schedule-preset="clear">پاک کردن</button>

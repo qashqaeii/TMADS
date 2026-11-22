@@ -11,6 +11,7 @@
       class="dash-hero__chip tabnums"
       title="{% if not ton_rate_display.is_fresh %}آخرین نرخ ثبت‌شده در سیستم{% else %}نرخ فعلی هر گرام{% endif %}"
     >
+      {% include "includes/gram_icon.html" with size="sm" decorative=1 %}
       <span class="dash-hero__chip-label">گرام</span>
       <span class="dash-hero__chip-value">{{ ton_rate_display.irr_per_ton|irr_to_toman|format_count }}</span>
       <span class="dash-hero__chip-unit">تومان</span>

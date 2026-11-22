@@ -4,7 +4,16 @@
 {% block page_title %}نرخ گرام{% endblock %}
 {% block content %}
 <div class="app-stack operations-page ui-ops ga-ops-premium ga-ops-workspace ga-rate-workspace ops-rates-page">
-{% include "includes/dash_header.html" with page_icon="wallet" eyebrow="مالی" title="نرخ گرام" subtitle="شفافیت مبنای نرخ‌گذاری و کنترل تغییرات دستی" %}
+<header class="dash-header ui-page-heading dash-header--luxe dash-header--editorial ga-page-head">
+  <div class="dash-header__main">
+    <div class="dash-header__title-row">
+      <span class="dash-header__kicker">مالی</span>
+      <span class="ga-page-heading-icon ga-page-heading-icon--gram" aria-hidden="true">{% include "includes/gram_icon.html" with size="md" decorative=1 %}</span>
+      <h1>نرخ گرام</h1>
+    </div>
+    <p class="page-sub">شفافیت مبنای نرخ‌گذاری و کنترل تغییرات دستی</p>
+  </div>
+</header>
 <div class="ops-context-strip"><div><strong>{% if live_rate %}{% if live_rate.is_fresh %}نرخ جاری به‌روز است{% else %}نرخ جاری نیازمند بازبینی است{% endif %}{% else %}نرخ فعلی در دسترس نیست{% endif %}</strong><span>تغییر نرخ مستقیماً بر محاسبات بعدی اثر می‌گذارد.</span></div><a href="{% url 'operations:overview' %}">مرکز عملیات</a></div>
 {% if live_rate %}
 <div class="kpi-exec-grid kpi-exec-grid--5 ui-ops-kpis ops-rate-metrics">
@@ -23,7 +32,7 @@
     </div>
   </article>
   <article class="kpi-exec kpi-exec--focus">
-    <span class="kpi-exec__icon">{% include "includes/kpi_icon.html" with name="wallet" %}</span>
+    <span class="kpi-exec__icon kpi-exec__icon--gram">{% include "includes/gram_icon.html" with size="md" decorative=1 %}</span>
     <div class="kpi-exec__body">
       <span class="kpi-exec__label">تومان به ازای هر گرام</span>
       <span class="kpi-exec__value"><bdi class="ops-rate-number" dir="ltr">{{ live_rate.irr_per_ton|irr_to_toman|format_count }}</bdi></span>

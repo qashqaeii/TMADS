@@ -14,5 +14,7 @@ class UserAdmin(DjangoUserAdmin):
 
 @admin.register(CustomerProfile)
 class CustomerProfileAdmin(admin.ModelAdmin):
-    list_display = ("user", "display_name", "is_suspended", "created_at")
+    list_display = ("user", "display_name", "avatar", "is_suspended", "created_at")
+    list_filter = ("avatar", "is_suspended")
     search_fields = ("user__username", "user__email", "display_name")
+    fields = ("user", "display_name", "company_name", "avatar", "is_suspended", "internal_notes")

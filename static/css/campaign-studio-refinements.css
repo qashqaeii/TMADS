@@ -96,88 +96,188 @@
   border:1px solid #e3eaf1;
   border-radius:15px;
   background:linear-gradient(180deg,#fbfdff 0%,#f7fafd 100%);
+  transition:opacity .18s ease;
 }
+#campaign-studio .policy-panel{
+  display:grid;
+  gap:12px;
+  margin-top:4px;
+  padding:14px;
+  border:1px solid #e4ecf4;
+  border-radius:14px;
+  background:#fff;
+}
+#campaign-studio .policy-panel.is-refreshing{opacity:.72}
 #campaign-studio .policy-panel__head{
   display:flex;
-  align-items:center;
+  align-items:flex-start;
   justify-content:space-between;
-  gap:8px 14px;
+  gap:10px 16px;
   flex-wrap:wrap;
 }
+#campaign-studio .policy-panel__title-wrap{display:grid;gap:3px;min-width:0}
 #campaign-studio .ui-policy-title{
   display:flex;
   align-items:center;
   gap:8px;
   margin:0;
-  color:#243f59;
-  font-size:.82rem;
+  color:#1f3a54;
+  font-size:.86rem;
+  font-weight:750;
 }
-#campaign-studio .ui-policy-title svg{width:18px;height:18px;flex:none}
-#campaign-studio .policy-panel__version{margin:0;color:#8a98a7;font-size:.62rem}
-#campaign-studio .ui-policy-counts{gap:6px}
-#campaign-studio .ui-policy-counts .status{padding:5px 8px;border-radius:8px;font-size:.64rem}
+#campaign-studio .ui-policy-title svg{width:18px;height:18px;flex:none;color:#2f74a8}
+#campaign-studio .policy-panel__version{margin:0;color:#8a98a7;font-size:.64rem;line-height:1.6}
+#campaign-studio .ui-policy-counts{display:flex;flex-wrap:wrap;gap:6px}
+#campaign-studio .policy-count{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  min-height:28px;
+  padding:4px 9px;
+  border-radius:999px;
+  background:#f4f7fa;
+  color:#5f7388;
+  font-size:.64rem;
+}
+#campaign-studio .policy-count em{font-style:normal;opacity:.85}
+#campaign-studio .policy-count strong{font-weight:800;font-variant-numeric:tabular-nums}
+#campaign-studio .policy-count--blocked{background:#fff1f2;color:#a83d4d}
+#campaign-studio .policy-count--review{background:#fff7eb;color:#9a6b27}
+#campaign-studio .policy-count--warning{background:#eef6fd;color:#2d6f9c}
 #campaign-studio .policy-findings{
   display:grid;
-  gap:7px;
+  gap:8px;
   margin:0;
   padding:0;
   list-style:none;
 }
 #campaign-studio .policy-findings__item{
   display:grid;
-  grid-template-columns:auto minmax(0,1fr);
-  align-items:start;
-  gap:3px 9px;
+  gap:5px;
   margin:0;
-  padding:9px 10px;
-  border:1px solid #e9eef3;
-  border-radius:10px;
-  background:#fff;
-  color:#405970;
-  font-size:.7rem;
-  line-height:1.8;
+  padding:11px 12px;
+  border:1px solid #e8eef4;
+  border-radius:12px;
+  background:#fbfcfe;
+  color:#35516b;
 }
+#campaign-studio .policy-findings__top{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
 #campaign-studio .policy-findings__badge{
   display:inline-flex;
   align-items:center;
-  justify-content:center;
-  align-self:start;
-  padding:3px 7px;
+  padding:3px 8px;
   border-radius:7px;
-  background:#f0f4f7;
-  color:#657b8f;
+  background:#eef2f6;
+  color:#5d7186;
   font-size:.61rem;
   font-weight:750;
   white-space:nowrap;
 }
-#campaign-studio .policy-findings__item small,
-#campaign-studio .policy-findings__jump{grid-column:2;min-width:0}
-#campaign-studio .policy-findings__item small{font-size:.65rem;line-height:1.75;color:#7b8c9c}
-#campaign-studio .policy-findings__jump{font-size:.65rem;font-weight:750}
-#campaign-studio .policy-findings__item--blocked{border-color:#f0dfe2;background:#fffdfd}
-#campaign-studio .policy-findings__item--blocked .policy-findings__badge{background:#fff0f1;color:#ad4050}
-#campaign-studio .policy-findings__item--review_required{border-color:#f0e6d5;background:#fffefa}
-#campaign-studio .policy-findings__item--review_required .policy-findings__badge{background:#fff5e5;color:#9a6b27}
-#campaign-studio .policy-findings__item--warning .policy-findings__badge{background:#edf6fd;color:#286b9b}
-#campaign-studio .policy-findings__item--info .policy-findings__badge{background:#eef5f2;color:#39745d}
-#campaign-studio .policy-findings__empty{padding:10px 12px;border:1px dashed #dce5ed;border-radius:10px;background:#fff;font-size:.7rem}
+#campaign-studio .policy-findings__clause{
+  padding:2px 7px;
+  border-radius:6px;
+  background:#edf4fb;
+  color:#2f6ea0;
+  font-size:.6rem;
+  font-weight:700;
+}
+#campaign-studio .policy-findings__rule-title{
+  margin:0;
+  color:#243f59;
+  font-size:.72rem;
+  font-weight:700;
+}
+#campaign-studio .policy-findings__message{
+  margin:0;
+  color:#35516b;
+  font-size:.74rem;
+  line-height:1.85;
+  overflow-wrap:anywhere;
+  font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",Vazirmatn,system-ui,sans-serif;
+  font-variant-emoji:emoji;
+}
+#campaign-studio .policy-findings__hint{
+  margin:0;
+  color:#7b8c9c;
+  font-size:.66rem;
+  line-height:1.75;
+}
+#campaign-studio .policy-findings__links{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px 12px;
+  margin-top:2px;
+}
+#campaign-studio .policy-findings__jump,
+#campaign-studio .policy-findings__rule,
+#campaign-studio .policy-findings__source{
+  font-size:.66rem;
+  font-weight:750;
+  text-decoration:none;
+}
+#campaign-studio .policy-findings__jump{color:#176bb4}
+#campaign-studio .policy-findings__rule{color:#1f5f90}
+#campaign-studio .policy-findings__source{color:#6d8194}
+#campaign-studio .policy-findings__empty{
+  margin:0;
+  padding:12px;
+  border:1px dashed #dce5ed;
+  border-radius:12px;
+  background:#fff;
+  color:#7b8c9c;
+  font-size:.72rem;
+  text-align:center;
+}
 #campaign-studio .policy-panel__actions{
   display:flex;
   align-items:center;
-  gap:8px 12px;
   flex-wrap:wrap;
+  gap:8px 12px;
+}
+#campaign-studio .policy-panel__actions>a{
+  color:#176bb4;
+  font-size:.7rem;
+  font-weight:700;
+  text-decoration:none;
+}
+#campaign-studio .policy-declarations--step1{
+  margin:0;
+  padding:0;
+  border:0;
+  display:grid;
+  gap:6px;
+}
+#campaign-studio .policy-declarations--step1 .field-help{
+  margin:0;
+  color:#6d8194;
+  font-size:.72rem;
+  line-height:1.7;
+}
+#campaign-studio .is-policy-focus{
+  outline:2px solid #2a8fd4;
+  outline-offset:4px;
+  border-radius:12px;
+  transition:outline-color .2s ease;
+}
+#campaign-studio .policy-findings__item--blocked{border-color:#f0d9de;background:#fffafb}
+#campaign-studio .policy-findings__item--blocked .policy-findings__badge{background:#fff0f1;color:#ad4050}
+#campaign-studio .policy-findings__item--review_required{border-color:#f0e2cc;background:#fffdf8}
+#campaign-studio .policy-findings__item--review_required .policy-findings__badge{background:#fff5e5;color:#9a6b27}
+#campaign-studio .policy-findings__item--warning{border-color:#d9e8f5;background:#f8fbfe}
+#campaign-studio .policy-findings__item--warning .policy-findings__badge{background:#edf6fd;color:#286b9b}
+#campaign-studio .policy-findings__item--info{border-color:#dfeee7;background:#f8fcfa}
+#campaign-studio .policy-findings__item--info .policy-findings__badge{background:#eef5f2;color:#39745d}
+#campaign-studio .policy-panel__actions{
   padding-top:8px;
   border-top:1px solid #e9eef3;
-  font-size:.68rem;
 }
 #campaign-studio .policy-panel__actions .btn{min-height:34px;padding:6px 10px;font-size:.66rem}
 #campaign-studio [id^="field-"]{scroll-margin-top:92px}
 
 /* The preview remains available without competing with the active step. */
-#campaign-studio .studio-aside{padding:15px;border-radius:19px}
-#campaign-studio .studio-preview__heading{margin-bottom:11px}
-#campaign-studio .studio-preview__summary{margin-top:10px}
-#campaign-studio .studio-preview__guidance{margin-top:10px;padding:9px}
+#campaign-studio .studio-aside{padding:13px;border-radius:16px}
+#campaign-studio .studio-preview__heading{margin-bottom:8px}
+#campaign-studio .tg-ads-preview__stage{min-height:232px}
 #campaign-studio .ui-preview-footnote{margin-top:9px}
 
 @media(min-width:1161px){
@@ -218,7 +318,8 @@
   #campaign-studio .studio-actions-bar .studio-action-save{grid-column:1}
   #campaign-studio .studio-actions-bar .studio-action-back{grid-column:2}
   #campaign-studio .studio-actions-bar .studio-action-review-save{grid-column:2}
-  #campaign-studio .studio-aside{padding:12px;border-radius:15px}
+  #campaign-studio .studio-aside{padding:11px;border-radius:14px}
+  #campaign-studio .tg-ads-preview__stage{min-height:210px}
   #campaign-studio .policy-panel{gap:8px;padding:11px}
   #campaign-studio .policy-findings__item{padding:8px;gap:3px 7px}
   #campaign-studio .policy-panel__actions{gap:7px}

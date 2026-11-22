@@ -39,6 +39,58 @@ def test_link_mismatch_blocked():
 
 
 @pytest.mark.django_db
+def test_bot_destination_does_not_trigger_channel_activity_warning(customer_user):
+    from apps.policies.services.destination_rules import check_destination_readiness, destination_looks_like_bot
+
+    campaign = Campaign.objects.create(
+        customer=customer_user.customer_profile,
+        target_type="bots",
+        placement="bot_banner",
+        destination="https://t.me/HyperTunnelbot?start=start",
+        wizard_version=2,
+    )
+    assert destination_looks_like_bot(campaign) is True
+    findings = check_destination_readiness(campaign)
+    messages = [f.message_fa for f in findings]
+    assert not any("کانال باید فعال باشد" in msg for msg in messages)
+    rights = next(f for f in findings if "حق قانونی" in f.message_fa)
+    assert rights.field_key == "destination_rights_confirmed"
+    assert any("ربات" in msg for msg in messages)
+
+
+@pytest.mark.django_db
+def test_step1_saves_destination_rights_confirmation(customer_user):
+    from apps.campaigns.studio import apply_studio_step
+    from apps.policies.services.destination_rules import check_destination_readiness
+
+    campaign = Campaign.objects.create(
+        customer=customer_user.customer_profile,
+        target_type="bots",
+        placement="bot_banner",
+        destination="https://t.me/HyperTunnelbot?start=start",
+        wizard_version=2,
+        wizard_step=1,
+    )
+    apply_studio_step(
+        campaign,
+        1,
+        {
+            "target_type": "bots",
+            "campaign_name": "تست",
+            "destination": "https://t.me/HyperTunnelbot?start=start",
+            "destination_rights_confirmed": "1",
+        },
+    )
+    campaign.save()
+    campaign.refresh_from_db()
+    assert campaign.ad_settings.get("destination_rights_confirmed") is True
+    assert not any(
+        "حق قانونی" in f.message_fa
+        for f in check_destination_readiness(campaign)
+    )
+
+
+@pytest.mark.django_db
 def test_draft_saves_despite_policy(customer_user):
     campaign = Campaign.objects.create(
         customer=customer_user.customer_profile,

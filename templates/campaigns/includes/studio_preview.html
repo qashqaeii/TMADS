@@ -1,59 +1,70 @@
-{% load core_filters %}
+{% load core_filters static %}
 <aside class="studio-aside ui-studio-preview" id="studio-preview-panel" aria-labelledby="studio-preview-title"
        data-preview-step="{{ step }}" data-preview-type="{{ campaign.target_type|default:'channels' }}" data-preview-name="{{ campaign.name|default:'' }}"
-       data-preview-destination="{{ campaign.destination|default:'' }}" data-preview-text="{% if creative %}{{ creative.ad_text }}{% endif %}" data-preview-cta="{% if creative %}{{ creative.cta_label }}{% endif %}">
+       data-preview-destination="{{ campaign.destination|default:'' }}" data-preview-text="{% if creative %}{{ creative.ad_text }}{% endif %}" data-preview-cta="{% if creative %}{{ creative.cta_label }}{% endif %}"
+       data-preview-show-userpic="{% if campaign.ad_settings.show_userpic %}1{% else %}0{% endif %}">
   <header class="studio-preview__heading">
-    <div class="studio-preview__identity">
-      <span class="studio-preview__icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="smartphone" size="md" %}</span>
-      <div>
-        <span class="studio-preview__eyebrow">پیش‌نمایش زنده تبلیغ</span>
-        <h2 id="studio-preview-title">پیش‌نمایش در تلگرام</h2>
-        <p>نمایش تقریبی؛ قالب نهایی را تلگرام تعیین می‌کند.</p>
-      </div>
-    </div>
-    <span class="studio-preview__live"><i></i> زنده</span>
+    <h2 id="studio-preview-title">Preview</h2>
+    <span class="studio-preview__live" aria-label="پیش‌نمایش زنده"><i></i></span>
   </header>
-  <div class="ui-preview-device">
-    <div class="ui-preview-device__head">
-      <span class="studio-preview__telegram-mark" aria-hidden="true">{% include "includes/lucide_icon.html" with name="send" size="sm" %}</span>
-      <span><strong>تبلیغات تلگرام</strong><small data-preview-mode>جایگاه تبلیغ</small></span>
-      <span class="ui-preview-sponsored">تبلیغ</span>
-    </div>
-    <div data-preview-search {% if campaign.target_type != 'search' %}hidden{% endif %} class="ui-preview-search">
-      <span class="ui-preview-search__query" dir="auto">{% include "includes/lucide_icon.html" with name="search" size="sm" %}<span data-preview-query>{% firstof campaign.targeting.config.search_queries.0 'جستجو' %}</span></span>
-      <div class="ui-preview-ad">
-        <span class="ui-preview-avatar" aria-hidden="true">{% include "includes/lucide_icon.html" with name="send" size="md" %}</span>
-        <div><span class="ui-preview-sponsored">تبلیغ</span><strong data-preview-title dir="auto">{{ campaign.name|default:'عنوان تبلیغ' }}</strong><small data-preview-url dir="auto">{{ campaign.destination|default:'t.me/...' }}</small></div>
+
+  <div class="tg-ads-preview" aria-label="پیش‌نمایش پیام تبلیغ در تلگرام">
+    <div class="tg-ads-preview__stage" style="--tg-wallpaper: url('{% static 'img/backgrounds/telegramWallpaper.webp' %}')">
+      <div data-preview-search {% if campaign.target_type != 'search' %}hidden{% endif %} class="tg-ads-preview__search">
+        <div class="tg-ads-preview__search-bar">
+          <span aria-hidden="true">{% include "includes/lucide_icon.html" with name="search" size="sm" %}</span>
+          <span data-preview-query>{% firstof campaign.targeting.config.search_queries.0 'جستجو' %}</span>
+        </div>
+        <article class="tg-ads-preview__card tg-ads-preview__card--search">
+          <span class="tg-ads-preview__avatar" data-preview-avatar aria-hidden="true">{% include "includes/lucide_icon.html" with name="send" size="sm" %}</span>
+          <div class="tg-ads-preview__card-body">
+            <div class="tg-ads-preview__meta">
+              <span class="tg-ads-preview__ad-badge">Ad</span>
+              <strong data-preview-title dir="auto">{{ campaign.name|default:'عنوان تبلیغ' }}</strong>
+            </div>
+            <small data-preview-url dir="ltr">{{ campaign.destination|default:'t.me/...' }}</small>
+          </div>
+        </article>
+      </div>
+
+      <div data-preview-message {% if campaign.target_type == 'search' %}hidden{% endif %} class="tg-ads-preview__thread">
+        <article class="tg-ads-preview__bubble" data-preview-ad-bubble>
+          <header class="tg-ads-preview__bubble-head">
+            <span class="tg-ads-preview__ad-badge">Ad</span>
+            <strong class="tg-ads-preview__brand" data-preview-brand dir="auto">{{ campaign.name|default:'عنوان تبلیغ' }}</strong>
+            <span class="tg-ads-preview__hint">what's this?</span>
+            <span class="tg-ads-preview__close" aria-hidden="true">×</span>
+          </header>
+          <div class="tg-ads-preview__bubble-body">
+            <span class="tg-ads-preview__avatar tg-ads-preview__avatar--inline" data-preview-avatar {% if not campaign.ad_settings.show_userpic %}hidden{% endif %} aria-hidden="true">{% include "includes/lucide_icon.html" with name="bot" size="sm" %}</span>
+            <p class="tg-ads-preview__text" data-preview-copy dir="auto">{% if creative %}{{ creative.ad_text|default:'متن تبلیغ شما' }}{% else %}متن تبلیغ شما{% endif %}</p>
+          </div>
+        </article>
+        <div class="tg-ads-preview__skeleton tg-ads-preview__skeleton--incoming" aria-hidden="true"><span></span><span></span></div>
+        <div class="tg-ads-preview__skeleton tg-ads-preview__skeleton--outgoing" aria-hidden="true"><span></span><span></span></div>
       </div>
     </div>
-    <div data-preview-message {% if campaign.target_type == 'search' %}hidden{% endif %} class="ui-preview-message">
-      <div class="ui-preview-ad ui-preview-ad--message">
-        <span class="ui-preview-sponsored">پیام اسپانسری</span>
-        <p data-preview-copy dir="auto">{% if creative %}{{ creative.ad_text|default:'متن تبلیغ شما' }}{% else %}متن تبلیغ شما{% endif %}</p>
-        <span class="ui-preview-cta" data-preview-button>{% if creative %}{{ creative.cta_label|default:'مشاهده' }}{% else %}مشاهده{% endif %}</span>
-      </div>
-    </div>
   </div>
-  <div class="studio-preview__summary">
-    <div><span>روش نمایش</span><strong data-preview-target-label>{% if campaign.target_type == 'search' %}نتایج جستجو{% elif campaign.target_type == 'bots' %}ربات‌های منتخب{% elif campaign.target_type == 'users' %}کاربران هدف{% else %}کانال‌های تلگرام{% endif %}</strong></div>
-    <div><span>نام کمپین</span><strong data-preview-campaign-name>{{ campaign.name|default:"کمپین جدید" }}</strong></div>
-    <div><span>مقصد تبلیغ</span><strong data-preview-destination-text dir="ltr">{{ campaign.destination|default:"هنوز مشخص نشده" }}</strong></div>
-  </div>
-  <div class="studio-preview__guidance">
-    <span aria-hidden="true">{% include "includes/lucide_icon.html" with name="compass" size="sm" %}</span>
-    <div><strong>راهنمای این مرحله</strong>
-      <p data-preview-guidance>{% if step == 1 %}روش نمایش و مقصد مناسب را انتخاب کنید.{% elif step == 2 %}مخاطب را دقیق و متناسب با هدف کمپین تعریف کنید.{% elif step == 3 %}پیام کوتاه و روشن، شانس دیده‌شدن را بیشتر می‌کند.{% elif step == 4 %}پیش‌فاکتور قطعی در مرحله بازبینی نمایش داده می‌شود.{% else %}اطلاعات و قوانین را پیش از پرداخت بررسی کنید.{% endif %}</p>
-    </div>
-  </div>
-  {% if studio_feedback.errors or studio_feedback.warnings or studio_feedback.infos %}
+
+  <p class="studio-preview__meta-line">
+    <span data-preview-target-label>{% if campaign.target_type == 'search' %}نتایج جستجو{% elif campaign.target_type == 'bots' %}ربات‌های منتخب{% elif campaign.target_type == 'users' %}کاربران هدف{% else %}کانال‌های تلگرام{% endif %}</span>
+    <span aria-hidden="true">·</span>
+    <strong data-preview-campaign-name dir="auto">{{ campaign.name|default:"کمپین جدید" }}</strong>
+  </p>
+  <p class="studio-preview__dest" data-preview-destination-text dir="ltr">{{ campaign.destination|default:"" }}</p>
+  <p class="studio-preview__hint-line" data-preview-guidance>{% if step == 1 %}روش نمایش و مقصد را انتخاب کنید.{% elif step == 2 %}مخاطب هدف را مشخص کنید.{% elif step == 3 %}متن کوتاه و واضح بنویسید.{% elif step == 4 %}بودجه و زمان را تنظیم کنید.{% else %}قبل از پرداخت یک‌بار مرور کنید.{% endif %}</p>
+
+  {% if studio_feedback.errors or studio_feedback.warnings %}
   <section class="studio-feedback" aria-label="نتیجه بررسی اولیه">
     {% if studio_feedback.errors %}<ul class="ui-preview-findings ui-preview-findings--error">{% for e in studio_feedback.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
     {% if studio_feedback.warnings %}<ul class="ui-preview-findings ui-preview-findings--warning">{% for w in studio_feedback.warnings %}<li>{{ w }}</li>{% endfor %}</ul>{% endif %}
-    {% if studio_feedback.ok and studio_feedback.infos %}<ul class="ui-preview-findings">{% for i in studio_feedback.infos %}<li>{{ i }}</li>{% endfor %}</ul>{% endif %}
   </section>
   {% endif %}
   {% if quote_totals and campaign.budget_irr and step != 5 %}
-  <div class="ui-preview-cost"><span>برآورد پرداختی</span><strong class="tabnums">{{ quote_totals.total_irr|irr_to_toman|format_irr }} تومان</strong>{% if quote_totals.ton_allocation %}<small dir="rtl">{{ quote_totals.ton_allocation|persian_digits }} تون</small>{% endif %}</div>
+  <div class="ui-preview-cost">
+    <span>برآورد</span>
+    <strong class="tabnums">{{ quote_totals.total_irr|irr_to_toman|format_irr }} تومان</strong>
+    {% if quote_totals.ton_allocation %}<small dir="rtl">{{ quote_totals.ton_allocation|persian_digits }} تون</small>{% endif %}
+  </div>
   {% endif %}
-  <p class="ui-preview-footnote">{% include "includes/lucide_icon.html" with name="shield-check" size="sm" %} پیش‌نمایش به معنی تأیید یا انتشار تبلیغ نیست.</p>
 </aside>

@@ -1,0 +1,11 @@
+{% load static %}
+{# Official Gram currency mark — use for rates, balances, and ton_amount. #}
+<img
+  class="ga-gram-icon ga-gram-icon--{{ size|default:'sm' }}{% if class %} {{ class }}{% endif %}"
+  src="{% static 'img/icons/gram.svg' %}"
+  alt="{% if alt %}{{ alt }}{% else %}گرام{% endif %}"
+  width="{% if size == 'lg' %}28{% elif size == 'md' %}22{% elif size == 'xs' %}14{% else %}18{% endif %}"
+  height="{% if size == 'lg' %}28{% elif size == 'md' %}22{% elif size == 'xs' %}14{% else %}18{% endif %}"
+  decoding="async"
+  {% if decorative or not alt %}aria-hidden="true"{% endif %}
+>

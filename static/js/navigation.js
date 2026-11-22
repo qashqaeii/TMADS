@@ -29,17 +29,71 @@
       if (!region.hasAttribute('aria-label') && !region.hasAttribute('aria-labelledby')) region.setAttribute('aria-label','جدول اطلاعات؛ پیمایش افقی');
     });
 
+    function disclosurePanel(menu) {
+      return menu.querySelector('.row-actions__menu, .exec-menu__panel');
+    }
+
+    function clearDisclosurePanel(menu) {
+      var panel = disclosurePanel(menu);
+      if (!panel) return;
+      panel.style.position = '';
+      panel.style.top = '';
+      panel.style.left = '';
+      panel.style.right = '';
+      panel.style.bottom = '';
+      panel.style.width = '';
+      panel.style.minWidth = '';
+      panel.style.zIndex = '';
+      panel.style.insetInlineEnd = '';
+    }
+
+    function placeDisclosurePanel(menu) {
+      var panel = disclosurePanel(menu);
+      var summary = menu.querySelector('summary');
+      if (!panel || !summary) return;
+      var rect = summary.getBoundingClientRect();
+      var rtl = getComputedStyle(document.documentElement).direction === 'rtl'
+        || getComputedStyle(menu).direction === 'rtl';
+      panel.style.position = 'fixed';
+      panel.style.zIndex = '5000';
+      panel.style.insetInlineEnd = 'auto';
+      panel.style.right = 'auto';
+      panel.style.bottom = 'auto';
+      panel.style.minWidth = Math.max(rect.width, 176) + 'px';
+      panel.style.top = '0px';
+      panel.style.left = '0px';
+      var width = panel.offsetWidth || 176;
+      var height = panel.offsetHeight || 0;
+      var gap = 4;
+      var top = rect.bottom + gap;
+      if (top + height > window.innerHeight - 8 && rect.top - gap - height > 8) {
+        top = rect.top - gap - height;
+      }
+      var left = rtl ? rect.left : rect.right - width;
+      left = Math.min(Math.max(8, left), window.innerWidth - width - 8);
+      panel.style.top = top + 'px';
+      panel.style.left = left + 'px';
+    }
+
     document.querySelectorAll('[data-disclosure-menu]').forEach(function (menu) {
       menu.addEventListener('keydown', function (event) {
         if (event.key !== 'Escape' || !menu.open) return;
         event.preventDefault();
         menu.open = false;
+        clearDisclosurePanel(menu);
         menu.querySelector('summary').focus();
       });
       menu.addEventListener('toggle', function () {
-        if (!menu.open) return;
+        if (!menu.open) {
+          clearDisclosurePanel(menu);
+          return;
+        }
         document.querySelectorAll('[data-disclosure-menu][open]').forEach(function (other) {
           if (other !== menu) other.open = false;
+        });
+        placeDisclosurePanel(menu);
+        requestAnimationFrame(function () {
+          if (menu.open) placeDisclosurePanel(menu);
         });
       });
     });
@@ -48,6 +102,14 @@
         if (!menu.contains(event.target)) menu.open = false;
       });
     });
+    window.addEventListener('resize', function () {
+      document.querySelectorAll('[data-disclosure-menu][open]').forEach(placeDisclosurePanel);
+    });
+    document.addEventListener('scroll', function () {
+      document.querySelectorAll('[data-disclosure-menu][open]').forEach(function (menu) {
+        menu.open = false;
+      });
+    }, true);
     document.querySelectorAll('[role="tablist"]').forEach(function (list) {
       list.addEventListener('keydown', function (event) {
         var current = event.target.closest('[role="tab"]');

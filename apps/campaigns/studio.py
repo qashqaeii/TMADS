@@ -18,11 +18,11 @@ from apps.campaigns.schedule_utils import parse_schedule_payload
 from apps.telegram_ads.targeting.validators import validate_audience_step, validate_studio_config
 
 STUDIO_STEPS = [
-    ("goal", "هدف تبلیغ"),
-    ("audience", "مخاطبان و جایگاه"),
-    ("creative", "محتوای تبلیغ"),
-    ("budget", "بودجه و زمان‌بندی"),
-    ("review", "بررسی و ثبت"),
+    ("goal", "کجا نشون بدم"),
+    ("audience", "کی ببینه"),
+    ("creative", "متن تبلیغ"),
+    ("budget", "بودجه و زمان"),
+    ("review", "نگاه آخر"),
 ]
 
 LEGACY_STEP_COUNT = 8
@@ -202,6 +202,9 @@ def apply_studio_step(campaign: Campaign, step: int, data, files=None) -> None:
         title = (data.get("campaign_name") or data.get("ad_title") or "").strip()
         if title:
             campaign.name = title
+        settings = dict(campaign.ad_settings or {})
+        settings["destination_rights_confirmed"] = data.get("destination_rights_confirmed") == "1"
+        campaign.ad_settings = settings
 
     elif step == 2:
         target_type = campaign.target_type or Campaign.TargetType.CHANNELS

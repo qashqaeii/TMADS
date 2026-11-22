@@ -46,10 +46,10 @@ class Campaign(TenantOwnedModel):
         VIDEO = "video", "ویدیو (قدیمی)"
 
     class TargetType(models.TextChoices):
-        SEARCH = "search", "جستجو"
-        BOTS = "bots", "ربات‌ها"
-        USERS = "users", "کاربران"
-        CHANNELS = "channels", "کانال‌ها"
+        SEARCH = "search", "نتایج جستجو"
+        BOTS = "bots", "داخل ربات‌ها"
+        USERS = "users", "برای کاربران خاص"
+        CHANNELS = "channels", "داخل کانال‌ها"
 
     customer = models.ForeignKey(CustomerProfile, on_delete=models.CASCADE, related_name="campaigns")
     project = models.ForeignKey(

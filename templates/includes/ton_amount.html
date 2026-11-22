@@ -1,7 +1,7 @@
 {% load core_filters %}
 <span class="ton-amount{% if not has_value %} ton-amount--empty{% endif %}{% if show_hint %} ton-amount--convertible{% endif %}"{% if show_hint %} tabindex="0"{% endif %}>
   {% if has_value %}
-  {% if symbol %}<span class="ton-amount__sym" aria-hidden="true">{{ symbol }}</span>{% endif %}
+  <span class="ton-amount__sym" aria-hidden="true">{% include "includes/gram_icon.html" with size="xs" decorative=1 %}</span>
   <span class="ton-amount__val tabnums">{{ amount|format_ton }}</span>
   {% if show_hint %}
   <span class="ton-amount__tip ui-tip-surface" role="tooltip">

@@ -25,7 +25,8 @@ def _tag_bool(value, default=True) -> bool:
 
 
 @register.inclusion_tag("includes/ton_amount.html")
-def ton_amount(amount, symbol="◈", exchange_rate_id=None, rate_irr=None, hint=True, inline_equiv=False):
+def ton_amount(amount, symbol="", exchange_rate_id=None, rate_irr=None, hint=True, inline_equiv=False):
+    """Render Gram amounts with the official Gram mark (templates/includes/gram_icon.html)."""
     parsed = _ton_or_none(amount)
     has_value = parsed is not None
     irr_per_ton, rate_hint = resolve_ton_display_rate(

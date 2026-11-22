@@ -1,5 +1,56 @@
 /* GramAds UI polish: campaigns, filters, payment, profile, notifications — load last */
 
+/* ---- Official Gram mark ---- */
+.ga-gram-icon {
+  display: inline-block;
+  flex: none;
+  vertical-align: -0.15em;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 0.04);
+}
+.ga-gram-icon--xs { width: 14px; height: 14px; }
+.ga-gram-icon--sm { width: 18px; height: 18px; }
+.ga-gram-icon--md { width: 22px; height: 22px; }
+.ga-gram-icon--lg { width: 28px; height: 28px; }
+.ton-amount__sym {
+  display: inline-flex;
+  align-items: center;
+  line-height: 0;
+}
+.ton-amount__sym .ga-gram-icon {
+  vertical-align: middle;
+}
+.ga-home-chip .ga-gram-icon,
+.rate-strip__label .ga-gram-icon {
+  margin-inline-end: 2px;
+}
+.campaign-kpi-ribbon__glyph--gram {
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+.campaign-kpi-ribbon__glyph--gram .ga-gram-icon {
+  width: 22px;
+  height: 22px;
+}
+.ui-final.is-app .nav-icon--gram {
+  display: grid;
+  place-items: center;
+  background: transparent;
+}
+.ui-final.is-app .nav-icon--gram .ga-gram-icon {
+  width: 18px;
+  height: 18px;
+}
+.ga-page-heading-icon--gram,
+.kpi-exec__icon--gram {
+  display: grid !important;
+  place-items: center;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
 /* ---- Notifications: editorial stream, no nested cards ---- */
 .ui-final.is-app .ga-notifications--minimal {
   gap: 18px;
@@ -310,6 +361,37 @@
   gap: 6px;
   max-width: none;
 }
+/* Keep ⋯ menu above following rows / parent overflow clipping */
+.ui-final.is-app .ui-campaign-list .campaigns-table-board--luxe:has(.row-actions__overflow[open]),
+.ui-final.is-app .ui-campaign-list .campaign-table-card:has(.row-actions__overflow[open]),
+.ui-final.is-app .ui-campaign-list .ga-data-panel:has(.row-actions__overflow[open]) {
+  overflow: visible;
+}
+.ui-final.is-app .ui-campaign-list .campaign-table-desktop.table-wrap--scroll:has(.row-actions__overflow[open]) {
+  overflow: visible !important;
+}
+.ui-final.is-app .ui-campaign-list .data-table--campaigns tr:has(.row-actions__overflow[open]) > * {
+  position: relative;
+  z-index: 30;
+}
+.ui-final.is-app .ui-campaign-list .data-table--campaigns tr:has(.row-actions__overflow[open]) > td.campaigns-table__actions {
+  z-index: 60;
+  overflow: visible !important;
+}
+.ui-final.is-app .ui-campaign-list .row-actions__overflow {
+  position: relative;
+  z-index: 1;
+}
+.ui-final.is-app .ui-campaign-list .row-actions__overflow[open] {
+  z-index: 70;
+}
+.ui-final.is-app .ui-campaign-list .row-actions__menu {
+  z-index: 80;
+  min-width: 11rem;
+}
+.ui-final.is-app .ui-campaign-list .campaigns-mobile-list:has(.row-actions__overflow[open]) {
+  overflow: visible;
+}
 .ui-final.is-app .ui-campaign-list .campaigns-table__identity {
   overflow: visible;
   min-width: 12rem;
@@ -336,8 +418,12 @@
 /* Mobile cards: clean hierarchy without phantom rail column */
 .ui-final.is-app .ui-campaign-list .campaigns-mobile-card--luxe {
   padding: 0;
-  overflow: hidden;
+  overflow: visible;
   border-radius: 14px;
+}
+.ui-final.is-app .ui-campaign-list .campaigns-mobile-card--luxe:has(.row-actions__overflow[open]) {
+  position: relative;
+  z-index: 30;
 }
 .ui-final.is-app .ui-campaign-list .campaigns-mobile-card__main {
   display: grid !important;
@@ -553,82 +639,361 @@
 }
 
 /* ---- Profile ---- */
-.ui-final.is-app .ga-profile-workspace {
-  gap: 16px;
-}
-.ui-final.is-app .ga-profile-identity {
+.ui-final.is-app .ui-user-avatar {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 14px 16px;
-  padding: 18px 20px;
-  border-radius: 18px;
-  border: 1px solid #d7e4f2;
+  place-items: center;
+  overflow: hidden;
+  flex: none;
+  padding: 0;
+}
+.ui-final.is-app .ui-user-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.ui-final.is-app .sidebar-foot__avatar.ui-user-avatar {
+  background: #fff;
+  border-color: rgba(42, 171, 238, 0.22);
+}
+.ui-final.is-app .ui-shell .topbar-account {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  min-height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 11px;
+  background: transparent;
+  box-shadow: none;
+  overflow: hidden;
+}
+.ui-final.is-app .ui-shell .topbar-account:hover,
+.ui-final.is-app .ui-shell .topbar-account[aria-expanded="true"],
+.ui-final.is-app .ui-shell .topbar--premium .topbar-account:hover,
+.ui-final.is-app .ui-shell .topbar--premium .topbar-account[aria-expanded="true"] {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.ui-final.is-app .ui-shell .topbar-account__avatar,
+.ui-final.is-app .ui-shell .topbar-account__avatar.ui-user-avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 11px;
+  border: 1px solid #d4e3f1;
+  background: #fff;
+  overflow: hidden;
+  box-shadow: none;
+}
+.ui-final.is-app .ui-shell .topbar-account:hover .topbar-account__avatar,
+.ui-final.is-app .ui-shell .topbar-account[aria-expanded="true"] .topbar-account__avatar {
+  border-color: #2a8fd4;
+}
+.ui-final.is-app .ga-profile-page {
+  gap: 18px;
+}
+.ui-final.is-app .ga-profile-hero {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  gap: 18px;
+  padding: 22px 24px;
+  border-radius: 22px;
+  color: #fff;
   background:
-    radial-gradient(120% 80% at 100% 0%, rgba(20, 108, 168, 0.12), transparent 55%),
-    linear-gradient(135deg, #123a63 0%, #1769c5 100%);
-  color: #fff;
-  box-shadow: 0 12px 28px rgb(16 58 110 / 0.18);
+    radial-gradient(90% 120% at 0% 0%, rgba(86, 188, 255, 0.28), transparent 48%),
+    linear-gradient(135deg, #0f355c 0%, #155ea8 52%, #1a7ac7 100%);
+  box-shadow: 0 18px 36px rgb(15 53 92 / 0.22);
 }
-.ui-final.is-app .ga-profile-identity .ui-profile-avatar {
-  width: 56px;
-  height: 56px;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.16);
-  color: #fff;
-  border: 1px solid rgba(255, 255, 255, 0.22);
+.ui-final.is-app .ga-profile-hero__glow {
+  position: absolute;
+  inset: auto -8% -40% auto;
+  width: 280px;
+  height: 280px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.18), transparent 68%);
+  pointer-events: none;
 }
-.ui-final.is-app .ga-profile-identity h2 {
+.ui-final.is-app .ga-profile-hero__main {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 16px 18px;
+  align-items: center;
+}
+.ui-final.is-app .ga-profile-hero__avatar-btn {
+  position: relative;
+  display: grid;
+  gap: 8px;
+  justify-items: center;
   margin: 0;
-  color: #fff;
-  font-size: 1.2rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  text-align: center;
 }
-.ui-final.is-app .ga-profile-identity p {
-  margin: 4px 0 0;
-  color: rgba(255, 255, 255, 0.78);
+.ui-final.is-app .ga-profile-hero__portrait {
+  width: 92px;
+  height: 92px;
+  border-radius: 28px;
+  background: #fff;
+  border: 3px solid rgba(255, 255, 255, 0.55);
+  box-shadow: 0 10px 24px rgb(8 36 68 / 0.28);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
-.ui-final.is-app .ga-profile-identity .ui-profile-handle {
-  margin: 0;
-  color: #fff;
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+.ui-final.is-app .ga-profile-hero__avatar-btn:hover .ga-profile-hero__portrait,
+.ui-final.is-app .ga-profile-hero__avatar-btn:focus-visible .ga-profile-hero__portrait {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 28px rgb(8 36 68 / 0.34);
+}
+.ui-final.is-app .ga-profile-hero__avatar-btn:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.85);
+  outline-offset: 4px;
+  border-radius: 20px;
+}
+.ui-final.is-app .ga-profile-hero__avatar-edit {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 30px;
+  padding: 0 10px;
   border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  color: #fff;
+  font-size: 0.74rem;
+  font-weight: 650;
+}
+.ui-final.is-app .ga-profile-hero__avatar-edit svg {
+  width: 14px;
+  height: 14px;
+}
+.ui-final.is-app .ga-profile-hero__eyebrow {
+  margin: 0 0 6px;
+  font-size: 0.74rem;
+  letter-spacing: 0.02em;
+  color: rgba(255, 255, 255, 0.72);
+}
+.ui-final.is-app .ga-profile-hero__copy h1 {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(1.35rem, 2.4vw, 1.75rem);
+  line-height: 1.35;
+}
+.ui-final.is-app .ga-profile-hero__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  margin: 8px 0 0;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 0.88rem;
+}
+.ui-final.is-app .ga-profile-hero__meta span + span::before {
+  content: "·";
+  margin-inline-end: 10px;
+  opacity: 0.55;
+}
+.ui-final.is-app .ga-profile-hero__handle {
+  display: inline-flex;
+  margin: 10px 0 0;
   padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #fff;
   font-size: 0.8rem;
 }
-.ui-final.is-app .ga-profile-settings.ga-split,
-.ui-final.is-app .ga-profile-settings {
+.ui-final.is-app .ga-profile-hero__chips {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.ui-final.is-app .ga-profile-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 0.76rem;
+}
+.ui-final.is-app .ga-profile-chip.is-ok {
+  background: rgba(120, 220, 180, 0.16);
+  border-color: rgba(160, 235, 205, 0.28);
+}
+.ui-final.is-app .ga-profile-chip.is-muted {
+  opacity: 0.72;
+}
+.ui-final.is-app .ga-profile-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  gap: 16px;
+  align-items: start;
+}
+.ui-final.is-app .ga-profile-card {
+  min-width: 0;
+  display: grid;
+  gap: 18px;
+  padding: 20px;
+  border-radius: 20px;
+  border: 1px solid #dce7f2;
+  background:
+    linear-gradient(180deg, #ffffff 0%, #f8fbfe 100%);
+  box-shadow: 0 10px 28px rgb(20 58 96 / 0.05);
+}
+.ui-final.is-app .ga-profile-card__head h2 {
+  margin: 0;
+  color: #14385f;
+  font-size: 1.08rem;
+}
+.ui-final.is-app .ga-profile-card__head p {
+  margin: 6px 0 0;
+  color: #5f758c;
+  font-size: 0.84rem;
+  line-height: 1.7;
+}
+.ui-final.is-app .ga-avatar-dialog {
+  width: min(520px, calc(100vw - 28px));
+  border: 1px solid #d7e4f2;
+  border-radius: 20px;
+  padding: 0;
+  background: #fff;
+  box-shadow: 0 24px 80px rgb(16 41 77 / 0.28);
+}
+.ui-final.is-app .ga-avatar-dialog::backdrop {
+  background: rgb(16 36 61 / 0.58);
+  backdrop-filter: blur(4px);
+}
+.ui-final.is-app .ga-avatar-dialog__form {
+  gap: 18px;
+}
+.ui-final.is-app .ga-avatar-dialog__head {
+  align-items: flex-start;
+  gap: 12px;
+}
+.ui-final.is-app .ga-avatar-dialog__head h2 {
+  margin: 0;
+  color: #14385f;
+  font-size: 1.08rem;
+}
+.ui-final.is-app .ga-avatar-dialog__head p {
+  margin: 6px 0 0;
+  color: #657b8f;
+  font-size: 0.8rem;
+  line-height: 1.65;
+}
+.ui-final.is-app .ga-avatar-dialog__close {
+  margin-inline-start: auto;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  min-height: 36px;
+  border-radius: 999px;
+  color: #4a647c;
+}
+.ui-final.is-app .ga-avatar-dialog__close:hover {
+  color: #14385f;
+}
+.ui-final.is-app .ga-avatar-dialog__options {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+  max-height: min(52vh, 360px);
+  overflow: auto;
+  padding: 4px 2px;
+}
+@media (max-width: 560px) {
+  .ui-final.is-app .ga-avatar-dialog__options {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+  }
+}
+@media (max-width: 400px) {
+  .ui-final.is-app .ga-avatar-dialog__options {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+.ui-final.is-app .ga-avatar-dialog__option {
+  position: relative;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.ui-final.is-app .ga-avatar-dialog__option input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.ui-final.is-app .ga-avatar-dialog__frame {
+  width: 72px;
+  height: 72px;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #f3f7fb;
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  transition: outline-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+.ui-final.is-app .ga-avatar-dialog__img {
+  width: 100%;
+  height: 100%;
+}
+.ui-final.is-app .ga-avatar-dialog__option:hover .ga-avatar-dialog__frame {
+  outline-color: #b7d4ea;
+  transform: translateY(-1px);
+}
+.ui-final.is-app .ga-avatar-dialog__option:focus-within .ga-avatar-dialog__frame,
+.ui-final.is-app .ga-avatar-dialog__option:has(input:checked) .ga-avatar-dialog__frame,
+.ui-final.is-app .ga-avatar-dialog__option.is-selected .ga-avatar-dialog__frame {
+  outline-color: #2a8fd4;
+  box-shadow: 0 0 0 3px rgba(32, 132, 200, 0.16);
+}
+.ui-final.is-app .ga-avatar-dialog__actions {
+  justify-content: flex-end;
+}
+.ui-final.is-app .ga-profile-fields {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
-  align-items: start;
 }
-.ui-final.is-app .ga-profile-settings > .ga-panel {
-  min-width: 0;
-  border-radius: 16px;
-}
-.ui-final.is-app .ga-profile-settings .ga-form-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px 14px;
-}
-.ui-final.is-app .ga-profile-settings .ga-form-grid .field {
+.ui-final.is-app .ga-profile-fields .field {
   display: grid;
   gap: 6px;
   min-width: 0;
 }
-.ui-final.is-app .ga-profile-settings .ga-form-grid .field a {
+.ui-final.is-app .ga-profile-inline-link {
   font-size: 0.78rem;
   color: #146ca8;
 }
-.ui-final.is-app .ga-profile-settings .ga-panel-foot {
+.ui-final.is-app .ga-profile-card__foot {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: 12px;
   flex-wrap: wrap;
+  padding-top: 4px;
 }
-.ui-final.is-app .ga-profile-password .field-help ul {
+.ui-final.is-app .ga-profile-card__foot p {
+  margin: 0;
+  color: #6b8094;
+  font-size: 0.78rem;
+}
+.ui-final.is-app .ga-profile-password-form .field-help ul {
   margin: 6px 0 0;
   padding-inline-start: 1.1rem;
   color: #5a738a;
@@ -636,24 +1001,36 @@
   line-height: 1.7;
   text-align: right;
 }
-.ui-final.is-app .ga-profile-password .btn-primary {
+.ui-final.is-app .ga-profile-password-form .btn-primary {
   width: 100%;
-  min-height: 44px;
+  min-height: 46px;
+  margin-top: 4px;
 }
-@media (max-width: 900px) {
-  .ui-final.is-app .ga-profile-settings {
+@media (max-width: 980px) {
+  .ui-final.is-app .ga-profile-layout {
     grid-template-columns: minmax(0, 1fr);
   }
-  .ui-final.is-app .ga-profile-identity {
-    grid-template-columns: auto minmax(0, 1fr);
-  }
-  .ui-final.is-app .ga-profile-identity .ui-profile-handle {
-    grid-column: 1 / -1;
-    justify-self: start;
-  }
 }
-@media (max-width: 560px) {
-  .ui-final.is-app .ga-profile-settings .ga-form-grid {
+@media (max-width: 640px) {
+  .ui-final.is-app .ga-profile-hero {
+    padding: 18px;
+  }
+  .ui-final.is-app .ga-profile-hero__main {
     grid-template-columns: minmax(0, 1fr);
+    justify-items: start;
+  }
+  .ui-final.is-app .ga-profile-hero__portrait {
+    width: 78px;
+    height: 78px;
+    border-radius: 24px;
+  }
+  .ui-final.is-app .ga-profile-fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .ui-final.is-app .ga-profile-card__foot {
+    align-items: stretch;
+  }
+  .ui-final.is-app .ga-profile-card__foot .btn {
+    width: 100%;
   }
 }
