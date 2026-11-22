@@ -213,15 +213,16 @@
 .ui-final.is-app .ui-conversation .message-text{overflow-wrap:anywhere;line-height:1.8;font-size:.86rem}
 .ui-final.is-app .ui-conversation .chat-compose{padding:14px;background:#fff;border-top:1px solid var(--gw-stroke)}
 .ui-final.is-app .ui-conversation .chat-compose textarea{min-height:90px}
-.ui-final.is-app .ui-policy-center .policy-intro{background:linear-gradient(130deg,#fff,#edf5fe)}
-.ui-final.is-app .ui-policy-center .policy-accordion{gap:9px}
-.ui-final.is-app .ui-policy-center .policy-accordion__item{background:#fff;border:1px solid var(--gw-stroke);border-radius:12px;box-shadow:var(--gw-shadow);overflow:hidden}
-.ui-final.is-app .ui-policy-center .policy-accordion__head{padding:13px 15px;gap:10px;min-height:50px}
-.ui-final.is-app .ui-policy-center .policy-accordion__item[open]{border-color:#aacbef}
-.ui-final.is-app .ui-policy-center .policy-accordion__item[open] .policy-accordion__head{background:#f0f6fe}
-.ui-final.is-app .ui-policy-center .policy-accordion__body{padding:14px 16px;line-height:1.9}
-.ui-final.is-app .ui-policy-center :is(.ui-example-good,.ui-example-bad){border-radius:11px}
-.ui-final.is-app .ui-policy-center .policy-sources{background:#f1f6fd;border:1px solid var(--gw-stroke);border-radius:12px}
+/* Legacy policy-center polish superseded by .ga-policy-workspace in gramads-ui-polish.css */
+.ui-final.is-app .ui-policy-center:not(.ga-policy-workspace) .policy-intro{background:linear-gradient(130deg,#fff,#edf5fe)}
+.ui-final.is-app .ui-policy-center:not(.ga-policy-workspace) .policy-accordion{gap:9px}
+.ui-final.is-app .ui-policy-center:not(.ga-policy-workspace) .policy-accordion__item{background:#fff;border:1px solid var(--gw-stroke);border-radius:12px;box-shadow:var(--gw-shadow);overflow:hidden}
+.ui-final.is-app .ui-policy-center:not(.ga-policy-workspace) .policy-accordion__head{padding:13px 15px;gap:10px;min-height:50px}
+.ui-final.is-app .ui-policy-center:not(.ga-policy-workspace) .policy-accordion__item[open]{border-color:#aacbef}
+.ui-final.is-app .ui-policy-center:not(.ga-policy-workspace) .policy-accordion__item[open] .policy-accordion__head{background:#f0f6fe}
+.ui-final.is-app .ui-policy-center:not(.ga-policy-workspace) .policy-accordion__body{padding:14px 16px;line-height:1.9}
+.ui-final.is-app .ui-policy-center:not(.ga-policy-workspace) :is(.ui-example-good,.ui-example-bad){border-radius:11px}
+.ui-final.is-app .ui-policy-center:not(.ga-policy-workspace) .policy-sources{background:#f1f6fd;border:1px solid var(--gw-stroke);border-radius:12px}
 .ui-final.is-app .ga-notifications .ga-notifications__hero{padding:0 0 4px;min-height:44px;gap:10px;background:none;border:0;box-shadow:none}
 .ui-final.is-app .ga-notifications__symbol{width:34px;height:34px;background:linear-gradient(145deg,#fff,#e7f1fd);border:1px solid #d9e6f5;border-radius:10px}
 .ui-final.is-app .ga-notifications__lead h1{font-size:clamp(1.22rem,1.8vw,1.55rem);color:var(--gw-ink)}

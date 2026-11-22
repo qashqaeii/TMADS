@@ -98,7 +98,7 @@ class CampaignPolicyAcceptance(UUIDModel):
 
 
 class OperatorAdvertisingAuthorization(UUIDModel):
-    """Commercial launch gate — third-party bidding on central account (Ads TOS §3.3(e))."""
+    """Commercial launch gate — third-party bidding on central account (Ads TOS 3.3(e))."""
 
     state = models.CharField(
         max_length=32,

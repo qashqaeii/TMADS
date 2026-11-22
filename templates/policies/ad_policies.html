@@ -1,93 +1,194 @@
 {% extends "app_shell.html" %}
-{% load static %}
+{% load static core_filters %}
 {% block page_title %}{{ intro.title }}{% endblock %}
 {% block container_class %}container-wide{% endblock %}
 {% block content %}
-<div class="policy-center app-stack ui-policy-center ga-policy-workspace">
-  <header class="dash-header ui-page-heading dash-header--luxe">
-    <div class="dash-header__main">
-      <span class="dash-header__kicker">راهنما</span>
-      <div class="dash-header__title-row"><span class="ga-page-heading-icon" aria-hidden="true">{% include "includes/gramads_workspace_icon.html" with name="shield-check" size="md" %}</span><h1>{{ intro.title }}</h1></div>
-      <p class="muted" style="margin:.5rem 0 0;max-width:40rem">{{ intro.subtitle }}</p>
+<div class="policy-center app-stack ui-policy-center ga-policy-workspace" data-policy-center>
+  <header class="ga-policy-hero" aria-labelledby="policy-hero-title">
+    <div class="ga-policy-hero__glow" aria-hidden="true"></div>
+    <div class="ga-policy-hero__main">
+      <span class="ga-policy-hero__mark" aria-hidden="true">
+        {% include "includes/gramads_workspace_icon.html" with name="shield-check" size="md" %}
+      </span>
+      <div class="ga-policy-hero__copy">
+        <p class="ga-policy-hero__eyebrow">مرکز قوانین تبلیغات</p>
+        <h1 id="policy-hero-title">{{ intro.title }}</h1>
+        <p class="ga-policy-hero__lead">{{ intro.subtitle }}</p>
+      </div>
     </div>
+    <ul class="ga-policy-hero__stats" aria-label="نمای کلی راهنما">
+      <li>
+        <strong>{{ categories|length }}</strong>
+        <span>موضوع اصلی</span>
+      </li>
+      <li>
+        <strong>{{ faq|length }}</strong>
+        <span>سوال متداول</span>
+      </li>
+      <li>
+        <strong>تلگرام</strong>
+        <span>مرجع نهایی</span>
+      </li>
+    </ul>
   </header>
 
-  <div class="ga-split ga-policy-layout"><div class="ga-policy-main">
-  <section class="card card-pad policy-intro">
-    <div class="ui-form-intro"><span class="ui-target-symbol" aria-hidden="true">{% include "includes/lucide_icon.html" with name="shield-check" size="md" %}</span><div><h2>پیش از انتشار</h2><p>نکات اصلی را مدنظر قرار دهید.</p></div></div>
-    <ul class="policy-intro-list">
-      {% for point in intro.points %}
-      <li>{{ point }}</li>
-      {% endfor %}
-    </ul>
-    <p class="muted" style="font-size:.82rem;margin:.75rem 0 0">
-      خلاصه‌های فارسی در گرام‌ادز راهنمای عملی هستند؛
-      <a href="https://ads.telegram.org/guidelines" target="_blank" rel="noopener">دستورالعمل رسمی تلگرام</a>
-      و
-      <a href="https://ads.telegram.org/tos" target="_blank" rel="noopener">شرایط پلتفرم تبلیغات</a>
-      مرجع حقوقی‌اند.
-    </p>
-  </section>
+  <div class="ga-split ga-policy-layout">
+    <div class="ga-policy-main">
+      <section class="ga-policy-intro" aria-labelledby="policy-intro-title">
+        <header class="ga-policy-section-head">
+          <div>
+            <p class="ga-policy-kicker">قبل از ثبت</p>
+            <h2 id="policy-intro-title">نکات کلیدی</h2>
+          </div>
+        </header>
+        <ol class="ga-policy-principles">
+          {% for point in intro.points %}
+          <li>
+            <span class="ga-policy-principles__index" aria-hidden="true">{{ forloop.counter|persian_digits }}</span>
+            <p>{{ point }}</p>
+          </li>
+          {% endfor %}
+        </ol>
+        <p class="ga-policy-legal-note">
+          خلاصه‌های فارسی در گرام‌ادز راهنمای عملی هستند؛
+          <a href="https://ads.telegram.org/guidelines" target="_blank" rel="noopener">دستورالعمل رسمی تلگرام</a>
+          و
+          <a href="https://ads.telegram.org/tos" target="_blank" rel="noopener">شرایط پلتفرم تبلیغات</a>
+          مرجع حقوقی‌اند.
+        </p>
+      </section>
 
-  <section class="policy-accordion" aria-label="قوانین به تفکیک موضوع">
-    {% for cat in categories %}
-    <details class="policy-accordion__item" id="policy-{{ cat.id }}" {% if forloop.first %}open{% endif %}>
-      <summary class="policy-accordion__head">
-        <span class="ui-policy-topic"><strong>{{ cat.title }}</strong><small>{{ cat.summary }}</small></span><span class="ui-policy-chevron" aria-hidden="true">{% include "includes/lucide_icon.html" with name="chevron-down" size="sm" %}</span>
-      </summary>
-      <div class="policy-accordion__body">
-        <div class="policy-example-grid">
-          <article>
-            <h3 class="ui-example-good">{% include "includes/lucide_icon.html" with name="check-circle" size="sm" %} نمونهٔ مناسب</h3>
-            <p dir="auto" style="margin:0;font-size:.9rem">{{ cat.good }}</p>
-          </article>
-          <article>
-            <h3 class="ui-example-bad">{% include "includes/lucide_icon.html" with name="alert-circle" size="sm" %} نمونهٔ مشکل‌دار</h3>
-            <p dir="auto" style="margin:0;font-size:.9rem">{{ cat.bad }}</p>
-          </article>
-        </div>
-        <p class="muted" style="margin:.75rem 0 0;font-size:.85rem">{{ cat.why }}</p>
-        {% if cat.details %}
-        <div class="policy-detail-list">
-          {% for detail in cat.details %}
-          <article class="policy-detail" id="policy-{{ cat.id }}-{{ detail.id }}">
-            <header>
-              <span class="policy-detail__clause">بند {{ detail.clause }}</span>
-              <h4>{{ detail.title }}</h4>
-            </header>
-            <p>{{ detail.body }}</p>
-          </article>
+      <nav class="ga-policy-mobile-toc" aria-label="موضوعات قوانین">
+        {% for cat in categories %}
+        <a class="ga-policy-mobile-toc__chip" href="#policy-{{ cat.id }}">{{ cat.title }}</a>
+        {% endfor %}
+      </nav>
+
+      <section class="ga-policy-topics" aria-label="قوانین به تفکیک موضوع">
+        <header class="ga-policy-section-head">
+          <div>
+            <p class="ga-policy-kicker">موضوعات</p>
+            <h2>راهنمای موضوعی</h2>
+            <p class="ga-policy-section-head__hint">هر موضوع را باز کنید تا نمونه و جزئیات را ببینید.</p>
+          </div>
+        </header>
+
+        <div class="policy-accordion ga-policy-accordion">
+          {% for cat in categories %}
+          <details class="policy-accordion__item ga-policy-topic" id="policy-{{ cat.id }}" {% if forloop.first %}open{% endif %}>
+            <summary class="policy-accordion__head ga-policy-topic__summary">
+              <span class="ga-policy-topic__symbol" aria-hidden="true">
+                {% if cat.id == "text" %}{% include "includes/lucide_icon.html" with name="type" size="md" %}
+                {% elif cat.id == "destination" %}{% include "includes/lucide_icon.html" with name="link" size="md" %}
+                {% elif cat.id == "bots_channels" %}{% include "includes/lucide_icon.html" with name="bot" size="md" %}
+                {% elif cat.id == "targeting" %}{% include "includes/lucide_icon.html" with name="target" size="md" %}
+                {% elif cat.id == "prohibited" %}{% include "includes/lucide_icon.html" with name="shield-alert" size="md" %}
+                {% elif cat.id == "budget" %}{% include "includes/lucide_icon.html" with name="wallet" size="md" %}
+                {% else %}{% include "includes/lucide_icon.html" with name="book-open" size="md" %}
+                {% endif %}
+              </span>
+              <span class="ui-policy-topic ga-policy-topic__copy">
+                <strong>{{ cat.title }}</strong>
+                <small>{{ cat.summary }}</small>
+              </span>
+              <span class="ui-policy-chevron ga-policy-topic__chevron" aria-hidden="true">{% include "includes/lucide_icon.html" with name="chevron-down" size="sm" %}</span>
+            </summary>
+            <div class="policy-accordion__body ga-policy-topic__body">
+              <div class="policy-example-grid ga-policy-examples">
+                <article class="ga-policy-example ga-policy-example--good">
+                  <h3 class="ui-example-good">
+                    {% include "includes/lucide_icon.html" with name="check-circle" size="sm" %}
+                    نمونه مناسب
+                  </h3>
+                  <p dir="auto">{{ cat.good }}</p>
+                </article>
+                <article class="ga-policy-example ga-policy-example--bad">
+                  <h3 class="ui-example-bad">
+                    {% include "includes/lucide_icon.html" with name="alert-circle" size="sm" %}
+                    نمونه مشکل‌دار
+                  </h3>
+                  <p dir="auto">{{ cat.bad }}</p>
+                </article>
+              </div>
+              <p class="ga-policy-why">{{ cat.why }}</p>
+              {% if cat.details %}
+              <div class="policy-detail-list ga-policy-details">
+                {% for detail in cat.details %}
+                <article class="policy-detail ga-policy-detail" id="policy-{{ cat.id }}-{{ detail.id }}">
+                  <header>
+                    <span class="policy-detail__clause">بند {{ detail.clause }}</span>
+                    <h4>{{ detail.title }}</h4>
+                  </header>
+                  <p>{{ detail.body }}</p>
+                </article>
+                {% endfor %}
+              </div>
+              {% endif %}
+            </div>
+          </details>
           {% endfor %}
         </div>
-        {% endif %}
-      </div>
-    </details>
-    {% endfor %}
-  </section>
+      </section>
 
-  <section class="ga-panel ga-panel-body">
-    <h2 class="section-title">سوالات متداول</h2>
-    <dl class="policy-faq">
-      {% for item in faq %}
-      <div class="policy-faq__row">
-        <dt>{{ item.q }}</dt>
-        <dd class="muted">{{ item.a }}</dd>
-      </div>
-      {% endfor %}
-    </dl>
-  </section>
-
-  </div><aside><section class="policy-sources ga-panel ga-panel-body">
-    <h2 class="section-title" style="font-size:1rem">منابع رسمی</h2>
-    <div class="policy-sources__links">
-      <a href="https://ads.telegram.org/tos" target="_blank" rel="noopener">شرایط پلتفرم تبلیغات تلگرام</a>
-      <a href="https://ads.telegram.org/guidelines" target="_blank" rel="noopener">دستورالعمل تبلیغات</a>
-      <a href="https://ads.telegram.org/getting-started" target="_blank" rel="noopener">راهنمای شروع</a>
-      <a href="{% url 'public:terms' %}">شرایط گرام‌ادز</a>
-      <a href="{% url 'public:refund' %}">بازپرداخت گرام‌ادز</a>
-      <a href="{% url 'public:privacy' %}">حریم خصوصی گرام‌ادز</a>
+      <section class="ga-policy-faq" aria-labelledby="policy-faq-title">
+        <header class="ga-policy-section-head">
+          <div>
+            <p class="ga-policy-kicker">پرسش‌ها</p>
+            <h2 id="policy-faq-title">سوالات متداول</h2>
+          </div>
+        </header>
+        <div class="ga-policy-faq__list">
+          {% for item in faq %}
+          <details class="ga-policy-faq__item">
+            <summary>{{ item.q }}</summary>
+            <p>{{ item.a }}</p>
+          </details>
+          {% endfor %}
+        </div>
+      </section>
     </div>
-  </section></aside></div>
+
+    <aside class="ga-policy-aside" aria-label="ناوبری و منابع">
+      <nav class="ga-policy-aside-card" aria-label="پرش به موضوع">
+        <header class="ga-policy-aside-card__head">
+          <h2>موضوعات</h2>
+          <p>برای مطالعه سریع، مستقیم بروید.</p>
+        </header>
+        <ul class="ga-policy-toc">
+          {% for cat in categories %}
+          <li>
+            <a href="#policy-{{ cat.id }}">
+              <span>{{ cat.title }}</span>
+              {% include "includes/lucide_icon.html" with name="chevron-left" size="sm" %}
+            </a>
+          </li>
+          {% endfor %}
+        </ul>
+      </nav>
+
+      <section class="policy-sources ga-policy-aside-card">
+        <header class="ga-policy-aside-card__head">
+          <h2 class="section-title">منابع رسمی</h2>
+          <p>اسناد مرجع تلگرام و گرام‌ادز.</p>
+        </header>
+        <div class="policy-sources__links ga-policy-source-links">
+          <a href="https://ads.telegram.org/tos" target="_blank" rel="noopener">شرایط پلتفرم تبلیغات تلگرام</a>
+          <a href="https://ads.telegram.org/guidelines" target="_blank" rel="noopener">دستورالعمل تبلیغات</a>
+          <a href="https://ads.telegram.org/getting-started" target="_blank" rel="noopener">راهنمای شروع</a>
+          <a href="{% url 'public:terms' %}">شرایط گرام‌ادز</a>
+          <a href="{% url 'public:refund' %}">بازپرداخت گرام‌ادز</a>
+          <a href="{% url 'public:privacy' %}">حریم خصوصی گرام‌ادز</a>
+        </div>
+      </section>
+
+      <section class="ga-policy-aside-card ga-policy-aside-card--cta">
+        <p class="ga-policy-aside-card__eyebrow">در استودیو</p>
+        <h2>قبل از ارسال بررسی کنید</h2>
+        <p>پنل قوانین استودیو همان بندها را هنگام ساخت کمپین به شما یادآوری می‌کند.</p>
+        <a class="btn btn-primary btn-sm" href="{% url 'campaigns:list' %}">مشاهده کمپین‌ها</a>
+      </section>
+    </aside>
+  </div>
 </div>
 <script>
 (function () {
@@ -106,15 +207,4 @@
 })();
 </script>
 {% endblock %}
-{% block page_styles %}{{ block.super }}
-<style>
-.policy-detail-list{display:grid;gap:10px;margin-top:14px}
-.policy-detail{padding:12px 14px;border:1px solid #e5edf5;border-radius:12px;background:#fbfcfe}
-.policy-detail header{display:flex;align-items:center;gap:8px;margin-bottom:6px}
-.policy-detail__clause{flex:none;padding:2px 7px;border-radius:6px;background:#edf4fb;color:#2f6ea0;font-size:.68rem;font-weight:750}
-.policy-detail h4{margin:0;font-size:.86rem;color:#243f59}
-.policy-detail p{margin:0;color:#5f7388;font-size:.8rem;line-height:1.85}
-.policy-accordion__item:target,
-.policy-detail:target{outline:2px solid #2a8fd4;outline-offset:3px}
-</style>
-{% endblock %}
+{% block page_styles %}{{ block.super }}{% endblock %}

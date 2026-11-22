@@ -11,7 +11,7 @@ RuleMeta = dict[str, Any]
 RULES: dict[str, RuleMeta] = {
     "TG-FMT-001": {
         "document": "Telegram Ad Guidelines",
-        "clause": "§1 قالب تبلیغ",
+        "clause": "بند ۱ قالب تبلیغ",
         "title_fa": "قالب و محدودیت متن",
         "guide_section": "text",
         "url": SOURCE_GUIDELINES,
@@ -21,7 +21,7 @@ RULES: dict[str, RuleMeta] = {
     },
     "TG-EDI-002": {
         "document": "Telegram Ad Guidelines",
-        "clause": "§2 الزامات ویرایشی",
+        "clause": "بند ۲ الزامات ویرایشی",
         "title_fa": "الزامات ویرایشی متن",
         "guide_section": "text",
         "url": SOURCE_GUIDELINES,
@@ -31,7 +31,7 @@ RULES: dict[str, RuleMeta] = {
     },
     "TG-LNK-003": {
         "document": "Telegram Ad Guidelines",
-        "clause": "§3 فرمت لینک",
+        "clause": "بند ۳ فرمت لینک",
         "title_fa": "لینک و مقصد تبلیغ",
         "guide_section": "destination",
         "url": SOURCE_GUIDELINES,
@@ -41,7 +41,7 @@ RULES: dict[str, RuleMeta] = {
     },
     "TG-DST-004": {
         "document": "Telegram Ad Guidelines",
-        "clause": "§4 مقصد و هدف‌گیری",
+        "clause": "بند ۴ مقصد و هدف‌گیری",
         "title_fa": "ربات، کانال و آمادگی مقصد",
         "guide_section": "bots_channels",
         "url": SOURCE_GUIDELINES,
@@ -51,7 +51,7 @@ RULES: dict[str, RuleMeta] = {
     },
     "TG-PRH-005": {
         "document": "Telegram Ad Guidelines",
-        "clause": "§5 محتوای غیرمجاز",
+        "clause": "بند ۵ محتوای غیرمجاز",
         "title_fa": "محتوای حساس و غیرمجاز",
         "guide_section": "prohibited",
         "url": SOURCE_GUIDELINES,
@@ -61,7 +61,7 @@ RULES: dict[str, RuleMeta] = {
     },
     "TG-TOS-006": {
         "document": "Telegram Ad Platform ToS",
-        "clause": "§3.3(e) پیشنهاد شخص ثالث",
+        "clause": "بند ۳.۳(e) پیشنهاد شخص ثالث",
         "title_fa": "مجوز حساب مرکزی",
         "guide_section": "",
         "url": SOURCE_ADS_TOS,
@@ -71,7 +71,7 @@ RULES: dict[str, RuleMeta] = {
     },
     "TG-TOS-007": {
         "document": "Telegram Ad Platform ToS",
-        "clause": "§4.3 اعتبار مصرف‌نشده",
+        "clause": "بند ۴.۳ اعتبار مصرف‌نشده",
         "title_fa": "بودجه و اعتبار تبلیغ",
         "guide_section": "budget",
         "url": SOURCE_ADS_TOS,
@@ -101,7 +101,7 @@ RULES: dict[str, RuleMeta] = {
     },
 }
 
-# Sub-anchors inside the prohibited guide section (Telegram §5.x).
+# Sub-anchors inside the prohibited guide section (Telegram 5.x).
 PROHIBITED_GUIDE_ANCHORS = {
     "5.6": "gambling",
     "5.7": "finance",
@@ -132,7 +132,7 @@ def guide_anchor_for(rule_id: str, source_clause: str = "") -> str:
     section = meta.get("guide_section") or ""
     if not section:
         return ""
-    clause = (source_clause or "").lstrip("§").strip()
+    clause = str(source_clause or "").replace("§", "").strip()
     if rule_id == "TG-PRH-005" and clause in PROHIBITED_GUIDE_ANCHORS:
         return f"policy-{section}-{PROHIBITED_GUIDE_ANCHORS[clause]}"
     return f"policy-{section}"

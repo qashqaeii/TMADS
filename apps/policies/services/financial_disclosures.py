@@ -13,7 +13,7 @@ def budget_step_guidance() -> list[PolicyFindingDTO]:
             field_key="budget",
             message_fa="موجودی رزرو شده در گرام‌ادز با اعتبار تبلیغاتی حساب تلگرام اپراتور متفاوت است؛ بازپرداخت طبق قرارداد گرام‌ادز است نه مستقیماً از تلگرام.",
             source_document="Telegram Ad Platform ToS",
-            source_clause="§4.3",
+            source_clause="4.3",
             source_url=SOURCE_ADS_TOS,
         ),
         PolicyFindingDTO(
@@ -22,7 +22,7 @@ def budget_step_guidance() -> list[PolicyFindingDTO]:
             field_key="budget",
             message_fa="CPM و نمایش تضمین‌شده نیست؛ تلگرام می‌تواند تبلیغ را رد یا متوقف کند.",
             source_document="Telegram Ad Platform ToS",
-            source_clause="§5.2",
+            source_clause="5.2",
             source_url=SOURCE_ADS_TOS,
         ),
     ]

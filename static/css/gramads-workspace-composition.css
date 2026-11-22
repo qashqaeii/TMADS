@@ -129,7 +129,7 @@
 .is-app .ga-ticket-detail .chat-thread{min-height:180px}
 .is-app .ga-ticket-detail .ga-facts{margin-bottom:10px}
 .is-app .ga-ticket-detail .ga-facts li{align-items:start}
-.is-app .ga-policy-layout{grid-template-columns:minmax(0,2.4fr) minmax(215px,1fr)}
+.is-app .ga-policy-layout{grid-template-columns:minmax(0,2.4fr) minmax(240px,0.92fr);gap:14px;align-items:start}
 .is-app .ga-policy-layout .policy-sources__links{display:grid;gap:7px}
 .is-app .ga-policy-layout .policy-sources__links a{padding:8px 0;border-bottom:1px solid #e0eaf6;font-size:.8rem;line-height:1.6}
 .is-app .ga-policy-layout .policy-sources__links a:last-child{border:0}

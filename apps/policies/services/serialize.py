@@ -15,11 +15,10 @@ _CLAUSE_ALIASES = {
 
 
 def format_clause_label(raw: str | None) -> str:
-    """Human-readable Persian clause badge; avoid § which reverses in RTL."""
-    text = str(raw or "").strip()
+    """Human-readable Persian clause badge. Never emit § (breaks RTL)."""
+    text = str(raw or "").replace("§", "").strip()
     if not text:
         return ""
-    text = text.lstrip("§").strip()
     alias = _CLAUSE_ALIASES.get(text.lower())
     if alias:
         return alias
