@@ -108,15 +108,45 @@ class BotRecommendationAdapter(Protocol):
         exclude: set[str],
         customer_id: str | None,
         limit: int,
+        seed_title: str = "",
     ) -> list[RecommendationCandidate]:
         ...
 
 
-def load_seed_context(seed_username: str) -> SeedContext:
+# Deterministic keyword → category/tags (no AI). Used when seed is not yet curated.
+_CATEGORY_HINTS: tuple[tuple[str, tuple[str, ...]], ...] = (
+    ("vpn", ("vpn", "v2ray", "vless", "proxy", "tunnel", "wireguard", "openvpn", "فیلترشکن", "ویپیان", "وی‌پی‌ان")),
+    ("wallet", ("wallet", "کیف پول", "tonkeeper", "payment")),
+    ("music", ("music", "آهنگ", "موزیک", "spotify", "melobot")),
+    ("download", ("download", "دانلود", "apk", "downloader")),
+    ("ai", ("chatgpt", "openai", "هوش مصنوعی", "ai bot", "گراتومیک")),
+)
+
+
+def infer_signals_from_text(*parts: str) -> tuple[str, set[str]]:
+    blob = " ".join(str(p or "") for p in parts).casefold()
+    if not blob.strip():
+        return "", set()
+    tags: set[str] = set()
+    category = ""
+    for cat, keywords in _CATEGORY_HINTS:
+        if any(k.casefold() in blob for k in keywords):
+            tags.add(cat)
+            if not category:
+                category = cat
+    return category, tags
+
+
+def load_seed_context(seed_username: str, *, seed_title: str = "") -> SeedContext:
     at = normalize_catalog_username(seed_username)
     if not at:
         return SeedContext(username="")
-    ctx = SeedContext(username=at)
+    inferred_category, inferred_tags = infer_signals_from_text(at, seed_title)
+    ctx = SeedContext(
+        username=at,
+        category=inferred_category,
+        tags=set(inferred_tags),
+    )
     row = (
         TargetBotCatalogEntry.objects.filter(is_active=True)
         .filter(Q(username__iexact=at) | Q(username__iexact=at.lstrip("@")))
@@ -129,10 +159,12 @@ def load_seed_context(seed_username: str) -> SeedContext:
         n = normalize_catalog_username(str(raw))
         if n:
             related.add(_username_key(n))
+    category = (row.category or "").strip().casefold() or inferred_category
+    tags = _as_str_set(row.tags) | inferred_tags
     return SeedContext(
         username=at,
-        category=(row.category or "").strip().casefold(),
-        tags=_as_str_set(row.tags),
+        category=category,
+        tags=tags,
         language_codes=_as_str_set(row.language_codes),
         topic_ids=_as_int_set(row.topic_ids),
         related=related,
@@ -291,8 +323,9 @@ class CatalogBotRecommendationAdapter:
         exclude: set[str],
         customer_id: str | None,
         limit: int,
+        seed_title: str = "",
     ) -> list[RecommendationCandidate]:
-        seed_ctx = load_seed_context(seed)
+        seed_ctx = load_seed_context(seed, seed_title=seed_title)
         if not seed_ctx.username:
             return []
 

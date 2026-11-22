@@ -108,6 +108,20 @@ def test_catalog_adapter_prefers_related_and_same_category(catalog_seed):
     assert "@deadvpnbot" not in usernames
 
 
+def test_infer_category_from_seed_title_when_not_in_catalog(catalog_seed):
+    adapter = CatalogBotRecommendationAdapter()
+    rows = adapter.recommend(
+        seed="@HyperVpnRobot",
+        exclude=set(),
+        customer_id=None,
+        limit=12,
+        seed_title="Hyper VPN",
+    )
+    usernames = [r.username.casefold() for r in rows]
+    assert "@peervpnbot" in usernames
+    assert "@musicbotx" not in usernames
+
+
 def test_catalog_adapter_excludes_duplicates(catalog_seed):
     adapter = CatalogBotRecommendationAdapter()
     rows = adapter.recommend(

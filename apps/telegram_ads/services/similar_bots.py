@@ -243,12 +243,16 @@ class SimilarBotsService:
             )
 
         customer_id = str(getattr(customer, "pk", "") or "") or None
+        seed_title = ""
+        if isinstance(seed_check.bot, dict):
+            seed_title = str(seed_check.bot.get("title") or "")
         try:
             candidates = self.adapter.recommend(
                 seed=seed_at,
                 exclude={x.casefold() for x in exclude_list},
                 customer_id=customer_id,
                 limit=limit,
+                seed_title=seed_title,
             )
         except Exception:
             logger.exception("similar bots adapter failed for seed=%s", seed_at)

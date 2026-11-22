@@ -580,6 +580,7 @@
       empty.className = "similar-bots__empty muted";
       empty.textContent = message || "ربات مشابه معتبری پیدا نشد.";
       similarBody.appendChild(empty);
+      if (similarAddBtn) similarAddBtn.hidden = true;
       updateSimilarAddState();
     }
 
@@ -708,10 +709,12 @@
             return true;
           });
           if (!similarSuggestions.length) {
-            setSimilarStatus(res.body.message_fa || "پیشنهاد مرتبطی پیدا نشد.");
+            // One empty message only — keep status quiet to avoid duplicate copy.
+            setSimilarStatus("");
             renderSimilarEmpty(res.body.message_fa || "ربات مشابه معتبری پیدا نشد.");
             return;
           }
+          if (similarAddBtn) similarAddBtn.hidden = false;
           setSimilarStatus("می‌توانید چند ربات مرتبط را یکجا اضافه کنید.");
           renderSimilarList();
         })
