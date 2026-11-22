@@ -69,7 +69,8 @@
           data-studio-mode="{{ studio_mode }}"
           data-catalog-locations="{% url 'campaigns:catalog_locations' %}"
           data-resolve-bot="{% url 'campaigns:catalog_resolve_bot' %}"
-          data-resolve-channel="{% url 'campaigns:catalog_resolve_channel' %}">
+          data-resolve-channel="{% url 'campaigns:catalog_resolve_channel' %}"
+          data-similar-bots="{% url 'campaigns:bots_similar' %}">
       {% csrf_token %}
       <input type="hidden" name="draft_revision" value="{{ campaign.draft_revision }}">
       <input type="hidden" name="studio_step" value="{{ step }}">
@@ -194,6 +195,19 @@
         </div>
         <div class="bot-target-preview" data-bot-preview hidden aria-live="polite"></div>
         <ul class="bot-target-list" data-bot-chip-list role="list"></ul>
+        <section class="similar-bots" data-similar-bots-panel hidden>
+          <div class="similar-bots__head">
+            <div class="similar-bots__titles">
+              <strong class="similar-bots__heading">ربات‌های مشابه</strong>
+              <p class="similar-bots__hint muted" data-similar-bots-status>پس از تأیید ربات، پیشنهادهای مرتبط اینجا می‌آید.</p>
+            </div>
+            <button type="button" class="btn btn-ghost btn-sm similar-bots__add" data-similar-bots-add disabled>
+              افزودن انتخاب‌شده‌ها
+              <span class="similar-bots__count" data-similar-bots-count hidden></span>
+            </button>
+          </div>
+          <div class="similar-bots__panel" data-similar-bots-body></div>
+        </section>
         <textarea name="bot_ids" hidden data-bot-hidden dir="ltr">{% if campaign.targeting %}{% for b in campaign.targeting.config.bot_ids %}{{ b }}
 {% endfor %}{% endif %}</textarea>
         <input type="hidden" name="bot_eligibility_json" data-bot-eligibility-hidden value="{{ bot_eligibility_json|escape }}">

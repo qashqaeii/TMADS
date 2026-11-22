@@ -418,19 +418,36 @@
     sync();
   }
 
-  function initBotTargetingSelector(root, resolveUrl) {
+  function csrfTokenFrom(root) {
+    var form = root && root.closest ? root.closest("form") : null;
+    var input = form && form.querySelector("[name=csrfmiddlewaretoken]");
+    if (input && input.value) return input.value;
+    var match = document.cookie.match(/(?:^|; )csrftoken=([^;]+)/);
+    return match ? decodeURIComponent(match[1]) : "";
+  }
+
+  function initBotTargetingSelector(root, resolveUrl, similarUrl) {
     var input = root.querySelector("[data-bot-input]");
     var addBtn = root.querySelector("[data-bot-add]");
     var list = root.querySelector("[data-bot-chip-list]");
     var hidden = root.querySelector("[data-bot-hidden]");
     var hiddenJson = root.querySelector("[data-bot-eligibility-hidden]");
     var preview = root.querySelector("[data-bot-preview]");
+    var similarPanel = root.querySelector("[data-similar-bots-panel]");
+    var similarBody = root.querySelector("[data-similar-bots-body]");
+    var similarStatus = root.querySelector("[data-similar-bots-status]");
+    var similarAddBtn = root.querySelector("[data-similar-bots-add]");
+    var similarCount = root.querySelector("[data-similar-bots-count]");
     if (!input || !list || !hidden) return;
 
     var items = [];
     var checks = {};
     var lastResolve = null;
     var inflight = null;
+    var similarInflight = null;
+    var similarSuggestions = [];
+    var similarSelected = {};
+    var activeSimilarSeed = "";
 
     try {
       checks = JSON.parse(hiddenJson && hiddenJson.value ? hiddenJson.value : "{}") || {};
@@ -508,9 +525,207 @@
       body.className = prefix + "__body";
       body.appendChild(textNode("strong", prefix + "__title", title, "auto"));
       body.appendChild(textNode("span", prefix + "__user", user, "ltr"));
-      body.appendChild(textNode("p", prefix + "__status", message));
+      if (message) body.appendChild(textNode("p", prefix + "__status", message));
       parent.append(img, body);
     }
+
+    function formatMonthly(n) {
+      if (typeof n !== "number" || !isFinite(n) || n <= 0) return "";
+      try {
+        return new Intl.NumberFormat("fa-IR").format(n) + " کاربر ماهانه";
+      } catch (_) {
+        return String(n) + " کاربر ماهانه";
+      }
+    }
+
+    function selectedSimilarCount() {
+      return Object.keys(similarSelected).filter(function (k) {
+        return similarSelected[k];
+      }).length;
+    }
+
+    function updateSimilarAddState() {
+      if (!similarAddBtn) return;
+      var count = selectedSimilarCount();
+      var room = Math.max(0, 100 - items.length);
+      similarAddBtn.disabled = count === 0 || room === 0;
+      if (similarCount) {
+        similarCount.hidden = count === 0;
+        similarCount.textContent = count ? String(count) : "";
+      }
+    }
+
+    function setSimilarStatus(text) {
+      if (similarStatus) similarStatus.textContent = text || "";
+    }
+
+    function renderSimilarSkeleton() {
+      if (!similarBody) return;
+      similarBody.replaceChildren();
+      var wrap = document.createElement("div");
+      wrap.className = "similar-bots__grid similar-bots__grid--skeleton";
+      wrap.setAttribute("aria-hidden", "true");
+      for (var i = 0; i < 4; i++) {
+        var sk = document.createElement("div");
+        sk.className = "similar-bots__skeleton";
+        wrap.appendChild(sk);
+      }
+      similarBody.appendChild(wrap);
+    }
+
+    function renderSimilarEmpty(message) {
+      if (!similarBody) return;
+      similarBody.replaceChildren();
+      var empty = document.createElement("p");
+      empty.className = "similar-bots__empty muted";
+      empty.textContent = message || "ربات مشابه معتبری پیدا نشد.";
+      similarBody.appendChild(empty);
+      updateSimilarAddState();
+    }
+
+    function renderSimilarList() {
+      if (!similarBody) return;
+      similarBody.replaceChildren();
+      if (!similarSuggestions.length) {
+        renderSimilarEmpty("ربات مشابه معتبری پیدا نشد.");
+        return;
+      }
+      var grid = document.createElement("div");
+      grid.className = "similar-bots__grid";
+      grid.setAttribute("role", "group");
+      grid.setAttribute("aria-label", "پیشنهاد ربات‌های مشابه");
+      similarSuggestions.forEach(function (sug) {
+        var key = String(sug.username || "").toLowerCase();
+        var label = document.createElement("label");
+        label.className = "similar-bots__item";
+        if (similarSelected[key]) label.classList.add("is-selected");
+        var check = document.createElement("input");
+        check.type = "checkbox";
+        check.className = "similar-bots__check";
+        check.checked = !!similarSelected[key];
+        check.addEventListener("change", function () {
+          if (check.checked) similarSelected[key] = true;
+          else delete similarSelected[key];
+          label.classList.toggle("is-selected", !!similarSelected[key]);
+          updateSimilarAddState();
+        });
+        var media = document.createElement("span");
+        media.className = "similar-bots__media";
+        appendBotContent(media, "similar-bots-card", sug.title || sug.username, sug.username, formatMonthly(sug.monthly_users), sug.photo_url);
+        label.append(check, media);
+        grid.appendChild(label);
+      });
+      similarBody.appendChild(grid);
+      updateSimilarAddState();
+    }
+
+    function hideSimilar() {
+      if (similarPanel) similarPanel.hidden = true;
+      similarSuggestions = [];
+      similarSelected = {};
+      activeSimilarSeed = "";
+      if (similarInflight && similarInflight.abort) similarInflight.abort();
+      updateSimilarAddState();
+    }
+
+    function fetchSimilar(seed) {
+      if (!similarUrl || !similarPanel || !similarBody) return;
+      seed = normalize(seed);
+      if (!seed) {
+        hideSimilar();
+        return;
+      }
+      if (items.length >= 100) {
+        similarPanel.hidden = false;
+        setSimilarStatus("به سقف ۱۰۰ ربات رسیده‌اید.");
+        renderSimilarEmpty("برای افزودن پیشنهاد جدید، ابتدا یکی از ربات‌ها را حذف کنید.");
+        return;
+      }
+      activeSimilarSeed = seed;
+      similarPanel.hidden = false;
+      similarSelected = {};
+      setSimilarStatus("در حال یافتن ربات‌های مرتبط…");
+      renderSimilarSkeleton();
+      updateSimilarAddState();
+      if (similarInflight && similarInflight.abort) similarInflight.abort();
+      var ctrl = typeof AbortController !== "undefined" ? new AbortController() : null;
+      similarInflight = ctrl;
+      var body = new FormData();
+      body.set("seed", seed);
+      body.set("limit", "12");
+      body.set(
+        "exclude",
+        JSON.stringify(
+          items.map(function (it) {
+            return it.username;
+          })
+        )
+      );
+      var csrf = csrfTokenFrom(root);
+      if (csrf) body.set("csrfmiddlewaretoken", csrf);
+      fetch(similarUrl, {
+        method: "POST",
+        body: body,
+        credentials: "same-origin",
+        headers: {
+          "X-Requested-With": "XMLHttpRequest",
+          "X-CSRFToken": csrf || "",
+        },
+        signal: ctrl ? ctrl.signal : undefined,
+      })
+        .then(function (r) {
+          return r.json().then(function (j) {
+            return { ok: r.ok, status: r.status, body: j || {} };
+          });
+        })
+        .then(function (res) {
+          if (activeSimilarSeed.toLowerCase() !== seed.toLowerCase()) return;
+          if (res.status === 429) {
+            setSimilarStatus(res.body.message_fa || "چند لحظه صبر کنید.");
+            renderSimilarEmpty(res.body.message_fa || "درخواست زیاد است.");
+            return;
+          }
+          if (res.body.feature_enabled === false) {
+            hideSimilar();
+            return;
+          }
+          if (!res.ok && res.body.reason === "invalid_seed") {
+            setSimilarStatus(res.body.message_fa || "ربات معتبر نیست.");
+            renderSimilarEmpty(res.body.message_fa || "ربات معتبر نیست.");
+            return;
+          }
+          var rows = Array.isArray(res.body.items) ? res.body.items : [];
+          var existing = {};
+          items.forEach(function (it) {
+            existing[it.username.toLowerCase()] = true;
+          });
+          similarSuggestions = rows.filter(function (row) {
+            if (!row || !row.username) return false;
+            if (row.eligibility !== "eligible" || !row.verified) return false;
+            var u = normalize(row.username);
+            if (!u || existing[u.toLowerCase()]) return false;
+            if (u.toLowerCase() === seed.toLowerCase()) return false;
+            return true;
+          });
+          if (!similarSuggestions.length) {
+            setSimilarStatus(res.body.message_fa || "پیشنهاد مرتبطی پیدا نشد.");
+            renderSimilarEmpty(res.body.message_fa || "ربات مشابه معتبری پیدا نشد.");
+            return;
+          }
+          setSimilarStatus("می‌توانید چند ربات مرتبط را یکجا اضافه کنید.");
+          renderSimilarList();
+        })
+        .catch(function (err) {
+          if (err && err.name === "AbortError") return;
+          if (activeSimilarSeed.toLowerCase() !== seed.toLowerCase()) return;
+          setSimilarStatus("پیشنهادها موقتاً در دسترس نیست؛ می‌توانید دستی ادامه دهید.");
+          renderSimilarEmpty("پیشنهادها موقتاً در دسترس نیست.");
+        });
+    }
+
+    var fetchSimilarDebounced = debounce(function (seed) {
+      fetchSimilar(seed);
+    }, 450);
 
     function renderPreview(payload) {
       if (!preview) return;
@@ -544,6 +759,7 @@
           renderList();
           syncHidden();
           dispatchInput(root);
+          if (activeSimilarSeed) fetchSimilarDebounced(activeSimilarSeed);
         });
         li.appendChild(btn);
         list.appendChild(li);
@@ -554,6 +770,11 @@
       if (!payload || normalize(input.value) !== query) return;
       lastResolve = { query: query, payload: payload };
       renderPreview(payload);
+      if (payload.eligibility === "eligible" && payload.verified) {
+        fetchSimilarDebounced(query);
+      } else if (payload.hard_block || payload.eligibility === "invalid_bot") {
+        hideSimilar();
+      }
     }
 
     var resolveDebounced = debounce(function () {
@@ -612,41 +833,101 @@
       resolveDebounced();
     });
 
+    function pushItem(entry) {
+      if (!entry || !entry.username) return false;
+      var u = normalize(entry.username);
+      if (!u) return false;
+      if (items.length >= 100) return false;
+      if (
+        items.some(function (it) {
+          return it.username.toLowerCase() === u.toLowerCase();
+        })
+      ) {
+        return false;
+      }
+      if (entry.hard_block || entry.eligibility === "insufficient_audience" || entry.eligibility === "invalid_bot") {
+        return false;
+      }
+      if (!(entry.eligibility === "eligible" && entry.verified)) {
+        // Allow pending add from manual resolve path for draft continuity (existing behavior),
+        // but Similar Bots path always sends eligible+verified.
+        if (entry.source === "similar") return false;
+      }
+      items.push({
+        username: u,
+        eligibility: entry.eligibility || "unknown",
+        message_fa: entry.message_fa || "",
+        hard_block: !!entry.hard_block,
+        verified: !!entry.verified,
+        bot: entry.bot || {},
+      });
+      return true;
+    }
+
     function addCurrent() {
       var v = normalize(input.value);
       if (!v) return;
-      if (
-        items.some(function (it) {
-          return it.username.toLowerCase() === v.toLowerCase();
-        })
-      ) {
-        return;
-      }
       var payload =
         lastResolve && lastResolve.query.toLowerCase() === v.toLowerCase() ? lastResolve.payload : null;
       if (!payload || !payload.eligibility) {
         return;
       }
-      if (items.length >= 100 || payload.hard_block || payload.eligibility === "insufficient_audience" || payload.eligibility === "invalid_bot") {
-        return;
-      }
-      items.push({
+      if (!pushItem({
         username: v,
         eligibility: payload.eligibility,
         message_fa: payload.message_fa,
         hard_block: !!payload.hard_block,
         verified: !!payload.verified,
         bot: payload.bot || {},
-      });
+        source: "manual",
+      })) {
+        return;
+      }
       input.value = "";
       lastResolve = null;
       renderPreview(null);
       renderList();
       syncHidden();
       dispatchInput(root);
+      fetchSimilarDebounced(v);
+    }
+
+    function addSelectedSimilar() {
+      var added = 0;
+      var seedForRefresh = activeSimilarSeed;
+      similarSuggestions.forEach(function (sug) {
+        var key = String(sug.username || "").toLowerCase();
+        if (!similarSelected[key]) return;
+        if (
+          pushItem({
+            username: sug.username,
+            eligibility: "eligible",
+            message_fa: "ربات برای هدف‌گیری تبلیغاتی تأیید شد.",
+            hard_block: false,
+            verified: true,
+            bot: {
+              bot_id: sug.bot_id,
+              title: sug.title,
+              username: String(sug.username || "").replace(/^@+/, ""),
+              photo_url: sug.photo_url,
+            },
+            source: "similar",
+          })
+        ) {
+          added += 1;
+        }
+      });
+      if (!added) return;
+      similarSelected = {};
+      renderList();
+      syncHidden();
+      dispatchInput(root);
+      if (seedForRefresh) fetchSimilar(seedForRefresh);
+      else updateSimilarAddState();
     }
 
     if (addBtn) addBtn.addEventListener("click", addCurrent);
+    if (similarAddBtn) similarAddBtn.addEventListener("click", addSelectedSimilar);
     input.addEventListener("keydown", function (e) {
       if (e.key === "Enter") {
         e.preventDefault();
@@ -674,7 +955,7 @@
     renderList();
     syncHidden();
 
-    items.forEach(function (it, idx) {
+    items.forEach(function (it) {
       if (!resolveUrl) return;
       fetch(resolveUrl + "?username=" + encodeURIComponent(it.username), { credentials: "same-origin" })
         .then(function (r) {
@@ -694,6 +975,9 @@
           };
           renderList();
           syncHidden();
+          if (j.eligibility === "eligible" && j.verified && !activeSimilarSeed) {
+            fetchSimilarDebounced(items[currentIndex].username);
+          }
         })
         .catch(function () {});
     });
@@ -1205,7 +1489,11 @@
     initChannelMode(form);
     document.querySelectorAll("[data-schedule-editor]").forEach(initScheduleEditor);
     document.querySelectorAll("[data-bot-selector]").forEach(function (el) {
-      initBotTargetingSelector(el, form.getAttribute("data-resolve-bot"));
+      initBotTargetingSelector(
+        el,
+        form.getAttribute("data-resolve-bot"),
+        form.getAttribute("data-similar-bots")
+      );
     });
     document.querySelectorAll("[data-channel-selector]").forEach(function (el) {
       initLineChips(el, {

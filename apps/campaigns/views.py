@@ -951,6 +951,61 @@ def studio_catalog_resolve_channel(request):
 @login_required
 @customer_required
 @require_POST
+def studio_bots_similar(request):
+    """Authenticated Similar Bots suggestions — catalog + official getTargetBot only."""
+    from apps.telegram_ads.services.similar_bots import SimilarBotsService, similar_bots_enabled
+
+    if not similar_bots_enabled():
+        return JsonResponse(
+            {
+                "ok": True,
+                "seed": None,
+                "items": [],
+                "message_fa": "پیشنهاد ربات‌های مشابه فعلاً غیرفعال است.",
+                "reason": "feature_disabled",
+                "feature_enabled": False,
+            }
+        )
+    if _catalog_rate_limited(request.user.pk, "similar_bots"):
+        return JsonResponse(
+            {
+                "ok": False,
+                "seed": None,
+                "items": [],
+                "message_fa": "تعداد درخواست زیاد است؛ چند لحظه صبر کنید.",
+                "reason": "rate_limited",
+                "feature_enabled": True,
+            },
+            status=429,
+        )
+
+    seed = (request.POST.get("seed") or "").strip()[:256]
+    exclude_raw = request.POST.get("exclude") or "[]"
+    try:
+        exclude_parsed = json.loads(exclude_raw)
+    except (TypeError, ValueError, json.JSONDecodeError):
+        exclude_parsed = []
+    if not isinstance(exclude_parsed, list):
+        exclude_parsed = []
+    try:
+        limit = int(request.POST.get("limit") or 12)
+    except (TypeError, ValueError):
+        limit = 12
+
+    customer = request.user.customer_profile
+    result = SimilarBotsService().get_similar(
+        seed,
+        customer=customer,
+        exclude=[str(x) for x in exclude_parsed[:100]],
+        limit=limit,
+    )
+    status = 400 if result.reason == "invalid_seed" and not result.ok else 200
+    return JsonResponse(result.to_json(), status=status)
+
+
+@login_required
+@customer_required
+@require_POST
 @transaction.atomic
 def campaign_policy_preview(request, campaign_id):
     customer = request.user.customer_profile
