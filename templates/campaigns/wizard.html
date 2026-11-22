@@ -49,15 +49,37 @@
     <nav class="studio-stepper" aria-label="مراحل ساخت تبلیغ">
       <ol class="studio-stepper__list">
         {% for key, label in steps %}
-        <li class="studio-stepper__item {% if forloop.counter == step %}is-active{% elif forloop.counter < step %}is-complete{% endif %}" {% if forloop.counter == step %}aria-current="step"{% endif %}>
-          <span class="studio-stepper__number">
-            {% if forloop.counter < step %}{% include "includes/lucide_icon.html" with name="check" size="sm" %}{% else %}{{ forloop.counter|persian_digits }}{% endif %}
-          </span>
-          <span class="studio-stepper__copy">
-            <strong>{{ label }}</strong>
-            <small>{% if key == "goal" %}جای نشون دادن{% elif key == "audience" %}کی می‌بینه{% elif key == "creative" %}چی بنویسی{% elif key == "budget" %}چقدر هزینه{% else %}چک آخر{% endif %}</small>
+        {% if forloop.counter == step %}
+        <li class="studio-stepper__item is-active" aria-current="step">
+          <span class="studio-stepper__btn studio-stepper__btn--static">
+            <span class="studio-stepper__number">{{ forloop.counter|persian_digits }}</span>
+            <span class="studio-stepper__copy">
+              <strong>{{ label }}</strong>
+              <small>{% if key == "goal" %}جای نشون دادن{% elif key == "audience" %}کی می‌بینه{% elif key == "creative" %}چی بنویسی{% elif key == "budget" %}چقدر هزینه{% else %}چک آخر{% endif %}</small>
+            </span>
           </span>
         </li>
+        {% elif forloop.counter <= furthest_step %}
+        <li class="studio-stepper__item is-complete">
+          <button type="submit" class="studio-stepper__btn" form="campaign-studio-form" name="goto_step" value="{{ forloop.counter }}" formnovalidate aria-label="رفتن به مرحله {{ label }}">
+            <span class="studio-stepper__number">{% include "includes/lucide_icon.html" with name="check" size="sm" %}</span>
+            <span class="studio-stepper__copy">
+              <strong>{{ label }}</strong>
+              <small>{% if key == "goal" %}جای نشون دادن{% elif key == "audience" %}کی می‌بینه{% elif key == "creative" %}چی بنویسی{% elif key == "budget" %}چقدر هزینه{% else %}چک آخر{% endif %}</small>
+            </span>
+          </button>
+        </li>
+        {% else %}
+        <li class="studio-stepper__item is-locked" aria-disabled="true">
+          <span class="studio-stepper__btn studio-stepper__btn--static">
+            <span class="studio-stepper__number">{{ forloop.counter|persian_digits }}</span>
+            <span class="studio-stepper__copy">
+              <strong>{{ label }}</strong>
+              <small>{% if key == "goal" %}جای نشون دادن{% elif key == "audience" %}کی می‌بینه{% elif key == "creative" %}چی بنویسی{% elif key == "budget" %}چقدر هزینه{% else %}چک آخر{% endif %}</small>
+            </span>
+          </span>
+        </li>
+        {% endif %}
         {% endfor %}
       </ol>
     </nav>
@@ -70,7 +92,9 @@
           data-catalog-locations="{% url 'campaigns:catalog_locations' %}"
           data-resolve-bot="{% url 'campaigns:catalog_resolve_bot' %}"
           data-resolve-channel="{% url 'campaigns:catalog_resolve_channel' %}"
-          data-similar-bots="{% url 'campaigns:bots_similar' %}">
+          data-similar-bots="{% url 'campaigns:bots_similar' %}"
+          data-similar-channels="{% url 'campaigns:channels_similar' %}"
+          data-promote-preview="{% url 'campaigns:promote_preview' %}">
       {% csrf_token %}
       <input type="hidden" name="draft_revision" value="{{ campaign.draft_revision }}">
       <input type="hidden" name="studio_step" value="{{ step }}">
@@ -89,11 +113,10 @@
         </div>
       </div>
       <div class="studio-step-heading" id="studio-step-heading">
-        <span class="studio-step-heading__eyebrow">گام {{ step|persian_digits }} از {{ steps|length|persian_digits }}</span>
         <h2 id="studio-step-title">
           {% if step == 1 %}کجا می‌خوای تبلیغ نمایش داده بشه؟
           {% elif step == 2 %}می‌خوای کی این تبلیغ رو ببینه؟
-          {% elif step == 3 %}متن تبلیغت چی باشه؟
+          {% elif step == 3 %}متن تبلیغ‌ت چی باشه؟
           {% elif step == 4 %}چقدر می‌خوای هزینه کنی و از کی شروع بشه؟
           {% else %}همه‌چی درسته؟ یه نگاه آخر بنداز{% endif %}
         </h2>
@@ -105,6 +128,7 @@
           {% else %}خلاصه تبلیغ، مبلغ و قوانین رو ببین؛ اگر اوکی بود ادامه بده.{% endif %}
         </p>
       </div>
+      {% if step == 2 %}
       <fieldset class="studio-mode-toggle" aria-label="سطح تنظیمات">
         <legend class="sr-only">سطح تنظیمات</legend>
         <label class="choice-card studio-mode-option {% if studio_mode == 'simple' %}is-selected{% endif %}">
@@ -120,6 +144,9 @@
           <span class="studio-mode-option__check" aria-hidden="true">{% include "includes/lucide_icon.html" with name="check-circle-2" size="sm" %}</span>
         </label>
       </fieldset>
+      {% else %}
+      <input type="hidden" name="studio_mode" value="{{ studio_mode }}">
+      {% endif %}
 
       {% if step == 1 %}
       {% if ai_available %}{% include "campaigns/includes/ai_planner.html" %}{% endif %}
@@ -157,10 +184,10 @@
       <div class="studio-context-note">
         <span class="studio-context-note__icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="info" size="sm" %}</span>
         <div><strong>{% if campaign.target_type == 'search' %}چی سرچ می‌کنن؟{% elif campaign.target_type == 'bots' %}کدام ربات‌ها؟{% elif campaign.target_type == 'users' %}مخاطبت کیه؟{% else %}کدام کانال‌ها؟{% endif %}</strong>
-          <p>{% if campaign.target_type == 'search' %}کلمه‌هایی رو بنویس که مردم تو تلگرام سرچ می‌کنن (حداکثر ۱۰ تا).{% elif campaign.target_type == 'bots' %}یوزرنیم ربات رو وارد کن تا ببینیم می‌شه روش تبلیغ زد یا نه.{% elif campaign.target_type == 'users' %}کشور و موضوعات مرتبط رو انتخاب کن؛ جزئیات بیشتر اگر خواستی هست.{% else %}می‌تونی با زبان، موضوع یا لیست کانال‌ها انتخاب کنی.{% endif %}</p>
+          <p>{% if campaign.target_type == 'search' %}کلمه‌هایی رو بنویس که مردم تو تلگرام سرچ می‌کنن (حداکثر ۱۰ تا).{% elif campaign.target_type == 'bots' %}یوزرنیم ربات رو وارد کن تا ببینیم می‌شه روش تبلیغ زد یا نه.{% elif campaign.target_type == 'users' %}کشور و موضوعات مرتبط رو انتخاب کن؛ جزئیات بیشتر اگر خواستی هست.{% else %}زبان، موضوع یا کانال مشخص را انتخاب کن؛ حذف موضوع/کانال هم اختیاری است.{% endif %}</p>
         </div>
       </div>
-      {% if campaign.target_type != 'search' %}
+      {% if target_placement_choices|length > 1 %}
       <div class="field">
         <label>تبلیغ کجا دیده بشه؟</label>
         <div class="choice-grid">
@@ -174,7 +201,7 @@
         </div>
       </div>
       {% else %}
-      <input type="hidden" name="placement" value="search_result">
+      <input type="hidden" name="placement" value="{% if target_placement_choices %}{{ target_placement_choices.0.placement }}{% else %}{{ campaign.placement|default:'search_result' }}{% endif %}">
       {% endif %}
 
       {% if campaign.target_type == 'search' %}
@@ -213,48 +240,71 @@
         <input type="hidden" name="bot_eligibility_json" data-bot-eligibility-hidden value="{{ bot_eligibility_json|escape }}">
       </div>
       {% elif campaign.target_type == 'channels' %}
-      <div class="field">
-        <label for="studio-control-4">چطور کانال‌ها رو انتخاب کنم؟</label>
-        <select id="studio-control-4" name="channel_mode">
-          <option value="language" {% if campaign.targeting.config.channel_mode == 'language' %}selected{% endif %}>با زبان کانال</option>
-          <option value="topics" {% if campaign.targeting.config.channel_mode == 'topics' %}selected{% endif %}>با زبان و موضوع</option>
-          <option value="specific" {% if campaign.targeting.config.channel_mode == 'specific' %}selected{% endif %}>لیست کانال‌های مشخص</option>
-        </select>
-      </div>
-      <div class="field" data-channel-modes="language topics" data-multiselect data-field="language_codes" data-catalog='{{ catalog_languages_json|escape }}' data-kind="language">
-        <label for="studio-control-5">کانال‌ها به چه زبانی باشن؟</label>
-        <input id="studio-control-5" type="search" data-ms-search placeholder="جستجوی زبان…" dir="auto" aria-controls="catalog-options-5" aria-expanded="false" aria-describedby="catalog-status-5" autocomplete="off">
-        <ul id="catalog-options-5" class="catalog-suggest" data-ms-results hidden></ul>
-        <p id="catalog-status-5" class="field-help" data-ms-status aria-live="polite"></p>
+      <input type="hidden" name="channel_mode" value="{{ campaign.targeting.config.channel_mode|default:'language' }}" data-channel-mode-inferred>
+      <div class="field" data-channel-lang-field data-multiselect data-field="language_codes" data-catalog='{{ catalog_languages_json|escape }}' data-kind="language" data-default="{% if campaign.targeting and campaign.targeting.config.language_codes or campaign.targeting and campaign.targeting.config.channel_ids %}{% else %}fa{% endif %}">
+        <label for="studio-control-5">زبان کانال‌ها (اختیاری)</label>
+        <input id="studio-control-5" type="search" data-ms-search placeholder="انتخاب زبان…" dir="auto" aria-controls="catalog-options-5" aria-expanded="false" aria-describedby="catalog-status-5 channel-lang-exclusive-hint" autocomplete="off">
+        <ul id="catalog-options-5" class="catalog-suggest catalog-suggest--dense" data-ms-results hidden></ul>
+        <p id="catalog-status-5" class="field-help" data-ms-status aria-live="polite" hidden></p>
+        <p id="channel-lang-exclusive-hint" class="field-help field-help--danger" data-channel-lang-exclusive hidden>اگر کانال مشخص انتخاب شده، فیلد زبان باید خالی باشد.</p>
         <ul class="chip-list" data-ms-chips></ul>
         <div data-ms-hidden>
-          {% if campaign.targeting %}{% for code in campaign.targeting.config.language_codes %}<input type="hidden" name="language_codes" value="{{ code }}">{% endfor %}{% endif %}
+          {% if campaign.targeting and campaign.targeting.config.language_codes %}
+            {% for code in campaign.targeting.config.language_codes %}<input type="hidden" name="language_codes" value="{{ code }}">{% endfor %}
+          {% elif not campaign.targeting or not campaign.targeting.config.channel_ids %}
+            <input type="hidden" name="language_codes" value="fa">
+          {% endif %}
         </div>
       </div>
-      <div class="field" data-channel-modes="topics" data-multiselect data-field="topic_ids" data-catalog='{{ catalog_topics_json|escape }}' data-kind="topic">
-        <label for="studio-control-6">درباره چی باشن؟</label>
-        <input id="studio-control-6" type="search" data-ms-search placeholder="جستجوی موضوع…" dir="auto" aria-controls="catalog-options-6" aria-expanded="false" aria-describedby="catalog-status-6" autocomplete="off">
-        <ul id="catalog-options-6" class="catalog-suggest" data-ms-results hidden></ul>
-        <p id="catalog-status-6" class="field-help" data-ms-status aria-live="polite"></p>
+      <div class="field" data-channel-topic-field data-multiselect data-field="topic_ids" data-catalog='{{ catalog_topics_json|escape }}' data-kind="topic">
+        <label for="studio-control-6">موضوع کانال‌ها (اختیاری)</label>
+        <input id="studio-control-6" type="search" data-ms-search placeholder="انتخاب موضوع…" dir="auto" aria-controls="catalog-options-6" aria-expanded="false" aria-describedby="catalog-status-6" autocomplete="off">
+        <ul id="catalog-options-6" class="catalog-suggest catalog-suggest--dense" data-ms-results hidden></ul>
+        <p id="catalog-status-6" class="field-help" data-ms-status aria-live="polite" hidden></p>
         <ul class="chip-list" data-ms-chips></ul>
         <div data-ms-hidden>
           {% if campaign.targeting %}{% for tid in campaign.targeting.config.topic_ids %}<input type="hidden" name="topic_ids" value="{{ tid }}">{% endfor %}{% endif %}
         </div>
       </div>
-      <div class="field" data-channel-modes="specific" data-channel-selector>
-        <label for="studio-channels">کدام کانال‌ها؟</label>
-        <span class="catalog-row"><input id="studio-channels" type="text" data-channel-input dir="ltr" placeholder="@channel"><button type="button" class="btn btn-ghost btn-sm" data-channel-add>افزودن</button></span>
+      <div class="field" data-channel-selector>
+        <label for="studio-channels">کانال‌های مشخص (اختیاری)</label>
+        <span class="catalog-row"><input id="studio-channels" type="text" data-channel-input dir="ltr" placeholder="t.me/channel"><button type="button" class="btn btn-ghost btn-sm" data-channel-add>افزودن</button></span>
         <ul class="chip-list" data-channel-chip-list></ul>
         <textarea name="channel_ids" hidden data-channel-hidden dir="ltr">{% if campaign.targeting %}{% for c in campaign.targeting.config.channel_ids %}{{ c }}
 {% endfor %}{% endif %}</textarea>
+        <button type="button" class="btn-link similar-channels-trigger" data-similar-channels-open hidden>افزودن کانال‌های مشابه ←</button>
+        <section class="similar-bots" data-similar-channels-panel hidden>
+          <div class="similar-bots__head">
+            <div class="similar-bots__titles">
+              <strong class="similar-bots__heading">کانال‌های مشابه</strong>
+              <p class="similar-bots__hint muted" data-similar-channels-status>پس از افزودن کانال، پیشنهادهای مرتبط اینجا می‌آید.</p>
+            </div>
+            <button type="button" class="btn btn-ghost btn-sm similar-bots__add" data-similar-channels-add disabled>
+              افزودن انتخاب‌شده‌ها
+              <span class="similar-bots__count" data-similar-channels-count hidden></span>
+            </button>
+          </div>
+          <div class="similar-bots__panel" data-similar-channels-body></div>
+        </section>
+        <p class="field-help">اگر کانال مشخص انتخاب شود، فیلد زبان باید خالی باشد.</p>
       </div>
-      <div class="field studio-pro-only" data-multiselect data-field="exclude_topic_ids" data-catalog='{{ catalog_topics_json|escape }}' data-kind="topic"><label for="excluded-channel-topic">کدام موضوع‌ها رو نشون نده؟</label><input id="excluded-channel-topic" type="search" data-ms-search placeholder="جستجوی موضوع…" autocomplete="off"><ul class="catalog-suggest" data-ms-results hidden></ul><p data-ms-status class="field-help" aria-live="polite"></p><ul class="chip-list" data-ms-chips></ul><div data-ms-hidden>{% if campaign.targeting %}{% for tid in campaign.targeting.config.exclude_topic_ids %}<input type="hidden" name="exclude_topic_ids" value="{{ tid }}">{% endfor %}{% endif %}</div></div>
-      <div class="field studio-pro-only"><label for="studio-control-7">کدام کانال‌ها رو رد کنه؟</label><textarea id="studio-control-7" name="exclude_channel_ids" rows="2" dir="ltr">{% if campaign.targeting %}{% for c in campaign.targeting.config.exclude_channel_ids %}{{ c }}
-{% endfor %}{% endif %}</textarea></div>
+      <div class="field field--compact" data-multiselect data-field="exclude_topic_ids" data-catalog='{{ catalog_topics_json|escape }}' data-kind="topic">
+        <label for="excluded-channel-topic">موضوع‌های حذف‌شده (اختیاری)</label>
+        <input id="excluded-channel-topic" type="search" data-ms-search placeholder="انتخاب موضوع برای حذف…" autocomplete="off">
+        <ul class="catalog-suggest catalog-suggest--dense" data-ms-results hidden></ul>
+        <p data-ms-status class="field-help" aria-live="polite" hidden></p>
+        <ul class="chip-list" data-ms-chips></ul>
+        <div data-ms-hidden>{% if campaign.targeting %}{% for tid in campaign.targeting.config.exclude_topic_ids %}<input type="hidden" name="exclude_topic_ids" value="{{ tid }}">{% endfor %}{% endif %}</div>
+      </div>
+      <div class="field">
+        <label for="studio-control-7">حذف کانال‌های مشخص (اختیاری)</label>
+        <textarea id="studio-control-7" name="exclude_channel_ids" rows="2" dir="ltr" placeholder="t.me/channel">{% if campaign.targeting %}{% for c in campaign.targeting.config.exclude_channel_ids %}{{ c }}
+{% endfor %}{% endif %}</textarea>
+      </div>
       {% elif campaign.target_type == 'users' %}
       <div class="field" data-multiselect data-field="country_codes" data-catalog='{{ catalog_countries_json|escape }}' data-kind="country">
-        <label for="studio-control-8">مخاطب از کدام کشور باشه؟</label>
-        <input id="studio-control-8" type="search" data-ms-search placeholder="جستجوی کشور (فارسی یا انگلیسی)…" dir="auto" aria-controls="catalog-options-8" aria-expanded="false" aria-describedby="catalog-status-8" autocomplete="off">
+        <label for="studio-control-8">کشور مخاطب</label>
+        <input id="studio-control-8" type="search" data-ms-search placeholder="انتخاب کشور…" dir="auto" aria-controls="catalog-options-8" aria-expanded="false" aria-describedby="catalog-status-8" autocomplete="off">
         <ul id="catalog-options-8" class="catalog-suggest" data-ms-results hidden></ul>
         <p id="catalog-status-8" class="field-help" data-ms-status aria-live="polite"></p>
         <ul class="chip-list" data-ms-chips></ul>
@@ -262,10 +312,10 @@
           {% if campaign.targeting %}{% for code in campaign.targeting.config.country_codes %}<input type="hidden" name="country_codes" value="{{ code }}">{% endfor %}{% endif %}
         </div>
       </div>
-      <div class="field studio-pro-only" data-location-picker>
-        <label for="studio-location">شهر یا منطقه خاص؟</label>
-        <p class="muted" style="font-size:.8rem;margin:0 0 .35rem">اول کشور رو بزن، بعد اسم شهر رو جستجو کن.</p>
-        <input id="studio-location" type="search" data-location-search dir="auto" placeholder="نام شهر…" autocomplete="off">
+      <div class="field" data-location-picker>
+        <label for="studio-location">موقعیت مکانی (اختیاری)</label>
+        <p class="muted" style="font-size:.8rem;margin:0 0 .35rem">اول کشور را انتخاب کنید، بعد شهر را جستجو کنید.</p>
+        <input id="studio-location" type="search" data-location-search dir="auto" placeholder="جستجوی شهر بر اساس کشور…" autocomplete="off">
         <ul class="catalog-suggest" data-location-results hidden></ul>
         <p class="field-help" data-location-status aria-live="polite"></p>
         <ul class="chip-list" data-location-chips></ul>
@@ -273,19 +323,9 @@
           {% if campaign.targeting %}{% for lid in campaign.targeting.config.location_ids %}<input type="hidden" name="location_ids" value="{{ lid }}">{% endfor %}{% endif %}
         </div>
       </div>
-      <div class="field" data-multiselect data-field="topic_ids" data-catalog='{{ catalog_topics_json|escape }}' data-kind="topic">
-        <label for="studio-control-9">به چی علاقه داشته باشن؟</label>
-        <input id="studio-control-9" type="search" data-ms-search placeholder="جستجوی موضوع…" dir="auto" aria-controls="catalog-options-9" aria-expanded="false" aria-describedby="catalog-status-9" autocomplete="off">
-        <ul id="catalog-options-9" class="catalog-suggest" data-ms-results hidden></ul>
-        <p id="catalog-status-9" class="field-help" data-ms-status aria-live="polite"></p>
-        <ul class="chip-list" data-ms-chips></ul>
-        <div data-ms-hidden>
-          {% if campaign.targeting %}{% for tid in campaign.targeting.config.topic_ids %}<input type="hidden" name="topic_ids" value="{{ tid }}">{% endfor %}{% endif %}
-        </div>
-      </div>
-      <div class="field studio-pro-only" data-multiselect data-field="language_codes" data-catalog='{{ catalog_languages_json|escape }}' data-kind="language">
-        <label for="studio-control-10">به چه زبونی حرف بزنن؟</label>
-        <input id="studio-control-10" type="search" data-ms-search placeholder="زبان…" dir="auto" aria-controls="catalog-options-10" aria-expanded="false" aria-describedby="catalog-status-10" autocomplete="off">
+      <div class="field" data-multiselect data-field="language_codes" data-catalog='{{ catalog_languages_json|escape }}' data-kind="language">
+        <label for="studio-control-10">زبان مخاطب (اختیاری)</label>
+        <input id="studio-control-10" type="search" data-ms-search placeholder="انتخاب زبان…" dir="auto" aria-controls="catalog-options-10" aria-expanded="false" aria-describedby="catalog-status-10" autocomplete="off">
         <ul id="catalog-options-10" class="catalog-suggest" data-ms-results hidden></ul>
         <p id="catalog-status-10" class="field-help" data-ms-status aria-live="polite"></p>
         <ul class="chip-list" data-ms-chips></ul>
@@ -293,17 +333,24 @@
           {% if campaign.targeting %}{% for code in campaign.targeting.config.language_codes %}<input type="hidden" name="language_codes" value="{{ code }}">{% endfor %}{% endif %}
         </div>
       </div>
-      <section class="card-muted card-pad form-stack studio-pro-only" aria-label="تنظیمات دقیق‌تر مخاطب">
-        <h3 class="section-title">تنظیمات دقیق‌تر</h3>
-        <label class="choice-card"><input type="checkbox" name="intersect_topics" value="1" {% if campaign.targeting.config.intersect_topics %}checked{% endif %}> فقط کسانی که به همهٔ این موضوع‌ها علاقه دارن</label>
-        <div class="field" data-multiselect data-field="exclude_topic_ids" data-catalog='{{ catalog_topics_json|escape }}' data-kind="topic"><label for="excluded-user-topic">کدام موضوع‌ها رو رد کنه؟</label><input id="excluded-user-topic" type="search" data-ms-search placeholder="جستجوی موضوع…" autocomplete="off"><ul class="catalog-suggest" data-ms-results hidden></ul><p data-ms-status class="field-help" aria-live="polite"></p><ul class="chip-list" data-ms-chips></ul><div data-ms-hidden>{% if campaign.targeting %}{% for tid in campaign.targeting.config.exclude_topic_ids %}<input type="hidden" name="exclude_topic_ids" value="{{ tid }}">{% endfor %}{% endif %}</div></div>
-        <div class="field"><label for="user-channel-included">اعضای این کانال‌ها هم ببینن (هر خط یک کانال)</label><textarea id="user-channel-included" name="channel_ids" rows="3" dir="ltr" placeholder="@channel">{% if campaign.targeting %}{% for c in campaign.targeting.config.channel_ids %}{{ c }}
-{% endfor %}{% endif %}</textarea></div>
-        <div class="field"><label for="user-channel-excluded">اعضای این کانال‌ها نبینن</label><textarea id="user-channel-excluded" name="exclude_channel_ids" rows="3" dir="ltr" placeholder="@channel">{% if campaign.targeting %}{% for c in campaign.targeting.config.exclude_channel_ids %}{{ c }}
-{% endfor %}{% endif %}</textarea></div>
-        <p class="field-help">قبل از ارسال، کانال‌ها از طرف تلگرام چک می‌شن.</p>
-      </section>
-      <div class="field studio-pro-only"><label for="studio-control-11">روی چه دستگاهی؟</label>
+      <div class="field" data-multiselect data-field="topic_ids" data-catalog='{{ catalog_topics_json|escape }}' data-kind="topic">
+        <label for="studio-control-9">موضوع‌های مورد علاقه (اختیاری)</label>
+        <input id="studio-control-9" type="search" data-ms-search placeholder="انتخاب موضوع…" dir="auto" aria-controls="catalog-options-9" aria-expanded="false" aria-describedby="catalog-status-9" autocomplete="off">
+        <ul id="catalog-options-9" class="catalog-suggest" data-ms-results hidden></ul>
+        <p id="catalog-status-9" class="field-help" data-ms-status aria-live="polite"></p>
+        <ul class="chip-list" data-ms-chips></ul>
+        <div data-ms-hidden>
+          {% if campaign.targeting %}{% for tid in campaign.targeting.config.topic_ids %}<input type="hidden" name="topic_ids" value="{{ tid }}">{% endfor %}{% endif %}
+        </div>
+      </div>
+      <div class="field">
+        <label for="user-channel-included">مخاطب کانال‌های مشخص (اختیاری)</label>
+        <textarea id="user-channel-included" name="channel_ids" rows="2" dir="ltr" placeholder="t.me/channel">{% if campaign.targeting %}{% for c in campaign.targeting.config.channel_ids %}{{ c }}
+{% endfor %}{% endif %}</textarea>
+        <p class="field-help">اعضای این کانال‌ها هم تبلیغ را می‌بینند.</p>
+      </div>
+      <div class="field">
+        <label for="studio-control-11">نوع دستگاه</label>
         <select id="studio-control-11" name="device">
           <option value="">همه دستگاه‌ها</option>
           <option value="ios" {% if campaign.targeting.config.device == 'ios' %}selected{% endif %}>آیفون</option>
@@ -312,6 +359,31 @@
           <option value="desktop" {% if campaign.targeting.config.device == 'desktop' %}selected{% endif %}>کامپیوتر</option>
         </select>
       </div>
+      <label class="choice-card">
+        <input type="checkbox" name="political_channels_only" value="1" {% if campaign.targeting.config.political_channels_only %}checked{% endif %}>
+        فقط در کانال‌های مرتبط با سیاست و حوادث نمایش داده شود
+      </label>
+      <div class="field" data-multiselect data-field="exclude_topic_ids" data-catalog='{{ catalog_topics_json|escape }}' data-kind="topic">
+        <label for="excluded-user-topic">موضوع‌های حذف‌شده (اختیاری)</label>
+        <input id="excluded-user-topic" type="search" data-ms-search placeholder="انتخاب موضوع برای حذف…" autocomplete="off">
+        <ul class="catalog-suggest" data-ms-results hidden></ul>
+        <p data-ms-status class="field-help" aria-live="polite"></p>
+        <ul class="chip-list" data-ms-chips></ul>
+        <div data-ms-hidden>{% if campaign.targeting %}{% for tid in campaign.targeting.config.exclude_topic_ids %}<input type="hidden" name="exclude_topic_ids" value="{{ tid }}">{% endfor %}{% endif %}</div>
+      </div>
+      <div class="field">
+        <label for="user-channel-excluded">حذف مخاطب کانال‌ها (اختیاری)</label>
+        <textarea id="user-channel-excluded" name="exclude_channel_ids" rows="2" dir="ltr" placeholder="t.me/channel">{% if campaign.targeting %}{% for c in campaign.targeting.config.exclude_channel_ids %}{{ c }}
+{% endfor %}{% endif %}</textarea>
+      </div>
+      <label class="choice-card">
+        <input type="checkbox" name="exclude_political_channels" value="1" {% if campaign.targeting.config.exclude_political_channels %}checked{% endif %}>
+        در کانال‌های مرتبط با سیاست و حوادث نمایش داده نشود
+      </label>
+      <label class="choice-card studio-pro-only">
+        <input type="checkbox" name="intersect_topics" value="1" {% if campaign.targeting.config.intersect_topics %}checked{% endif %}>
+        فقط کسانی که به همهٔ موضوع‌های انتخاب‌شده علاقه دارند
+      </label>
       {% endif %}
       {% include "campaigns/includes/policy_panel.html" %}
 
@@ -343,7 +415,18 @@
           <label class="choice-card"><input type="checkbox" name="remove_website_photo" value="1"> حذف فایل ذخیره‌شده در پیش‌نویس</label>
         {% endif %}
       </div><div class="field"><label for="website-button">دکمه رسمی تبلیغ</label><select id="website-button" name="button">{% for value,label in website_buttons %}<option value="{{ value }}" {% if campaign.ad_settings.button == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div></details>
-      <label class="choice-card studio-pro-only" style="margin-top:.5rem"><input type="checkbox" name="show_userpic" value="1" {% if campaign.ad_settings.show_userpic %}checked{% endif %}> نمایش تصویر ربات/کانال مقصد</label>
+      {% if campaign.target_type != 'search' %}
+      <div class="studio-userpic-option" data-userpic-option>
+        <label class="choice-card studio-userpic-option__card">
+          <input type="checkbox" name="show_userpic" value="1" data-show-userpic {% if campaign.ad_settings.show_userpic %}checked{% endif %}>
+          <span class="studio-userpic-option__copy">
+            <strong>نمایش تصویر ربات/کانال مقصد</strong>
+          </span>
+          <span class="studio-userpic-fee" aria-hidden="true">+٪۳۰</span>
+        </label>
+        <p class="field-help studio-userpic-option__hint">طبق قوانین تلگرام، تبلیغ با تصویر پروفایل مقصد معمولاً برای نمایش به حدود ۳۰٪ CPM بالاتر نیاز دارد. این افزایش از سمت تلگرام است، نه کارمزد گرام‌ادز.</p>
+      </div>
+      {% endif %}
       {% if campaign.target_type == 'channels' or campaign.target_type == 'users' or creative.media %}
       <div class="field">
         <label for="studio-control-15">عکس یا ویدیو هم می‌خوای؟ (اختیاری)</label>
@@ -370,119 +453,294 @@
       {% include "campaigns/includes/policy_panel.html" %}
 
       {% elif step == 4 %}
-      <div class="studio-context-note studio-context-note--finance">
-        <span class="studio-context-note__icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="wallet" size="sm" %}</span>
-        <div><strong>اینجا هنوز پولی کم نمی‌شه</strong><p>اول بودجه و زمان رو مشخص کن. مبلغ دقیق قبل از پرداخت دوباره بهت نشون داده می‌شه.</p></div>
-      </div>
-      <div class="panel-grid panel-2">
-        <div class="field"><label for="studio-control-16">کل بودجه چقدر باشه؟ (هزار تومان)</label><input id="studio-control-16" name="budget_toman" type="number" min="100" step="1" value="{% widthratio campaign.budget_irr 10000 1 %}" dir="ltr"></div>
-        <div class="field"><label for="studio-control-17">سقف هزینه روزانه؟ (هزار تومان)</label><input id="studio-control-17" name="daily_cap_toman" type="number" min="0" step="1" value="{% if campaign.daily_cap_irr %}{% widthratio campaign.daily_cap_irr 10000 1 %}{% endif %}" dir="ltr"></div>
-      </div>
-      <div class="field"><label for="studio-control-18">حاضری برای هر هزار نمایش چقدر بدی؟ (گرام)</label><input id="studio-control-18" name="cpm_bid" type="number" min="0.01" step="0.01" value="{{ campaign.cpm_bid|default:'1' }}" dir="ltr"></div>
-      <p class="muted" style="font-size:.85rem">مبلغ‌ها رو به تومان می‌بینی؛ تبدیل به گرام با نرخ روز انجام می‌شه.</p>
-      <div class="field">
-        <label>هر نفر در روز حداکثر چند بار این تبلیغ رو ببینه؟</label>
-        <div class="seg-control">
-          {% for n in impression_frequency_choices %}
-          <label><input type="radio" name="impression_frequency" value="{{ n }}" {% if campaign.ad_settings.impression_frequency == n or not campaign.ad_settings.impression_frequency and n == 1 %}checked{% endif %}>{{ n }}</label>
-          {% endfor %}
+      <section class="studio-finance" aria-label="بودجه، پیشنهاد و زمان‌بندی">
+        {% if ton_rate_display %}
+        <aside class="studio-finance__live-rate" aria-label="قیمت لحظه‌ای گرام">
+          <span class="studio-finance__live-rate-kicker">
+            {% include "includes/gram_icon.html" with size="xs" decorative=1 %}
+            قیمت گرام
+            {% if ton_rate_display.is_fresh %}<em>زنده</em>{% else %}<em class="is-stale">آخرین نرخ</em>{% endif %}
+          </span>
+          <strong class="tabnums">{{ ton_rate_display.irr_per_ton|irr_to_toman|format_count }} <small>تومان</small></strong>
+        </aside>
+        {% endif %}
+
+        <div class="studio-finance__columns">
+          <div class="studio-finance__col">
+            <div class="field studio-finance__row">
+              <div class="studio-finance__label-row">
+                <label for="studio-control-21">عنوان تبلیغ</label>
+                {% include "campaigns/includes/studio_field_tip.html" with label="عنوان تبلیغ" tip="فقط در رابط مدیریت تبلیغ دیده می‌شود؛ مخاطب آن را نمی‌بیند. برای نظم دادن به تبلیغ‌ها در پنل خودتان است." %}
+              </div>
+              <input id="studio-control-21" class="studio-finance__text" name="campaign_name" maxlength="128" value="{{ campaign.name|default:'' }}" placeholder="مثلاً کمپین نوروز" autocomplete="off">
+            </div>
+
+            <div class="studio-finance__money">
+              <div class="field studio-finance__row">
+                <div class="studio-finance__label-row">
+                  <label for="studio-control-16">کل بودجه</label>
+                  {% include "campaigns/includes/studio_field_tip.html" with label="کل بودجه" tip=budget_field_tip %}
+                </div>
+                <div class="studio-finance__control">
+                  <input type="hidden" name="budget_toman" value="{% if campaign.budget_irr %}{{ campaign.budget_irr|irr_to_toman }}{% endif %}" data-money-raw>
+                  <input id="studio-control-16" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" dir="ltr" data-money-input data-money-kind="int" aria-describedby="studio-control-16-unit" placeholder="۵۰۰٬۰۰۰">
+                  <span class="studio-finance__unit" id="studio-control-16-unit">تومان</span>
+                </div>
+              </div>
+              <div class="field studio-finance__row" data-daily-cap-wrap>
+                <div class="studio-finance__label-row">
+                  <label for="studio-control-17">سقف روزانه</label>
+                  {% include "campaigns/includes/studio_field_tip.html" with label="سقف روزانه" tip="حداکثر مبلغ روزانه به تومان. خالی = بدون سقف روزانه." %}
+                  <button type="button" class="studio-finance__text-action" data-daily-cap-clear {% if not campaign.daily_cap_irr %}hidden{% endif %}>حذف</button>
+                </div>
+                <div class="studio-finance__control" {% if not campaign.daily_cap_irr %}hidden{% endif %} data-daily-cap-field>
+                  <input type="hidden" name="daily_cap_toman" value="{% if campaign.daily_cap_irr %}{{ campaign.daily_cap_irr|irr_to_toman }}{% endif %}" data-money-raw>
+                  <input id="studio-control-17" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" dir="ltr" data-money-input data-money-kind="int" aria-describedby="studio-control-17-unit" placeholder="۲۰۰٬۰۰۰">
+                  <span class="studio-finance__unit" id="studio-control-17-unit">تومان</span>
+                </div>
+                <button type="button" class="studio-finance__add-link" data-daily-cap-add {% if campaign.daily_cap_irr %}hidden{% endif %}>افزودن سقف روزانه</button>
+              </div>
+            </div>
+
+            <div class="studio-finance__pair">
+              <div class="studio-finance__row" data-cpm-field>
+                <div class="studio-finance__label-row">
+                  <label for="studio-control-18">پیشنهاد نمایش</label>
+                  {% include "campaigns/includes/studio_field_tip.html" with label="پیشنهاد نمایش" tip="برای هر هزار نمایش چند گرام حاضرید بپردازید. عدد بالاتر معمولاً شانس دیده شدن را بیشتر می‌کند." %}
+                </div>
+                <div class="studio-finance__control studio-finance__control--bid">
+                  <input type="hidden" name="cpm_bid" value="{{ campaign.cpm_bid|default:'1' }}" data-money-raw>
+                  <input id="studio-control-18" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" dir="ltr" data-money-input data-money-kind="decimal" data-cpm-input aria-describedby="studio-control-18-unit" placeholder="۰٫۵۰">
+                  <span class="studio-finance__unit" id="studio-control-18-unit">گرام</span>
+                </div>
+                <aside class="studio-finance__note" data-cpm-userpic-hint {% if not campaign.ad_settings.show_userpic %}hidden{% endif %}>
+                  <span class="studio-finance__note-tag" data-cpm-userpic-badge>+٪۳۰</span>
+                  <p>با نمایش تصویر مقصد، تلگرام معمولاً CPM بالاتری می‌خواهد.</p>
+                  {% include "campaigns/includes/studio_field_tip.html" with label="افزایش تصویر مقصد" tip="چون نمایش تصویر مقصد فعال است، تلگرام معمولاً حدود ۳۰٪ پیشنهاد بالاتر می‌خواهد. این از سمت تلگرام است، نه کارمزد گرام‌ادز." %}
+                </aside>
+              </div>
+
+              <div class="studio-finance__row">
+                <div class="studio-finance__label-row">
+                  <strong id="studio-freq-label">نمایش روزانه</strong>
+                  {% include "campaigns/includes/studio_field_tip.html" with label="تکرار نمایش" tip="هر نفر در روز حداکثر چند بار این تبلیغ را ببیند." %}
+                </div>
+                <div class="studio-finance__freq" role="radiogroup" aria-labelledby="studio-freq-label">
+                  {% for n in impression_frequency_choices %}
+                  <label class="studio-finance__freq-item">
+                    <input type="radio" name="impression_frequency" value="{{ n }}" {% if campaign.ad_settings.impression_frequency == n or not campaign.ad_settings.impression_frequency and n == 1 %}checked{% endif %}>
+                    <span>{{ n|persian_digits }}</span>
+                  </label>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="studio-finance__col">
+            <div class="studio-finance__row studio-finance__row--status">
+              <div class="studio-finance__label-row">
+                <strong id="studio-status-label">وضعیت اولیه</strong>
+                {% include "campaigns/includes/studio_field_tip.html" with label="وضعیت اولیه" tip="بعد از تأیید تلگرام: فوراً فعال شود یا در انتظار بماند." %}
+              </div>
+              <div class="studio-finance__status" role="radiogroup" aria-labelledby="studio-status-label">
+                <label class="studio-finance__status-item">
+                  <input type="radio" name="remote_initial_status" value="active" {% if campaign.ad_settings.remote_initial_status != 'on_hold' %}checked{% endif %}>
+                  <span>فعال</span>
+                </label>
+                <label class="studio-finance__status-item">
+                  <input type="radio" name="remote_initial_status" value="on_hold" {% if campaign.ad_settings.remote_initial_status == 'on_hold' %}checked{% endif %}>
+                  <span>در انتظار</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="studio-finance__when" data-schedule-when>
+              <div class="field studio-finance__row">
+                <div class="studio-finance__label-row">
+                  <label for="studio-control-19">زمان شروع</label>
+                  {% include "campaigns/includes/studio_field_tip.html" with label="زمان شروع" tip="تاریخ و ساعت شمسی به وقت ایران. خالی بگذارید اگر هنوز زمان دقیق ندارید." %}
+                </div>
+                <div class="studio-finance__datetime" data-jalali-datetime>
+                  <input id="studio-control-19" name="schedule_start" type="text" data-jalali-input autocomplete="off" placeholder="انتخاب از تقویم" value="{{ campaign.schedule_start|jalali_input }}" aria-describedby="studio-schedule-help" aria-haspopup="dialog">
+                  <button type="button" class="studio-finance__cal-btn" data-jalali-open aria-label="باز کردن تقویم شروع">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5" stroke="currentColor" stroke-width="1.7"/><path d="M3.5 9.5h17M8 3.5v3.5M16 3.5v3.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+                  </button>
+                </div>
+              </div>
+
+              <div class="field studio-finance__row" data-end-wrap {% if not campaign.schedule_end %}hidden{% endif %}>
+                <div class="studio-finance__label-row">
+                  <label for="studio-control-20">زمان پایان</label>
+                  <button type="button" class="studio-finance__text-action" data-end-clear>حذف</button>
+                </div>
+                <div class="studio-finance__datetime" data-jalali-datetime>
+                  <input id="studio-control-20" name="schedule_end" type="text" data-jalali-input autocomplete="off" placeholder="انتخاب از تقویم" value="{{ campaign.schedule_end|jalali_input }}" aria-describedby="studio-schedule-help" aria-haspopup="dialog">
+                  <button type="button" class="studio-finance__cal-btn" data-jalali-open aria-label="باز کردن تقویم پایان">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5" stroke="currentColor" stroke-width="1.7"/><path d="M3.5 9.5h17M8 3.5v3.5M16 3.5v3.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+                  </button>
+                </div>
+              </div>
+
+              <button type="button" class="studio-finance__add-link" data-end-add {% if campaign.schedule_end %}hidden{% endif %}>تعیین زمان پایان</button>
+              <p class="studio-finance__help" id="studio-schedule-help">به وقت ایران (‎+۳:۳۰)</p>
+            </div>
+
+            {% if quote_totals and campaign.budget_irr %}
+            <div class="studio-finance__summary" aria-label="خلاصه مالی تقریبی">
+              <div class="studio-finance__summary-row">
+                <span class="studio-finance__summary-label">معادل گرام</span>
+                <strong>{% ton_amount quote_totals.ton_allocation rate_irr=quote_totals.irr_per_ton %}</strong>
+              </div>
+              <div class="studio-finance__summary-row studio-finance__summary-row--total">
+                <span class="studio-finance__summary-label">جمع حدودی</span>
+                <strong class="tabnums">{{ quote_totals.total_irr|irr_to_toman|format_irr }} تومان</strong>
+              </div>
+            </div>
+            {% endif %}
+          </div>
         </div>
-      </div>
-      <div class="panel-grid panel-2">
-        <div class="field">
-          <label for="studio-control-19">از کی شروع بشه؟ (وقت ایران)</label>
-          <input id="studio-control-19" name="schedule_start" type="text" inputmode="numeric" autocomplete="off" placeholder="۱۴۰۵/۰۹/۳۰ ۱۲:۰۰" value="{{ campaign.schedule_start|jalali_input }}" aria-describedby="studio-schedule-help">
-          <p class="field-help" id="studio-schedule-help">تاریخ شمسی + ساعت ایران؛ مثلاً ۱۴۰۵/۰۹/۳۰ ۱۲:۰۰</p>
+
+        <div class="studio-finance__schedule-slot">
+          {% include "campaigns/includes/schedule_grid.html" %}
         </div>
-        <div class="field">
-          <label for="studio-control-20">تا کی ادامه داشته باشه؟</label>
-          <input id="studio-control-20" name="schedule_end" type="text" inputmode="numeric" autocomplete="off" placeholder="۱۴۰۵/۰۹/۳۰ ۲۳:۰۰" value="{{ campaign.schedule_end|jalali_input }}" aria-describedby="studio-schedule-help">
-        </div>
-      </div>
-      {% include "campaigns/includes/schedule_grid.html" %}
-      <label class="choice-card"><input type="radio" name="remote_initial_status" value="active" {% if campaign.ad_settings.remote_initial_status != 'on_hold' %}checked{% endif %}> بعد از تأیید، تبلیغ روشن بشه</label>
-      <label class="choice-card"><input type="radio" name="remote_initial_status" value="on_hold" {% if campaign.ad_settings.remote_initial_status == 'on_hold' %}checked{% endif %}> اول در حالت انتظار بمونه</label>
-      <div class="field studio-pro-only"><label for="studio-control-21">کد داخلی تبلیغ (اختیاری)</label><input id="studio-control-21" name="additional_info" maxlength="64" value="{{ campaign.ad_settings.additional_info|default:'' }}"></div>
-      {% if ton_rate_display %}
-      <article class="card card-pad card-muted" style="margin-top:1rem">
-        <p class="muted" style="margin:0 0 .5rem;font-size:.85rem;display:flex;align-items:center;gap:.4rem">
-          {% include "includes/gram_icon.html" with size="xs" decorative=1 %}
-          نرخ هر گرام{% if ton_rate_display.is_fresh %} · زنده{% endif %}
-        </p>
-        <div class="finance-line"><span>هر گرام</span><strong>{{ ton_rate_display.irr_per_ton|format_count }} ریال</strong></div>
-      </article>
-      {% endif %}
-      {% if quote_totals and campaign.budget_irr %}
-      <article class="card card-pad" style="margin-top:1rem">
-        <h3 class="section-title" style="font-size:1rem">تقریباً چقدر می‌شه؟</h3>
-        <div class="finance-line"><span>معادل گرام</span><strong>{% ton_amount quote_totals.ton_allocation rate_irr=quote_totals.irr_per_ton %}</strong></div>
-        <div class="finance-line"><span>جمع حدودی</span><strong>{{ quote_totals.total_irr|irr_to_toman|format_irr }} تومان</strong></div>
-      </article>
-      {% endif %}
+      </section>
       {% include "campaigns/includes/policy_panel.html" %}
 
       {% elif step == 5 %}
-      <div class="studio-context-note studio-context-note--review">
-        <span class="studio-context-note__icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="shield-check" size="sm" %}</span>
-        <div><strong>قبل از پرداخت، یه بار چک کن</strong><p>خلاصه تبلیغ، مبلغ و موجودی کیف پولت رو ببین. تا خودت تأیید نکنی چیزی ثبت نمی‌شه.</p></div>
-      </div>
-      <div class="studio-review card-muted card-pad" aria-label="خلاصه تبلیغ">
-        <div class="studio-review__row">
-          <span class="studio-review__label">کجا نشون داده می‌شه</span>
-          <span class="studio-review__value">{{ campaign.get_target_type_display|default:campaign.target_type|default:"—" }}</span>
+      <section class="studio-final" aria-label="نگاه آخر">
+        <div class="studio-final__layout">
+          <div class="studio-final__main">
+            <dl class="studio-review" aria-label="خلاصه تبلیغ">
+              {% if campaign.name %}
+              <div class="studio-review__row">
+                <dt class="studio-review__label">عنوان</dt>
+                <dd class="studio-review__value" dir="auto">{{ campaign.name }}</dd>
+              </div>
+              {% endif %}
+              <div class="studio-review__row">
+                <dt class="studio-review__label">مخاطب</dt>
+                <dd class="studio-review__value">{{ campaign.get_target_type_display|default:campaign.target_type|default:"—" }}</dd>
+              </div>
+              <div class="studio-review__row">
+                <dt class="studio-review__label">مقصد</dt>
+                <dd class="studio-review__value" dir="ltr">{{ campaign.destination|default:"—" }}</dd>
+              </div>
+              <div class="studio-review__row">
+                <dt class="studio-review__label">جای نمایش</dt>
+                <dd class="studio-review__value">{{ campaign.get_placement_display|default:campaign.placement|default:"—" }}</dd>
+              </div>
+              {% if creative and creative.ad_text %}
+              <div class="studio-review__row">
+                <dt class="studio-review__label">متن</dt>
+                <dd class="studio-review__value" dir="auto">{{ creative.ad_text|truncatechars:140 }}</dd>
+              </div>
+              {% endif %}
+              {% if campaign.budget_irr %}
+              <div class="studio-review__row">
+                <dt class="studio-review__label">بودجه</dt>
+                <dd class="studio-review__value tabnums">{{ campaign.budget_irr|irr_to_toman|format_irr }} تومان{% if campaign.daily_cap_irr %} · سقف روزانه {{ campaign.daily_cap_irr|irr_to_toman|format_irr }}{% endif %}</dd>
+              </div>
+              {% endif %}
+              {% if campaign.cpm_bid %}
+              <div class="studio-review__row">
+                <dt class="studio-review__label">پیشنهاد</dt>
+                <dd class="studio-review__value tabnums">{{ campaign.cpm_bid }} گرام</dd>
+              </div>
+              {% endif %}
+              <div class="studio-review__row">
+                <dt class="studio-review__label">تصویر مقصد</dt>
+                <dd class="studio-review__value">{% if campaign.ad_settings.show_userpic %}فعال <span class="studio-userpic-fee studio-userpic-fee--inline">+٪۳۰</span>{% else %}خاموش{% endif %}</dd>
+              </div>
+              {% if campaign.schedule_start or campaign.schedule_end %}
+              <div class="studio-review__row">
+                <dt class="studio-review__label">بازه زمانی</dt>
+                <dd class="studio-review__value tabnums">{% if campaign.schedule_start %}{{ campaign.schedule_start|jalali_input }}{% else %}—{% endif %}{% if campaign.schedule_end %} تا {{ campaign.schedule_end|jalali_input }}{% endif %}</dd>
+              </div>
+              {% endif %}
+              <div class="studio-review__row">
+                <dt class="studio-review__label">وضعیت اولیه</dt>
+                <dd class="studio-review__value">{% if campaign.ad_settings.remote_initial_status == 'on_hold' %}در انتظار{% else %}فعال{% endif %}</dd>
+              </div>
+            </dl>
+          </div>
+
+          <aside class="studio-final__aside">
+            {% if quote_ready %}
+            <input type="hidden" name="quote_nonce" value="{{ quote.payload.quote_nonce }}">
+            <article class="studio-final__pay" aria-label="مبلغ نهایی">
+              <header class="studio-final__pay-head">
+                <strong>مبلغ پرداخت</strong>
+                <span>تا {{ quote.expires_at|jalali_datetime }}</span>
+              </header>
+              <div class="studio-final__pay-lines">
+                <div class="studio-final__pay-line"><span>بودجه تبلیغ</span><strong class="tabnums">{{ quote_totals.advertising_budget_irr|irr_to_toman|format_irr }}</strong></div>
+                <div class="studio-final__pay-line"><span>کارمزد</span><strong class="tabnums">{{ quote_totals.service_fee_irr|irr_to_toman|format_irr }}</strong></div>
+                {% if quote_totals.risk_buffer_irr %}
+                <div class="studio-final__pay-line">
+                  <span>موقت نوسان نرخ</span>
+                  <strong class="tabnums">{{ quote_totals.risk_buffer_irr|irr_to_toman|format_irr }}</strong>
+                </div>
+                {% endif %}
+                <div class="studio-final__pay-line"><span>اعتبار گرام</span><strong>{% ton_amount quote_totals.ton_allocation rate_irr=quote_totals.irr_per_ton hint=0 %}</strong></div>
+              </div>
+              <div class="studio-final__pay-total">
+                <span>جمع قابل پرداخت</span>
+                <strong class="tabnums">{{ quote_totals.total_irr|irr_to_toman|format_irr }} <small>تومان</small></strong>
+              </div>
+              {% if quote_totals.risk_buffer_irr %}
+              <p class="studio-final__pay-note">مبلغ موقت نوسان بعد از تخصیص به کیف پول برمی‌گردد.</p>
+              {% endif %}
+              <button class="btn btn-primary studio-final__pay-btn" name="action" value="pay" type="submit"
+                      {% if wallet and wallet.available_irr < quote_totals.total_irr %}disabled{% endif %}>
+                <span>پرداخت و ثبت</span>
+                {% include "includes/lucide_icon.html" with name="wallet" size="sm" %}
+              </button>
+            </article>
+            {% else %}
+            <article class="studio-final__pay studio-final__pay--empty" role="status">
+              <strong>مبلغ نهایی آماده نیست</strong>
+              <p>برای ادامه، مبلغ روز را محاسبه کن. تا قبل از پرداخت چیزی کم نمی‌شود.</p>
+              <button name="action" value="refresh_quote" type="submit" formnovalidate class="btn btn-primary studio-final__quote-btn">محاسبه مبلغ</button>
+            </article>
+            {% endif %}
+
+            {% if wallet %}
+            <div class="studio-final__wallet">
+              <div class="studio-final__wallet-copy">
+                <span>موجودی کیف پول</span>
+                <strong class="tabnums">{{ wallet.available_irr|irr_to_toman|format_irr }} تومان</strong>
+              </div>
+              <a class="studio-final__wallet-link" href="{% url 'finance:topup' %}">شارژ</a>
+            </div>
+            {% if quote_ready and wallet.available_irr < quote_totals.total_irr %}
+            <p class="studio-final__warn" role="status">موجودی برای این مبلغ کافی نیست.</p>
+            {% endif %}
+            {% endif %}
+          </aside>
         </div>
-        <div class="studio-review__row">
-          <span class="studio-review__label">با کلیک کجا می‌رن</span>
-          <span class="studio-review__value" dir="ltr">{{ campaign.destination|default:"—" }}</span>
+
+        {% include "campaigns/includes/policy_panel.html" %}
+
+        <div class="studio-final__terms" id="field-terms">
+          <label class="studio-final__terms-check">
+            <input type="checkbox" name="terms_accepted" value="1" required aria-describedby="ui-terms-links">
+            <span>شرایط استفاده را خواندم و می‌پذیرم که تأیید نهایی با تلگرام است.</span>
+          </label>
+          <p id="ui-terms-links" class="studio-final__terms-links">
+            <a href="{% url 'public:terms' %}" target="_blank" rel="noopener">شرایط گرام‌ادز</a>
+            <span aria-hidden="true">·</span>
+            <a href="{% url 'policies:ad_policies' %}" target="_blank" rel="noopener">راهنمای تبلیغ تلگرام</a>
+          </p>
         </div>
-        <div class="studio-review__row">
-          <span class="studio-review__label">جای نمایش</span>
-          <span class="studio-review__value">{{ campaign.get_placement_display|default:campaign.placement|default:"—" }}</span>
-        </div>
-        {% if campaign.budget_irr %}
-        <div class="studio-review__row">
-          <span class="studio-review__label">بودجه کل</span>
-          <span class="studio-review__value tabnums">{{ campaign.budget_irr|irr_to_toman|format_irr }} تومان</span>
-        </div>
+
+        {% if dry_run_preview and dry_run_preview.ok %}
+        <details class="studio-final__debug">
+          <summary>پیش‌نمایش داده ارسالی</summary>
+          <pre dir="ltr">{{ dry_run_json }}</pre>
+        </details>
         {% endif %}
-        {% if creative and creative.ad_text %}
-        <div class="studio-review__row">
-          <span class="studio-review__label">متن تبلیغ</span>
-          <span class="studio-review__value" dir="auto">{{ creative.ad_text|truncatechars:120 }}</span>
-        </div>
-        {% endif %}
-      </div>
-      {% if quote_ready %}
-      <input type="hidden" name="quote_nonce" value="{{ quote.payload.quote_nonce }}">
-      <article class="card card-pad card-muted studio-finance-card" aria-label="مبلغ نهایی">
-        <h3 class="section-title" style="font-size:.95rem;margin:0 0 .65rem">مبلغ نهایی پرداخت</h3>
-        <div class="finance-line"><span>بودجه تبلیغ</span><strong class="tabnums">{{ quote_totals.advertising_budget_irr|irr_to_toman|format_irr }} تومان</strong></div>
-        <div class="finance-line"><span>کارمزد</span><strong class="tabnums">{{ quote_totals.service_fee_irr|irr_to_toman|format_irr }} تومان</strong></div>
-        {% if quote_totals.risk_buffer_irr %}<div class="finance-line"><span>مبلغ موقت برای نوسان نرخ</span><strong class="tabnums">{{ quote_totals.risk_buffer_irr|irr_to_toman|format_irr }} تومان</strong></div><p class="muted studio-hint">این مبلغ موقت بعد از تخصیص اعتبار به کیف پولت برمی‌گرده.</p>{% endif %}
-        <div class="finance-line"><span>اعتبار گرام</span><strong>{% ton_amount quote_totals.ton_allocation rate_irr=quote_totals.irr_per_ton hint=0 %}</strong></div>
-        <div class="finance-line ui-quote-total"><span>در مجموع باید پرداخت کنی</span><strong class="tabnums">{{ quote_totals.total_irr|irr_to_toman|format_irr }} تومان</strong></div>
-        <p class="muted studio-hint">این مبلغ تا {{ quote.expires_at|jalali_datetime }} معتبره.</p>
-      </article>
-      {% else %}
-      <article class="card card-pad card-muted studio-finance-card" role="status">
-        <h3 class="section-title">مبلغ نهایی هنوز آماده نیست</h3>
-        <p class="muted">اول مبلغ روز رو بگیر و ببین. تا قبل از پرداخت چیزی از کیف پول کم نمی‌شه.</p>
-        <button name="action" value="refresh_quote" type="submit" formnovalidate class="btn btn-primary">محاسبه مبلغ نهایی</button>
-      </article>
-      {% endif %}
-      {% if wallet %}<div class="ui-studio-wallet"><span>موجودی کیف پول</span><strong class="tabnums">{{ wallet.available_irr|irr_to_toman|format_irr }} تومان</strong><a class="btn btn-ghost btn-sm" href="{% url 'finance:topup' %}">شارژ کیف پول</a></div>{% if quote_ready and wallet.available_irr < quote_totals.total_irr %}<p class="ui-studio-warning" role="status">موجودی‌ات برای این مبلغ کافی نیست؛ اول کیف پول رو شارژ کن.</p>{% endif %}{% endif %}
-      {% include "campaigns/includes/policy_panel.html" %}
-      <div class="ui-terms-panel" id="field-terms">
-        <label class="choice-card"><input type="checkbox" name="terms_accepted" value="1" required aria-describedby="ui-terms-links"> شرایط استفاده رو خوندم و می‌پذیرم که تأیید نهایی با تلگرام است.</label>
-        <p id="ui-terms-links"><a href="{% url 'public:terms' %}" target="_blank" rel="noopener">شرایط گرام‌ادز</a> · <a href="{% url 'policies:ad_policies' %}" target="_blank" rel="noopener">راهنمای تبلیغ تلگرام</a></p>
-      </div>
-      <p class="muted" style="font-size:.8rem">ذخیره پیش‌نویس هنوز تبلیغی تو تلگرام نمی‌سازه.</p>
-      {% if dry_run_preview and dry_run_preview.ok %}
-      <details class="field" style="margin-top:1rem">
-        <summary>داده ارسالی (پیش‌نمایش بدون ارسال)</summary>
-        <pre dir="ltr" style="font-size:.75rem;overflow:auto;max-height:200px">{{ dry_run_json }}</pre>
-      </details>
-      {% endif %}
+      </section>
       {% endif %}
 
       <footer class="studio-footer">
@@ -500,9 +758,6 @@
             {% include "includes/lucide_icon.html" with name="save" size="sm" %}<span>ذخیره کن</span>
           </button>
           {% if step == 5 %}
-            <button class="btn btn-primary studio-action-primary" name="action" value="pay" type="submit" {% if not quote_ready %}disabled{% endif %}>
-              <span>پرداخت و ثبت</span>{% include "includes/lucide_icon.html" with name="wallet" size="sm" %}
-            </button>
             <button class="btn btn-ghost studio-action-review-save" name="action" value="next" type="submit">فعلاً ذخیره کن</button>
           {% elif step < 5 %}
             <button class="btn btn-primary studio-action-primary" name="action" value="next" type="submit">
@@ -516,6 +771,7 @@
     {% include "campaigns/includes/studio_preview.html" %}
   </div>
 </div>
+<script src="{% static 'js/studio-jalali-picker.js' %}"></script>
 <script src="{% static 'js/ad-studio.js' %}"></script>
 <script defer src="{% static 'js/ui-studio.js' %}"></script>
 {% if ai_available %}<script defer src="{% static 'js/ui-ai.js' %}"></script>{% endif %}

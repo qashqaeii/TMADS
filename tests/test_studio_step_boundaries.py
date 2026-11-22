@@ -34,6 +34,44 @@ def test_actual_audience_post_advances_without_creative_or_terms(client, custome
 
 
 @pytest.mark.django_db
+def test_stepper_goto_allows_jump_within_furthest(client, customer_user):
+    campaign = Campaign.objects.create(
+        customer=customer_user.customer_profile,
+        name="Stepper jump",
+        target_type="channels",
+        placement="channel_post",
+        destination="https://t.me/test",
+        wizard_step=3,
+        wizard_version=2,
+        wizard_data={"studio_furthest_step": 4},
+    )
+    CampaignTargeting.objects.create(campaign=campaign, config={"language_codes": ["fa"]})
+    AdCreative.objects.create(campaign=campaign, ad_text="متن آزمایشی تبلیغ")
+    client.force_login(customer_user)
+
+    html = client.get(reverse("campaigns:wizard", args=[campaign.id])).content.decode()
+    assert 'name="goto_step" value="1"' in html
+    assert 'name="goto_step" value="2"' in html
+    assert 'name="goto_step" value="4"' in html
+    assert 'name="goto_step" value="5"' not in html
+    assert 'aria-current="step"' in html
+
+    response = client.post(
+        reverse("campaigns:wizard", args=[campaign.id]),
+        {
+            "goto_step": "1",
+            "draft_revision": campaign.draft_revision,
+            "studio_step": 3,
+            "ad_text": "متن آزمایشی تبلیغ",
+        },
+    )
+    campaign.refresh_from_db()
+    assert response.status_code == 302
+    assert campaign.wizard_step == 1
+    assert (campaign.wizard_data or {}).get("studio_furthest_step") == 4
+
+
+@pytest.mark.django_db
 def test_final_validation_does_not_change_budget_or_schedule(customer_user):
     campaign = Campaign.objects.create(
         customer=customer_user.customer_profile, name="Review",

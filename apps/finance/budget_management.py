@@ -40,9 +40,18 @@ def _amount(value, *, money=False):
 def preview_budget(campaign, *, actor, action, value):
     ad=_eligible(campaign,actor)
     if action=="increase_budget":
+        from apps.core.dates import to_persian_digits
+        from apps.finance.services.money import (
+            irr_to_toman_int,
+            minimum_advertising_budget_irr,
+            toman_to_irr,
+        )
+
         toman=int(_amount(value,money=True))
-        if toman<100000:
-            raise ValueError("حداقل بودجه پیشنهادی ۱۰۰ هزار تومان است.")
+        min_irr = minimum_advertising_budget_irr()
+        if min_irr and toman_to_irr(toman) < min_irr:
+            min_fa = to_persian_digits(f"{irr_to_toman_int(min_irr):,}".replace(",", "٬"))
+            raise ValueError(f"حداقل بودجه پیشنهادی معادل ۱ گرام است (حدود {min_fa} تومان).")
         quote=build_campaign_quote(toman*10)
         data={"quote":quote,"requested_toman":toman,"amount_ton":quote["ton_allocation"]}
     elif action=="decrease_budget":

@@ -44,31 +44,31 @@ def build_input_target(target_type: str, config: dict[str, Any] | None) -> Any:
         return InputAdTargetBots(bot_ids=_peer_list(cfg.get("bot_ids") or []))
 
     if target_type == "channels":
-        mode = (cfg.get("channel_mode") or cfg.get("mode") or "").strip()
-        if not mode:
-            mode = "specific" if cfg.get("channel_ids") else "topics" if cfg.get("topic_ids") else "language"
-        if mode not in {"specific", "topics", "language"}:
-            raise ValueError("استراتژی هدف‌گیری کانال معتبر نیست.")
-        if mode == "specific":
+        channel_ids = _peer_list(cfg.get("channel_ids") or [])
+        topic_ids = [int(x) for x in cfg.get("topic_ids") or []]
+        language_codes = [str(c) for c in cfg.get("language_codes") or []]
+        if not language_codes and cfg.get("language_code"):
+            language_codes = [str(cfg["language_code"])]
+        exclude_topic_ids = [int(x) for x in cfg.get("exclude_topic_ids") or []]
+        exclude_channel_ids = _peer_list(cfg.get("exclude_channel_ids") or [])
+        # اولویت محدودیت API: کانال مشخص > موضوع+زبان > فقط زبان
+        if channel_ids:
             return InputAdTargetChannels(
-                channel_ids=_peer_list(cfg.get("channel_ids") or []),
-                exclude_channel_ids=_peer_list(cfg.get("exclude_channel_ids") or []),
-                exclude_topic_ids=[int(x) for x in cfg.get("exclude_topic_ids") or []],
+                channel_ids=channel_ids,
+                exclude_channel_ids=exclude_channel_ids,
+                exclude_topic_ids=exclude_topic_ids,
             )
-        if mode == "topics":
-            langs = [str(c) for c in cfg.get("language_codes") or []]
-            if not langs and cfg.get("language_code"):
-                langs = [str(cfg["language_code"])]
+        if topic_ids:
             return InputAdTargetChannels(
-                language_codes=langs,
-                topic_ids=[int(x) for x in cfg.get("topic_ids") or []],
-                exclude_topic_ids=[int(x) for x in cfg.get("exclude_topic_ids") or []],
-                exclude_channel_ids=_peer_list(cfg.get("exclude_channel_ids") or []),
+                language_codes=language_codes,
+                topic_ids=topic_ids,
+                exclude_topic_ids=exclude_topic_ids,
+                exclude_channel_ids=exclude_channel_ids,
             )
         return InputAdTargetChannels(
-            language_codes=[str(c) for c in cfg.get("language_codes") or []],
-            exclude_topic_ids=[int(x) for x in cfg.get("exclude_topic_ids") or []],
-            exclude_channel_ids=_peer_list(cfg.get("exclude_channel_ids") or []),
+            language_codes=language_codes,
+            exclude_topic_ids=exclude_topic_ids,
+            exclude_channel_ids=exclude_channel_ids,
         )
 
     if target_type == "users":

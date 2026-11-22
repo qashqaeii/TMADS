@@ -32,5 +32,7 @@ urlpatterns = [
     path("studio/catalog/resolve-bot/", views.studio_catalog_resolve_bot, name="catalog_resolve_bot"),
     path("studio/catalog/resolve-channel/", views.studio_catalog_resolve_channel, name="catalog_resolve_channel"),
     path("studio/bots/similar/", views.studio_bots_similar, name="bots_similar"),
+    path("studio/channels/similar/", views.studio_channels_similar, name="channels_similar"),
+    path("studio/preview/promote/", views.studio_promote_preview, name="promote_preview"),
     path("<uuid:campaign_id>/export.csv", views.campaign_export_csv, name="export_csv"),
 ]

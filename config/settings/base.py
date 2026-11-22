@@ -178,6 +178,7 @@ TELEGRAM_ADS_WEBSITE_ENABLED = env.bool("TELEGRAM_ADS_WEBSITE_ENABLED", default=
 TELEGRAM_ADS_CUSTOMER_ASSETS_ENABLED = env.bool("TELEGRAM_ADS_CUSTOMER_ASSETS_ENABLED", default=False)
 # Similar Bots — catalog recommendations gated by official getTargetBot (no web-panel session).
 SIMILAR_BOTS_ENABLED = env.bool("SIMILAR_BOTS_ENABLED", default=True)
+SIMILAR_CHANNELS_ENABLED = env.bool("SIMILAR_CHANNELS_ENABLED", default=True)
 
 # Transactional SMS — off until separate GramAds credentials/patterns are approved.
 SMS_ENABLED = env.bool("SMS_ENABLED", default=False)
@@ -217,6 +218,7 @@ ZARINPAL_MERCHANT_ID = env("ZARINPAL_MERCHANT_ID", default="")
 ZARINPAL_SANDBOX = env.bool("ZARINPAL_SANDBOX", default=True)
 DEFAULT_EXCHANGE_RATE_TON_IRR = env.int("DEFAULT_EXCHANGE_RATE_TON_IRR", default=0)
 PLATFORM_SERVICE_FEE_PERCENT = env.int("PLATFORM_SERVICE_FEE_PERCENT", default=5)
+GRAM_RATE_MARKUP_PERCENT = env.int("GRAM_RATE_MARKUP_PERCENT", default=0)
 
 # Nobitex — Gram (Telegram TON) / RLS. Read-only public API.
 NOBITEX_API_BASE_URL = env("NOBITEX_API_BASE_URL", default="https://apiv2.nobitex.ir")

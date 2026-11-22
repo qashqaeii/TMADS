@@ -37,9 +37,12 @@
 #campaign-studio .studio-stepper__list{gap:5px}
 #campaign-studio .studio-stepper__item{
   min-height:44px;
+  border-radius:10px;
+}
+#campaign-studio .studio-stepper__btn{
+  min-height:44px;
   gap:7px;
   padding:6px 8px;
-  border-radius:10px;
 }
 #campaign-studio .studio-stepper__number{width:28px;height:28px;border-radius:9px;font-size:.72rem}
 #campaign-studio .studio-stepper__copy strong{font-size:.71rem}
@@ -88,176 +91,128 @@
 #campaign-studio .studio-actions-bar .btn{min-height:44px}
 #campaign-studio .studio-actions-bar .studio-action-primary{min-width:180px}
 
-/* A cleaner policy summary: severity, explanation and next action are distinct. */
+/* Compact collapsible policy strip — summary always visible, details on demand. */
 #campaign-studio .policy-panel{
-  display:grid;
-  gap:10px;
-  padding:13px 14px;
-  border:1px solid #e3eaf1;
-  border-radius:15px;
-  background:linear-gradient(180deg,#fbfdff 0%,#f7fafd 100%);
-  transition:opacity .18s ease;
-}
-#campaign-studio .policy-panel{
-  display:grid;
-  gap:12px;
   margin-top:4px;
-  padding:14px;
-  border:1px solid #e4ecf4;
+  border:1px solid #e5edf5;
   border-radius:14px;
   background:#fff;
+  overflow:hidden;
+  transition:opacity .18s ease,border-color .16s ease;
 }
 #campaign-studio .policy-panel.is-refreshing{opacity:.72}
-#campaign-studio .policy-panel__head{
-  display:flex;
-  align-items:flex-start;
-  justify-content:space-between;
-  gap:10px 16px;
-  flex-wrap:wrap;
+#campaign-studio .policy-panel__summary{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  list-style:none;cursor:pointer;user-select:none;
+  padding:11px 12px;min-height:48px;
+  transition:background .16s ease
 }
-#campaign-studio .policy-panel__title-wrap{display:grid;gap:3px;min-width:0}
-#campaign-studio .ui-policy-title{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  margin:0;
-  color:#1f3a54;
-  font-size:.86rem;
-  font-weight:750;
+#campaign-studio .policy-panel__summary::-webkit-details-marker{display:none}
+#campaign-studio .policy-panel__summary::marker{content:""}
+#campaign-studio .policy-panel__summary:hover{background:#f8fafc}
+#campaign-studio .policy-panel__summary:focus-visible{
+  outline:none;box-shadow:inset 0 0 0 2px rgba(23,107,180,.22)
 }
-#campaign-studio .ui-policy-title svg{width:18px;height:18px;flex:none;color:#2f74a8}
-#campaign-studio .policy-panel__version{margin:0;color:#8a98a7;font-size:.64rem;line-height:1.6}
-#campaign-studio .ui-policy-counts{display:flex;flex-wrap:wrap;gap:6px}
+#campaign-studio .policy-panel__summary-main{
+  display:inline-flex;align-items:center;gap:9px;min-width:0;flex:1 1 auto
+}
+#campaign-studio .policy-panel__icon{
+  display:grid;place-items:center;flex:none;
+  width:28px;height:28px;border-radius:9px;
+  background:#eef5fb;color:#2f74a8
+}
+#campaign-studio .policy-panel__icon svg{width:15px;height:15px}
+#campaign-studio .policy-panel__summary-copy{display:grid;gap:1px;min-width:0}
+#campaign-studio .policy-panel__summary-copy strong{
+  margin:0;color:#1f3a54;font-size:.8rem;font-weight:750;line-height:1.35
+}
+#campaign-studio .policy-panel__hint{
+  color:#8a98a7;font-size:.62rem;line-height:1.5;font-weight:500
+}
+#campaign-studio .policy-panel__chevron{
+  display:grid;place-items:center;flex:none;
+  width:22px;height:22px;color:#7d90a3;
+  transition:transform .18s ease
+}
+#campaign-studio .policy-panel__chevron svg{width:16px;height:16px}
+#campaign-studio .policy-panel[open] .policy-panel__chevron{transform:rotate(180deg)}
+#campaign-studio .ui-policy-counts{
+  display:flex;flex-wrap:wrap;gap:5px;margin-inline-start:auto
+}
 #campaign-studio .policy-count{
-  display:inline-flex;
-  align-items:center;
-  gap:6px;
-  min-height:28px;
-  padding:4px 9px;
-  border-radius:999px;
-  background:#f4f7fa;
-  color:#5f7388;
-  font-size:.64rem;
+  display:inline-flex;align-items:center;gap:5px;
+  min-height:26px;padding:3px 8px;border-radius:999px;
+  background:#f4f7fa;color:#5f7388;font-size:.62rem
 }
 #campaign-studio .policy-count em{font-style:normal;opacity:.85}
 #campaign-studio .policy-count strong{font-weight:800;font-variant-numeric:tabular-nums}
+#campaign-studio .policy-count.is-zero{opacity:.55}
 #campaign-studio .policy-count--blocked{background:#fff1f2;color:#a83d4d}
 #campaign-studio .policy-count--review{background:#fff7eb;color:#9a6b27}
 #campaign-studio .policy-count--warning{background:#eef6fd;color:#2d6f9c}
+#campaign-studio .policy-panel__body{
+  display:grid;gap:10px;padding:0 12px 12px;
+  border-top:1px solid #eef2f6
+}
 #campaign-studio .policy-findings{
-  display:grid;
-  gap:8px;
-  margin:0;
-  padding:0;
-  list-style:none;
+  display:grid;gap:7px;margin:10px 0 0;padding:0;list-style:none
 }
 #campaign-studio .policy-findings__item{
-  display:grid;
-  gap:5px;
-  margin:0;
-  padding:11px 12px;
-  border:1px solid #e8eef4;
-  border-radius:12px;
-  background:#fbfcfe;
-  color:#35516b;
+  display:grid;gap:4px;margin:0;padding:10px 11px;
+  border:1px solid #e8eef4;border-radius:11px;background:#fbfcfe;color:#35516b
 }
 #campaign-studio .policy-findings__top{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
 #campaign-studio .policy-findings__badge{
-  display:inline-flex;
-  align-items:center;
-  padding:3px 8px;
-  border-radius:7px;
-  background:#eef2f6;
-  color:#5d7186;
-  font-size:.61rem;
-  font-weight:750;
-  white-space:nowrap;
+  display:inline-flex;align-items:center;padding:2px 7px;border-radius:6px;
+  background:#eef2f6;color:#5d7186;font-size:.6rem;font-weight:750;white-space:nowrap
 }
 #campaign-studio .policy-findings__clause{
-  padding:2px 7px;
-  border-radius:6px;
-  background:#edf4fb;
-  color:#2f6ea0;
-  font-size:.6rem;
-  font-weight:700;
+  padding:2px 6px;border-radius:6px;background:#edf4fb;color:#2f6ea0;
+  font-size:.58rem;font-weight:700
 }
 #campaign-studio .policy-findings__rule-title{
-  margin:0;
-  color:#243f59;
-  font-size:.72rem;
-  font-weight:700;
+  margin:0;color:#243f59;font-size:.7rem;font-weight:700
 }
 #campaign-studio .policy-findings__message{
-  margin:0;
-  color:#35516b;
-  font-size:.74rem;
-  line-height:1.85;
-  overflow-wrap:anywhere;
+  margin:0;color:#35516b;font-size:.72rem;line-height:1.8;overflow-wrap:anywhere;
   font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",Vazirmatn,system-ui,sans-serif;
-  font-variant-emoji:emoji;
+  font-variant-emoji:emoji
 }
 #campaign-studio .policy-findings__hint{
-  margin:0;
-  color:#7b8c9c;
-  font-size:.66rem;
-  line-height:1.75;
+  margin:0;color:#7b8c9c;font-size:.64rem;line-height:1.7
 }
 #campaign-studio .policy-findings__links{
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px 12px;
-  margin-top:2px;
+  display:flex;flex-wrap:wrap;gap:8px 12px;margin-top:1px
 }
 #campaign-studio .policy-findings__jump,
 #campaign-studio .policy-findings__rule,
 #campaign-studio .policy-findings__source{
-  font-size:.66rem;
-  font-weight:750;
-  text-decoration:none;
+  font-size:.64rem;font-weight:750;text-decoration:none
 }
 #campaign-studio .policy-findings__jump{color:#176bb4}
 #campaign-studio .policy-findings__rule{color:#1f5f90}
 #campaign-studio .policy-findings__source{color:#6d8194}
 #campaign-studio .policy-findings__empty{
-  margin:0;
-  padding:12px;
-  border:1px dashed #dce5ed;
-  border-radius:12px;
-  background:#fff;
-  color:#7b8c9c;
-  font-size:.72rem;
-  text-align:center;
+  margin:0;padding:11px;border:1px dashed #dce5ed;border-radius:11px;
+  background:#fff;color:#7b8c9c;font-size:.7rem;text-align:center
 }
 #campaign-studio .policy-panel__actions{
-  display:flex;
-  align-items:center;
-  flex-wrap:wrap;
-  gap:8px 12px;
+  display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px;
+  padding-top:2px
 }
 #campaign-studio .policy-panel__actions>a{
-  color:#176bb4;
-  font-size:.7rem;
-  font-weight:700;
-  text-decoration:none;
+  color:#176bb4;font-size:.68rem;font-weight:700;text-decoration:none
 }
+#campaign-studio .policy-panel__actions .btn{min-height:32px;padding:5px 10px;font-size:.64rem}
 #campaign-studio .policy-declarations--step1{
-  margin:0;
-  padding:0;
-  border:0;
-  display:grid;
-  gap:6px;
+  margin:0;padding:0;border:0;display:grid;gap:6px
 }
 #campaign-studio .policy-declarations--step1 .field-help{
-  margin:0;
-  color:#6d8194;
-  font-size:.72rem;
-  line-height:1.7;
+  margin:0;color:#6d8194;font-size:.72rem;line-height:1.7
 }
 #campaign-studio .is-policy-focus{
-  outline:2px solid #2a8fd4;
-  outline-offset:4px;
-  border-radius:12px;
-  transition:outline-color .2s ease;
+  outline:2px solid #2a8fd4;outline-offset:4px;border-radius:12px;
+  transition:outline-color .2s ease
 }
 #campaign-studio .policy-findings__item--blocked{border-color:#f0d9de;background:#fffafb}
 #campaign-studio .policy-findings__item--blocked .policy-findings__badge{background:#fff0f1;color:#ad4050}
@@ -267,11 +222,6 @@
 #campaign-studio .policy-findings__item--warning .policy-findings__badge{background:#edf6fd;color:#286b9b}
 #campaign-studio .policy-findings__item--info{border-color:#dfeee7;background:#f8fcfa}
 #campaign-studio .policy-findings__item--info .policy-findings__badge{background:#eef5f2;color:#39745d}
-#campaign-studio .policy-panel__actions{
-  padding-top:8px;
-  border-top:1px solid #e9eef3;
-}
-#campaign-studio .policy-panel__actions .btn{min-height:34px;padding:6px 10px;font-size:.66rem}
 #campaign-studio [id^="field-"]{scroll-margin-top:92px}
 
 /* The preview remains available without competing with the active step. */
@@ -320,15 +270,16 @@
   #campaign-studio .studio-actions-bar .studio-action-review-save{grid-column:2}
   #campaign-studio .studio-aside{padding:11px;border-radius:14px}
   #campaign-studio .tg-ads-preview__stage{min-height:210px}
-  #campaign-studio .policy-panel{gap:8px;padding:11px}
+  #campaign-studio .policy-panel__summary{padding:10px 11px;gap:8px}
+  #campaign-studio .policy-panel__body{padding:0 11px 11px}
   #campaign-studio .policy-findings__item{padding:8px;gap:3px 7px}
   #campaign-studio .policy-panel__actions{gap:7px}
+  #campaign-studio .ui-policy-counts{width:100%;margin-inline-start:0}
 }
 @media(max-width:390px){
   #campaign-studio .studio-masthead__back span{max-width:88px;white-space:nowrap}
   #campaign-studio .studio-stepper__item{flex-basis:128px}
   #campaign-studio .studio-form{padding:11px}
-  #campaign-studio .policy-panel__head{align-items:flex-start}
 }
 @media(prefers-reduced-motion:reduce){
   #campaign-studio :is(*,::before,::after){scroll-behavior:auto!important;transition:none!important;animation:none!important}

@@ -36,10 +36,20 @@ def _legacy_validate_step(campaign, step: int, data: dict) -> list[str]:
         if len(text) > 160:
             errors.append("متن تبلیغ بیش از حد مجاز است.")
     if step == 6:
+        from apps.campaigns.studio import parse_studio_int_amount
+        from apps.core.dates import to_persian_digits
+        from apps.finance.services.money import (
+            irr_to_toman_int,
+            minimum_advertising_budget_irr,
+            toman_to_irr,
+        )
+
         try:
-            budget_toman = int(data.get("budget_toman") or 0)
+            budget_toman = parse_studio_int_amount(data.get("budget_toman"))
         except ValueError:
             budget_toman = 0
-        if budget_toman and budget_toman < 100:
-            errors.append("حداقل بودجه ۱۰۰ هزار تومان پیشنهاد می‌شود.")
+        min_irr = minimum_advertising_budget_irr()
+        if budget_toman and min_irr and toman_to_irr(budget_toman) < min_irr:
+            min_fa = to_persian_digits(f"{irr_to_toman_int(min_irr):,}".replace(",", "٬"))
+            errors.append(f"حداقل بودجه معادل ۱ گرام است (حدود {min_fa} تومان با نرخ روز).")
     return errors

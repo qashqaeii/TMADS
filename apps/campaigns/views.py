@@ -61,11 +61,18 @@ from .catalog import (
     resolve_channel,
     search_locations,
 )
-from .schedule_utils import IRAN_SCHEDULE_TIMEZONE_SEC, WEEKDAY_LABELS_FA, schedule_summary_fa
+from .schedule_utils import (
+    IRAN_SCHEDULE_TIMEZONE_SEC,
+    schedule_summary_fa,
+    schedule_summary_rows,
+    weekdays_for_ui,
+)
 from .studio import (
     STUDIO_STEPS,
     apply_studio_step,
+    bump_studio_furthest_step,
     ensure_studio_step,
+    studio_furthest_step,
     migrate_campaign_to_studio,
     studio_payload_from_post,
     validate_studio_step,
@@ -218,8 +225,9 @@ def campaign_detail(request, campaign_id):
     performance_badges = insight_badges_for_campaign(performance_insights, campaign.id)
     from .performance_advice import campaign_advice
     performance_recommendations = campaign_advice(campaign, metrics)
-    from apps.ai.provider import available as ai_available
+    from apps.ai.provider import available as ai_available, ui_visible as ai_ui_visible
     from apps.ai.features import analysis_eligible
+    ai_ui = ai_ui_visible()
     ai_campaign_ready = ai_available() and analysis_eligible(campaign, metrics)
     has_linked_remote = remote_ads.exclude(remote_ad_id="").exists()
     return render(
@@ -232,8 +240,8 @@ def campaign_detail(request, campaign_id):
             "destination_link": destination_link,
             "performance_badges": performance_badges,
             "performance_recommendations": performance_recommendations,
-            "ai_analysis_available": ai_campaign_ready,
-            "ai_optimization_available": ai_campaign_ready,
+            "ai_analysis_available": ai_ui or ai_campaign_ready,
+            "ai_optimization_available": ai_ui or ai_campaign_ready,
             "has_chart": has_chart,
             "chart_has_signal": chart_has_signal(chart),
             "has_spend_chart": any(v is not None for v in chart.get("spent", [])),
@@ -269,6 +277,7 @@ def campaign_delete(request, campaign_id):
         messages.error(request, reason)
         return redirect("campaigns:detail", campaign_id=campaign.id)
     name = campaign.name or "پیش‌نویس"
+    deleted_status = campaign.status
     try:
         delete_draft_campaign(campaign)
     except ValueError as exc:
@@ -279,7 +288,7 @@ def campaign_delete(request, campaign_id):
         action="campaign.deleted",
         entity_type="campaign",
         entity_id=campaign_id,
-        new_state={"name": name, "status": Campaign.Status.DRAFT},
+        new_state={"name": name, "status": deleted_status},
     )
     messages.success(request, f"پیش‌نویس «{name}» حذف شد.")
     return redirect("campaigns:list")
@@ -353,10 +362,16 @@ def campaign_wizard(request, campaign_id=None):
     migrate_campaign_to_studio(campaign)
     step = ensure_studio_step(campaign)
     campaign.wizard_step = step
+    prev_furthest = (campaign.wizard_data or {}).get("studio_furthest_step")
+    bump_studio_furthest_step(campaign, step)
+    if (campaign.wizard_data or {}).get("studio_furthest_step") != prev_furthest:
+        campaign.save(update_fields=["wizard_data", "updated_at"])
     max_step = len(STUDIO_STEPS)
+    furthest_step = studio_furthest_step(campaign)
 
     if request.method == "POST":
-        action = request.POST.get("action", "next")
+        goto_raw = (request.POST.get("goto_step") or "").strip()
+        action = "goto_step" if goto_raw else request.POST.get("action", "next")
         if not _draft_revision_matches(campaign, request.POST):
             messages.error(request, "نسخه یا مرحله پیش‌نویس تغییر کرده است؛ صفحه جدید را بررسی کنید.")
             return redirect("campaigns:wizard", campaign_id=campaign.id)
@@ -397,11 +412,21 @@ def campaign_wizard(request, campaign_id=None):
         else:
             apply_studio_step(campaign, step, request.POST, files=request.FILES)
             campaign.wizard_data = {**campaign.wizard_data, **studio_payload_from_post(request.POST)}
+            bump_studio_furthest_step(campaign, step)
             campaign.draft_revision += 1
             campaign.draft_saved_at = timezone.now()
             campaign.save()
 
-            if action == "back" and step > 1:
+            if action == "goto_step":
+                try:
+                    target = int(goto_raw)
+                except (TypeError, ValueError):
+                    target = 0
+                furthest = studio_furthest_step(campaign)
+                if 1 <= target <= furthest and target != step:
+                    campaign.wizard_step = target
+                    campaign.save(update_fields=["wizard_step", "updated_at"])
+            elif action == "back" and step > 1:
                 campaign.wizard_step = step - 1
                 campaign.save(update_fields=["wizard_step", "updated_at"])
             elif action == "save_draft":
@@ -448,7 +473,8 @@ def campaign_wizard(request, campaign_id=None):
                         return redirect("campaigns:detail", campaign_id=campaign.id)
             elif step < max_step and action == "next":
                 campaign.wizard_step = step + 1
-                campaign.save(update_fields=["wizard_step", "updated_at"])
+                bump_studio_furthest_step(campaign, step + 1)
+                campaign.save(update_fields=["wizard_step", "wizard_data", "updated_at"])
                 if step == 4:
                     try:
                         _create_quote(campaign)
@@ -472,10 +498,25 @@ def campaign_wizard(request, campaign_id=None):
     creative = campaign.creatives.first()
     wallet = ensure_wallet(customer)
     ton_rate_display = None
+    min_budget_toman = 0
+    budget_field_tip = (
+        "کل پولی که برای این تبلیغ کنار می‌گذارید، به تومان. مثلاً ۵۰۰٬۰۰۰ یعنی پانصد هزار تومان. "
+        "وقتی این مبلغ تمام شود، تبلیغ دیگر نمایش داده نمی‌شود. حداقل بودجه معادل ۱ گرام است."
+    )
     try:
+        from apps.core.dates import to_persian_digits
+        from apps.finance.services.money import minimum_advertising_budget_toman
         from apps.finance.services.ton_exchange_rate import get_ui_rate_snapshot
 
         ton_rate_display = get_ui_rate_snapshot()
+        min_budget_toman = minimum_advertising_budget_toman()
+        if min_budget_toman:
+            min_fa = to_persian_digits(f"{min_budget_toman:,}".replace(",", "٬"))
+            budget_field_tip = (
+                "کل پولی که برای این تبلیغ کنار می‌گذارید، به تومان. مثلاً ۵۰۰٬۰۰۰ یعنی پانصد هزار تومان. "
+                "وقتی این مبلغ تمام شود، تبلیغ دیگر نمایش داده نمی‌شود. "
+                f"حداقل بودجه معادل ۱ گرام است (حدود {min_fa} تومان با نرخ روز)."
+            )
     except Exception:
         pass
     from apps.telegram_ads.services.ad_write import dry_run_create_ad
@@ -526,6 +567,7 @@ def campaign_wizard(request, campaign_id=None):
         "website_photo_enabled": website_photo_enabled(),
         "media_upload_enabled": media_upload_enabled(),
         "step": step,
+        "furthest_step": furthest_step,
         "steps": STUDIO_STEPS,
         "target_placement_choices": placement_choices_for_target(campaign.target_type or "channels"),
         "studio_feedback": validation_preview,
@@ -537,6 +579,8 @@ def campaign_wizard(request, campaign_id=None):
         "creative": creative,
         "wallet": wallet,
         "ton_rate_display": ton_rate_display,
+        "min_budget_toman": min_budget_toman,
+        "budget_field_tip": budget_field_tip,
         "target_type_choices": Campaign.TargetType.choices,
         "impression_frequency_choices": [1, 2, 3, 4],
         "search_queries_json": json.dumps(
@@ -561,12 +605,13 @@ def campaign_wizard(request, campaign_id=None):
         "schedule_timezones": __import__("apps.campaigns.schedule_utils",fromlist=["schedule_timezone_choices"]).schedule_timezone_choices(),
         "website_buttons": __import__("apps.telegram_ads.targeting.website",fromlist=["WEBSITE_BUTTONS"]).WEBSITE_BUTTONS,
         "schedule_summary": schedule_summary_fa(schedule_obj if schedule_obj else None),
+        "schedule_summary_rows": schedule_summary_rows(schedule_obj if schedule_obj else None),
         "schedule_hours": list(range(24)),
-        "schedule_weekdays": [{"index": i, "label": label} for i, label in enumerate(WEEKDAY_LABELS_FA)],
+        "schedule_weekdays": weekdays_for_ui(),
         "policy_preview_url": reverse("campaigns:policy_preview", kwargs={"campaign_id": campaign.id}),
     }
-    from apps.ai.provider import available as ai_available
-    ctx["ai_available"] = ai_available()
+    from apps.ai.provider import ui_visible as ai_ui_visible
+    ctx["ai_available"] = ai_ui_visible()
     return render(request, "campaigns/wizard.html", ctx)
 
 
@@ -641,17 +686,19 @@ def _apply_step(campaign: Campaign, step: int, data) -> None:
         creative.cta_label = data.get("cta_label", "").strip()
         creative.save()
     elif step == 6:
+        from apps.finance.services.money import toman_to_irr
+
         try:
             budget_toman = int(data.get("budget_toman") or 0)
         except ValueError:
             budget_toman = 0
-        campaign.budget_irr = budget_toman * 10_000
+        campaign.budget_irr = toman_to_irr(budget_toman)
         campaign.name = data.get("campaign_name", "").strip() or campaign.name
         try:
             daily_toman = int(data.get("daily_cap_toman") or 0)
         except ValueError:
             daily_toman = 0
-        campaign.daily_cap_irr = daily_toman * 10_000 if daily_toman else 0
+        campaign.daily_cap_irr = toman_to_irr(daily_toman) if daily_toman else 0
         cpm_raw = (data.get("cpm_bid") or "").strip()
         if cpm_raw:
             from decimal import Decimal, InvalidOperation
@@ -950,6 +997,28 @@ def studio_catalog_resolve_channel(request):
 
 @login_required
 @customer_required
+@require_GET
+def studio_promote_preview(request):
+    """Destination title/photo for studio preview via official getTargetBot/Channel."""
+    if _catalog_rate_limited(request.user.pk, "promote_preview"):
+        return JsonResponse(
+            {
+                "ok": False,
+                "reason": "rate_limited",
+                "message_fa": "چند لحظه صبر کنید.",
+                "title": "",
+                "photo_url": "",
+            },
+            status=429,
+        )
+    from apps.telegram_ads.services.promote_preview import resolve_promote_preview
+
+    destination = (request.GET.get("destination") or request.GET.get("q") or "").strip()[:500]
+    return JsonResponse(resolve_promote_preview(destination))
+
+
+@login_required
+@customer_required
 @require_POST
 def studio_bots_similar(request):
     """Authenticated Similar Bots suggestions — catalog + official getTargetBot only."""
@@ -994,6 +1063,64 @@ def studio_bots_similar(request):
 
     customer = request.user.customer_profile
     result = SimilarBotsService().get_similar(
+        seed,
+        customer=customer,
+        exclude=[str(x) for x in exclude_parsed[:100]],
+        limit=limit,
+    )
+    status = 400 if result.reason == "invalid_seed" and not result.ok else 200
+    return JsonResponse(result.to_json(), status=status)
+
+
+@login_required
+@customer_required
+@require_POST
+def studio_channels_similar(request):
+    """Authenticated Similar Channels suggestions for channel targeting."""
+    from apps.telegram_ads.services.similar_channels import (
+        SimilarChannelsService,
+        similar_channels_enabled,
+    )
+
+    if not similar_channels_enabled():
+        return JsonResponse(
+            {
+                "ok": True,
+                "seed": None,
+                "items": [],
+                "message_fa": "پیشنهاد کانال‌های مشابه فعلاً غیرفعال است.",
+                "reason": "feature_disabled",
+                "feature_enabled": False,
+            }
+        )
+    if _catalog_rate_limited(request.user.pk, "similar_channels"):
+        return JsonResponse(
+            {
+                "ok": False,
+                "seed": None,
+                "items": [],
+                "message_fa": "تعداد درخواست زیاد است؛ چند لحظه صبر کنید.",
+                "reason": "rate_limited",
+                "feature_enabled": True,
+            },
+            status=429,
+        )
+
+    seed = (request.POST.get("seed") or "").strip()[:256]
+    exclude_raw = request.POST.get("exclude") or "[]"
+    try:
+        exclude_parsed = json.loads(exclude_raw)
+    except (TypeError, ValueError, json.JSONDecodeError):
+        exclude_parsed = []
+    if not isinstance(exclude_parsed, list):
+        exclude_parsed = []
+    try:
+        limit = int(request.POST.get("limit") or 12)
+    except (TypeError, ValueError):
+        limit = 12
+
+    customer = request.user.customer_profile
+    result = SimilarChannelsService().get_similar(
         seed,
         customer=customer,
         exclude=[str(x) for x in exclude_parsed[:100]],

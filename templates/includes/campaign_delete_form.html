@@ -1,4 +1,4 @@
-{% if campaign.status == 'draft' %}
+{% if campaign.status == 'draft' or campaign.status == 'awaiting_payment' %}
 <form
   method="post"
   action="{% url 'campaigns:delete' campaign.id %}"

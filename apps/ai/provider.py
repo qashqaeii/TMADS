@@ -79,6 +79,19 @@ def available():
     )
 
 
+def ui_visible():
+    """Show AI surfaces in the product UI.
+
+    In LOCAL+DEBUG, panels stay visible even without provider credentials so
+    placements can be reviewed. Actual API calls still require available().
+    """
+    if available():
+        return True
+    return bool(getattr(settings, "DEBUG", False)) and str(
+        getattr(settings, "APP_ENV", "") or ""
+    ).upper() == "LOCAL"
+
+
 def count(value):
     return value if type(value) is int and 0 <= value <= 1_000_000 else None
 

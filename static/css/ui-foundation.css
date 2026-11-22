@@ -89,7 +89,8 @@
 .ui-notice__icon { flex:none;color:var(--ui-muted); }
 .ui-final [hidden] { display:none !important; }
 @media(max-width:600px) {
-  .ui-final :is(.btn,.campaigns-filter__btn,.campaign-detail__action,.ui-icon-button) { min-height:44px; }
+  .ui-final :is(.btn,.campaign-detail__action,.ui-icon-button) { min-height:44px; }
+  .ui-final .campaigns-filter__btn { min-height:2rem; }
   .ui-dialog__inner { padding:20px; }
   .ui-dialog__actions > .btn { flex:1; }
 }

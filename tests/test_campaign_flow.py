@@ -18,7 +18,7 @@ def test_wizard_creates_quote(client, customer_user):
     campaign.destination = "https://t.me/test"
     campaign.save()
     url = reverse("campaigns:wizard", kwargs={"campaign_id": campaign.id})
-    response = client.post(url, {"action": "next", "budget_toman": "100", "studio_step": "4", "draft_revision": "0"})
+    response = client.post(url, {"action": "next", "budget_toman": "200000", "studio_step": "4", "draft_revision": "0"})
     campaign.refresh_from_db()
     assert campaign.status == Campaign.Status.AWAITING_PAYMENT
     assert response.status_code in (302, 200)

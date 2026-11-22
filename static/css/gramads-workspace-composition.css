@@ -137,7 +137,7 @@
 
 /* Campaign portfolio composition: KPIs, one integrated control/table surface and compact identities. */
 .ui-final.is-app .ga-campaign-workspace .campaigns-table-board{padding:0;overflow:visible}
-.ui-final.is-app .ga-campaign-workspace .ga-campaign-filter{border:0;border-bottom:1px solid #eaf0f6;box-shadow:none;border-radius:0;background:#f8fbff;margin:0;padding:11px 14px}
+.ui-final.is-app .ga-campaign-workspace .ga-campaign-filter{border:0;border-bottom:1px solid #eaf0f6;box-shadow:none;border-radius:0;background:#f8fbff;margin:0;padding:8px 12px}
 .ui-final.is-app .ga-campaign-workspace .campaigns-filter__form{padding:0;background:none;border:0;box-shadow:none}
 .ui-final.is-app .ga-campaign-workspace .campaigns-table__head{border-bottom:1px solid #edf1f6}
 .ui-final.is-app .ga-campaign-workspace .campaigns-table__identity{min-width:155px}

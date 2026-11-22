@@ -30,10 +30,14 @@ def build_campaign_quote(advertising_budget_irr: int) -> dict:
     if advertising_budget_irr <= 0:
         raise PricingError("بودجه تبلیغ نامعتبر است.")
 
-    manual = resolve_manual_snapshot()
-    snapshot = manual or get_pricing_snapshot(require_fresh=True)
+    from apps.finance.services.gram_markup import apply_gram_markup_amount, gram_markup_factor
 
-    base_rate = snapshot.best_ask_irr
+    manual = resolve_manual_snapshot()
+    raw_snapshot = manual or get_pricing_snapshot(require_fresh=True)
+    # Silent admin markup applies only to market (Nobitex) rates, not manual overrides.
+    markup_factor = Decimal("1") if manual else gram_markup_factor()
+    snapshot = raw_snapshot
+    base_rate = snapshot.best_ask_irr * markup_factor
     if not base_rate.is_finite() or base_rate <= 0:
         raise PricingError("نرخ معتبر در دسترس نیست.")
     # Match the documented TON budget precision before locking the purchase.
@@ -43,13 +47,18 @@ def build_campaign_quote(advertising_budget_irr: int) -> dict:
 
     rate_info = (
         {"rate_type": "manual", "effective_rate_irr": base_rate}
-        if manual else effective_rate_for_ton(est_ton, snapshot=snapshot)
+        if manual else effective_rate_for_ton(est_ton, snapshot=raw_snapshot)
     )
     effective_rate = rate_info["effective_rate_irr"]
+    if not manual:
+        effective_rate = apply_gram_markup_amount(effective_rate) or effective_rate
     if rate_info.get("liquidity_limited"):
         raise InsufficientLiquidityError("عمق بازار یا نرخ قطعی در دسترس نیست؛ دوباره تلاش کنید.")
     if rate_info["rate_type"] == "vwap" and rate_info.get("total_irr_for_ton"):
-        advertising_cost = ceil_irr(rate_info["total_irr_for_ton"])
+        market_cost = rate_info["total_irr_for_ton"]
+        if not manual:
+            market_cost = apply_gram_markup_amount(market_cost) or market_cost
+        advertising_cost = ceil_irr(market_cost)
     else:
         advertising_cost = ceil_irr(est_ton * effective_rate)
 

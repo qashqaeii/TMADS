@@ -1,6 +1,16 @@
 from django.contrib import admin
 
-from .models import ExchangeRate, Invoice, Payment, PaymentVerification, PlatformFeeRule, RefundRequest, Wallet, WalletLedgerEntry
+from .models import (
+    ExchangeRate,
+    GramRateMarkupRule,
+    Invoice,
+    Payment,
+    PaymentVerification,
+    PlatformFeeRule,
+    RefundRequest,
+    Wallet,
+    WalletLedgerEntry,
+)
 
 
 @admin.register(Wallet)

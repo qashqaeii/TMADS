@@ -1,47 +1,58 @@
 {% load core_filters %}
 {% if policy_run %}
-<section class="policy-panel" id="studio-policy-panel" data-policy-panel aria-live="polite">
-  {% with counts=policy_run.counts %}
-  <header class="policy-panel__head">
-    <div class="policy-panel__title-wrap">
-      <h3 class="ui-policy-title" id="studio-policy-title">{% include "includes/lucide_icon.html" with name="shield-check" size="md" %}<span>بررسی قوانین تبلیغ</span></h3>
-      <p class="policy-panel__version">با تغییر فیلدها به‌صورت زنده به‌روز می‌شود</p>
-    </div>
-    <div class="ui-policy-counts" data-policy-counts role="group" aria-label="خلاصه نتیجه بررسی قوانین">
-      <span class="policy-count policy-count--blocked" data-policy-count="blocked"><em>مسدود</em><strong>{{ counts.blocked|default:0|persian_digits }}</strong></span>
-      <span class="policy-count policy-count--review" data-policy-count="review_required"><em>بررسی</em><strong>{{ counts.review_required|default:0|persian_digits }}</strong></span>
-      <span class="policy-count policy-count--warning" data-policy-count="warning"><em>هشدار</em><strong>{{ counts.warning|default:0|persian_digits }}</strong></span>
-    </div>
-  </header>
-  {% endwith %}
+{% with counts=policy_run.counts %}
+{% with blocked=counts.blocked|default:0 review=counts.review_required|default:0 warning=counts.warning|default:0 %}
+<details class="policy-panel"
+         id="studio-policy-panel"
+         data-policy-panel
+         aria-live="polite">
+  <summary class="policy-panel__summary">
+    <span class="policy-panel__summary-main">
+      <span class="policy-panel__icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="shield-check" size="sm" %}</span>
+      <span class="policy-panel__summary-copy">
+        <strong id="studio-policy-title">بررسی قوانین</strong>
+        <small class="policy-panel__hint">با تغییر فیلدها به‌روز می‌شود</small>
+      </span>
+    </span>
+    <span class="ui-policy-counts" data-policy-counts role="group" aria-label="خلاصه نتیجه بررسی قوانین">
+      <span class="policy-count policy-count--blocked{% if not blocked %} is-zero{% endif %}" data-policy-count="blocked"><em>مسدود</em><strong>{{ blocked|persian_digits }}</strong></span>
+      <span class="policy-count policy-count--review{% if not review %} is-zero{% endif %}" data-policy-count="review_required"><em>بررسی</em><strong>{{ review|persian_digits }}</strong></span>
+      <span class="policy-count policy-count--warning{% if not warning %} is-zero{% endif %}" data-policy-count="warning"><em>هشدار</em><strong>{{ warning|persian_digits }}</strong></span>
+    </span>
+    <span class="policy-panel__chevron" aria-hidden="true">{% include "includes/lucide_icon.html" with name="chevron-down" size="sm" %}</span>
+  </summary>
 
-  <ul class="policy-findings" data-policy-findings>
-    {% for f in policy_findings %}
-    <li class="policy-findings__item policy-findings__item--{{ f.severity }}">
-      <div class="policy-findings__top">
-        <span class="policy-findings__badge">{% if f.severity == "blocked" %}نیازمند اصلاح{% elif f.severity == "review_required" %}نیازمند بررسی{% elif f.severity == "warning" %}هشدار{% elif f.severity == "info" %}راهنما{% else %}{{ f.severity }}{% endif %}</span>
-        {% if f.source_clause_label %}<span class="policy-findings__clause">{{ f.source_clause_label }}</span>{% endif %}
-      </div>
-      {% if f.rule_title_fa %}<p class="policy-findings__rule-title">{{ f.rule_title_fa }}</p>{% endif %}
-      <p class="policy-findings__message">{{ f.message_fa }}</p>
-      {% if f.suggestion_fa %}<p class="policy-findings__hint">{{ f.suggestion_fa }}</p>{% endif %}
-      <div class="policy-findings__links">
-        {% if f.field_key and step %}<a href="#field-{{ f.field_key }}" class="policy-findings__jump" data-policy-jump="{{ f.field_key }}">رفتن به فیلد</a>{% endif %}
-        {% if f.guide_url %}<a class="policy-findings__rule" href="{{ f.guide_url }}" target="_blank" rel="noopener">{{ f.guide_label|default:"مشاهده قانون" }}</a>{% endif %}
-        {% if f.source_url and f.source_url != f.guide_url %}<a class="policy-findings__source" href="{{ f.source_url }}" target="_blank" rel="noopener">منبع رسمی</a>{% endif %}
-      </div>
-    </li>
-    {% empty %}
-    <li class="policy-findings__empty">مورد مهمی یافت نشد. می‌توانید ادامه دهید.</li>
-    {% endfor %}
-  </ul>
+  <div class="policy-panel__body">
+    <ul class="policy-findings" data-policy-findings>
+      {% for f in policy_findings %}
+      <li class="policy-findings__item policy-findings__item--{{ f.severity }}">
+        <div class="policy-findings__top">
+          <span class="policy-findings__badge">{% if f.severity == "blocked" %}نیازمند اصلاح{% elif f.severity == "review_required" %}نیازمند بررسی{% elif f.severity == "warning" %}هشدار{% elif f.severity == "info" %}راهنما{% else %}{{ f.severity }}{% endif %}</span>
+          {% if f.source_clause_label %}<span class="policy-findings__clause">{{ f.source_clause_label }}</span>{% endif %}
+        </div>
+        {% if f.rule_title_fa %}<p class="policy-findings__rule-title">{{ f.rule_title_fa }}</p>{% endif %}
+        <p class="policy-findings__message">{{ f.message_fa }}</p>
+        {% if f.suggestion_fa %}<p class="policy-findings__hint">{{ f.suggestion_fa }}</p>{% endif %}
+        <div class="policy-findings__links">
+          {% if f.field_key and step %}<a href="#field-{{ f.field_key }}" class="policy-findings__jump" data-policy-jump="{{ f.field_key }}">رفتن به فیلد</a>{% endif %}
+          {% if f.guide_url %}<a class="policy-findings__rule" href="{{ f.guide_url }}" target="_blank" rel="noopener">{{ f.guide_label|default:"مشاهده قانون" }}</a>{% endif %}
+          {% if f.source_url and f.source_url != f.guide_url %}<a class="policy-findings__source" href="{{ f.source_url }}" target="_blank" rel="noopener">منبع رسمی</a>{% endif %}
+        </div>
+      </li>
+      {% empty %}
+      <li class="policy-findings__empty">مورد مهمی یافت نشد. می‌توانید ادامه دهید.</li>
+      {% endfor %}
+    </ul>
 
-  <div class="policy-panel__actions">
-    <a href="{% url 'policies:ad_policies' %}" target="_blank" rel="noopener">راهنمای کامل قوانین</a>
-    {% if step %}
-    <button type="button" class="btn btn-ghost btn-sm" data-policy-refresh>بررسی مجدد</button>
-    <span class="muted" data-policy-refresh-status aria-live="polite"></span>
-    {% endif %}
+    <div class="policy-panel__actions">
+      <a href="{% url 'policies:ad_policies' %}" target="_blank" rel="noopener">راهنمای قوانین</a>
+      {% if step %}
+      <button type="button" class="btn btn-ghost btn-sm" data-policy-refresh>بررسی مجدد</button>
+      <span class="muted" data-policy-refresh-status aria-live="polite"></span>
+      {% endif %}
+    </div>
   </div>
-</section>
+</details>
+{% endwith %}
+{% endwith %}
 {% endif %}

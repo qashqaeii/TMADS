@@ -67,6 +67,28 @@ class PlatformFeeRule(UUIDModel, TimeStampedModel):
     is_active = models.BooleanField(default=True)
 
 
+class GramRateMarkupRule(UUIDModel, TimeStampedModel):
+    """Admin markup on Nobitex Gram ask, applied silently to customer rates/quotes."""
+
+    percent = models.PositiveSmallIntegerField(
+        default=0,
+        help_text="Percent added on top of Nobitex ask for customer pricing (0–100).",
+    )
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(percent__gte=0) & models.Q(percent__lte=100),
+                name="gram_rate_markup_percent_range",
+            ),
+        ]
+
+    def __str__(self) -> str:
+        return f"Gram markup {self.percent}%"
+
+
 class AdvertisingOrder(TenantOwnedModel):
     class Status(models.TextChoices):
         DRAFT = "draft", "پیش‌نویس"

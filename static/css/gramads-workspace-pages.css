@@ -93,8 +93,8 @@
 .ui-final.is-app .ui-campaign-list .campaign-kpi-ribbon__cell--lead .campaign-kpi-ribbon__glyph{background:#ffffff21;color:#fff}
 .ui-final.is-app .ui-campaign-list .campaign-kpi-ribbon__cell--ctr .campaign-kpi-ribbon__value{color:var(--gw-accent)}
 .ui-final.is-app .ui-campaign-list .campaign-kpi-ribbon__value--ton{font-size:1.12rem}
-.ui-final.is-app .ui-campaign-list .campaigns-filter--luxe{padding:12px;border-radius:var(--gw-radius);box-shadow:var(--gw-shadow)}
-.ui-final.is-app .ui-campaign-list .campaigns-filter__bar{gap:9px}
+.ui-final.is-app .ui-campaign-list .campaigns-filter--luxe{padding:8px 12px;border:0;border-bottom:1px solid var(--gw-stroke);border-radius:0;box-shadow:none;background:color-mix(in srgb,var(--gw-soft,#f3f7fb) 70%,#fff)}
+.ui-final.is-app .ui-campaign-list .campaigns-filter__bar{gap:6px;flex-wrap:nowrap;align-items:center;min-width:0}
 .ui-final.is-app .ui-campaign-list .campaigns-table-board{border:1px solid var(--gw-stroke);border-radius:var(--gw-radius);box-shadow:var(--gw-shadow)}
 .ui-final.is-app .ui-campaign-list .campaigns-table__head{padding:12px 14px;gap:8px}
 .ui-final.is-app .ui-campaign-list .campaigns-table__title{font-size:.97rem;font-weight:700}

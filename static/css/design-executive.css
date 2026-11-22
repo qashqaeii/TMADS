@@ -1257,6 +1257,26 @@ body.app-body :where(a, button, summary, [tabindex="0"]):focus-visible { outline
 .field input[type="checkbox"], .field input[type="radio"] { min-height: 0; width: 18px; height: 18px; accent-color: var(--brand-action); }
 .field:has(.form-error) :is(input, select, textarea) { border-color: var(--danger); }
 .field-help { font-size: .8rem; line-height: 1.75; color: var(--text-secondary); }
+.field-help--danger { color: var(--danger, #c94b56); font-weight: 500; }
+.field.is-exclusive-locked { opacity: .72; }
+.field.is-exclusive-locked .chip-list { pointer-events: none; }
+.field.is-invalid [data-ms-search],
+.field.is-invalid .catalog-row input {
+  border-color: var(--danger, #c94b56);
+}
+.btn-link.similar-channels-trigger {
+  display: inline-flex;
+  align-items: center;
+  margin-top: .45rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent, #2aabee);
+  font: inherit;
+  font-size: .875rem;
+  cursor: pointer;
+}
+.btn-link.similar-channels-trigger:hover { text-decoration: underline; }
 .field-help ul, .form-error ul { margin: 0; padding-inline-start: 1.2rem; }
 .auth-card--exec .form-stack { max-width: none; gap: var(--space-4); }
 .auth-card--exec .form-stack > .btn, .auth-card--exec > .btn { width: 100%; }
@@ -7269,6 +7289,28 @@ details.exec-menu[open] > summary { color: var(--brand-action); background: var(
     opacity 0.2s var(--ease-premium),
     transform 0.24s var(--ease-premium);
 }
+.ui-tip-pop--rich {
+  max-width: min(22.5rem, calc(100vw - 1.25rem));
+  padding: 0.7rem 0.85rem;
+  font-size: 0.78rem;
+  font-weight: 500;
+  line-height: 1.75;
+}
+.ui-tip-pop--studio {
+  max-width: min(20.5rem, calc(100vw - 1.5rem));
+  padding: 0.78rem 0.92rem;
+  border-color: color-mix(in srgb, #7eb3df 55%, var(--ui-tip-stroke));
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(245, 250, 255, 0.94));
+  box-shadow:
+    0 16px 40px rgba(18, 42, 72, 0.14),
+    0 1px 0 rgba(255, 255, 255, 0.85) inset;
+  color: #24384d;
+  font-size: 0.8rem;
+  font-weight: 550;
+  line-height: 1.85;
+  letter-spacing: 0;
+}
 .ui-tip-pop--visible {
   opacity: 1;
   transform: translateY(0) scale(1);
@@ -7663,7 +7705,7 @@ body.is-app .sync-hint[title] {
   border: 1px solid var(--border-default);
   border-radius: var(--radius-sm);
   background: var(--surface-primary);
-  max-height: 15rem;
+  max-height: min(280px, 42vh);
   overflow: auto;
   overscroll-behavior: contain;
 }
@@ -7674,15 +7716,15 @@ body.is-app .sync-hint[title] {
   justify-content: space-between;
   gap: .75rem;
   width: 100%;
-  min-height: 44px;
-  padding: .55rem .75rem;
+  min-height: 34px;
+  padding: .4rem .65rem;
   border: 0;
   border-radius: 6px;
   background: transparent;
   color: inherit;
   cursor: pointer;
   font: inherit;
-  font-size: .88rem;
+  font-size: .82rem;
   text-align: start;
 }
 .catalog-suggest__item small { color: var(--text-secondary); font-size: .75rem; min-width: 0; overflow-wrap: anywhere; }
@@ -7725,6 +7767,8 @@ body.is-app .sync-hint[title] {
   padding-inline: 0.35rem;
 }
 .schedule-cell {
+  display: grid;
+  place-items: center;
   width: var(--control-height);
   height: var(--control-height);
   border: none;
@@ -7732,9 +7776,17 @@ body.is-app .sync-hint[title] {
   background: var(--surface-secondary);
   cursor: pointer;
   padding: 0;
+  color: transparent;
 }
 .schedule-cell.is-on {
-  background: var(--brand-action);
+  background: #eef6fc;
+  color: var(--brand-action);
+}
+.schedule-cell.is-on::after {
+  content: "";
+  width: 11px;
+  height: 11px;
+  background: center / contain no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M3.2 8.2 6.4 11.4 12.8 4.6' stroke='%232481cc' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
 }
 .schedule-cell:focus-visible {
   outline: 2px solid var(--brand-action);
@@ -9363,86 +9415,92 @@ html.motion-ready .campaigns-insights--premium.is-revealed .campaigns-insights__
 
 .campaigns-page--luxe .campaigns-filter--luxe {
   margin: 0;
+  padding: 0.55rem 0.92rem 0.62rem;
+  border: 0;
+  border-bottom: 1px solid var(--dash-luxe-stroke);
+  border-radius: 0;
+  background: color-mix(in srgb, var(--surface-soft) 8%, var(--surface-primary));
+  box-shadow: none;
 }
 .campaigns-page--luxe .campaigns-filter--luxe .filter-exec {
-  padding: 0.62rem 0.68rem;
-  background: var(--surface-primary);
-  border: 1px solid var(--dash-luxe-stroke);
-  border-radius: var(--dash-luxe-radius);
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
   box-shadow: none;
 }
 .campaigns-filter__bar {
   display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  gap: 0.42rem 0.48rem;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
 }
 .campaigns-filter__field {
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
+  gap: 0;
   min-width: 0;
 }
 .campaigns-filter__field--search {
-  flex: 1 1 12rem;
+  flex: 1 1 auto;
+  min-width: 10rem;
 }
 .campaigns-filter__field--select {
-  flex: 0 1 9.25rem;
-  min-width: 6.75rem;
+  flex: 0 0 8.5rem;
+  width: 8.5rem;
+  max-width: 9.5rem;
 }
 .campaigns-filter__label {
-  margin: 0;
-  padding-inline: 0.1rem;
-  font-size: 0.6rem;
-  font-weight: 550;
-  color: var(--dash-luxe-muted);
-  line-height: 1.2;
+  display: none;
 }
 .campaigns-filter__input-wrap {
   position: relative;
   display: flex;
   align-items: center;
+  min-width: 0;
 }
 .campaigns-filter__input-icon {
   position: absolute;
-  inset-inline-start: 0.52rem;
+  inset-inline-start: 0.62rem;
   display: inline-flex;
   pointer-events: none;
   color: var(--dash-luxe-muted);
-  opacity: 0.85;
+  opacity: 0.78;
 }
 .campaigns-filter__input-icon .icon-shell--sm svg {
-  width: 0.82rem;
-  height: 0.82rem;
+  width: 0.85rem;
+  height: 0.85rem;
 }
 .campaigns-page--luxe .campaigns-filter__control {
   width: 100%;
-  min-height: 2.15rem;
-  padding: 0.38rem 0.58rem;
-  border: 1px solid color-mix(in srgb, var(--dash-luxe-stroke) 92%, transparent);
-  border-radius: 10px;
-  background: color-mix(in srgb, var(--surface-soft) 18%, var(--surface-primary));
+  min-height: 2.05rem;
+  height: 2.05rem;
+  padding: 0.3rem 0.7rem;
+  border: 1px solid color-mix(in srgb, var(--dash-luxe-stroke) 88%, transparent);
+  border-radius: 8px;
+  background: var(--surface-primary);
   color: var(--text-heading);
   font: inherit;
   font-size: 0.78rem;
   font-weight: 500;
+  line-height: 1.2;
+  box-shadow: none;
   transition:
-    border-color 0.2s var(--ease-premium),
-    background 0.2s var(--ease-premium),
-    box-shadow 0.2s var(--ease-premium);
+    border-color 0.18s var(--ease-premium),
+    background 0.18s var(--ease-premium),
+    box-shadow 0.18s var(--ease-premium);
 }
 .campaigns-page--luxe .campaigns-filter__control--search {
-  padding-inline-start: 2.05rem;
+  padding-inline-start: 2.1rem;
 }
 .campaigns-page--luxe .campaigns-filter__control:hover {
-  border-color: color-mix(in srgb, var(--dash-luxe-stroke) 100%, var(--brand-action));
-  background: var(--surface-primary);
+  border-color: color-mix(in srgb, var(--dash-luxe-stroke) 100%, var(--brand-action) 18%);
 }
 .campaigns-page--luxe .campaigns-filter__control:focus {
   outline: none;
-  border-color: color-mix(in srgb, var(--brand-action) 42%, var(--dash-luxe-stroke));
-  background: var(--surface-primary);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand-action) 14%, transparent);
+  border-color: color-mix(in srgb, var(--brand-action) 40%, var(--dash-luxe-stroke));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand-action) 12%, transparent);
 }
 .campaigns-page--luxe .campaigns-filter__control::placeholder {
   color: var(--dash-luxe-muted);
@@ -9450,81 +9508,87 @@ html.motion-ready .campaigns-insights--premium.is-revealed .campaigns-insights__
 }
 .campaigns-page--luxe .campaigns-filter__control--select {
   appearance: none;
-  padding-inline-end: 1.75rem;
+  padding-inline-end: 1.7rem;
   cursor: pointer;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%238794a7' d='M1.5 1.5 6 6l4.5-4.5'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: inset-inline-start 0.55rem center;
-  background-size: 10px;
+  background-position: left 0.55rem center;
+  background-size: 9px;
+}
+[dir="rtl"] .campaigns-page--luxe .campaigns-filter__control--select {
+  background-position: left 0.55rem center;
 }
 .campaigns-filter__actions {
   display: inline-flex;
   align-items: center;
   flex-wrap: nowrap;
-  gap: 0.22rem;
+  gap: 0.15rem;
   flex: 0 0 auto;
-  margin-inline-start: auto;
-  padding-bottom: 0.02rem;
+  margin-inline-start: 0.1rem;
 }
 .campaigns-filter__btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 2.15rem;
-  padding: 0.32rem 0.72rem;
-  border-radius: 999px;
+  min-height: 2.05rem;
+  padding: 0.28rem 0.78rem;
+  border-radius: 8px;
   font: inherit;
-  font-size: 0.72rem;
+  font-size: 0.74rem;
   font-weight: 600;
   line-height: 1.2;
   text-decoration: none;
   white-space: nowrap;
   cursor: pointer;
   transition:
-    color 0.2s var(--ease-premium),
-    background 0.2s var(--ease-premium),
-    border-color 0.2s var(--ease-premium),
-    box-shadow 0.2s var(--ease-premium);
+    color 0.18s var(--ease-premium),
+    background 0.18s var(--ease-premium),
+    border-color 0.18s var(--ease-premium);
 }
 .campaigns-filter__btn--apply {
-  border: 1px solid color-mix(in srgb, var(--brand-action) 38%, var(--dash-luxe-stroke));
-  background: color-mix(in srgb, var(--brand-action) 12%, var(--surface-primary));
+  border: 1px solid transparent;
+  background: color-mix(in srgb, var(--brand-action) 10%, var(--surface-primary));
   color: var(--brand-action);
 }
 .campaigns-filter__btn--apply:hover {
-  background: color-mix(in srgb, var(--brand-action) 18%, var(--surface-primary));
-  box-shadow: 0 2px 8px color-mix(in srgb, var(--brand-action) 12%, transparent);
+  background: color-mix(in srgb, var(--brand-action) 16%, var(--surface-primary));
 }
 .campaigns-filter__btn--clear {
   border: 1px solid transparent;
   background: transparent;
   color: var(--dash-luxe-muted);
+  padding-inline: 0.55rem;
 }
 .campaigns-filter__btn--clear:hover {
   color: var(--text-secondary);
-  background: color-mix(in srgb, var(--surface-soft) 45%, transparent);
-  border-color: color-mix(in srgb, var(--dash-luxe-stroke) 80%, transparent);
+  background: color-mix(in srgb, var(--surface-soft) 50%, transparent);
 }
 .campaigns-filter__btn:focus-visible {
   outline: 2px solid color-mix(in srgb, var(--brand-action) 50%, transparent);
   outline-offset: 2px;
 }
-@media (max-width: 720px) {
-  .campaigns-filter__bar {
-    flex-direction: column;
-    align-items: stretch;
+@media (max-width: 560px) {
+  .campaigns-page--luxe .campaigns-filter--luxe {
+    padding: 0.5rem 0.72rem 0.55rem;
   }
-  .campaigns-filter__field--search,
+  .campaigns-filter__bar {
+    flex-wrap: wrap;
+  }
+  .campaigns-filter__field--search {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
   .campaigns-filter__field--select {
-    flex: 1 1 auto;
-    width: 100%;
+    flex: 1 1 calc(50% - 0.2rem);
+    width: auto;
+    max-width: none;
+    min-width: 0;
   }
   .campaigns-filter__actions {
     width: 100%;
     margin-inline-start: 0;
-    justify-content: stretch;
   }
-  .campaigns-filter__btn {
+  .campaigns-filter__btn--apply {
     flex: 1 1 auto;
   }
 }

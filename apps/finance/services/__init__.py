@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import uuid
-from decimal import Decimal
+from decimal import ROUND_CEILING, Decimal
 
 from django.conf import settings
 from django.db import transaction
@@ -135,21 +135,30 @@ def outstanding_order_reservation(wallet: Wallet, order_id: uuid.UUID) -> int:
 
 def resolve_irr_per_ton() -> int:
     from apps.finance.exceptions import StaleRateError
+    from apps.finance.services.gram_markup import (
+        apply_gram_markup_amount,
+        snapshot_with_customer_markup,
+    )
     from apps.finance.services.ton_exchange_rate import get_pricing_snapshot, resolve_manual_snapshot
 
     manual = resolve_manual_snapshot()
     if manual:
         return manual.irr_per_ton
     try:
-        snap = get_pricing_snapshot(require_fresh=False)
+        snap = snapshot_with_customer_markup(get_pricing_snapshot(require_fresh=False))
         return snap.irr_per_ton
     except StaleRateError:
         rate = ExchangeRate.objects.filter(is_active=True).order_by("-created_at").first()
         if rate and isinstance(rate.details, dict) and rate.details.get("irr_per_ton"):
-            return int(rate.details["irr_per_ton"])
+            marked = apply_gram_markup_amount(Decimal(str(rate.details["irr_per_ton"])))
+            return int(marked.to_integral_value(rounding=ROUND_CEILING)) if marked else 0
     except Exception:
         pass
-    return int(settings.DEFAULT_EXCHANGE_RATE_TON_IRR or 0)
+    fallback = int(settings.DEFAULT_EXCHANGE_RATE_TON_IRR or 0)
+    if fallback <= 0:
+        return 0
+    marked = apply_gram_markup_amount(Decimal(fallback))
+    return int(marked.to_integral_value(rounding=ROUND_CEILING)) if marked else 0
 
 
 def ton_allocation_for_budget(advertising_budget_irr: int) -> Decimal:

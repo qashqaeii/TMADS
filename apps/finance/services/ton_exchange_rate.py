@@ -212,26 +212,30 @@ def get_ui_rate_snapshot(*, refresh: bool = False) -> TonRateSnapshot | None:
 
     - refresh=False (page render): never blocks on Nobitex; returns cache/DB/manual immediately.
     - refresh=True (async live fragment): tries a fresh fetch with a short lock; falls back on failure.
+    Customer-facing Nobitex rates include silent admin markup (default 0%).
     """
+    from apps.finance.services.gram_markup import snapshot_with_customer_markup
+
     manual = resolve_manual_snapshot()
     if manual:
         return manual
 
     cached = get_cached_snapshot(allow_stale_display=True)
     if not refresh:
-        return cached
+        return snapshot_with_customer_markup(cached)
 
     lock_key = "finance:ui_rate_refresh_lock"
     if not cache.add(lock_key, 1, timeout=20):
-        return cached
+        return snapshot_with_customer_markup(cached)
 
     # Keep the async UI path snappy; Celery remains the durable refresher.
     ui_timeout = min(float(settings.NOBITEX_HTTP_TIMEOUT_SECONDS), 4.0)
     try:
-        return get_pricing_snapshot(require_fresh=True, timeout=ui_timeout, retries=0)
+        snap = get_pricing_snapshot(require_fresh=True, timeout=ui_timeout, retries=0)
+        return snapshot_with_customer_markup(snap)
     except Exception as exc:
         logger.warning("ui_rate_live_fetch_failed: %s", exc)
-        return cached
+        return snapshot_with_customer_markup(cached)
     finally:
         cache.delete(lock_key)
 

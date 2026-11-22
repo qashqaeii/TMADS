@@ -1,48 +1,104 @@
 {% load core_filters static %}
 <section class="schedule-editor studio-pro-only" data-schedule-editor
          data-timezone="{{ schedule_timezone|default:12600 }}">
-  <div class="schedule-editor__head">
-    <h3 class="section-title" style="font-size:.92rem;margin:0">تو چه ساعت‌هایی نشون بده؟</h3>
-    <label class="choice-card schedule-editor__toggle">
+  <div class="schedule-editor__enable-row">
+    <label class="schedule-editor__enable">
       <input type="checkbox" name="schedule_enabled" value="1"
              {% if schedule_enabled %}checked{% endif %} data-schedule-enabled>
-      فقط تو بعضی ساعت‌ها نشون بده
+      <span class="schedule-editor__enable-copy">
+        <strong>اجرای تبلیغ طبق برنامه زمانی</strong>
+        <small>فقط در روزها و ساعت‌های انتخاب‌شده نمایش داده شود</small>
+      </span>
     </label>
+    {% include "campaigns/includes/studio_field_tip.html" with label="برنامه زمانی" tip="اگر روشن کنید، تبلیغ فقط در خانه‌هایی که در جدول انتخاب می‌کنید نمایش داده می‌شود. اگر خاموش باشد، در تمام ساعاتِ بازه شروع و پایان نمایش داده می‌شود." %}
   </div>
-  <p class="muted" style="font-size:.8rem;margin:.35rem 0 .75rem">
-    هر خونه یک ساعته. منطقه زمانی رو انتخاب کن؛ با فلش‌های کیبورد هم می‌تونی بین ساعت‌ها جابه‌جا بشی.
-  </p>
+
   <input type="hidden" name="schedule_json" data-schedule-json value="{{ schedule_json|escape }}">
-  <div class="field"><label for="schedule-zone">ساعت‌ها بر اساس کدوم منطقه زمانی؟</label><select id="schedule-zone" name="schedule_timezone">{% for offset,label in schedule_timezones %}<option value="{{ offset }}" {% if offset == schedule_timezone %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
-  {% if campaign.target_type == "users" %}<label class="choice-card"><input type="checkbox" name="schedule_viewer_timezone" value="1" {% if schedule_viewer_timezone %}checked{% endif %}> ساعت محلی هر نفر (نه یه منطقه ثابت)</label>{% endif %}
-  <div class="schedule-presets" role="group" aria-label="انتخاب سریع">
-    <button type="button" class="btn btn-ghost btn-sm" data-schedule-preset="all">همه روز، ۲۴ ساعته</button>
-    <button type="button" class="btn btn-ghost btn-sm" data-schedule-preset="business">ساعات اداری (۹–۱۷)</button>
-    <button type="button" class="btn btn-ghost btn-sm" data-schedule-preset="evening">عصرها (۱۸–۲۲)</button>
-    <button type="button" class="btn btn-ghost btn-sm" data-schedule-preset="clear">پاک کردن</button>
-  </div>
-  <div class="schedule-grid-wrap" tabindex="0" role="region" aria-label="جدول ساعت‌ها؛ برای پیمایش افقی از صفحه‌کلید یا لمس استفاده کنید" data-schedule-grid-wrap {% if not schedule_enabled %}hidden{% endif %}>
-    <table class="schedule-grid" role="grid" aria-label="برنامه هفتگی">
-      <thead>
-        <tr>
-          <th scope="col">روز</th>
-          {% for h in schedule_hours %}<th scope="col"><span class="sr-only">ساعت {{ h }}</span>{{ h|persian_digits }}</th>{% endfor %}
-        </tr>
-      </thead>
-      <tbody>
-        {% for day in schedule_weekdays %}
-        <tr data-day-index="{{ day.index }}">
-          <th scope="row">{{ day.label }}</th>
-          {% for h in schedule_hours %}
-          <td>
-            <button type="button" class="schedule-cell" data-hour="{{ h }}" aria-pressed="false"
-                    aria-label="{{ day.label }}، ساعت {{ h|persian_digits }}" title="{{ day.label }} {{ h|persian_digits }}"></button>
-          </td>
-          {% endfor %}
-        </tr>
+
+  <div class="schedule-editor__trigger" data-schedule-trigger {% if not schedule_enabled %}hidden{% endif %}>
+    <details class="schedule-summary" data-schedule-summary-box {% if schedule_summary_rows %}open{% endif %}>
+      <summary class="schedule-summary__bar">
+        <span class="schedule-summary__label">برنامه فعال</span>
+        <span class="schedule-summary__teaser" data-schedule-teaser>
+          {% if schedule_summary_rows %}{{ schedule_summary_rows|length }} روز انتخاب‌شده{% else %}بازه‌ای انتخاب نشده{% endif %}
+        </span>
+        <button type="button" class="schedule-editor__open" data-schedule-open>ویرایش</button>
+      </summary>
+      <ul class="schedule-summary__days" data-schedule-summary aria-live="polite">
+        {% for row in schedule_summary_rows %}
+        <li class="schedule-summary__day">
+          <span class="schedule-summary__day-name">{{ row.day }}</span>
+          <span class="schedule-summary__day-hours tabnums">{{ row.hours }}</span>
+        </li>
+        {% empty %}
+        <li class="schedule-summary__empty">بازه‌ای انتخاب نشده — از ویرایش جدول را تنظیم کنید.</li>
         {% endfor %}
-      </tbody>
-    </table>
-    <p class="muted schedule-summary" data-schedule-summary style="font-size:.82rem;margin:.65rem 0 0" aria-live="polite">{{ schedule_summary }}</p>
+      </ul>
+    </details>
+  </div>
+
+  <div class="schedule-modal" data-schedule-modal hidden>
+    <div class="schedule-modal__backdrop" data-schedule-cancel></div>
+    <div class="schedule-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="schedule-modal-title">
+      <div class="schedule-modal__card">
+        <header class="schedule-modal__head">
+          <strong id="schedule-modal-title">برنامه زمانی تبلیغ</strong>
+          <div class="schedule-presets" role="group" aria-label="انتخاب سریع">
+            <button type="button" class="schedule-presets__link" data-schedule-preset="all">همه ساعات</button>
+            <button type="button" class="schedule-presets__link" data-schedule-preset="business">۹–۱۷</button>
+            <button type="button" class="schedule-presets__link" data-schedule-preset="evening">۱۸–۲۲</button>
+            <button type="button" class="schedule-presets__link" data-schedule-preset="clear">پاک کردن</button>
+          </div>
+        </header>
+
+        <div class="schedule-grid-wrap" tabindex="0" role="region" aria-label="جدول ساعت‌ها؛ برای پیمایش افقی از صفحه‌کلید یا لمس استفاده کنید" data-schedule-grid-wrap>
+          <table class="schedule-grid" role="grid" aria-label="برنامه هفتگی">
+            <thead>
+              <tr>
+                <th scope="col" class="schedule-grid__corner"></th>
+                {% for h in schedule_hours %}<th scope="col"><span class="sr-only">ساعت {{ h }}</span>{{ h|persian_digits }}</th>{% endfor %}
+              </tr>
+            </thead>
+            <tbody>
+              {% for day in schedule_weekdays %}
+              <tr data-day-index="{{ day.index }}">
+                <th scope="row">{{ day.label }}</th>
+                {% for h in schedule_hours %}
+                <td>
+                  <button type="button" class="schedule-cell" data-hour="{{ h }}" aria-pressed="false"
+                          aria-label="{{ day.label }}، ساعت {{ h|persian_digits }}" title="{{ day.label }} {{ h|persian_digits }}"></button>
+                </td>
+                {% endfor %}
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="schedule-editor__tz" role="group" aria-label="منطقه زمانی">
+          {% if campaign.target_type == "users" %}
+          <label class="schedule-editor__tz-option">
+            <input type="radio" name="schedule_viewer_timezone" value="1" {% if schedule_viewer_timezone %}checked{% endif %} data-schedule-tz-viewer>
+            <span>ساعت محلی بیننده</span>
+          </label>
+          <label class="schedule-editor__tz-option schedule-editor__tz-option--select">
+            <input type="radio" name="schedule_viewer_timezone" value="" {% if not schedule_viewer_timezone %}checked{% endif %} data-schedule-tz-fixed>
+            <span>انتخاب منطقه زمانی</span>
+            <select id="schedule-zone" name="schedule_timezone" data-schedule-zone {% if schedule_viewer_timezone %}aria-disabled="true"{% endif %}>{% for offset,label in schedule_timezones %}<option value="{{ offset }}" {% if offset == schedule_timezone %}selected{% endif %}>{{ label }}</option>{% endfor %}</select>
+          </label>
+          {% else %}
+          <div class="schedule-editor__tz-fixed">
+            <span>منطقه زمانی</span>
+            <select id="schedule-zone" name="schedule_timezone">{% for offset,label in schedule_timezones %}<option value="{{ offset }}" {% if offset == schedule_timezone %}selected{% endif %}>{{ label }}</option>{% endfor %}</select>
+          </div>
+          {% endif %}
+        </div>
+
+        <footer class="schedule-modal__foot">
+          <button type="button" class="schedule-modal__link" data-schedule-cancel>انصراف</button>
+          <button type="button" class="schedule-modal__save" data-schedule-save>ذخیره برنامه</button>
+        </footer>
+      </div>
+    </div>
   </div>
 </section>

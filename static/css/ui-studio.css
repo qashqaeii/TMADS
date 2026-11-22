@@ -25,7 +25,9 @@
 .ui-final .ui-studio .target-card > input { position:absolute;inset-inline-end:12px;inset-block-start:12px; }
 .ui-final .ui-studio .catalog-row { display:flex;gap:8px;flex-wrap:wrap; }
 .ui-final .ui-studio .catalog-row > input { flex:1 1 180px; }
-.ui-final .ui-studio .catalog-suggest { border:1px solid var(--ui-border);border-radius:10px;background:#fff;max-height:240px;overflow:auto;box-shadow:var(--ui-shadow); }
+.ui-final .ui-studio .catalog-suggest { border:1px solid var(--ui-border);border-radius:10px;background:#fff;max-height:min(280px,42vh);overflow:auto;box-shadow:var(--ui-shadow); }
+.ui-final .ui-studio .catalog-suggest__item { min-height:34px;padding:.4rem .65rem;font-size:.82rem; }
+.ui-final .ui-studio .form-stack.studio-form { gap:10px; }
 .ui-final .ui-studio .chip-list .chip { background:#eff5fa;color:var(--ui-ink);border:1px solid var(--ui-border);border-radius:8px; }
 .ui-final .ui-studio :is(.bot-target-card,.bot-target-preview) { border-radius:10px;box-shadow:none;padding:12px; }
 .ui-final .ui-studio .bot-target-card__remove { width:40px;height:40px;border-radius:8px; }

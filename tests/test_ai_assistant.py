@@ -35,6 +35,30 @@ def test_arvan_authorization_prefix_is_not_duplicated():
         assert provider.authorization_header() == "apikey existing-key"
 
 
+def test_ai_ui_visible_in_local_debug_without_credentials():
+    with override_settings(
+        DEBUG=True,
+        APP_ENV="LOCAL",
+        ARVAN_AI_ENABLED=False,
+        ARVAN_AI_BASE_URL="",
+        ARVAN_AI_API_KEY="",
+    ):
+        assert provider.available() is False
+        assert provider.ui_visible() is True
+
+
+def test_ai_ui_hidden_in_production_without_credentials():
+    with override_settings(
+        DEBUG=False,
+        APP_ENV="PRODUCTION",
+        ARVAN_AI_ENABLED=False,
+        ARVAN_AI_BASE_URL="",
+        ARVAN_AI_API_KEY="",
+    ):
+        assert provider.available() is False
+        assert provider.ui_visible() is False
+
+
 def test_arvan_provider_sends_selected_model_and_parses_usage(monkeypatch):
     captured = {}
 

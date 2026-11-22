@@ -1,53 +1,165 @@
 {% load core_filters static %}
 <aside class="studio-aside ui-studio-preview" id="studio-preview-panel" aria-labelledby="studio-preview-title"
-       data-preview-step="{{ step }}" data-preview-type="{{ campaign.target_type|default:'channels' }}" data-preview-name="{{ campaign.name|default:'' }}"
+       data-preview-step="{{ step }}" data-preview-type="{{ campaign.target_type|default:'channels' }}"
+       data-preview-placement="{{ campaign.placement|default:'' }}"
+       data-preview-name="{{ campaign.name|default:'' }}"
        data-preview-destination="{{ campaign.destination|default:'' }}" data-preview-text="{% if creative %}{{ creative.ad_text }}{% endif %}" data-preview-cta="{% if creative %}{{ creative.cta_label }}{% endif %}"
+       data-preview-button="{{ campaign.ad_settings.button|default:'' }}"
        data-preview-show-userpic="{% if campaign.ad_settings.show_userpic %}1{% else %}0{% endif %}">
   <header class="studio-preview__heading">
     <h2 id="studio-preview-title">Preview</h2>
     <span class="studio-preview__live" aria-label="پیش‌نمایش زنده"><i></i></span>
   </header>
 
-  <div class="tg-ads-preview" aria-label="پیش‌نمایش پیام تبلیغ در تلگرام">
-    <div class="tg-ads-preview__stage" style="--tg-wallpaper: url('{% static 'img/backgrounds/telegramWallpaper.webp' %}')">
+  <div class="tg-ads-preview" data-tg-ads-preview aria-label="پیش‌نمایش محل نمایش تبلیغ در تلگرام">
+    <div class="tg-ads-preview__phone" aria-hidden="true">
+      <span class="tg-ads-preview__phone-speaker"></span>
+    </div>
+    <div class="tg-ads-preview__stage" data-preview-stage style="--tg-wallpaper: url('{% static 'img/backgrounds/telegramWallpaper.webp' %}')">
+
+      {# نتایج جستجو #}
       <div data-preview-search {% if campaign.target_type != 'search' %}hidden{% endif %} class="tg-ads-preview__search">
         <div class="tg-ads-preview__search-bar">
           <span aria-hidden="true">{% include "includes/lucide_icon.html" with name="search" size="sm" %}</span>
           <span data-preview-query>{% firstof campaign.targeting.config.search_queries.0 'جستجو' %}</span>
         </div>
-        <article class="tg-ads-preview__card tg-ads-preview__card--search">
-          <span class="tg-ads-preview__avatar" data-preview-avatar aria-hidden="true">{% include "includes/lucide_icon.html" with name="send" size="sm" %}</span>
-          <div class="tg-ads-preview__card-body">
-            <div class="tg-ads-preview__meta">
-              <span class="tg-ads-preview__ad-badge">Ad</span>
-              <strong data-preview-title dir="auto">{{ campaign.name|default:'عنوان تبلیغ' }}</strong>
+        <div class="tg-ads-preview__search-body">
+          <article class="tg-ads-preview__card tg-ads-preview__card--search">
+            <span class="tg-ads-preview__avatar" data-preview-avatar aria-hidden="true">{% include "includes/lucide_icon.html" with name="send" size="sm" %}</span>
+            <div class="tg-ads-preview__card-body">
+              <div class="tg-ads-preview__meta">
+                <span class="tg-ads-preview__ad-badge">Ad</span>
+                <strong data-preview-title dir="auto">مقصد تبلیغ</strong>
+              </div>
+              <small data-preview-url dir="ltr">{{ campaign.destination|default:'t.me/...' }}</small>
             </div>
-            <small data-preview-url dir="ltr">{{ campaign.destination|default:'t.me/...' }}</small>
-          </div>
-        </article>
+          </article>
+        </div>
       </div>
 
-      <div data-preview-message {% if campaign.target_type == 'search' %}hidden{% endif %} class="tg-ads-preview__thread">
-        <article class="tg-ads-preview__bubble" data-preview-ad-bubble>
-          <header class="tg-ads-preview__bubble-head">
-            <span class="tg-ads-preview__ad-badge">Ad</span>
-            <strong class="tg-ads-preview__brand" data-preview-brand dir="auto">{{ campaign.name|default:'عنوان تبلیغ' }}</strong>
-            <span class="tg-ads-preview__hint">what's this?</span>
-            <span class="tg-ads-preview__close" aria-hidden="true">×</span>
-          </header>
-          <div class="tg-ads-preview__bubble-body">
-            <span class="tg-ads-preview__avatar tg-ads-preview__avatar--inline" data-preview-avatar {% if not campaign.ad_settings.show_userpic %}hidden{% endif %} aria-hidden="true">{% include "includes/lucide_icon.html" with name="bot" size="sm" %}</span>
-            <p class="tg-ads-preview__text" data-preview-copy dir="auto">{% if creative %}{{ creative.ad_text|default:'متن تبلیغ شما' }}{% else %}متن تبلیغ شما{% endif %}</p>
+      {# پیام اسپانسری در پایین کانال — کاربران خاص و داخل کانال‌ها #}
+      <div data-preview-message data-preview-shell="channel_post" {% if campaign.target_type == 'search' or campaign.placement == 'video_banner' or campaign.placement == 'bot_banner' %}hidden{% endif %} class="tg-ads-preview__thread tg-ads-preview__thread--channel tg-ads-preview__thread--channel-bottom">
+        <div class="tg-ads-preview__channel-bar" aria-hidden="true">
+          <span class="tg-ads-preview__channel-avatar">{% include "includes/lucide_icon.html" with name="megaphone" size="sm" %}</span>
+          <div class="tg-ads-preview__channel-meta">
+            <strong data-preview-channel-context>{% if campaign.target_type == 'users' %}کانال مرتبط با مخاطب{% else %}کانال هدف{% endif %}</strong>
+            <small>اسکرول کانال · تبلیغ پایین فید</small>
           </div>
-        </article>
-        <div class="tg-ads-preview__skeleton tg-ads-preview__skeleton--incoming" aria-hidden="true"><span></span><span></span></div>
-        <div class="tg-ads-preview__skeleton tg-ads-preview__skeleton--outgoing" aria-hidden="true"><span></span><span></span></div>
+        </div>
+        <div class="tg-ads-preview__feed" aria-hidden="true">
+          <div class="tg-ads-preview__skeleton tg-ads-preview__skeleton--channel"><span></span><span></span><span></span></div>
+          <div class="tg-ads-preview__skeleton tg-ads-preview__skeleton--channel tg-ads-preview__skeleton--channel-short"><span></span><span></span></div>
+          <div class="tg-ads-preview__skeleton tg-ads-preview__skeleton--incoming"><span></span><span></span></div>
+          <div class="tg-ads-preview__feed-fade"></div>
+        </div>
+        <div class="tg-ads-preview__bottom-slot">
+          <p class="tg-ads-preview__bottom-label" aria-hidden="true">پایین کانال</p>
+          <div class="tg-ads-preview__ad-row">
+            <article class="tg-ads-preview__bubble" data-preview-ad-bubble>
+              <header class="tg-ads-preview__bubble-head">
+                <span class="tg-ads-preview__ad-badge">Ad</span>
+                <span class="tg-ads-preview__hint">what's this?</span>
+              </header>
+              <div class="tg-ads-preview__bubble-body">
+                <span class="tg-ads-preview__avatar tg-ads-preview__avatar--inline" data-preview-avatar {% if not campaign.ad_settings.show_userpic %}hidden{% endif %} aria-hidden="true">
+                  <img class="tg-ads-preview__avatar-img" data-preview-avatar-img alt="" hidden loading="lazy" referrerpolicy="no-referrer">
+                  <span class="tg-ads-preview__avatar-fallback" data-preview-avatar-fallback>{% include "includes/lucide_icon.html" with name="bot" size="sm" %}</span>
+                </span>
+                <div class="tg-ads-preview__copy-stack">
+                  <strong class="tg-ads-preview__brand" data-preview-brand dir="auto">مقصد تبلیغ</strong>
+                  <p class="tg-ads-preview__text" data-preview-copy dir="auto">{% if creative %}{{ creative.ad_text|default:'متن تبلیغ شما' }}{% else %}متن تبلیغ شما{% endif %}</p>
+                  <span class="tg-ads-preview__cta tg-ads-preview__cta--link" data-preview-cta-label>VIEW BOT</span>
+                </div>
+              </div>
+            </article>
+            <div class="tg-ads-preview__chrome" aria-hidden="true">
+              <span class="tg-ads-preview__close">×</span>
+              <span class="tg-ads-preview__menu">⋮</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {# بنر روی ویدیو — فقط کاربران خاص #}
+      <div data-preview-message data-preview-shell="video_banner" {% if campaign.placement != 'video_banner' %}hidden{% endif %} class="tg-ads-preview__thread tg-ads-preview__thread--video">
+        <div class="tg-ads-preview__video-frame">
+          <div class="tg-ads-preview__video-screen">
+            <span class="tg-ads-preview__video-play" aria-hidden="true"></span>
+            <div class="tg-ads-preview__video-caption" aria-hidden="true">ویدیو در کانال / چت</div>
+            <article class="tg-ads-preview__video-ad" data-preview-ad-bubble>
+              <header class="tg-ads-preview__bubble-head">
+                <span class="tg-ads-preview__ad-badge">Ad</span>
+                <span class="tg-ads-preview__hint">what's this?</span>
+              </header>
+              <div class="tg-ads-preview__bubble-body">
+                <span class="tg-ads-preview__avatar tg-ads-preview__avatar--inline" data-preview-avatar {% if not campaign.ad_settings.show_userpic %}hidden{% endif %} aria-hidden="true">
+                  <img class="tg-ads-preview__avatar-img" data-preview-avatar-img alt="" hidden loading="lazy" referrerpolicy="no-referrer">
+                  <span class="tg-ads-preview__avatar-fallback" data-preview-avatar-fallback>{% include "includes/lucide_icon.html" with name="bot" size="sm" %}</span>
+                </span>
+                <div class="tg-ads-preview__copy-stack">
+                  <strong class="tg-ads-preview__brand" data-preview-brand dir="auto">مقصد تبلیغ</strong>
+                  <p class="tg-ads-preview__text" data-preview-copy dir="auto">{% if creative %}{{ creative.ad_text|default:'متن تبلیغ شما' }}{% else %}متن تبلیغ شما{% endif %}</p>
+                  <span class="tg-ads-preview__cta tg-ads-preview__cta--link" data-preview-cta-label>VIEW</span>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
+
+      {# بنر در ربات — تبلیغ زیر هدر ربات، سپس چت در پایین #}
+      <div data-preview-message data-preview-shell="bot_banner" {% if campaign.placement != 'bot_banner' and campaign.target_type != 'bots' %}hidden{% endif %} class="tg-ads-preview__thread tg-ads-preview__thread--bot">
+        <div class="tg-ads-preview__bot-shell">
+          <div class="tg-ads-preview__bot-bar" aria-hidden="true">
+            <span class="tg-ads-preview__channel-avatar">{% include "includes/lucide_icon.html" with name="bot" size="sm" %}</span>
+            <div class="tg-ads-preview__channel-meta">
+              <strong data-preview-bot-host>ربات میزبان</strong>
+              <small>چت ربات · بنر اسپانسری</small>
+            </div>
+          </div>
+          <div class="tg-ads-preview__top-slot">
+            <div class="tg-ads-preview__ad-row">
+              <article class="tg-ads-preview__bubble tg-ads-preview__bubble--bot" data-preview-ad-bubble>
+                <header class="tg-ads-preview__bubble-head">
+                  <span class="tg-ads-preview__ad-badge">Ad</span>
+                  <span class="tg-ads-preview__hint">what's this?</span>
+                </header>
+                <div class="tg-ads-preview__bubble-body">
+                  <span class="tg-ads-preview__avatar tg-ads-preview__avatar--inline" data-preview-avatar {% if not campaign.ad_settings.show_userpic %}hidden{% endif %} aria-hidden="true">
+                    <img class="tg-ads-preview__avatar-img" data-preview-avatar-img alt="" hidden loading="lazy" referrerpolicy="no-referrer">
+                    <span class="tg-ads-preview__avatar-fallback" data-preview-avatar-fallback>{% include "includes/lucide_icon.html" with name="bot" size="sm" %}</span>
+                  </span>
+                  <div class="tg-ads-preview__copy-stack">
+                    <strong class="tg-ads-preview__brand" data-preview-brand dir="auto">مقصد تبلیغ</strong>
+                    <p class="tg-ads-preview__text" data-preview-copy dir="auto">{% if creative %}{{ creative.ad_text|default:'متن تبلیغ شما' }}{% else %}متن تبلیغ شما{% endif %}</p>
+                    <span class="tg-ads-preview__cta tg-ads-preview__cta--link" data-preview-cta-label>VIEW BOT</span>
+                  </div>
+                </div>
+              </article>
+              <div class="tg-ads-preview__chrome" aria-hidden="true">
+                <span class="tg-ads-preview__close">×</span>
+                <span class="tg-ads-preview__menu">⋮</span>
+              </div>
+            </div>
+          </div>
+          <div class="tg-ads-preview__feed tg-ads-preview__feed--bot" aria-hidden="true">
+            <div class="tg-ads-preview__skeleton tg-ads-preview__skeleton--outgoing"><span></span><span></span></div>
+            <div class="tg-ads-preview__skeleton tg-ads-preview__skeleton--incoming"><span></span><span></span><span></span></div>
+            <div class="tg-ads-preview__skeleton tg-ads-preview__skeleton--outgoing tg-ads-preview__skeleton--short"><span></span></div>
+            <div class="tg-ads-preview__feed-fade"></div>
+          </div>
+          <div class="tg-ads-preview__bot-composer" aria-hidden="true"><span>پیام به ربات…</span></div>
+        </div>
       </div>
     </div>
   </div>
 
+  <div class="studio-preview__locus-chip" data-preview-locus>
+    <span class="studio-preview__locus-kicker">محل نمایش</span>
+    <strong data-preview-placement-label>{% if campaign.placement == 'video_banner' %}بنر روی ویدیو{% elif campaign.placement == 'bot_banner' %}بنر در ربات{% elif campaign.placement == 'search_result' %}نتایج جستجو{% else %}پایین کانال · پیام اسپانسری{% endif %}</strong>
+  </div>
   <p class="studio-preview__meta-line">
-    <span data-preview-target-label>{% if campaign.target_type == 'search' %}نتایج جستجو{% elif campaign.target_type == 'bots' %}ربات‌های منتخب{% elif campaign.target_type == 'users' %}کاربران هدف{% else %}کانال‌های تلگرام{% endif %}</span>
+    <span data-preview-target-label>{% if campaign.target_type == 'search' %}نتایج جستجو{% elif campaign.target_type == 'bots' %}ربات‌های منتخب{% elif campaign.target_type == 'users' %}برای کاربران خاص{% else %}داخل کانال‌ها{% endif %}</span>
     <span aria-hidden="true">·</span>
     <strong data-preview-campaign-name dir="auto">{{ campaign.name|default:"کمپین جدید" }}</strong>
   </p>
@@ -64,7 +176,7 @@
   <div class="ui-preview-cost">
     <span>برآورد</span>
     <strong class="tabnums">{{ quote_totals.total_irr|irr_to_toman|format_irr }} تومان</strong>
-    {% if quote_totals.ton_allocation %}<small dir="rtl">{{ quote_totals.ton_allocation|persian_digits }} تون</small>{% endif %}
+    {% if quote_totals.ton_allocation %}<small dir="rtl">{{ quote_totals.ton_allocation|format_ton }} گرام</small>{% endif %}
   </div>
   {% endif %}
 </aside>

@@ -236,6 +236,35 @@ class TelegramAdsClient:
         return self._run("resolve_target_channel", lambda client: _model_to_dict(
             client.get_target_channel(channel, for_excluding=True) if for_excluding else client.get_target_channel(channel)))
 
+    def get_similar_channels(
+        self,
+        *,
+        channels: list[str | int],
+        for_target: str = "channels",
+    ) -> Any:
+        """Official/undocumented similar-channels lookup via telead Client.call."""
+        cleaned: list[str | int] = []
+        for item in channels:
+            if isinstance(item, int) and item > 0:
+                cleaned.append(item)
+                continue
+            text = str(item or "").strip().lstrip("@")
+            if text:
+                cleaned.append(text)
+            if len(cleaned) >= 20:
+                break
+        if not cleaned:
+            raise TelegramAdsError("حداقل یک کانال برای پیشنهاد مشابه لازم است.")
+
+        def _call(client):
+            # Prefer username/id list; platform may accept either form.
+            return client.call(
+                "getSimilarChannels",
+                {"channels": cleaned, "for": for_target or "channels"},
+            )
+
+        return self._run("get_similar_channels", _call)
+
     def get_target_locations_by_ids(self, location_ids: list[int]) -> list[dict[str, Any]]:
         return self._run("get_target_locations_by_id", lambda client: [
             _model_to_dict(item) for item in client.get_target_locations_by_id(location_ids=location_ids)

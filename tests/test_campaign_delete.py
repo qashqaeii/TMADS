@@ -4,16 +4,54 @@ from django.urls import reverse
 from apps.accounts.models import User
 from apps.campaigns.deletion import can_delete_draft_campaign, delete_draft_campaign
 from apps.campaigns.models import Campaign
+from apps.finance.models import AdvertisingOrder
 
 
 @pytest.mark.django_db
-def test_can_delete_only_draft():
+def test_can_delete_draft_and_awaiting_payment():
     user = User.objects.create_user(username="del1", password="pass1234")
     customer = user.customer_profile
     draft = Campaign.objects.create(customer=customer, name="d", status=Campaign.Status.DRAFT)
+    awaiting = Campaign.objects.create(
+        customer=customer, name="w", status=Campaign.Status.AWAITING_PAYMENT
+    )
     active = Campaign.objects.create(customer=customer, name="a", status=Campaign.Status.ACTIVE)
     assert can_delete_draft_campaign(draft)[0] is True
+    assert can_delete_draft_campaign(awaiting)[0] is True
     assert can_delete_draft_campaign(active)[0] is False
+
+
+@pytest.mark.django_db
+def test_can_delete_awaiting_payment_with_unpaid_order():
+    user = User.objects.create_user(username="del_order", password="pass1234")
+    customer = user.customer_profile
+    campaign = Campaign.objects.create(
+        customer=customer, name="pay-wait", status=Campaign.Status.AWAITING_PAYMENT
+    )
+    AdvertisingOrder.objects.create(
+        customer=customer,
+        campaign_id=campaign.id,
+        status=AdvertisingOrder.Status.AWAITING_PAYMENT,
+    )
+    assert can_delete_draft_campaign(campaign)[0] is True
+    delete_draft_campaign(campaign)
+    assert not Campaign.objects.filter(id=campaign.id).exists()
+    assert not AdvertisingOrder.objects.filter(campaign_id=campaign.id).exists()
+
+
+@pytest.mark.django_db
+def test_cannot_delete_when_order_paid():
+    user = User.objects.create_user(username="del_paid", password="pass1234")
+    customer = user.customer_profile
+    campaign = Campaign.objects.create(
+        customer=customer, name="paid", status=Campaign.Status.AWAITING_PAYMENT
+    )
+    AdvertisingOrder.objects.create(
+        customer=customer,
+        campaign_id=campaign.id,
+        status=AdvertisingOrder.Status.PAID,
+    )
+    assert can_delete_draft_campaign(campaign)[0] is False
 
 
 @pytest.mark.django_db

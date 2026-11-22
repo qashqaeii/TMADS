@@ -248,16 +248,45 @@
 
     function inputs() { return Array.from(fields.querySelectorAll("input")); }
     function value(item) { return String(kind === "country" ? item.country_code : kind === "topic" ? item.topic_id : item.language_code); }
-    function label(item) { return String(item.name_fa || item.name || value(item)); }
+    function label(item) {
+      // زبان‌ها مثل تلگرام با نام انگلیسی؛ جستجو هر دو نام را پوشش می‌دهد.
+      if (kind === "language") return String(item.name || item.name_fa || value(item));
+      return String(item.name_fa || item.name || value(item));
+    }
+    function matchesQuery(item, q) {
+      if (!q) return true;
+      var hay = [label(item), item.name || "", item.name_fa || "", value(item)].join(" ").toLocaleLowerCase();
+      return hay.indexOf(q) >= 0;
+    }
     function maximum() {
       var mode = root.closest("form").querySelector('[name="channel_mode"]');
       return kind === "topic" ? 20 : kind === "language" && mode && mode.value === "topics" ? 1 : 8;
     }
     function updateStatus() {
-      status.textContent = inputs().length.toLocaleString("fa-IR") + " از " + maximum().toLocaleString("fa-IR") + " انتخاب";
-      if (!catalog.length) status.textContent += " · فهرست در دسترس نیست یا نتیجه‌ای ندارد";
-      else if (catalog.some(function(item) { return item.verified === false; })) status.textContent += " · پیشنهادهای اولیه؛ تأیید API در انتظار";
-      if (inputs().length > maximum()) status.textContent += " · انتخاب اضافی را حذف کنید";
+      var count = inputs().length;
+      status.textContent = count
+        ? count.toLocaleString("fa-IR") + " از " + maximum().toLocaleString("fa-IR") + " انتخاب"
+        : "";
+      if (!catalog.length) status.textContent = "فهرست در دسترس نیست";
+      else if (count > maximum()) status.textContent += " · انتخاب اضافی را حذف کنید";
+      status.hidden = !status.textContent;
+    }
+    function addValue(raw, opts) {
+      opts = opts || {};
+      var code = String(raw || "");
+      if (!code) return false;
+      if (inputs().length >= maximum()) return false;
+      if (inputs().some(function (n) { return n.value === code; })) return false;
+      var inp = document.createElement("input");
+      inp.type = "hidden";
+      inp.name = root.getAttribute("data-field");
+      inp.value = code;
+      fields.appendChild(inp);
+      if (!opts.silent) {
+        syncChips();
+        dispatchInput(root);
+      }
+      return true;
     }
     function syncChips() {
       chips.replaceChildren();
@@ -267,42 +296,61 @@
           inp.remove(); syncChips(); renderOptions(); dispatchInput(root); search.focus();
         });
       });
+      chips.hidden = !inputs().length;
       updateStatus();
     }
+    var suppressOpen = false;
+    function isOpen() {
+      return !results.hidden;
+    }
     function closeOptions() {
-      results.replaceChildren(); results.hidden = true;
+      results.replaceChildren();
+      results.hidden = true;
       search.setAttribute("aria-expanded", "false");
     }
     function renderOptions() {
+      if (suppressOpen) return;
       results.replaceChildren();
       var q = search.value.trim().toLocaleLowerCase();
       var selected = new Set(inputs().map(function(inp) { return inp.value; }));
+      // مثل تلگرام: کل فهرست فیلترشده با اسکرول، بدون سقف ۱۲ تایی
       var options = catalog.filter(function(item) {
-        return !selected.has(value(item)) && (label(item).toLocaleLowerCase().includes(q) || value(item).toLowerCase().includes(q));
-      }).slice(0, 12);
+        return !selected.has(value(item)) && matchesQuery(item, q);
+      });
       if (inputs().length >= maximum() || !options.length) {
         closeOptions();
         updateStatus();
-        if (q && !options.length) status.textContent += " · نتیجه دیگری یافت نشد";
+        if (q && !options.length) {
+          status.hidden = false;
+          status.textContent = "نتیجه‌ای یافت نشد";
+        }
         return;
       }
       options.forEach(function(item) {
-        suggestionButton(results, label(item), item.verified === false ? value(item) + " · تأیید نشده" : value(item), function() {
-          if (inputs().length >= maximum() || inputs().some(function(n) { return n.value === value(item); })) return;
-          var inp = document.createElement("input");
-          inp.type = "hidden"; inp.name = root.getAttribute("data-field"); inp.value = value(item);
-          fields.appendChild(inp);
+        suggestionButton(results, label(item), "", function() {
+          if (!addValue(value(item))) return;
           search.value = "";
-          syncChips(); closeOptions(); dispatchInput(root); search.focus();
+          closeOptions();
+          // بعد از انتخاب فوکوس نده تا منو دوباره باز نشود
+          suppressOpen = true;
+          search.blur();
+          setTimeout(function () { suppressOpen = false; }, 0);
         });
       });
       results.hidden = false;
       search.setAttribute("aria-expanded", "true");
     }
-    search.addEventListener("focus", renderOptions);
+    search.addEventListener("focus", function () {
+      if (!suppressOpen) renderOptions();
+    });
     search.addEventListener("input", renderOptions);
     search.addEventListener("keydown", function(event) {
-      if (event.key === "Escape") closeOptions();
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeOptions();
+        search.blur();
+        return;
+      }
       if (event.key === "ArrowDown") {
         event.preventDefault();
         renderOptions();
@@ -317,7 +365,12 @@
       }
     });
     results.addEventListener("keydown", function(event) {
-      if (event.key === "Escape") { closeOptions(); search.focus(); }
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeOptions();
+        search.blur();
+        return;
+      }
       if (event.key === "ArrowDown" || event.key === "ArrowUp") {
         event.preventDefault();
         var buttons = Array.from(results.querySelectorAll("button"));
@@ -326,12 +379,32 @@
         else if (buttons[next]) buttons[next].focus();
       }
     });
+    // کلیک روی عناصر غیرقابل‌فوکوس بیرون فیلد focusout نمی‌دهد؛ با pointerdown می‌بندیم
+    document.addEventListener("pointerdown", function (event) {
+      if (!isOpen()) return;
+      if (root.contains(event.target)) return;
+      closeOptions();
+    });
     root.addEventListener("focusout", function(event) {
-      if (!root.contains(event.relatedTarget)) closeOptions();
+      var next = event.relatedTarget;
+      if (next && root.contains(next)) return;
+      // تاخیر کوتاه تا کلیک روی آیتم لیست اول ثبت شود
+      setTimeout(function () {
+        if (!root.contains(document.activeElement)) closeOptions();
+      }, 0);
     });
     root.closest("form").addEventListener("change", function(event) {
       if (event.target.name === "channel_mode") { closeOptions(); updateStatus(); }
     });
+
+    // پیش‌فرض زبان فارسی برای هدف‌گیری کانال (مثل تلگرام)
+    var defaultCode = (root.getAttribute("data-default") || "").trim();
+    if (defaultCode && kind === "language" && !inputs().length) {
+      var hasDefault = catalog.some(function (row) { return value(row) === defaultCode; });
+      var channelHidden = root.closest("form").querySelector("[data-channel-hidden]");
+      var hasChannels = !!(channelHidden && String(channelHidden.value || "").trim());
+      if (hasDefault && !hasChannels) addValue(defaultCode, { silent: true });
+    }
     syncChips();
   }
 
@@ -989,10 +1062,89 @@
   function initScheduleEditor(root) {
     if (!root) return;
     var enabled = root.querySelector("[data-schedule-enabled]");
-    var wrap = root.querySelector("[data-schedule-grid-wrap]");
+    var trigger = root.querySelector("[data-schedule-trigger]");
+    var modal = root.querySelector("[data-schedule-modal]");
+    var openBtn = root.querySelector("[data-schedule-open]");
+    var saveBtn = root.querySelector("[data-schedule-save]");
     var hidden = root.querySelector("[data-schedule-json]");
-    var summary = root.querySelector("[data-schedule-summary]");
+    var summaryList = root.querySelector("[data-schedule-summary]");
+    var summaryTeaser = root.querySelector("[data-schedule-teaser]");
+    var summaryBox = root.querySelector("[data-schedule-summary-box]");
     var masks = [0, 0, 0, 0, 0, 0, 0];
+    var draft = null;
+    var zoneSnapshot = null;
+    var FA_DIGITS = "۰۱۲۳۴۵۶۷۸۹";
+
+    function toFa(value) {
+      return String(value).replace(/\d/g, function (d) { return FA_DIGITS[+d]; });
+    }
+
+    function pad2(n) {
+      return n < 10 ? "0" + n : String(n);
+    }
+
+    function formatHourRanges(hrs) {
+      if (!hrs.length) return "";
+      var ranges = [];
+      var start = hrs[0];
+      var prev = hrs[0];
+      for (var i = 1; i < hrs.length; i++) {
+        if (hrs[i] === prev + 1) {
+          prev = hrs[i];
+          continue;
+        }
+        ranges.push(start === prev ? pad2(start) : pad2(start) + "–" + pad2(prev));
+        start = prev = hrs[i];
+      }
+      ranges.push(start === prev ? pad2(start) : pad2(start) + "–" + pad2(prev));
+      return toFa(ranges.join("، "));
+    }
+
+    function summaryRows() {
+      var dayOrder = [5, 6, 0, 1, 2, 3, 4];
+      var days = ["دوشنبه", "سه‌شنبه", "چهارشنبه", "پنج‌شنبه", "جمعه", "شنبه", "یکشنبه"];
+      var rows = [];
+      dayOrder.forEach(function (d) {
+        var mask = masks[d];
+        if (!mask) return;
+        var hrs = [];
+        for (var h = 0; h < 24; h++) if (mask & (1 << h)) hrs.push(h);
+        if (hrs.length) rows.push({ day: days[d], hours: formatHourRanges(hrs) });
+      });
+      return rows;
+    }
+
+    function renderSummary() {
+      var rows = summaryRows();
+      if (summaryTeaser) {
+        summaryTeaser.textContent = rows.length
+          ? toFa(rows.length) + " روز انتخاب‌شده"
+          : "بازه‌ای انتخاب نشده";
+      }
+      if (!summaryList) return;
+      summaryList.innerHTML = "";
+      if (!rows.length) {
+        var empty = document.createElement("li");
+        empty.className = "schedule-summary__empty";
+        empty.textContent = "بازه‌ای انتخاب نشده — از ویرایش جدول را تنظیم کنید.";
+        summaryList.appendChild(empty);
+        return;
+      }
+      rows.forEach(function (row) {
+        var li = document.createElement("li");
+        li.className = "schedule-summary__day";
+        var name = document.createElement("span");
+        name.className = "schedule-summary__day-name";
+        name.textContent = row.day;
+        var hours = document.createElement("span");
+        hours.className = "schedule-summary__day-hours tabnums";
+        hours.textContent = row.hours;
+        li.appendChild(name);
+        li.appendChild(hours);
+        summaryList.appendChild(li);
+      });
+      if (summaryBox && rows.length) summaryBox.open = true;
+    }
 
     function load() {
       try {
@@ -1007,27 +1159,22 @@
       }
     }
 
+    function cloneMasks(src) {
+      return src.map(function (m) { return m; });
+    }
+
     function persist() {
       hidden.value = JSON.stringify({
         week_hours_mask: masks,
         timezone: parseInt((root.querySelector('[name="schedule_timezone"]') || {}).value || "12600", 10),
-        use_viewer_timezone: !!(root.querySelector('[name="schedule_viewer_timezone"]') || {}).checked,
+        use_viewer_timezone: (function () {
+          var checked = root.querySelector('[name="schedule_viewer_timezone"]:checked');
+          return !!(checked && String(checked.value) === "1");
+        })(),
       });
       paint();
-      if (summary) summary.textContent = summarize();
+      renderSummary();
       dispatchInput(root);
-    }
-
-    function summarize() {
-      var days = ["دوشنبه", "سه‌شنبه", "چهارشنبه", "پنج‌شنبه", "جمعه", "شنبه", "یکشنبه"];
-      var parts = [];
-      masks.forEach(function (mask, d) {
-        if (!mask) return;
-        var hrs = [];
-        for (var h = 0; h < 24; h++) if (mask & (1 << h)) hrs.push(h);
-        if (hrs.length) parts.push(days[d] + ": " + hrs.join("، "));
-      });
-      return parts.length ? parts.join(" · ") : "بازه‌ای انتخاب نشده";
     }
 
     function paint() {
@@ -1041,13 +1188,73 @@
       });
     }
 
+    function captureZone() {
+      var zone = root.querySelector('[name="schedule_timezone"]');
+      var checked = root.querySelector('[name="schedule_viewer_timezone"]:checked');
+      return {
+        timezone: zone ? zone.value : "",
+        viewer: checked ? checked.value : "",
+      };
+    }
+
+    function restoreZone(snap) {
+      if (!snap) return;
+      var zone = root.querySelector('[name="schedule_timezone"]');
+      if (zone && snap.timezone !== "") zone.value = snap.timezone;
+      root.querySelectorAll('[name="schedule_viewer_timezone"]').forEach(function (radio) {
+        radio.checked = String(radio.value) === String(snap.viewer);
+      });
+      syncZone();
+    }
+
+    function openModal() {
+      draft = cloneMasks(masks);
+      zoneSnapshot = captureZone();
+      if (modal) modal.hidden = false;
+      document.documentElement.classList.add("schedule-modal-open");
+      paint();
+      if (saveBtn) saveBtn.focus();
+    }
+
+    function closeModal() {
+      if (modal) modal.hidden = true;
+      document.documentElement.classList.remove("schedule-modal-open");
+    }
+
+    function cancelModal() {
+      if (draft) masks = cloneMasks(draft);
+      restoreZone(zoneSnapshot);
+      paint();
+      closeModal();
+      renderSummary();
+    }
+
+    function saveModal() {
+      persist();
+      closeModal();
+      if (trigger) trigger.hidden = !(enabled && enabled.checked);
+    }
+
     load();
     paint();
-    var viewer = root.querySelector('[name="schedule_viewer_timezone"]');
+    renderSummary();
+
+    var viewerRadios = root.querySelectorAll('[name="schedule_viewer_timezone"]');
     var zone = root.querySelector('[name="schedule_timezone"]');
-    function syncZone() { if(zone) zone.disabled=!!(viewer && viewer.checked); }
-    if(viewer) viewer.addEventListener("change",function(){syncZone();persist();});
-    if(zone) zone.addEventListener("change",persist);
+    function viewerEnabled() {
+      var checked = root.querySelector('[name="schedule_viewer_timezone"]:checked');
+      return !!(checked && checked.value === "1");
+    }
+    function syncZone() {
+      if (!zone) return;
+      var viewerOn = viewerEnabled();
+      zone.classList.toggle("is-disabled", viewerOn);
+      zone.setAttribute("aria-disabled", viewerOn ? "true" : "false");
+      zone.tabIndex = viewerOn ? -1 : 0;
+    }
+    viewerRadios.forEach(function (radio) {
+      radio.addEventListener("change", syncZone);
+    });
     syncZone();
 
     var cells = Array.from(root.querySelectorAll(".schedule-cell"));
@@ -1078,12 +1285,13 @@
         var day = parseInt(tr.getAttribute("data-day-index"), 10);
         var hour = parseInt(btn.getAttribute("data-hour"), 10);
         masks[day] ^= 1 << hour;
-        persist();
+        paint();
       });
     });
 
     root.querySelectorAll("[data-schedule-preset]").forEach(function (btn) {
-      btn.addEventListener("click", function () {
+      btn.addEventListener("click", function (event) {
+        event.preventDefault();
         var p = btn.getAttribute("data-schedule-preset");
         if (p === "clear") masks = [0, 0, 0, 0, 0, 0, 0];
         else if (p === "all") masks = [(1 << 24) - 1, (1 << 24) - 1, (1 << 24) - 1, (1 << 24) - 1, (1 << 24) - 1, (1 << 24) - 1, (1 << 24) - 1];
@@ -1096,38 +1304,512 @@
           for (var h2 = 18; h2 < 23; h2++) ev |= 1 << h2;
           masks = [ev, ev, ev, ev, ev, ev, ev];
         }
-        if (enabled) enabled.checked = true;
-        if (wrap) wrap.hidden = false;
-        persist();
+        paint();
       });
+    });
+
+    if (openBtn) openBtn.addEventListener("click", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      openModal();
+    });
+    if (saveBtn) saveBtn.addEventListener("click", function (e) {
+      e.preventDefault();
+      saveModal();
+    });
+    root.querySelectorAll("[data-schedule-cancel]").forEach(function (btn) {
+      btn.addEventListener("click", function (e) {
+        e.preventDefault();
+        cancelModal();
+      });
+    });
+    document.addEventListener("keydown", function (e) {
+      if (!modal || modal.hidden) return;
+      if (e.key === "Escape") {
+        e.preventDefault();
+        cancelModal();
+      }
     });
 
     if (enabled) {
       enabled.addEventListener("change", function () {
-        if (wrap) wrap.hidden = !enabled.checked;
-        if (!enabled.checked) {
+        if (enabled.checked) {
+          if (trigger) trigger.hidden = false;
+          openModal();
+        } else {
           masks = [0, 0, 0, 0, 0, 0, 0];
           persist();
+          if (trigger) trigger.hidden = true;
+          closeModal();
         }
         dispatchInput(root);
       });
     }
   }
 
+  function clearMultiselectField(root) {
+    if (!root) return;
+    var fields = root.querySelector("[data-ms-hidden]");
+    var chips = root.querySelector("[data-ms-chips]");
+    var search = root.querySelector("[data-ms-search]");
+    var status = root.querySelector("[data-ms-status]");
+    if (fields) fields.replaceChildren();
+    if (chips) chips.replaceChildren();
+    if (search) {
+      search.value = "";
+      search.disabled = false;
+    }
+    if (status) status.textContent = "";
+  }
+
+  function setFieldDisabled(root, disabled) {
+    if (!root) return;
+    root.classList.toggle("is-exclusive-locked", !!disabled);
+    root.querySelectorAll("input, button, textarea, select").forEach(function (el) {
+      if (el.type === "hidden") return;
+      el.disabled = !!disabled;
+    });
+  }
+
   function initChannelMode(form) {
-    var select = form.querySelector('[name="channel_mode"]');
-    if (!select) return;
-    function sync() {
-      form.querySelectorAll("[data-channel-modes]").forEach(function(section) {
-        var active = section.dataset.channelModes.split(" ").includes(select.value);
-        section.hidden = !active;
-        section.querySelectorAll("input, textarea, select, button").forEach(function(control) {
-          control.disabled = !active;
+    var modeInput = form.querySelector("[data-channel-mode-inferred]");
+    var select = form.querySelector('select[name="channel_mode"]');
+    if (select) {
+      function syncSections() {
+        form.querySelectorAll("[data-channel-modes]").forEach(function(section) {
+          var active = section.dataset.channelModes.split(" ").includes(select.value);
+          section.hidden = !active;
+          section.querySelectorAll("input, textarea, select, button").forEach(function(control) {
+            control.disabled = !active;
+          });
         });
+      }
+      select.addEventListener("change", syncSections);
+      syncSections();
+      return;
+    }
+    if (!modeInput) return;
+    var langField = form.querySelector("[data-channel-lang-field]");
+    var topicField = form.querySelector("[data-channel-topic-field]");
+    var exclusiveHint = form.querySelector("[data-channel-lang-exclusive]");
+    var lastHadChannels = false;
+
+    function hasSpecificChannels() {
+      var channelHidden = form.querySelector("[data-channel-hidden]");
+      return !!(channelHidden && String(channelHidden.value || "").trim());
+    }
+
+    function applyExclusivity(hasChannels) {
+      // قانون تلگرام: با کانال مشخص، زبان باید خالی باشد.
+      if (hasChannels) {
+        if (langField) {
+          clearMultiselectField(langField);
+          setFieldDisabled(langField, true);
+        }
+        if (topicField) {
+          clearMultiselectField(topicField);
+          setFieldDisabled(topicField, true);
+        }
+        if (exclusiveHint) exclusiveHint.hidden = false;
+        if (langField) langField.classList.add("is-invalid");
+      } else {
+        if (langField) {
+          setFieldDisabled(langField, false);
+          langField.classList.remove("is-invalid");
+        }
+        if (topicField) setFieldDisabled(topicField, false);
+        if (exclusiveHint) exclusiveHint.hidden = true;
+      }
+    }
+
+    function inferMode() {
+      var hasChannels = hasSpecificChannels();
+      var hasTopics = !!form.querySelector('[data-field="topic_ids"] [data-ms-hidden] input');
+      modeInput.value = hasChannels ? "specific" : hasTopics ? "topics" : "language";
+      if (hasChannels !== lastHadChannels) {
+        lastHadChannels = hasChannels;
+        applyExclusivity(hasChannels);
+      } else if (hasChannels) {
+        applyExclusivity(true);
+      }
+    }
+    form.addEventListener("change", inferMode);
+    form.addEventListener("input", inferMode);
+    inferMode();
+  }
+
+  function initChannelTargetingSelector(root, resolveUrl, similarUrl) {
+    var input = root.querySelector("[data-channel-input]");
+    var addBtn = root.querySelector("[data-channel-add]");
+    var list = root.querySelector("[data-channel-chip-list]");
+    var hidden = root.querySelector("[data-channel-hidden]");
+    var openBtn = root.querySelector("[data-similar-channels-open]");
+    var similarPanel = root.querySelector("[data-similar-channels-panel]");
+    var similarBody = root.querySelector("[data-similar-channels-body]");
+    var similarStatus = root.querySelector("[data-similar-channels-status]");
+    var similarAddBtn = root.querySelector("[data-similar-channels-add]");
+    var similarCount = root.querySelector("[data-similar-channels-count]");
+    if (!input || !list || !hidden) return;
+
+    var items = String(hidden.value || "")
+      .split(/\n/)
+      .map(function (s) {
+        return s.trim();
+      })
+      .filter(Boolean);
+    var similarInflight = null;
+    var similarSuggestions = [];
+    var similarSelected = {};
+    var activeSimilarSeed = "";
+
+    function normalize(raw) {
+      raw = (raw || "").trim();
+      if (!raw) return "";
+      if (raw.indexOf("t.me/") >= 0) {
+        var m = raw.match(/t\.me\/([A-Za-z0-9_]+)/);
+        if (m) return "@" + m[1];
+      }
+      if (raw.charAt(0) !== "@") raw = "@" + raw.replace(/^@+/, "");
+      return raw;
+    }
+
+    function syncHidden() {
+      hidden.value = items.join("\n");
+    }
+
+    function textNode(tag, cls, value, dir) {
+      var el = document.createElement(tag);
+      if (cls) el.className = cls;
+      if (dir) el.dir = dir;
+      el.textContent = String(value || "");
+      return el;
+    }
+
+    function appendChannelContent(parent, prefix, title, user, message, photo) {
+      var img = null;
+      try {
+        var url = new URL(photo);
+        if (url.protocol === "https:") {
+          img = document.createElement("img");
+          img.className = prefix + "__avatar";
+          img.src = url.href;
+          img.alt = "";
+          img.loading = "lazy";
+          img.referrerPolicy = "no-referrer";
+        }
+      } catch (_) {}
+      if (!img) {
+        img = textNode("span", prefix + "__avatar " + prefix + "__avatar--empty", "#");
+        img.setAttribute("aria-hidden", "true");
+      }
+      var body = document.createElement("div");
+      body.className = prefix + "__body";
+      body.appendChild(textNode("strong", prefix + "__title", title, "auto"));
+      body.appendChild(textNode("span", prefix + "__user", user, "ltr"));
+      if (message) body.appendChild(textNode("p", prefix + "__status", message));
+      parent.append(img, body);
+    }
+
+    function formatSubscribers(n) {
+      if (typeof n !== "number" || !isFinite(n) || n <= 0) return "";
+      try {
+        return new Intl.NumberFormat("fa-IR").format(n) + " مشترک";
+      } catch (_) {
+        return String(n) + " مشترک";
+      }
+    }
+
+    function selectedSimilarCount() {
+      return Object.keys(similarSelected).filter(function (k) {
+        return similarSelected[k];
+      }).length;
+    }
+
+    function updateSimilarAddState() {
+      if (!similarAddBtn) return;
+      var count = selectedSimilarCount();
+      var room = Math.max(0, 100 - items.length);
+      similarAddBtn.disabled = count === 0 || room === 0;
+      if (similarCount) {
+        similarCount.hidden = count === 0;
+        similarCount.textContent = count ? String(count) : "";
+      }
+    }
+
+    function setSimilarStatus(text) {
+      if (similarStatus) similarStatus.textContent = text || "";
+    }
+
+    function updateOpenBtn() {
+      if (!openBtn) return;
+      openBtn.hidden = items.length === 0;
+    }
+
+    function renderSimilarSkeleton() {
+      if (!similarBody) return;
+      similarBody.replaceChildren();
+      var wrap = document.createElement("div");
+      wrap.className = "similar-bots__grid similar-bots__grid--skeleton";
+      wrap.setAttribute("aria-hidden", "true");
+      for (var i = 0; i < 4; i++) {
+        var sk = document.createElement("div");
+        sk.className = "similar-bots__skeleton";
+        wrap.appendChild(sk);
+      }
+      similarBody.appendChild(wrap);
+    }
+
+    function renderSimilarEmpty(message) {
+      if (!similarBody) return;
+      similarBody.replaceChildren();
+      var empty = document.createElement("p");
+      empty.className = "similar-bots__empty muted";
+      empty.textContent = message || "کانال مشابهی پیدا نشد.";
+      similarBody.appendChild(empty);
+      if (similarAddBtn) similarAddBtn.hidden = true;
+      updateSimilarAddState();
+    }
+
+    function renderSimilarList() {
+      if (!similarBody) return;
+      similarBody.replaceChildren();
+      if (!similarSuggestions.length) {
+        renderSimilarEmpty("کانال مشابهی پیدا نشد.");
+        return;
+      }
+      var grid = document.createElement("div");
+      grid.className = "similar-bots__grid";
+      grid.setAttribute("role", "group");
+      grid.setAttribute("aria-label", "پیشنهاد کانال‌های مشابه");
+      similarSuggestions.forEach(function (sug) {
+        var key = String(sug.username || "").toLowerCase();
+        var label = document.createElement("label");
+        label.className = "similar-bots__item";
+        if (similarSelected[key]) label.classList.add("is-selected");
+        var check = document.createElement("input");
+        check.type = "checkbox";
+        check.className = "similar-bots__check";
+        check.checked = !!similarSelected[key];
+        check.addEventListener("change", function () {
+          if (check.checked) similarSelected[key] = true;
+          else delete similarSelected[key];
+          label.classList.toggle("is-selected", !!similarSelected[key]);
+          updateSimilarAddState();
+        });
+        var media = document.createElement("span");
+        media.className = "similar-bots__media";
+        appendChannelContent(
+          media,
+          "similar-bots-card",
+          sug.title || sug.username,
+          sug.username,
+          formatSubscribers(sug.subscribers),
+          sug.photo_url
+        );
+        label.append(check, media);
+        grid.appendChild(label);
+      });
+      similarBody.appendChild(grid);
+      if (similarAddBtn) similarAddBtn.hidden = false;
+      updateSimilarAddState();
+    }
+
+    function hideSimilar() {
+      if (similarPanel) similarPanel.hidden = true;
+      similarSuggestions = [];
+      similarSelected = {};
+      activeSimilarSeed = "";
+      if (similarInflight && similarInflight.abort) similarInflight.abort();
+      updateSimilarAddState();
+    }
+
+    function fetchSimilar(seed) {
+      if (!similarUrl || !similarPanel || !similarBody) return;
+      seed = normalize(seed);
+      if (!seed) {
+        hideSimilar();
+        return;
+      }
+      if (items.length >= 100) {
+        similarPanel.hidden = false;
+        setSimilarStatus("به سقف ۱۰۰ کانال رسیده‌اید.");
+        renderSimilarEmpty("برای افزودن پیشنهاد جدید، ابتدا یکی از کانال‌ها را حذف کنید.");
+        return;
+      }
+      activeSimilarSeed = seed;
+      similarPanel.hidden = false;
+      similarSelected = {};
+      setSimilarStatus("در حال یافتن کانال‌های مرتبط…");
+      renderSimilarSkeleton();
+      updateSimilarAddState();
+      if (similarInflight && similarInflight.abort) similarInflight.abort();
+      var ctrl = typeof AbortController !== "undefined" ? new AbortController() : null;
+      similarInflight = ctrl;
+      var body = new FormData();
+      body.set("seed", seed);
+      body.set("limit", "12");
+      body.set(
+        "exclude",
+        JSON.stringify(
+          items.map(function (it) {
+            return it;
+          })
+        )
+      );
+      var csrf = csrfTokenFrom(root);
+      if (csrf) body.set("csrfmiddlewaretoken", csrf);
+      fetch(similarUrl, {
+        method: "POST",
+        body: body,
+        credentials: "same-origin",
+        headers: {
+          "X-Requested-With": "XMLHttpRequest",
+          "X-CSRFToken": csrf || "",
+        },
+        signal: ctrl ? ctrl.signal : undefined,
+      })
+        .then(function (r) {
+          return r.json().then(function (j) {
+            return { ok: r.ok, status: r.status, body: j || {} };
+          });
+        })
+        .then(function (res) {
+          if (activeSimilarSeed.toLowerCase() !== seed.toLowerCase()) return;
+          if (res.status === 429) {
+            setSimilarStatus(res.body.message_fa || "چند لحظه صبر کنید.");
+            renderSimilarEmpty(res.body.message_fa || "درخواست زیاد است.");
+            return;
+          }
+          if (res.body.feature_enabled === false) {
+            hideSimilar();
+            return;
+          }
+          if (!res.ok && res.body.reason === "invalid_seed") {
+            setSimilarStatus(res.body.message_fa || "کانال معتبر نیست.");
+            renderSimilarEmpty(res.body.message_fa || "کانال معتبر نیست.");
+            return;
+          }
+          var rows = Array.isArray(res.body.items) ? res.body.items : [];
+          var existing = {};
+          items.forEach(function (it) {
+            existing[normalize(it).toLowerCase()] = true;
+          });
+          similarSuggestions = rows.filter(function (row) {
+            if (!row || !row.username) return false;
+            var u = normalize(row.username);
+            if (!u || existing[u.toLowerCase()]) return false;
+            if (u.toLowerCase() === seed.toLowerCase()) return false;
+            return true;
+          });
+          if (!similarSuggestions.length) {
+            setSimilarStatus("");
+            renderSimilarEmpty(res.body.message_fa || "کانال مشابهی پیدا نشد.");
+            return;
+          }
+          setSimilarStatus("می‌توانید چند کانال مرتبط را یکجا اضافه کنید.");
+          renderSimilarList();
+        })
+        .catch(function (err) {
+          if (err && err.name === "AbortError") return;
+          if (activeSimilarSeed.toLowerCase() !== seed.toLowerCase()) return;
+          setSimilarStatus("پیشنهادها موقتاً در دسترس نیست؛ می‌توانید دستی ادامه دهید.");
+          renderSimilarEmpty("پیشنهادها موقتاً در دسترس نیست.");
+        });
+    }
+
+    function renderList() {
+      list.replaceChildren();
+      items.forEach(function (val, idx) {
+        var li = document.createElement("li");
+        li.className = "chip";
+        li.textContent = val;
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.textContent = "×";
+        btn.setAttribute("aria-label", "حذف " + val);
+        btn.addEventListener("click", function () {
+          items.splice(idx, 1);
+          syncHidden();
+          renderList();
+          updateOpenBtn();
+          dispatchInput(root);
+          if (!items.length) hideSimilar();
+          else if (activeSimilarSeed) fetchSimilar(items[items.length - 1]);
+        });
+        li.appendChild(btn);
+        list.appendChild(li);
       });
     }
-    select.addEventListener("change", sync);
-    sync();
+
+    function addChannel(raw, opts) {
+      opts = opts || {};
+      var v = normalize(raw);
+      if (!v) return false;
+      if (items.length >= 100) return false;
+      if (
+        items.some(function (it) {
+          return it.toLowerCase() === v.toLowerCase();
+        })
+      ) {
+        return false;
+      }
+      items.push(v);
+      syncHidden();
+      renderList();
+      updateOpenBtn();
+      dispatchInput(root);
+      if (opts.fetchSimilar !== false) fetchSimilar(v);
+      return true;
+    }
+
+    function addCurrent() {
+      var v = normalize(input.value);
+      if (!v) return;
+      if (!addChannel(v)) return;
+      input.value = "";
+      if (resolveUrl) {
+        fetch(resolveUrl + "?username=" + encodeURIComponent(v.replace(/^@/, "")), {
+          credentials: "same-origin",
+        }).catch(function () {});
+      }
+    }
+
+    if (addBtn) addBtn.addEventListener("click", addCurrent);
+    input.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        addCurrent();
+      }
+    });
+    if (openBtn) {
+      openBtn.addEventListener("click", function () {
+        if (!items.length) return;
+        fetchSimilar(items[items.length - 1]);
+      });
+    }
+    if (similarAddBtn) {
+      similarAddBtn.addEventListener("click", function () {
+        var added = 0;
+        similarSuggestions.forEach(function (sug) {
+          var key = String(sug.username || "").toLowerCase();
+          if (!similarSelected[key]) return;
+          if (addChannel(sug.username, { fetchSimilar: false })) added += 1;
+        });
+        if (added) {
+          similarSelected = {};
+          updateSimilarAddState();
+          if (items.length) fetchSimilar(items[items.length - 1]);
+        }
+      });
+    }
+
+    syncHidden();
+    renderList();
+    updateOpenBtn();
+    if (items.length && similarUrl) {
+      // پنل را مخفی نگه می‌داریم تا کاربر خودش «افزودن کانال‌های مشابه» را بزند
+      // مثل رفتار لینک Add similar channels در ads.telegram.org
+    }
   }
 
   function initLocationPicker(form) {
@@ -1260,10 +1942,14 @@
 
     function updateCounts(counts) {
       var map = counts || {};
+      var blocked = Number(map.blocked || 0);
+      var review = Number(map.review_required || 0);
       panel.querySelectorAll("[data-policy-count]").forEach(function (el) {
         var key = el.getAttribute("data-policy-count");
-        var value = toPersianDigits(map[key] || 0);
+        var raw = Number(map[key] || 0);
+        var value = toPersianDigits(raw);
         var strong = el.querySelector("strong");
+        el.classList.toggle("is-zero", raw <= 0);
         if (strong) {
           strong.textContent = value;
           return;
@@ -1472,11 +2158,75 @@
     });
   }
 
+  function initFinanceOptionalFields(root) {
+    if (!root) return;
+
+    function wireToggle(addSel, clearSel, showEls, hideEls, onClear) {
+      var addBtn = root.querySelector(addSel);
+      var clearBtn = root.querySelector(clearSel);
+      function show() {
+        (showEls || []).forEach(function (sel) {
+          var el = root.querySelector(sel);
+          if (el) el.hidden = false;
+        });
+        (hideEls || []).forEach(function (sel) {
+          var el = root.querySelector(sel);
+          if (el) el.hidden = true;
+        });
+      }
+      function hide() {
+        if (typeof onClear === "function") onClear();
+        (showEls || []).forEach(function (sel) {
+          var el = root.querySelector(sel);
+          if (el) el.hidden = true;
+        });
+        (hideEls || []).forEach(function (sel) {
+          var el = root.querySelector(sel);
+          if (el) el.hidden = false;
+        });
+      }
+      if (addBtn) addBtn.addEventListener("click", function (e) { e.preventDefault(); show(); });
+      if (clearBtn) clearBtn.addEventListener("click", function (e) { e.preventDefault(); hide(); });
+    }
+
+    wireToggle(
+      "[data-daily-cap-add]",
+      "[data-daily-cap-clear]",
+      ["[data-daily-cap-field]", "[data-daily-cap-clear]"],
+      ["[data-daily-cap-add]"],
+      function () {
+        var wrap = root.querySelector("[data-daily-cap-wrap]");
+        if (!wrap) return;
+        var raw = wrap.querySelector('[name="daily_cap_toman"]');
+        var visible = wrap.querySelector("[data-money-input]");
+        if (raw) raw.value = "";
+        if (visible) {
+          visible.value = "";
+          visible.dispatchEvent(new Event("input", { bubbles: true }));
+        }
+      }
+    );
+
+    wireToggle(
+      "[data-end-add]",
+      "[data-end-clear]",
+      ["[data-end-wrap]"],
+      ["[data-end-add]"],
+      function () {
+        var input = root.querySelector('[name="schedule_end"]');
+        if (!input) return;
+        input.value = "";
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+    );
+  }
+
   document.addEventListener("DOMContentLoaded", function () {
     var form = document.querySelector(".studio-form");
     if (!form) return;
     initAutosave(form);
     initStudioMode(form);
+    initFinanceOptionalFields(form);
     form.querySelectorAll("[data-creative-template-text]").forEach(function(btn) {
       btn.addEventListener("click", function() {
         var text = form.querySelector('[name="ad_text"]');
@@ -1499,13 +2249,11 @@
       );
     });
     document.querySelectorAll("[data-channel-selector]").forEach(function (el) {
-      initLineChips(el, {
-        inputSel: "[data-channel-input]",
-        addSel: "[data-channel-add]",
-        listSel: "[data-channel-chip-list]",
-        hiddenSel: "[data-channel-hidden]",
-        resolveUrl: form.getAttribute("data-resolve-channel"),
-      });
+      initChannelTargetingSelector(
+        el,
+        form.getAttribute("data-resolve-channel"),
+        form.getAttribute("data-similar-channels")
+      );
     });
     var adText = document.querySelector("[data-ad-text-counter]");
     if (adText) initAdTextCounter(adText);

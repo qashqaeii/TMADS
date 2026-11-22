@@ -10,6 +10,7 @@ from telead.inputs import InputAdSchedule
 # Iran (UTC+3:30) — accepted offset per telead.limits.SCHEDULE_TIMEZONES
 IRAN_SCHEDULE_TIMEZONE_SEC = 12600
 
+# Telegram Ads week_hours_mask: 0=Mon … 6=Sun
 WEEKDAY_LABELS_FA = (
     "دوشنبه",
     "سه‌شنبه",
@@ -19,6 +20,13 @@ WEEKDAY_LABELS_FA = (
     "شنبه",
     "یکشنبه",
 )
+
+# نمایش UI هفتهٔ ایرانی: شنبه → جمعه (ایندکس API حفظ می‌شود)
+WEEKDAY_DISPLAY_ORDER = (5, 6, 0, 1, 2, 3, 4)
+
+
+def weekdays_for_ui() -> list[dict[str, Any]]:
+    return [{"index": i, "label": WEEKDAY_LABELS_FA[i]} for i in WEEKDAY_DISPLAY_ORDER]
 
 
 def empty_week_mask() -> list[int]:
@@ -80,18 +88,44 @@ def parse_schedule_payload(data) -> dict[str, Any] | None:
         return None
 
 
-def schedule_summary_fa(schedule: dict[str, Any] | None) -> str:
+def _format_hour_ranges(hours: list[int]) -> str:
+    """Compress consecutive hours: [9,10,11,15] -> '۰۹–۱۱، ۱۵'."""
+    from apps.core.dates import to_persian_digits
+
+    if not hours:
+        return ""
+    ranges: list[str] = []
+    start = prev = hours[0]
+    for hour in hours[1:]:
+        if hour == prev + 1:
+            prev = hour
+            continue
+        ranges.append(f"{start:02d}" if start == prev else f"{start:02d}–{prev:02d}")
+        start = prev = hour
+    ranges.append(f"{start:02d}" if start == prev else f"{start:02d}–{prev:02d}")
+    return to_persian_digits("، ".join(ranges))
+
+
+def schedule_summary_rows(schedule: dict[str, Any] | None) -> list[dict[str, str]]:
     if not schedule or not schedule.get("week_hours_mask"):
-        return "بدون محدودیت ساعتی (نمایش در تمام ساعات)"
+        return []
     masks = schedule["week_hours_mask"]
-    parts: list[str] = []
-    for idx, mask in enumerate(masks):
-        hours = hours_from_mask(int(mask))
+    rows: list[dict[str, str]] = []
+    for idx in WEEKDAY_DISPLAY_ORDER:
+        hours = hours_from_mask(int(masks[idx]))
         if not hours:
             continue
-        hr_txt = "، ".join(f"{h:02d}" for h in hours)
-        parts.append(f"{WEEKDAY_LABELS_FA[idx]}: {hr_txt}")
-    return " · ".join(parts) if parts else "بدون بازهٔ انتخاب‌شده"
+        rows.append({"day": WEEKDAY_LABELS_FA[idx], "hours": _format_hour_ranges(hours)})
+    return rows
+
+
+def schedule_summary_fa(schedule: dict[str, Any] | None) -> str:
+    rows = schedule_summary_rows(schedule)
+    if not schedule or not schedule.get("week_hours_mask"):
+        return "بدون محدودیت ساعتی (نمایش در تمام ساعات)"
+    if not rows:
+        return "بدون بازهٔ انتخاب‌شده"
+    return " · ".join(f"{row['day']}: {row['hours']}" for row in rows)
 
 
 def preset_business_hours() -> list[int]:

@@ -67,6 +67,19 @@
     <p class="muted" style="margin-top:1rem;font-size:.82rem">کارمزد پلتفرم: {{ fee_percent|persian_digits }}٪ · بافر نوسان: {{ buffer_percent|persian_digits }}٪</p>
     {% if live_rate %}<p class="muted" style="font-size:.82rem">آخرین دریافت: {{ live_rate.fetched_at|jalali_datetime }}</p>{% endif %}
   </div></section>
+  <section class="ga-panel"><header class="ga-panel-head"><div class="ga-panel-title"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="settings" %}</span><div><h2>افزایش نرخ مشتری</h2><p>روی نرخ نوبیتکس اعمال می‌شود؛ کاربر آن را جدا نمی‌بیند</p></div></div></header><div class="ga-panel-body form-stack">
+    <form method="post" class="form-stack">{% csrf_token %}<input type="hidden" name="action" value="save_markup">
+      <div class="field">
+        <label for="markup-percent">درصد افزایش روی نرخ نوبیتکس</label>
+        <input id="markup-percent" name="markup_percent" type="number" inputmode="numeric" min="0" max="100" step="1" dir="ltr" required value="{{ markup_percent|default:0 }}">
+        <small class="field-help">پیش‌فرض ۰٪. مثلاً ۵ یعنی نرخ مشتری ۵٪ بالاتر از پیشنهاد فروش نوبیتکس است.</small>
+      </div>
+      {% if live_rate and customer_ask_irr %}
+      <p class="muted" style="font-size:.82rem;margin:0">نرخ خام نوبیتکس: <bdi dir="ltr">{{ live_rate.best_ask_irr|format_count }}</bdi> ریال · نرخ مشتری: <bdi dir="ltr">{{ customer_ask_irr|format_count }}</bdi> ریال</p>
+      {% endif %}
+      <button class="btn btn-primary" type="submit">ذخیره درصد</button>
+    </form>
+  </div></section>
   <section class="ga-panel ops-rate-manual"><header class="ga-panel-head"><div class="ga-panel-title"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="settings" %}</span><div><h2>نرخ دستی جایگزین</h2><p>اقدام حساس؛ نیازمند بررسی دلیل و مقدار</p></div></div></header><div class="ga-panel-body">
     <form method="post" class="form-stack">{% csrf_token %}<input type="hidden" name="action" value="manual">
       <div class="ops-review-note"><strong>پیش از تغییر نرخ</strong><p>نرخ جدید به مدت ۲۴ ساعت اولویت دارد. برای جلوگیری از خطای قیمت‌گذاری، مقدار را با منبع معتبر تطبیق دهید.</p></div><div class="field"><label for="manual-rate">ریال به ازای هر گرام</label><input id="manual-rate" name="irr_per_ton" type="number" inputmode="numeric" min="1" max="9223372036854775807" step="1" dir="ltr" required placeholder="مبلغ به ریال"></div>

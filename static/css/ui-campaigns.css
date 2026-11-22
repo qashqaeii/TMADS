@@ -15,11 +15,13 @@
 .ui-final :is(.ui-campaign-list,.ui-campaign-detail) .campaign-kpi-ribbon__cell:not(:first-child) { border-inline-start:1px solid var(--ui-border); }
 .ui-final :is(.ui-campaign-list,.ui-campaign-detail) .campaign-kpi-ribbon__name { font-size:.83rem;color:var(--ui-muted); }
 .ui-final :is(.ui-campaign-list,.ui-campaign-detail) .campaign-kpi-ribbon__value { font-size:clamp(1.15rem,2vw,1.75rem);font-weight:750;overflow-wrap:anywhere;line-height:1.4; }
-.ui-final .ui-campaign-list .campaigns-filter--luxe { border:1px solid var(--ui-border);border-radius:var(--ui-radius);background:#fff;box-shadow:none;padding:14px; }
-.ui-final .ui-campaign-list .campaigns-filter__bar { display:grid;grid-template-columns:minmax(180px,2fr) minmax(110px,1fr) minmax(110px,1fr) auto;align-items:end;gap:12px; }
+.ui-final .ui-campaign-list .campaigns-filter--luxe { border:0;border-bottom:1px solid var(--ui-border);border-radius:0;background:color-mix(in srgb,var(--ui-soft) 55%,#fff);box-shadow:none;padding:8px 12px; }
+.ui-final .ui-campaign-list .campaigns-filter__bar { display:flex;flex-wrap:nowrap;align-items:center;gap:6px;min-width:0; }
 .ui-final .ui-campaign-list .campaigns-filter__field { min-width:0; }
-.ui-final .ui-campaign-list .campaigns-filter__input-wrap input { padding-inline-start:36px; }
-.ui-final .ui-campaign-list .campaigns-filter__label { color:var(--ui-muted);font-size:.8rem;font-weight:650; }
+.ui-final .ui-campaign-list .campaigns-filter__field--search { flex:1 1 auto;min-width:8rem; }
+.ui-final .ui-campaign-list .campaigns-filter__field--select { flex:0 1 8.25rem;width:8.25rem;max-width:9.5rem; }
+.ui-final .ui-campaign-list .campaigns-filter__input-wrap input { padding-inline-start:1.95rem; }
+.ui-final .ui-campaign-list .campaigns-filter__label { display:none !important; }
 .ui-final .ui-campaign-list .campaigns-table-board--luxe { background:#fff;border:1px solid var(--ui-border);border-radius:var(--ui-radius);box-shadow:var(--ui-shadow);min-width:0; }
 .ui-final .ui-campaign-list .campaigns-table__head { padding:14px 16px;gap:12px; }
 .ui-final .ui-campaign-list .campaigns-table__title { font-size:1.02rem;font-weight:700; }
@@ -63,8 +65,12 @@
 .ui-final .ui-campaign-detail :is(.campaign-overview-facts__row,.campaign-overview-metrics__item):last-child { border-bottom:0; }
 .ui-final .ui-campaign-detail .campaign-performance-badges__card { background:var(--ui-soft);border:1px solid var(--ui-border);border-radius:9px;box-shadow:none; }
 .ui-final .ui-campaign-detail .campaign-history-timeline { max-height:none;overflow:visible; }
-@media(max-width:1100px) {
- .ui-final .ui-campaign-list .campaigns-filter__bar { grid-template-columns:repeat(2,minmax(0,1fr)); }
+@media(max-width:560px) {
+ .ui-final .ui-campaign-list .campaigns-filter__bar { flex-wrap:wrap; }
+ .ui-final .ui-campaign-list .campaigns-filter__field--search { flex:1 1 100%;min-width:0; }
+ .ui-final .ui-campaign-list .campaigns-filter__field--select { flex:1 1 calc(50% - 3px);width:auto;max-width:none; }
+ .ui-final .ui-campaign-list .campaigns-filter__actions { display:flex;gap:6px;width:100%; }
+ .ui-final .ui-campaign-list .campaigns-filter__btn--apply { flex:1; }
 }
 @media(max-width:680px) {
  .ui-final :is(.ui-campaign-list,.ui-campaign-detail) .campaign-kpi-ribbon__track { grid-template-columns:repeat(2,minmax(0,1fr));gap:0; }
@@ -72,9 +78,6 @@
  .ui-final :is(.ui-campaign-list,.ui-campaign-detail) .campaign-kpi-ribbon__cell:not(:first-child) { border-inline-start:0; }
  .ui-final :is(.ui-campaign-list,.ui-campaign-detail) .campaign-kpi-ribbon__cell:nth-child(even) { border-inline-start:1px solid var(--ui-border); }
  .ui-final :is(.ui-campaign-list,.ui-campaign-detail) .campaign-kpi-ribbon__cell:last-child { grid-column:1/-1;border:0; }
- .ui-final .ui-campaign-list .campaigns-filter__bar { grid-template-columns:minmax(0,1fr); }
- .ui-final .ui-campaign-list .campaigns-filter__actions { display:flex;gap:8px; }
- .ui-final .ui-campaign-list .campaigns-filter__actions > * { flex:1; }
  .ui-final .ui-campaign-detail .campaign-detail__hero-body--minimal { padding:16px;flex-wrap:wrap; }
  .ui-final .ui-campaign-detail .campaign-detail__hero-budget--minimal { margin:auto; }
  .ui-final .ui-campaign-detail .campaign-detail__toolbar--minimal { padding:10px;flex-wrap:wrap; }
@@ -123,10 +126,9 @@
 .ui-performance-advice__item p {font-size:.8rem;color:var(--ui-muted);line-height:1.8;margin:0}
 
 /* Dense list work stays readable without inputs colliding at intermediate widths. */
-.ui-final .ui-campaign-list .campaigns-filter__bar { grid-template-columns:minmax(160px,1.65fr) repeat(2,minmax(105px,1fr)) minmax(0,auto);gap:10px; }
 .ui-final .ui-campaign-list .campaigns-filter__field,.ui-final .ui-campaign-list .campaigns-filter__input-wrap { min-inline-size:0; }
-.ui-final .ui-campaign-list .campaigns-filter__control { width:100%;max-width:100%;height:var(--ui-control); }
-.ui-final .ui-campaign-list .campaigns-filter__actions { display:flex;flex-wrap:wrap;align-items:center;gap:6px; }
+.ui-final .ui-campaign-list .campaigns-filter__control { width:100%;max-width:100%;height:2.05rem;min-height:2.05rem; }
+.ui-final .ui-campaign-list .campaigns-filter__actions { display:inline-flex;flex-wrap:nowrap;align-items:center;gap:4px; }
 .ui-final .ui-campaign-list .campaigns-table__head { align-items:flex-start;flex-wrap:wrap; }
 .ui-final .ui-campaign-list .campaigns-table__tools { min-width:0;flex-wrap:wrap;gap:8px; }
 .ui-final .ui-campaign-list .campaigns-table__sort { min-width:0;flex-wrap:wrap; }
@@ -137,5 +139,4 @@
 .ui-final .ui-campaign-detail .campaign-detail__toolbar-track { min-width:0; }
 .ui-final .ui-campaign-detail .campaign-detail__toolbar--minimal { flex-wrap:wrap;justify-content:space-between; }
 .ui-final .ui-campaign-detail .ui-budget-alert-card { border-radius:var(--ui-radius);box-shadow:var(--ui-shadow); }
-@media(max-width:1250px){.ui-final .ui-campaign-list .campaigns-filter__bar{grid-template-columns:repeat(2,minmax(0,1fr))}.ui-final .ui-campaign-list .campaigns-filter__actions{justify-content:flex-start}}
-@media(max-width:650px){.ui-final .ui-campaign-list .campaigns-filter__bar{grid-template-columns:minmax(0,1fr)}.ui-final .ui-campaign-list .campaigns-filter__actions>*{flex:1}.ui-final .ui-campaign-list .campaigns-table__tools{width:100%}}
+@media(max-width:650px){.ui-final .ui-campaign-list .campaigns-table__tools{width:100%}}

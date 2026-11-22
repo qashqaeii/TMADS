@@ -472,95 +472,171 @@
   }
 }
 
-/* ---- Filters: one minimal language ---- */
+/* ---- Filters: single compact toolbar (no stacked grid / no visible labels) ---- */
 .ui-final.is-app .ui-campaign-list .campaigns-filter--luxe,
 .ui-final.is-app .ga-campaign-workspace .ga-campaign-filter {
   border: 0;
   border-bottom: 1px solid #e8eef5;
   border-radius: 0;
-  background: #f7fafc;
+  background: #f8fafc;
   box-shadow: none;
-  padding: 12px 14px;
+  padding: 8px 12px;
   margin: 0;
 }
-.ui-final.is-app .ui-campaign-list .campaigns-filter__bar {
-  display: grid;
-  grid-template-columns: minmax(0, 1.8fr) repeat(2, minmax(7.5rem, 1fr)) auto;
-  align-items: end;
-  gap: 10px 12px;
-}
-.ui-final.is-app .ui-campaign-list .campaigns-filter__label {
-  display: block;
-  margin: 0 0 5px;
-  font-size: 0.72rem;
-  font-weight: 650;
-  color: #5a738a;
-  letter-spacing: 0;
-}
-.ui-final.is-app .ui-campaign-list .campaigns-filter__control,
-.ui-final.is-app .ui-campaign-list .campaigns-filter__input-wrap {
-  min-height: 40px;
-  border-radius: 10px;
-  border: 1px solid #d3dde8;
-  background: #fff;
+.ui-final.is-app .ui-campaign-list .campaigns-filter__form {
+  padding: 0;
+  margin: 0;
+  background: none;
+  border: 0;
   box-shadow: none;
 }
+.ui-final.is-app .ui-campaign-list .campaigns-filter__bar {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.ui-final.is-app .ui-campaign-list .campaigns-filter__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+.ui-final.is-app .ui-campaign-list .campaigns-filter__field--search {
+  flex: 1 1 auto;
+  min-width: 8rem;
+}
+.ui-final.is-app .ui-campaign-list .campaigns-filter__field--select {
+  flex: 0 1 8.25rem;
+  width: 8.25rem;
+  max-width: 9.5rem;
+}
+.ui-final.is-app .ui-campaign-list .campaigns-filter__label,
+.ui-final.is-app .ui-campaign-list .campaigns-filter__field > label:not(.sr-only) {
+  display: none !important;
+}
 .ui-final.is-app .ui-campaign-list .campaigns-filter__input-wrap {
+  position: relative;
   display: flex;
   align-items: center;
-  padding: 0 10px;
-  gap: 6px;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  min-height: 0;
 }
-.ui-final.is-app .ui-campaign-list .campaigns-filter__input-wrap input,
-.ui-final.is-app .ui-campaign-list .campaigns-filter__input-wrap .campaigns-filter__control {
-  border: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  min-height: 38px;
-  padding-inline-start: 0 !important;
-  height: auto;
+.ui-final.is-app .ui-campaign-list .campaigns-filter__input-icon {
+  position: absolute;
+  inset-inline-start: 0.55rem;
+  z-index: 1;
+  display: inline-flex;
+  pointer-events: none;
+  color: #7a8fa3;
+  opacity: 0.85;
+}
+.ui-final.is-app .ui-campaign-list .campaigns-filter__control {
+  width: 100%;
+  max-width: 100%;
+  height: 2rem;
+  min-height: 2rem;
+  padding: 0 0.65rem;
+  border: 1px solid #d5dee8;
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ui-ink, #152536);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 500;
+  line-height: 1.2;
+  box-shadow: none;
+}
+.ui-final.is-app .ui-campaign-list .campaigns-filter__control--search {
+  padding-inline-start: 1.95rem;
+}
+.ui-final.is-app .ui-campaign-list .campaigns-filter__control:focus {
+  outline: none;
+  border-color: #7eb0df;
+  box-shadow: 0 0 0 3px rgba(42, 140, 214, 0.12);
 }
 .ui-final.is-app .ui-campaign-list .campaigns-filter__control--select {
-  width: 100%;
-  min-height: 40px;
-  padding: 0 10px;
-}
-.ui-final.is-app .ui-campaign-list .campaigns-filter__btn--apply {
-  min-height: 40px;
-  border-radius: 10px;
-  padding: 0 14px;
+  appearance: none;
+  padding-inline-end: 1.55rem;
+  cursor: pointer;
+  text-overflow: ellipsis;
   white-space: nowrap;
+  overflow: hidden;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%238794a7' d='M1.5 1.5 6 6l4.5-4.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: left 0.5rem center;
+  background-size: 9px;
 }
-.ui-final.is-app .ui-campaign-list .campaigns-filter__btn--clear {
-  min-height: 40px;
-  border-radius: 10px;
+.ui-final.is-app .ui-campaign-list .campaigns-filter__actions {
+  display: inline-flex;
+  flex: 0 0 auto;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 2px;
+  margin-inline-start: 2px;
+}
+.ui-final.is-app .ui-campaign-list .campaigns-filter__btn {
   display: inline-flex;
   align-items: center;
-  padding: 0 12px;
-  color: #5a738a;
+  justify-content: center;
+  height: 2rem;
+  min-height: 2rem;
+  padding: 0 0.7rem;
+  border-radius: 8px;
+  font-size: 0.74rem;
+  font-weight: 650;
+  white-space: nowrap;
   text-decoration: none;
-  border: 1px solid #d3dde8;
-  background: #fff;
+  box-shadow: none;
 }
-@media (max-width: 1100px) {
+.ui-final.is-app .ui-campaign-list .campaigns-filter__btn--apply {
+  border: 1px solid transparent;
+  background: color-mix(in srgb, var(--ui-action, #2a8cd6) 12%, #fff);
+  color: var(--ui-action, #2a8cd6);
+}
+.ui-final.is-app .ui-campaign-list .campaigns-filter__btn--apply:hover {
+  background: color-mix(in srgb, var(--ui-action, #2a8cd6) 18%, #fff);
+}
+.ui-final.is-app .ui-campaign-list .campaigns-filter__btn--clear {
+  border: 0;
+  background: transparent;
+  color: #6a8096;
+  padding-inline: 0.5rem;
+}
+.ui-final.is-app .ui-campaign-list .campaigns-filter__btn--clear:hover {
+  color: #334859;
+  background: #eef3f8;
+}
+@media (max-width: 560px) {
+  .ui-final.is-app .ui-campaign-list .campaigns-filter--luxe,
+  .ui-final.is-app .ga-campaign-workspace .ga-campaign-filter {
+    padding: 8px 10px;
+  }
   .ui-final.is-app .ui-campaign-list .campaigns-filter__bar {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    flex-wrap: wrap;
+    gap: 6px;
   }
   .ui-final.is-app .ui-campaign-list .campaigns-filter__field--search {
-    grid-column: 1 / -1;
+    flex: 1 1 100%;
+    min-width: 0;
   }
-}
-@media (max-width: 640px) {
-  .ui-final.is-app .ui-campaign-list .campaigns-filter__bar {
-    grid-template-columns: minmax(0, 1fr);
+  .ui-final.is-app .ui-campaign-list .campaigns-filter__field--select {
+    flex: 1 1 calc(50% - 3px);
+    width: auto;
+    max-width: none;
   }
   .ui-final.is-app .ui-campaign-list .campaigns-filter__actions {
-    display: flex;
-    gap: 8px;
+    width: 100%;
+    margin-inline-start: 0;
+    gap: 6px;
   }
-  .ui-final.is-app .ui-campaign-list .campaigns-filter__actions > * {
-    flex: 1;
-    justify-content: center;
+  .ui-final.is-app .ui-campaign-list .campaigns-filter__btn--apply {
+    flex: 1 1 auto;
   }
 }
 

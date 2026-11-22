@@ -191,6 +191,11 @@ def campaign_review(request, campaign_id):
 def exchange_rates(request):
     from django.utils import timezone as tz
 
+    from apps.finance.models import GramRateMarkupRule
+    from apps.finance.services.gram_markup import (
+        active_gram_markup_percent,
+        apply_gram_markup_amount,
+    )
     from apps.finance.services.ton_exchange_rate import fetch_live_snapshot, get_cached_snapshot
 
     rates = ExchangeRate.objects.order_by("-created_at")[:30]
@@ -202,6 +207,24 @@ def exchange_rates(request):
             messages.success(request, "نرخ نوبیتکس بروزرسانی شد (فقط خواندن).")
         except Exception as exc:
             messages.error(request, f"نوبیتکس: {exc}")
+        return redirect("operations:exchange_rates")
+    if request.method == "POST" and action == "save_markup":
+        try:
+            percent = int(request.POST.get("markup_percent", "0"))
+        except ValueError:
+            percent = -1
+        if not 0 <= percent <= 100:
+            messages.error(request, "درصد افزایش نرخ باید بین ۰ تا ۱۰۰ باشد.")
+            return redirect("operations:exchange_rates")
+        GramRateMarkupRule.objects.filter(is_active=True).update(is_active=False)
+        GramRateMarkupRule.objects.create(percent=percent, is_active=True)
+        AuditLog.objects.create(
+            actor=request.user,
+            action="exchange_rate.markup",
+            entity_type="GramRateMarkupRule",
+            new_state={"percent": percent},
+        )
+        messages.success(request, "درصد افزایش نرخ مشتری ذخیره شد.")
         return redirect("operations:exchange_rates")
     if request.method == "POST" and action == "manual":
         reason = request.POST.get("reason", "").strip()[:200]
@@ -237,6 +260,10 @@ def exchange_rates(request):
         )
         messages.success(request, "نرخ دستی ثبت شد (اولویت بر نوبیتکس تا انقضا).")
         return redirect("operations:exchange_rates")
+    markup_percent = active_gram_markup_percent()
+    customer_ask = None
+    if live and live.best_ask_irr is not None:
+        customer_ask = apply_gram_markup_amount(live.best_ask_irr, percent=markup_percent)
     return render(
         request,
         "operations/exchange_rates.html",
@@ -245,6 +272,8 @@ def exchange_rates(request):
             "live_rate": live,
             "fee_percent": settings.PLATFORM_SERVICE_FEE_PERCENT,
             "buffer_percent": settings.TON_PRICING_RISK_BUFFER_PERCENT,
+            "markup_percent": markup_percent,
+            "customer_ask_irr": customer_ask,
         },
     )
 

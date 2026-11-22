@@ -32,7 +32,25 @@ UNVERIFIED_TARGET_PLACEMENTS: dict[str, frozenset[str]] = {
 }
 
 
+# ترتیب نمایش مثل ads.telegram.org (نه حروف الفبا)
+_PLACEMENT_UI_ORDER: dict[str, tuple[str, ...]] = {
+    "search": ("search_result",),
+    "bots": ("bot_banner",),
+    "users": ("channel_post", "video_banner", "bot_banner"),
+    "channels": ("channel_post",),
+}
+
+_DEFAULT_PLACEMENT: dict[str, str] = {
+    "search": "search_result",
+    "bots": "bot_banner",
+    "users": "channel_post",
+    "channels": "channel_post",
+}
+
+
 def default_placement_for_target(target_type: str) -> str:
+    if target_type in _DEFAULT_PLACEMENT:
+        return _DEFAULT_PLACEMENT[target_type]
     verified = VERIFIED_TARGET_PLACEMENTS.get(target_type) or frozenset()
     if not verified:
         return "search_result"
@@ -50,8 +68,11 @@ def placement_choices_for_target(target_type: str) -> list[dict[str, Any]]:
     verified = VERIFIED_TARGET_PLACEMENTS.get(target_type, frozenset())
     unverified = UNVERIFIED_TARGET_PLACEMENTS.get(target_type, frozenset())
     allowed = verified | unverified
+    preferred = _PLACEMENT_UI_ORDER.get(target_type) or tuple(sorted(allowed))
+    ordered = [p for p in preferred if p in allowed]
+    ordered.extend(sorted(p for p in allowed if p not in ordered))
     out: list[dict[str, Any]] = []
-    for placement in sorted(allowed):
+    for placement in ordered:
         title, hint = labels.get(placement, (placement, ""))
         out.append(
             {

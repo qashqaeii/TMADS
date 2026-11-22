@@ -95,26 +95,33 @@ def _validate_target_config(target_type: str, config: dict[str, Any], *, strict:
             result.warnings.append("هدف‌گیری کاربران ممکن است بیش از حد محدود باشد.")
 
     if target_type == "channels":
-        mode = cfg.get("channel_mode") or cfg.get("mode") or ("specific" if cfg.get("channel_ids") else "topics" if cfg.get("topic_ids") else "language")
-        if mode not in {"specific", "topics", "language"}:
-            result.errors.append("استراتژی کانال معتبر نیست.")
-        if mode != "specific" and cfg.get("channel_ids"):
-            result.errors.append("کانال‌های مشخص با این استراتژی سازگار نیستند.")
-        if mode != "topics" and cfg.get("topic_ids"):
-            result.errors.append("موضوعات انتخاب‌شده با این استراتژی سازگار نیستند.")
-        if mode == "specific" and cfg.get("language_codes"):
-            result.errors.append("زبان مستقل در هدف‌گیری کانال مشخص قابل استفاده نیست.")
+        channels = cfg.get("channel_ids") or []
+        topics = cfg.get("topic_ids") or []
+        langs = cfg.get("language_codes") or []
+        # استراتژی مؤثر برای API از داده استنباط می‌شود (UI همه فیلدها را نشان می‌دهد).
+        if channels:
+            mode = "specific"
+        elif topics:
+            mode = "topics"
+        else:
+            mode = "language"
+        # قانون تلگرام: با کانال مشخص، فیلد زبان باید خالی باشد.
+        if channels and langs:
+            result.errors.append("اگر کانال مشخص انتخاب شده، فیلد زبان باید خالی باشد.")
+        if channels and topics:
+            result.errors.append("اگر کانال مشخص انتخاب شده، فیلد موضوع باید خالی باشد.")
         if mode == "specific":
-            if strict and not (cfg.get("channel_ids") or []):
+            if strict and not channels:
                 result.errors.append("حداقل یک کانال مشخص انتخاب کنید.")
         elif mode == "topics":
-            if strict and not (cfg.get("topic_ids") or []):
+            if strict and not topics:
                 result.errors.append("حداقل یک موضوع برای هدف‌گیری کانال لازم است.")
-            langs = cfg.get("language_codes") or []
             if strict and len(langs) != 1:
                 result.errors.append("برای هدف‌گیری موضوعی باید یک زبان کانال انتخاب شود.")
-        elif strict and not (cfg.get("language_codes") or []):
+        elif strict and not langs:
             result.warnings.append("حداقل یک زبان کانال پیشنهاد می‌شود.")
+        elif not strict and not langs and not topics and not channels:
+            result.warnings.append("هنوز زبان، موضوع یا کانال مشخصی انتخاب نشده است.")
 
     return result
 
