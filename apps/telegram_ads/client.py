@@ -236,6 +236,36 @@ class TelegramAdsClient:
             raise TelegramAdsWriteDisabled("Paid submission is disabled")
         return self._run("create_advertisement", lambda client: _model_to_dict(client.create_ad(**payload)))
 
+    def increase_ad_budget(self, ad_id: str, amount: float, *, idempotency_key: str | None = None) -> dict[str, Any]:
+        if not (settings.TELEGRAM_ADS_WRITE_ENABLED and settings.TELEGRAM_ADS_PAID_SUBMISSION_ENABLED):
+            raise TelegramAdsWriteDisabled("Ad budget changes are disabled")
+        return self._run(
+            "increase_ad_budget",
+            lambda client: _model_to_dict(
+                client.increase_ad_budget(
+                    int(ad_id),
+                    float(amount),
+                    idempotency_key=idempotency_key,
+                    return_target=True,
+                )
+            ),
+        )
+
+    def decrease_ad_budget(self, ad_id: str, amount: float, *, idempotency_key: str | None = None) -> dict[str, Any]:
+        if not (settings.TELEGRAM_ADS_WRITE_ENABLED and settings.TELEGRAM_ADS_PAID_SUBMISSION_ENABLED):
+            raise TelegramAdsWriteDisabled("Ad budget changes are disabled")
+        return self._run(
+            "decrease_ad_budget",
+            lambda client: _model_to_dict(
+                client.decrease_ad_budget(
+                    int(ad_id),
+                    float(amount),
+                    idempotency_key=idempotency_key,
+                    return_target=True,
+                )
+            ),
+        )
+
     def edit_advertisement(self, ad_id: str, payload: dict[str, Any]) -> dict[str, Any]:
         if not settings.TELEGRAM_ADS_WRITE_ENABLED:
             raise TelegramAdsWriteDisabled("Write operations are disabled")

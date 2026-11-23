@@ -98,8 +98,11 @@ def reject_operation(operation_id, *, actor, reason):
 
 def _guard(campaign, op):
     direct = bool(campaign.telegram_connection_id and campaign.telegram_connection.connection_type == "customer_owned")
-    if op.action in (Action.INCREASE_BUDGET, Action.DECREASE_BUDGET):
-        raise ValueError("اجرای مالی تا تکمیل تسویه و تأیید شرایط تجاری غیرفعال است؛ هیچ مبلغی منتقل نمی‌شود.")
+    if op.action == Action.INCREASE_BUDGET and not direct:
+        raise ValueError(
+            "افزایش بودجه حساب مدیریت‌شده نیازمند رزرو کیف پول و انتقال اعتبار است؛ "
+            "این مسیر از پنل عملیات هنوز فعال نشده است."
+        )
     if not settings.TELEGRAM_ADS_WRITE_ENABLED or not settings.TELEGRAM_ADS_PAID_SUBMISSION_ENABLED:
         raise ValueError("عملیات زنده تبلیغات غیرفعال است.")
     if not direct and not CampaignPolicyPreflight.operator_submission_allowed():
@@ -154,7 +157,16 @@ def operation_matches_remote(op, remote):
         return False
     action = op.action
     if action in (Action.INCREASE_BUDGET, Action.DECREASE_BUDGET):
-        return False  # Budget requires independent financial and transfer evidence.
+        try:
+            after = Decimal(str(remote.get("remaining_budget")))
+            before = Decimal(str(op.request_payload.get("budget_before")))
+            delta = Decimal(str(op.request_payload["amount_ton"]))
+            if not after.is_finite() or not before.is_finite() or not delta.is_finite():
+                return False
+            expected = before + delta if action == Action.INCREASE_BUDGET else before - delta
+            return after == expected
+        except (KeyError, InvalidOperation, TypeError, ValueError):
+            return False
     if action == Action.REVIEW:
         return remote.get("status") in {"in_review", "active", "on_hold", "declined"}
     if action in (Action.PAUSE, Action.RESUME):
@@ -213,28 +225,48 @@ def reconcile_operation_readonly(operation_id, *, actor):
     return op
 
 
+def _budget_api_call(client, op, ad):
+    amount = float(op.request_payload["amount_ton"])
+    key = f"tmads-budget-{op.pk}"
+    if op.action == Action.INCREASE_BUDGET:
+        return client.increase_ad_budget(ad.remote_ad_id, amount, idempotency_key=key)
+    if op.action == Action.DECREASE_BUDGET:
+        return client.decrease_ad_budget(ad.remote_ad_id, amount, idempotency_key=key)
+    raise ValueError("عملیات بودجه معتبر نیست.")
+
+
 def execute_operation(operation_id, *, actor):
     """Claim before I/O; once a write is attempted, ambiguity blocks retries."""
     _manager(actor)
-    stub = RemoteAdOperation.objects.select_related("advertisement").get(pk=operation_id)
+    stub = RemoteAdOperation.objects.select_related("advertisement__campaign__telegram_connection").get(
+        pk=operation_id,
+    )
     with transaction.atomic():
         campaign = Campaign.objects.select_for_update().get(pk=stub.advertisement.campaign_id)
         op = RemoteAdOperation.objects.select_for_update().get(pk=operation_id)
         if op.status != Status.PENDING:
             raise ValueError("درخواست قبلاً بررسی شده است.")
-        _guard(campaign,op)
-        ad = op.advertisement
-        client = campaign_client(campaign)
-        remote = _checked_remote(client,ad)
-        payload = _payload(op,remote)
-        op.status=Status.EXECUTING
-        op.save(update_fields=["status","updated_at"])
-        _audit(op,actor,"claimed")
+        _guard(campaign, op)
+        op.status = Status.EXECUTING
+        op.save(update_fields=["status", "updated_at"])
+        _audit(op, actor, "claimed")
+    ad = op.advertisement
+    campaign = ad.campaign
+    client = campaign_client(campaign)
+    remote = _checked_remote(client, ad)
+    payload = _payload(op, remote) if op.action not in (Action.INCREASE_BUDGET, Action.DECREASE_BUDGET) else None
+    if op.action in (Action.INCREASE_BUDGET, Action.DECREASE_BUDGET):
+        request_payload = dict(op.request_payload or {})
+        request_payload["budget_before"] = str(remote.get("remaining_budget"))
+        op.request_payload = request_payload
+        op.save(update_fields=["request_payload", "updated_at"])
     try:
-        if op.action == Action.REVIEW:
+        if op.action in (Action.INCREASE_BUDGET, Action.DECREASE_BUDGET):
+            _budget_api_call(client, op, ad)
+        elif op.action == Action.REVIEW:
             client.submit_ad_for_review(ad.remote_ad_id)
         else:
-            client.edit_advertisement(ad.remote_ad_id,payload)
+            client.edit_advertisement(ad.remote_ad_id, payload)
         confirmed = _checked_remote(client,ad)
         valid = operation_matches_remote(op, confirmed)
         if not valid:
