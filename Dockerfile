@@ -14,6 +14,19 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-RUN DJANGO_SETTINGS_MODULE=config.settings.local python manage.py collectstatic --noinput
+ARG DJANGO_SETTINGS_MODULE=config.settings.local
+ENV DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE}
 
-CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000"]
+RUN python manage.py collectstatic --noinput
+
+RUN useradd --create-home --uid 1000 --shell /usr/sbin/nologin tmads \
+    && chown -R tmads:tmads /app
+
+USER tmads
+
+EXPOSE 8000
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/accounts/login/', timeout=3)" || exit 1
+
+CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "2", "--timeout", "120"]

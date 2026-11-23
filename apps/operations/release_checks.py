@@ -76,8 +76,18 @@ def release_checks():
         "نتیجه تست تراکنش، بازپرداخت، مجوزها و API باید مستقل ثبت شود.", pending=True)
     add("browser_qa", "تأیید بصری و دسترس‌پذیری", False,
         "نتیجه تست واقعی در موبایل، تبلت و دسکتاپ ثبت نشده است.", pending=True)
-    add("account_routing", "تفکیک مالی و تبلیغاتی حساب‌های زیرمجموعه", False,
-        "مسیردهی کمپین به حساب اختصاصی و تسویه اعتبار زیرحساب هنوز تکمیل نشده است.", pending=True)
+    routing_ready = (
+        len(str(getattr(settings, "TELEGRAM_ADS_TOKEN_ENCRYPTION_KEY", "") or "")) >= 32
+        and platform_token_is_configured()
+    )
+    add(
+        "account_routing",
+        "تفکیک مالی و تبلیغاتی حساب‌های زیرمجموعه",
+        routing_ready,
+        "مسیردهی کمپین، انتقال اعتبار زیرحساب و تسویه از همان حساب در کد پیاده‌سازی شده است؛ "
+        "تطبیق زنده زیرحساب‌ها همچنان نیازمند تأیید اپراتور است.",
+        pending=not routing_ready,
+    )
     return checks
 
 
