@@ -326,6 +326,15 @@ class TelegramAdsClient:
     def get_account_statistics(self, *, from_time, to_time, interval=86400):
         return self._run("account_stats", lambda c: [_model_to_dict(x) for x in c.get_account_stats(from_time,to_time,interval)])
 
+    def get_ads_page(self, *, offset=None, limit=50):
+        """List ads from the authenticated customer's own API token, not the central account."""
+        if type(limit) is not int or not 1 <= limit <= 100:
+            raise ValueError("Invalid ad list limit")
+        return self._run(
+            "customer_owned_ads",
+            lambda c: _model_to_dict(c.get_ads_list(offset=offset, limit=limit)),
+        )
+
     def get_account_ads_page(self, *, account_id, offset=None, limit=50):
         if not account_id or not isinstance(account_id, str):
             raise ValueError("Related account ID required")

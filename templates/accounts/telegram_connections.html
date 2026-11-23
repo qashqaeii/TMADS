@@ -49,7 +49,7 @@
           {% if connection.connection_type == "customer_owned" and connection.status != "disconnected" %}
           <form method="post">{% csrf_token %}<input type="hidden" name="action" value="disconnect"><input type="hidden" name="connection_id" value="{{ connection.pk }}"><button class="btn btn-ghost btn-sm" type="submit">قطع اتصال</button></form>
           {% endif %}
-          <a class="btn btn-ghost btn-sm" href="{% url 'accounts:related_ads' %}">مشاهده تبلیغات</a>
+          <a class="btn btn-ghost btn-sm" href="{% url 'accounts:related_ads' %}?connection_id={{ connection.pk }}">مشاهده تبلیغات</a>
         </div>
       </article>
       {% empty %}
