@@ -152,8 +152,12 @@ def import_remote_campaigns_for_customer(
         cpm = item.get("cpm")
         ad_text = (item.get("text") or "").strip()
 
+        account_scope = (connection.remote_account_id if connection else "").strip()
         with transaction.atomic():
-            remote = TelegramAdvertisement.objects.filter(remote_ad_id=rid).select_related("campaign").first()
+            remote = TelegramAdvertisement.objects.filter(
+                remote_ad_id=rid,
+                remote_account_id=account_scope,
+            ).select_related("campaign").first()
             if remote:
                 campaign = Campaign.objects.select_for_update().get(pk=remote.campaign_id)
                 if campaign.customer_id != customer.id:

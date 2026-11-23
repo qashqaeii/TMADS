@@ -1,5 +1,12 @@
 # Production-oriented compose stack. Provide secrets via .env.production (never commit).
-# Build with: docker compose -f docker-compose.prod.yml build
+#
+# Usage (required for ${POSTGRES_PASSWORD} interpolation in this file):
+#   docker compose --env-file .env.production -f docker-compose.prod.yml up -d
+#
+# Service containers also load runtime secrets from env_file below; the root
+# --env-file is still required so compose can resolve ${...} substitution here.
+#
+# Enable GitHub branch protection on `main` (require PR + passing CI) in repo settings.
 services:
   db:
     image: postgres:16-alpine

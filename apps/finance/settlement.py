@@ -1,4 +1,5 @@
 """Conservative allocation settlement. No Telegram write or remote-ID attachment."""
+from dataclasses import dataclass, replace
 from decimal import Decimal, InvalidOperation
 
 from django.db import transaction
@@ -59,11 +60,26 @@ def _consume(wallet, order, amount, kind, suffix, description):
     )
 
 
-@transaction.atomic
-def settle_confirmed_allocation(campaign_id, *, actor):
-    campaign = Campaign.objects.select_for_update().get(pk=campaign_id)
-    orders = list(AdvertisingOrder.objects.select_for_update().filter(
-        campaign_id=campaign.pk, customer=campaign.customer)[:2])
+@dataclass(frozen=True)
+class _SettlementPrepared:
+    campaign_id: int
+    order_id: int
+    ad_pk: int
+    remote_ad_id: str
+    cost: int
+    fee: int
+    buffer: int
+    order_total_irr: int
+    ton_allocation: Decimal
+    remote: dict
+    evidence: dict
+
+
+def _load_settlement_context(campaign_id) -> tuple[Campaign, AdvertisingOrder, object, _SettlementPrepared]:
+    campaign = Campaign.objects.select_related("telegram_connection", "customer").get(pk=campaign_id)
+    orders = list(
+        AdvertisingOrder.objects.filter(campaign_id=campaign.pk, customer=campaign.customer)[:2]
+    )
     if len(orders) != 1:
         raise ValueError("سفارش یکتا یافت نشد.")
     order = orders[0]
@@ -73,7 +89,7 @@ def settle_confirmed_allocation(campaign_id, *, actor):
             idempotency_key=f"settle-{order.pk}-allocation",
             entry_type=WalletLedgerEntry.EntryType.CREDIT_ALLOCATION,
         ).exists():
-            return order
+            return campaign, order, None, None  # type: ignore[return-value]
         raise ValueError("سفارش قدیمی نیازمند تطبیق دستی است.")
     if order.status != AdvertisingOrder.Status.SUBMITTING:
         raise ValueError("سفارش در وضعیت قابل تسویه نیست.")
@@ -105,43 +121,109 @@ def settle_confirmed_allocation(campaign_id, *, actor):
     except (KeyError, ValueError, TypeError, InvalidOperation):
         raise ValueError("شرایط مالی پیش‌فاکتور نیازمند تطبیق دستی است.") from None
 
+    connection = getattr(campaign, "telegram_connection", None)
+    if connection:
+        if ad.remote_account_id and ad.remote_account_id != connection.remote_account_id:
+            raise ValueError("شناسه حساب تبلیغ با حساب انتخاب‌شده کمپین مطابقت ندارد.")
+        if not ad.remote_account_id:
+            raise ValueError("شناسه حساب تبلیغ ثبت نشده است.")
+
+    return campaign, order, ad, _SettlementPrepared(
+        campaign_id=campaign.pk,
+        order_id=order.pk,
+        ad_pk=ad.pk,
+        remote_ad_id=ad.remote_ad_id,
+        cost=cost,
+        fee=fee,
+        buffer=buffer,
+        order_total_irr=order.total_irr,
+        ton_allocation=order.ton_allocation,
+        remote={},
+        evidence={},
+    )
+
+
+def _fetch_settlement_evidence(campaign, order, ad, claim, prepared: _SettlementPrepared) -> _SettlementPrepared:
     client = campaign_client(campaign)
     remote = client.get_ad(ad.remote_ad_id)
     if str(remote.get("ad_id")) != ad.remote_ad_id or remote.get("promote_url") != campaign.destination:
         raise ValueError("هویت تبلیغ با سند ایجاد آن یکسان نیست.")
     if remote.get("currency") != "TON":
         raise ValueError("ارز تبلیغ با سند ایجاد آن یکسان نیست.")
-    connection = getattr(campaign, "telegram_connection", None)
-    if connection:
-        expected_account = connection.remote_account_id
-        if ad.remote_account_id and ad.remote_account_id != expected_account:
-            raise ValueError("شناسه حساب تبلیغ با حساب انتخاب‌شده کمپین مطابقت ندارد.")
-        if not ad.remote_account_id:
-            raise ValueError("شناسه حساب تبلیغ ثبت نشده است.")
-    evidence = _verify_transfer(client.get_ad_transactions(ad.remote_ad_id, limit=100),
-                                amount=order.ton_allocation, claimed_at=claim.created_at)
+    evidence = _verify_transfer(
+        client.get_ad_transactions(ad.remote_ad_id, limit=100),
+        amount=order.ton_allocation,
+        claimed_at=claim.created_at,
+    )
+    return replace(prepared, remote=remote, evidence=evidence)
+
+
+@transaction.atomic
+def _commit_settlement(prepared: _SettlementPrepared, *, actor) -> AdvertisingOrder:
+    campaign = Campaign.objects.select_for_update().get(pk=prepared.campaign_id)
+    orders = list(
+        AdvertisingOrder.objects.select_for_update().filter(pk=prepared.order_id, customer=campaign.customer)[:2]
+    )
+    if len(orders) != 1:
+        raise ValueError("سفارش یکتا یافت نشد.")
+    order = orders[0]
+    if order.status == AdvertisingOrder.Status.COMPLETED:
+        return order
+    if order.status != AdvertisingOrder.Status.SUBMITTING:
+        raise ValueError("سفارش در وضعیت قابل تسویه نیست.")
+    if order.total_irr != prepared.order_total_irr or order.ton_allocation != prepared.ton_allocation:
+        raise ValueError("شرایط مالی سفارش از زمان تأیید تغییر کرده است.")
+
+    ad = campaign.remote_ads.select_for_update().get(pk=prepared.ad_pk)
+    if ad.remote_ad_id != prepared.remote_ad_id:
+        raise ValueError("شناسه تبلیغ برای تسویه منطبق نیست.")
 
     wallet = Wallet.objects.select_for_update().get(pk=ensure_wallet(campaign.customer).pk)
-    if outstanding_order_reservation(wallet, order.pk) != order.total_irr or wallet.reserved_irr < order.total_irr:
+    if outstanding_order_reservation(wallet, order.pk) != prepared.order_total_irr or wallet.reserved_irr < prepared.order_total_irr:
         raise ValueError("رزرو اختصاصی سفارش کامل نیست.")
-    _consume(wallet, order, cost, WalletLedgerEntry.EntryType.CREDIT_ALLOCATION, "allocation", "تخصیص تأییدشده اعتبار تلگرام (نه مصرف نمایش)")
-    _consume(wallet, order, fee, WalletLedgerEntry.EntryType.SERVICE_FEE, "fee", "کارمزد سفارش تبلیغ")
-    if buffer:
-        release_reservation_for_order(wallet, buffer, order.pk, f"settle-{order.pk}-buffer", description="بازگشت ذخیره موقت ریسک نرخ")
+
+    _consume(wallet, order, prepared.cost, WalletLedgerEntry.EntryType.CREDIT_ALLOCATION, "allocation",
+             "تخصیص تأییدشده اعتبار تلگرام (نه مصرف نمایش)")
+    _consume(wallet, order, prepared.fee, WalletLedgerEntry.EntryType.SERVICE_FEE, "fee", "کارمزد سفارش تبلیغ")
+    if prepared.buffer:
+        release_reservation_for_order(
+            wallet, prepared.buffer, order.pk, f"settle-{order.pk}-buffer",
+            description="بازگشت ذخیره موقت ریسک نرخ",
+        )
     order.status = AdvertisingOrder.Status.COMPLETED
     order.save(update_fields=["status", "updated_at"])
-    ad.remote_status = str(remote.get("status") or "")
-    ad.remote_status_raw = remote
+    ad.remote_status = str(prepared.remote.get("status") or "")
+    ad.remote_status_raw = prepared.remote
     ad.save(update_fields=["remote_status", "remote_status_raw", "updated_at"])
     previous = campaign.status
-    campaign.status = map_remote_status_to_campaign(remote)
+    campaign.status = map_remote_status_to_campaign(prepared.remote)
     campaign.save(update_fields=["status", "updated_at"])
-    CampaignStatusHistory.objects.create(campaign=campaign, from_status=previous,
-        to_status=campaign.status, note="تخصیص اعتبار با سند تلگرام تطبیق و تسویه شد")
-    AuditLog.objects.create(actor=actor, action="order.allocation_settled", entity_type="order", entity_id=order.pk,
-        new_state={"remote_ad_id": ad.remote_ad_id, "evidence": evidence,
-                   "allocation_cost_irr": cost, "service_fee_irr": fee, "returned_buffer_irr": buffer})
-    notify_customer(campaign.customer, "تخصیص اعتبار تأیید شد",
+    CampaignStatusHistory.objects.create(
+        campaign=campaign, from_status=previous,
+        to_status=campaign.status, note="تخصیص اعتبار با سند تلگرام تطبیق و تسویه شد",
+    )
+    AuditLog.objects.create(
+        actor=actor, action="order.allocation_settled", entity_type="order", entity_id=order.pk,
+        new_state={
+            "remote_ad_id": ad.remote_ad_id, "evidence": prepared.evidence,
+            "allocation_cost_irr": prepared.cost, "service_fee_irr": prepared.fee,
+            "returned_buffer_irr": prepared.buffer,
+        },
+    )
+    notify_customer(
+        campaign.customer, "تخصیص اعتبار تأیید شد",
         "اعتبار تبلیغاتی با تلگرام تطبیق داده شد و ذخیره موقت به کیف پول بازگشت.",
-        level="success", related_campaign_id=campaign.pk)
+        level="success", related_campaign_id=campaign.pk,
+    )
     return order
+
+
+def settle_confirmed_allocation(campaign_id, *, actor):
+    campaign, order, ad, prepared = _load_settlement_context(campaign_id)
+    if prepared is None:
+        return order
+    claim = campaign.status_history.filter(to_status=Campaign.Status.SUBMITTING).first()
+    if not claim:
+        raise ValueError("سند ایجاد تبلیغ ثبت نشده است؛ بررسی دستی لازم است.")
+    prepared = _fetch_settlement_evidence(campaign, order, ad, claim, prepared)
+    return _commit_settlement(prepared, actor=actor)

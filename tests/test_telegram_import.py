@@ -51,6 +51,60 @@ def test_import_creates_hyper_tunnel_campaign(monkeypatch):
 
 
 @pytest.mark.django_db
+def test_import_distinguishes_same_ad_id_across_accounts(customer_user, monkeypatch):
+    from apps.accounts.models import User
+    from apps.telegram_ads.models import TelegramAdsConnection
+
+    other = User.objects.create_user(username="import-other", password="x", role=User.Role.CUSTOMER)
+    conn_a = TelegramAdsConnection.objects.create(
+        customer=customer_user.customer_profile,
+        connection_type=TelegramAdsConnection.Type.CUSTOMER_OWNED,
+        status=TelegramAdsConnection.Status.CONNECTED,
+        remote_account_id="acct-a",
+        currency="TON",
+        remaining_budget=1,
+        encrypted_access_token="enc",
+        token_fingerprint="a" * 64,
+        is_default=True,
+    )
+    conn_b = TelegramAdsConnection.objects.create(
+        customer=other.customer_profile,
+        connection_type=TelegramAdsConnection.Type.CUSTOMER_OWNED,
+        status=TelegramAdsConnection.Status.CONNECTED,
+        remote_account_id="acct-b",
+        currency="TON",
+        remaining_budget=1,
+        encrypted_access_token="enc2",
+        token_fingerprint="b" * 64,
+        is_default=True,
+    )
+
+    def fake_list(self):
+        return [{
+            "ad_id": 55,
+            "title": "shared id",
+            "promote_url": "https://t.me/x",
+            "status": "active",
+            "currency": "TON",
+        }]
+
+    monkeypatch.setattr(
+        "apps.telegram_ads.services.import_campaigns.connection_client",
+        lambda conn: type("C", (), {"list_advertisements": fake_list})(),
+    )
+    import_remote_campaigns_for_customer(
+        customer_user.customer_profile, connection=conn_a, fetch_statistics=False,
+    )
+    import_remote_campaigns_for_customer(
+        other.customer_profile, connection=conn_b, fetch_statistics=False,
+    )
+    assert TelegramAdvertisement.objects.filter(remote_ad_id="55").count() == 2
+    assert set(
+        TelegramAdvertisement.objects.filter(remote_ad_id="55").values_list("remote_account_id", flat=True)
+    ) == {"acct-a", "acct-b"}
+
+
+@pytest.mark.django_db
 def test_import_uses_connection_scoped_client(monkeypatch, customer_user):
     from apps.telegram_ads.models import TelegramAdsConnection
 
