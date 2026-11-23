@@ -1,0 +1,35 @@
+{% extends "app_shell.html" %}
+{% load core_filters %}
+{% block page_title %}اتصال API حساب مرکزی{% endblock %}
+{% block content %}
+<div class="app-stack operations-page ui-ops ga-ops-workspace">
+  {% include "includes/dash_header.html" with page_icon="key-round" title="اتصال API حساب مرکزی" subtitle="اتصال امن Telegram Ads برای تبلیغات مشتریان بدون پنل شخصی" %}
+  <div class="ops-context-strip"><div><strong>فقط مدیر پلتفرم</strong><span>توکن هرگز در صفحه و گزارش‌ها نمایش داده نمی‌شود.</span></div><a href="{% url 'operations:telegram_account' %}">گزارش حساب مرکزی</a></div>
+  <section class="ga-panel">
+    <header class="ga-panel-head"><div class="ga-panel-title"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="shield-check" %}</span><div><h2>اتصال حساب مرکزی</h2><p>پس از ثبت موفق، توکن رمزنگاری‌شده دیتابیس جایگزین تنظیم قدیمی سرور می‌شود.</p></div></div></header>
+    <div class="ga-panel-body form-stack">
+      {% if credential %}
+      <div class="finance-line"><span>حساب تأییدشده</span><strong>{{ credential.account_title|default:"حساب مرکزی" }}</strong></div>
+      <div class="finance-line"><span>شناسه</span><strong dir="ltr">{{ credential.remote_account_id }}</strong></div>
+      <div class="finance-line"><span>موجودی آخرین بررسی</span><strong dir="ltr">{{ credential.remaining_budget|floatformat:2 }} {{ credential.currency }}</strong></div>
+      <p class="muted">برای تمدید API، توکن جدید باید متعلق به همین حساب باشد؛ تعویض حساب مرکزی به حساب متفاوت مسدود است.</p>
+      {% else %}
+      <p class="muted">توکن مرکزی هنوز در دیتابیس ثبت نشده است. تا زمان ثبت، مسیر فعلی سرور برای کمپین‌های قدیمی حفظ می‌شود.</p>
+      {% endif %}
+      {% if encryption_ready %}
+      <form method="post" autocomplete="off" class="form-stack">
+        {% csrf_token %}
+        <div class="field">
+          <label for="platform-api-token">توکن API حساب مرکزی</label>
+          <input id="platform-api-token" name="api_token" type="password" dir="ltr" autocomplete="new-password" maxlength="4096" required placeholder="API Token">
+          <p class="field-help">فقط هویت و موجودی حساب بررسی می‌شود؛ تبلیغی ساخته نمی‌شود و اعتباری منتقل نخواهد شد.</p>
+        </div>
+        <button type="submit" class="btn btn-primary">{% if credential %}تأیید و تعویض توکن{% else %}ثبت اتصال مرکزی{% endif %}</button>
+      </form>
+      {% else %}
+      <p class="ui-studio-warning">برای ثبت ایمن توکن، ابتدا TELEGRAM_ADS_TOKEN_ENCRYPTION_KEY را با حداقل ۳۲ کاراکتر تصادفی در تنظیمات سرور قرار دهید.</p>
+      {% endif %}
+    </div>
+  </section>
+</div>
+{% endblock %}

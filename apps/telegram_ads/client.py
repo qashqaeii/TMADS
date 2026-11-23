@@ -77,12 +77,17 @@ class TelegramAdsClient:
     """Wrapper around telead.Client with environment write gates."""
 
     def __init__(self, token: str | None = None, *, account_id: str | None = None):
-        self.token = token or settings.TELEGRAM_ADS_API_TOKEN
+        # Explicit (customer-owned) credentials never fall back to the central token.
+        self._uses_platform_token = token is None
+        self.token = settings.TELEGRAM_ADS_API_TOKEN if token is None else token
         self.account_id = account_id
 
     def _ensure_configured(self) -> None:
+        if self._uses_platform_token:
+            from apps.telegram_ads.services.platform_credentials import active_platform_token
+            self.token = active_platform_token()
         if not self.token:
-            raise TelegramAdsNotConfigured("TELEGRAM_ADS_API_TOKEN is not set")
+            raise TelegramAdsNotConfigured("Telegram Ads API token is not configured")
 
     def _client(self):
         self._ensure_configured()

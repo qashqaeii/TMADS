@@ -162,6 +162,23 @@ class TelegramAdsConnection(UUIDModel, TimeStampedModel):
         return f"{self.customer_id}:{self.connection_type}:{self.remote_account_id}"
 
 
+class TelegramAdsPlatformCredential(UUIDModel, TimeStampedModel):
+    """One encrypted platform-manager API credential, separate from tenant tokens."""
+
+    slot = models.CharField(max_length=16, unique=True, default="primary", editable=False)
+    encrypted_access_token = models.TextField(blank=True)
+    token_fingerprint = models.CharField(max_length=64, blank=True)
+    remote_account_id = models.CharField(max_length=256, blank=True)
+    account_title = models.CharField(max_length=200, blank=True)
+    currency = models.CharField(max_length=8, blank=True)
+    remaining_budget = models.DecimalField(max_digits=24, decimal_places=9, default=0)
+    is_active = models.BooleanField(default=True)
+    last_checked_at = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return self.account_title or self.remote_account_id or "Telegram Ads platform account"
+
+
 class TargetBotCatalogEntry(UUIDModel, TimeStampedModel):
     """Curated internal bot catalog for Similar Bots recommendations (not Telegram HTML)."""
 

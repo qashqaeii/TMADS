@@ -255,8 +255,8 @@ def _missing_secrets() -> list[str]:
     missing = []
     if APP_ENV == "PRODUCTION" and SECRET_KEY.startswith("dev-"):
         missing.append("SECRET_KEY")
-    if APP_ENV == "PRODUCTION" and not TELEGRAM_ADS_API_TOKEN:
-        missing.append("TELEGRAM_ADS_API_TOKEN")
+    if APP_ENV == "PRODUCTION" and TELEGRAM_ADS_WRITE_ENABLED and not TELEGRAM_ADS_API_TOKEN and len(TELEGRAM_ADS_TOKEN_ENCRYPTION_KEY) < 32:
+        missing.append("TELEGRAM_ADS_API_TOKEN or TELEGRAM_ADS_TOKEN_ENCRYPTION_KEY (database token setup)")
     if APP_ENV == "PRODUCTION" and TELEGRAM_ADS_CUSTOMER_OWNED_ENABLED and len(TELEGRAM_ADS_TOKEN_ENCRYPTION_KEY) < 32:
         missing.append("TELEGRAM_ADS_TOKEN_ENCRYPTION_KEY (32+ characters)")
     if APP_ENV == "PRODUCTION" and PAYMENT_GATEWAY == "fake":

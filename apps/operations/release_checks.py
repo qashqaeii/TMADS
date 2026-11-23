@@ -64,7 +64,8 @@ def release_checks():
         configured(purpose) for purpose in settings.FARAZSMS_PATTERNS)),
         "کلید، خطوط و پترن‌های مستقل بررسی می‌شوند؛ ارسال واقعی نیازمند آزمون است.")
     add("sms_live", "آزمون ارسال و دریافت پیامک", False, "تحویل پیامک و عملکرد صف باید در محیط واقعی آزموده شود.", pending=True)
-    token = bool(settings.TELEGRAM_ADS_API_TOKEN)
+    from apps.telegram_ads.services.platform_credentials import platform_token_is_configured
+    token = platform_token_is_configured()
     add("telegram_token", "توکن API تبلیغات", token,
         "صرفاً وجود توکن بررسی می‌شود؛ مقدار، بخشی از آن یا شناسه قابل بازیابی نمایش داده نمی‌شود.")
     writes = bool(settings.TELEGRAM_ADS_WRITE_ENABLED and settings.TELEGRAM_ADS_PAID_SUBMISSION_ENABLED)

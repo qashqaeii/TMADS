@@ -15,7 +15,7 @@ from django.utils import timezone
 from apps.accounts.models import CustomerProfile
 from apps.core.models import AuditLog
 from apps.telegram_ads.client import TelegramAdsClient
-from apps.telegram_ads.models import RelatedAccountRequest, TelegramAdsConnection
+from apps.telegram_ads.models import RelatedAccountRequest, TelegramAdsConnection, TelegramAdsPlatformCredential
 
 SUPPORTED_CURRENCIES = frozenset({"TON", "EUR", "XTR"})
 
@@ -142,6 +142,13 @@ def connect_customer_owned_account(actor, raw_token: str) -> TelegramAdsConnecti
 
     client = TelegramAdsClient(token=token)
     snapshot = _account_snapshot(client)
+    if TelegramAdsPlatformCredential.objects.filter(
+        slot="primary", is_active=True, remote_account_id=snapshot["account_id"],
+    ).exists():
+        raise ValueError("حساب مرکزی پلتفرم را نمی‌توان به‌عنوان حساب شخصی مشتری متصل کرد.")
+    central_env = str(getattr(settings, "TELEGRAM_ADS_API_TOKEN", "") or "").strip()
+    if central_env and fingerprint == hashlib.sha256(central_env.encode("utf-8")).hexdigest():
+        raise ValueError("توکن حساب مرکزی پلتفرم نباید به مشتری متصل شود.")
     if TelegramAdsConnection.objects.filter(token_fingerprint=fingerprint).exclude(customer=profile).exists():
         raise ValueError("این توکن قبلاً به حساب مشتری دیگری متصل شده است.")
     if TelegramAdsConnection.objects.filter(remote_account_id=snapshot["account_id"]).exclude(customer=profile).exists():
