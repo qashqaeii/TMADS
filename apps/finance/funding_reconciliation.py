@@ -43,14 +43,30 @@ def fetch_transfer_status_payload(transfer: AccountFundingTransfer) -> dict:
     return TelegramAdsClient().get_account_transaction_status(transfer.transaction_id)
 
 
+def _validate_evidence_against_transfer(transfer: AccountFundingTransfer, evidence: dict) -> None:
+    """Re-check parsed evidence against the locked transfer row before persisting."""
+    status = evidence.get("status")
+    if status not in {"completed", "failed"}:
+        raise ValueError("وضعیت تطبیق معتبر نیست.")
+    if status == "completed":
+        try:
+            amount = Decimal(str(evidence.get("amount")))
+        except (InvalidOperation, TypeError, ValueError):
+            raise ValueError("مبلغ تراکنش قابل تأیید نیست.") from None
+        if amount != transfer.amount or evidence.get("currency") != transfer.currency:
+            raise ValueError("مبلغ یا ارز تراکنش با سند انتقال مطابقت ندارد.")
+        transaction_id = str(evidence.get("transaction_id") or "").strip()
+        if not transaction_id:
+            raise ValueError("شناسه تراکنش در تطبیق موجود نیست.")
+
+
 @transaction.atomic
 def apply_reconciled_transfer(transfer_id, *, actor, evidence: dict) -> AccountFundingTransfer:
     _manager(actor)
-    transfer = AccountFundingTransfer.objects.select_for_update().select_related(
-        "connection", "operation__advertisement__campaign",
-    ).get(pk=transfer_id)
+    transfer = AccountFundingTransfer.objects.select_for_update(of=("self",)).get(pk=transfer_id)
     if transfer.status != AccountFundingTransfer.Status.UNCERTAIN:
         raise ValueError("فقط انتقال‌های نیازمند تطبیق قابل بررسی هستند.")
+    _validate_evidence_against_transfer(transfer, evidence)
 
     if evidence["status"] == "completed":
         transfer.status = AccountFundingTransfer.Status.COMPLETED
@@ -58,11 +74,13 @@ def apply_reconciled_transfer(transfer_id, *, actor, evidence: dict) -> AccountF
         transfer.confirmed_at = timezone.now()
     else:
         transfer.status = AccountFundingTransfer.Status.FAILED
-        if transfer.operation_id and transfer.operation.action == "increase_budget":
-            from apps.finance.managed_budget_increase import release_managed_budget_reservation
+        if transfer.operation_id:
+            operation = transfer.operation
+            if operation and operation.action == "increase_budget":
+                from apps.finance.managed_budget_increase import release_managed_budget_reservation
 
-            campaign = transfer.operation.advertisement.campaign
-            release_managed_budget_reservation(campaign.customer, transfer.operation_id)
+                campaign = operation.advertisement.campaign
+                release_managed_budget_reservation(campaign.customer, transfer.operation_id)
 
     transfer.response_payload = {**(transfer.response_payload or {}), "reconciliation": evidence}
     transfer.save(update_fields=["status", "transaction_id", "response_payload", "confirmed_at", "updated_at"])
