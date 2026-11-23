@@ -76,8 +76,9 @@ def _model_to_dict(obj: Any) -> dict[str, Any]:
 class TelegramAdsClient:
     """Wrapper around telead.Client with environment write gates."""
 
-    def __init__(self, token: str | None = None):
+    def __init__(self, token: str | None = None, *, account_id: str | None = None):
         self.token = token or settings.TELEGRAM_ADS_API_TOKEN
+        self.account_id = account_id
 
     def _ensure_configured(self) -> None:
         if not self.token:
@@ -89,7 +90,7 @@ class TelegramAdsClient:
             from telead import Client
         except ImportError as exc:
             raise TelegramAdsNotConfigured("telead package not installed") from exc
-        return Client(self.token)
+        return Client(self.token, account_id=self.account_id)
 
     def _run(self, operation: str, fn: Callable[..., Any]) -> Any:
         with self._client() as client:
@@ -120,8 +121,22 @@ class TelegramAdsClient:
                 logger.warning("Telegram Ads API %s failed: %s", operation, exc, exc_info=True)
                 raise TelegramAdsError(_humanize_api_error(exc)) from exc
 
-    def get_account(self) -> dict[str, Any]:
-        return self._run("get_account", lambda client: _model_to_dict(client.get_current_account()))
+    def get_account(self, *, account_id: str | None = None) -> dict[str, Any]:
+        """Read the token's current account or one explicitly scoped related account."""
+        target_id = account_id or self.account_id
+
+        def _read(client):
+            if target_id:
+                rows = client.get_accounts_by_id([target_id])
+                if len(rows) != 1:
+                    raise TelegramAdsError("حساب تبلیغاتی موردنظر از تلگرام تأیید نشد.")
+                account = _model_to_dict(rows[0])
+                if str(account.get("account_id") or "") != str(target_id):
+                    raise TelegramAdsError("شناسه حساب برگشتی با حساب درخواستی یکسان نیست.")
+                return account
+            return _model_to_dict(client.get_current_account())
+
+        return self._run("get_account", _read)
 
     def list_advertisements(self) -> list[dict[str, Any]]:
         def _list(client):
@@ -408,3 +423,43 @@ class TelegramAdsClient:
                 return _model_to_dict(client.create_pixel_event(title, event_type, account_id=account_id, idempotency_key=key))
             raise ValueError("Unknown asset action")
         return self._run("customer_asset_create", perform)
+
+    def transfer_to_related_account(self, *, account_id: str, amount: float, idempotency_key: str):
+        """Transfer platform funds from the main account to one related account."""
+        if self.account_id:
+            raise ValueError("Account funding must originate from the platform main account.")
+        if not (settings.TELEGRAM_ADS_WRITE_ENABLED and settings.TELEGRAM_ADS_PAID_SUBMISSION_ENABLED):
+            raise TelegramAdsWriteDisabled("Account funding is disabled")
+
+        def _transfer(c):
+            result = c.increase_account_budget(
+                account_id, float(amount), idempotency_key=idempotency_key,
+            )
+            if getattr(result, "is_pending", False):
+                result = c.wait_for_transaction(result, timeout=60, interval=2)
+            return _model_to_dict(result)
+
+        return self._run("related_account_funding", _transfer)
+
+    def transfer_from_related_account(self, *, account_id: str, amount: float, idempotency_key: str):
+        """Return funds from one related account to the platform main account."""
+        if self.account_id:
+            raise ValueError("Account funding must settle to the platform main account.")
+        if not (settings.TELEGRAM_ADS_WRITE_ENABLED and settings.TELEGRAM_ADS_PAID_SUBMISSION_ENABLED):
+            raise TelegramAdsWriteDisabled("Account funding return is disabled")
+
+        def _transfer(c):
+            result = c.decrease_account_budget(
+                account_id, float(amount), idempotency_key=idempotency_key,
+            )
+            if getattr(result, "is_pending", False):
+                result = c.wait_for_transaction(result, timeout=60, interval=2)
+            return _model_to_dict(result)
+
+        return self._run("related_account_funding_return", _transfer)
+
+    def get_account_transaction_status(self, transaction_id: str):
+        return self._run(
+            "account_transaction_status",
+            lambda c: _model_to_dict(c.get_transaction_status(transaction_id)),
+        )

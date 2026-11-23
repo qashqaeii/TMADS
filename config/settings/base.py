@@ -176,6 +176,9 @@ TELEGRAM_ADS_MEDIA_UPLOAD_ENABLED = env.bool("TELEGRAM_ADS_MEDIA_UPLOAD_ENABLED"
 TELEGRAM_ADS_RELATED_ACCOUNTS_ENABLED = env.bool("TELEGRAM_ADS_RELATED_ACCOUNTS_ENABLED", default=False)
 TELEGRAM_ADS_WEBSITE_ENABLED = env.bool("TELEGRAM_ADS_WEBSITE_ENABLED", default=False)
 TELEGRAM_ADS_CUSTOMER_ASSETS_ENABLED = env.bool("TELEGRAM_ADS_CUSTOMER_ASSETS_ENABLED", default=False)
+TELEGRAM_ADS_CUSTOMER_OWNED_ENABLED = env.bool("TELEGRAM_ADS_CUSTOMER_OWNED_ENABLED", default=False)
+# Stable high-entropy server-only secret for Fernet token encryption. Never reuse SECRET_KEY.
+TELEGRAM_ADS_TOKEN_ENCRYPTION_KEY = env("TELEGRAM_ADS_TOKEN_ENCRYPTION_KEY", default="")
 # Similar Bots — catalog recommendations gated by official getTargetBot (no web-panel session).
 SIMILAR_BOTS_ENABLED = env.bool("SIMILAR_BOTS_ENABLED", default=True)
 SIMILAR_CHANNELS_ENABLED = env.bool("SIMILAR_CHANNELS_ENABLED", default=True)
@@ -254,6 +257,8 @@ def _missing_secrets() -> list[str]:
         missing.append("SECRET_KEY")
     if APP_ENV == "PRODUCTION" and not TELEGRAM_ADS_API_TOKEN:
         missing.append("TELEGRAM_ADS_API_TOKEN")
+    if APP_ENV == "PRODUCTION" and TELEGRAM_ADS_CUSTOMER_OWNED_ENABLED and len(TELEGRAM_ADS_TOKEN_ENCRYPTION_KEY) < 32:
+        missing.append("TELEGRAM_ADS_TOKEN_ENCRYPTION_KEY (32+ characters)")
     if APP_ENV == "PRODUCTION" and PAYMENT_GATEWAY == "fake":
         missing.append("PAYMENT_GATEWAY (production requires real gateway)")
     return missing
