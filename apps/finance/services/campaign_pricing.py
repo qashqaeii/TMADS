@@ -65,7 +65,11 @@ def build_campaign_quote(advertising_budget_irr: int) -> dict:
     if advertising_cost > advertising_budget_irr:
         raise InsufficientLiquidityError("عمق بازار برای این بودجه کافی نیست.")
 
-    fee_percent = settings.PLATFORM_SERVICE_FEE_PERCENT
+    # Prefer DB fee rule when active; fall back to settings for fresh quotes only.
+    from apps.finance.models import PlatformFeeRule
+
+    fee_rule = PlatformFeeRule.objects.filter(is_active=True).order_by("-created_at").first()
+    fee_percent = int(fee_rule.percent) if fee_rule else int(settings.PLATFORM_SERVICE_FEE_PERCENT)
     buffer_percent = settings.TON_PRICING_RISK_BUFFER_PERCENT
     service_fee = advertising_cost * fee_percent // 100
     risk_buffer = advertising_cost * buffer_percent // 100

@@ -115,56 +115,98 @@ def topup_view(request):
     )
 
 
-@login_required
-@customer_required
+def _topup_return_url(request):
+    """Receipt stays private; logged-in users go to wallet, others to login."""
+    if request.user.is_authenticated:
+        return redirect("finance:wallet")
+    login_url = reverse("accounts:login")
+    next_url = reverse("finance:wallet")
+    return redirect(f"{login_url}?next={next_url}")
+
+
+def verify_zarinpal_topup(payment_id, *, expected_authority: str) -> None:
+    """Server-side Zarinpal verify; network I/O happens outside the row lock."""
+    with transaction.atomic():
+        payment = Payment.objects.select_for_update().filter(
+            pk=payment_id, gateway="zarinpal", order__isnull=True
+        ).first()
+        if (
+            not payment
+            or not expected_authority
+            or payment.provider_reference != expected_authority
+            or payment.status != Payment.Status.REDIRECTED
+            or payment.provider_amount_irr != payment.amount_irr
+        ):
+            return
+        amount_irr = payment.provider_amount_irr
+        provider_reference = payment.provider_reference
+
+    gateway = get_payment_gateway("zarinpal")
+    result = gateway.verify_payment(provider_reference=provider_reference, amount_irr=amount_irr)
+
+    with transaction.atomic():
+        payment = Payment.objects.select_for_update().filter(pk=payment_id, gateway="zarinpal").first()
+        if not payment or payment.status != Payment.Status.REDIRECTED:
+            return
+        PaymentVerification.objects.create(
+            payment=payment,
+            success=result.success,
+            raw_payload={
+                "provider_reference_matched": result.provider_reference == payment.provider_reference,
+                "amount_irr": payment.provider_amount_irr,
+                "code": ((result.raw or {}).get("response") or {}).get("data", {}).get("code"),
+            },
+        )
+        if result.success and result.provider_reference == payment.provider_reference:
+            complete_topup_payment(payment)
+
+
 @require_GET
-@transaction.atomic
 def topup_callback(request, payment_id):
-    payment = get_object_or_404(
-        Payment.objects.select_for_update(),
-        id=payment_id, customer=request.user.customer_profile,
-    )
+    """
+    Zarinpal/fake return URL.
+    Verification must not depend on browser session; only a matching stored Authority may verify.
+    """
+    payment = Payment.objects.filter(pk=payment_id, order__isnull=True).first()
+    if not payment:
+        return redirect("accounts:login")
     if payment.status == Payment.Status.VERIFIED:
-        return redirect("finance:wallet")
-    if payment.order_id is not None or payment.status != Payment.Status.REDIRECTED or not payment.provider_reference:
+        return _topup_return_url(request)
+    if payment.status != Payment.Status.REDIRECTED or not payment.provider_reference:
         messages.error(request, "پرداخت معتبر یا آماده بررسی نیست.")
-        return redirect("finance:wallet")
+        return _topup_return_url(request)
+
     if payment.gateway == "fake":
-        if verify_fake_payment(payment):
-            messages.success(request, "پرداخت آزمایشی با موفقیت تأیید شد و کیف پول شارژ شد.")
-        else:
-            messages.error(request, "پرداخت آزمایشی مجاز نیست.")
-        return redirect("finance:wallet")
+        # Fake top-up remains an authenticated operator/customer action.
+        if not request.user.is_authenticated:
+            return redirect("accounts:login")
+        with transaction.atomic():
+            locked = Payment.objects.select_for_update().filter(pk=payment.pk).first()
+            if locked and verify_fake_payment(locked):
+                messages.success(request, "پرداخت آزمایشی با موفقیت تأیید شد و کیف پول شارژ شد.")
+            else:
+                messages.error(request, "پرداخت آزمایشی مجاز نیست.")
+        return _topup_return_url(request)
 
     authority = request.GET.get("Authority", "")
     status_param = request.GET.get("Status", "")
     if payment.gateway != "zarinpal" or authority != payment.provider_reference:
         messages.error(request, "شناسه پرداخت با سفارش ثبت‌شده مطابقت ندارد.")
-        return redirect("finance:wallet")
+        return _topup_return_url(request)
     if status_param != "OK":
         messages.warning(request, "پرداخت تکمیل نشده؛ در صورت پرداخت از پشتیبانی پیگیری کنید.")
-        return redirect("finance:wallet")
-
-    # Old pending payments were created without an explicit currency contract.
-    # Do not reinterpret them with the new Rial adapter.
+        return _topup_return_url(request)
     if payment.provider_amount_irr != payment.amount_irr:
         messages.error(request, "مبلغ این پرداخت قدیمی نیازمند بررسی پشتیبانی است.")
-        return redirect("finance:wallet")
-    gateway = get_payment_gateway(payment.gateway)
-    result = gateway.verify_payment(provider_reference=payment.provider_reference, amount_irr=payment.provider_amount_irr)
-    PaymentVerification.objects.create(
-        payment=payment, success=result.success,
-        raw_payload={"provider_reference_matched": result.provider_reference == payment.provider_reference,
-                     "amount_irr": payment.provider_amount_irr,
-                     "code": ((result.raw or {}).get("response") or {}).get("data", {}).get("code")},
-    )
-    if result.success and result.provider_reference == payment.provider_reference:
-        complete_topup_payment(payment)
+        return _topup_return_url(request)
+
+    verify_zarinpal_topup(payment.pk, expected_authority=authority)
+    payment.refresh_from_db()
+    if payment.status == Payment.Status.VERIFIED:
         messages.success(request, "پرداخت با موفقیت تأیید شد و کیف پول شارژ شد.")
     else:
-        # An uncertain external result must remain retryable; never mark verified on callback data alone.
         messages.error(request, "تأیید پرداخت هنوز انجام نشده است. دوباره تلاش کنید یا با پشتیبانی تماس بگیرید.")
-    return redirect("finance:wallet")
+    return _topup_return_url(request)
 
 @login_required
 @customer_required

@@ -71,8 +71,18 @@ def profile_view(request):
             messages.success(request, "آواتار ذخیره شد.")
             return redirect("accounts:profile")
         else:
-            profile.display_name = request.POST.get("display_name", "").strip()
-            profile.company_name = request.POST.get("company_name", "").strip()
+            display_name = request.POST.get("display_name", "").strip()
+            company_name = request.POST.get("company_name", "").strip()
+            display_limit = profile._meta.get_field("display_name").max_length
+            company_limit = profile._meta.get_field("company_name").max_length
+            if len(display_name) > display_limit or len(company_name) > company_limit:
+                messages.error(
+                    request,
+                    f"نام نمایشی حداکثر {display_limit} و نام کسب‌وکار حداکثر {company_limit} کاراکتر است.",
+                )
+                return redirect("accounts:profile")
+            profile.display_name = display_name
+            profile.company_name = company_name
             profile.save(update_fields=["display_name", "company_name", "updated_at"])
             messages.success(request, "پروفایل به‌روزرسانی شد.")
             return redirect("accounts:profile")

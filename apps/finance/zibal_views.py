@@ -85,28 +85,51 @@ def payment_start(request, payment_id):
     })
 
 
-@transaction.atomic
 def verify_zibal(payment_id, *, expected_track):
-    payment = Payment.objects.select_for_update().filter(pk=payment_id, gateway="zibal", order__isnull=True).first()
-    if not payment or not expected_track or payment.provider_reference != expected_track:
-        return
-    if payment.status != Payment.Status.REDIRECTED or payment.provider_amount_irr != payment.amount_irr:
-        return
-    latest = payment.verifications.order_by("-created_at").first()
-    if latest and (timezone.now() - latest.created_at).total_seconds() < 10:
-        return
-    result = get_payment_gateway("zibal").verify_payment(provider_reference=expected_track,
-                                                         amount_irr=payment.amount_irr)
+    """Verify Zibal outside a long-held row lock; finalize under a short atomic section."""
+    with transaction.atomic():
+        payment = Payment.objects.select_for_update().filter(
+            pk=payment_id, gateway="zibal", order__isnull=True
+        ).first()
+        if not payment or not expected_track or payment.provider_reference != expected_track:
+            return
+        if payment.status != Payment.Status.REDIRECTED or payment.provider_amount_irr != payment.amount_irr:
+            return
+        latest = payment.verifications.order_by("-created_at").first()
+        if latest and (timezone.now() - latest.created_at).total_seconds() < 10:
+            return
+        amount_irr = payment.amount_irr
+
+    result = get_payment_gateway("zibal").verify_payment(
+        provider_reference=expected_track, amount_irr=amount_irr
+    )
     audit = result.raw or {}
-    matches = (result.success and result.provider_reference == expected_track
-               and type(audit.get("paid_amount_irr")) is int
-               and audit.get("paid_amount_irr") == payment.amount_irr and bool(audit.get("bank_reference")))
-    PaymentVerification.objects.create(payment=payment, success=bool(matches), raw_payload={
-        "code": audit.get("code"), "paid_amount_irr": audit.get("paid_amount_irr"),
-        "bank_reference": audit.get("bank_reference", ""), "error": audit.get("error", ""),
-    })
-    if matches:
-        complete_topup_payment(payment, deposit_description="شارژ کیف پول (زیبال)")
+    matches = (
+        result.success
+        and result.provider_reference == expected_track
+        and type(audit.get("paid_amount_irr")) is int
+        and audit.get("paid_amount_irr") == amount_irr
+        and bool(audit.get("bank_reference"))
+    )
+
+    with transaction.atomic():
+        payment = Payment.objects.select_for_update().filter(
+            pk=payment_id, gateway="zibal", order__isnull=True
+        ).first()
+        if not payment or payment.status != Payment.Status.REDIRECTED:
+            return
+        PaymentVerification.objects.create(
+            payment=payment,
+            success=bool(matches),
+            raw_payload={
+                "code": audit.get("code"),
+                "paid_amount_irr": audit.get("paid_amount_irr"),
+                "bank_reference": audit.get("bank_reference", ""),
+                "error": audit.get("error", ""),
+            },
+        )
+        if matches:
+            complete_topup_payment(payment, deposit_description="شارژ کیف پول (زیبال)")
     # A definitive unpaid result is not proof of cancellation forever. Keep the
     # original attempt available for safe rechecking; do not encourage a new charge.
 

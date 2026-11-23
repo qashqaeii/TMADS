@@ -42,3 +42,32 @@ def test_callback_rejects_wrong_authority_without_provider_call(client, customer
     payment.refresh_from_db()
     assert payment.provider_reference == "stored"
     assert payment.status != Payment.Status.VERIFIED
+
+
+@pytest.mark.django_db
+def test_zarinpal_callback_verifies_without_browser_session(client, customer_user):
+    payment = Payment.objects.create(
+        customer=customer_user.customer_profile,
+        amount_irr=50_000,
+        provider_amount_irr=50_000,
+        gateway="zarinpal",
+        provider_reference="auth-sessionless",
+        idempotency_key="sessionless",
+        status=Payment.Status.REDIRECTED,
+    )
+
+    class Result:
+        success = True
+        provider_reference = "auth-sessionless"
+        raw = {"response": {"data": {"code": 100}}}
+
+    with patch("apps.finance.views.get_payment_gateway") as gateway:
+        gateway.return_value.verify_payment.return_value = Result()
+        response = client.get(
+            reverse("finance:topup_callback", args=[payment.id]),
+            {"Authority": "auth-sessionless", "Status": "OK"},
+        )
+    assert response.status_code in {302, 303}
+    payment.refresh_from_db()
+    assert payment.status == Payment.Status.VERIFIED
+
