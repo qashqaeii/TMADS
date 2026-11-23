@@ -10,7 +10,7 @@ from apps.accounts.permissions import staff_ops_required
 from apps.campaigns.models import Campaign, CampaignStatusHistory, TelegramAdvertisement, RemoteAdOperation
 from apps.core.models import AuditLog
 from django.utils import timezone
-from apps.finance.models import AdvertisingOrder, ExchangeRate, RefundRequest, Wallet
+from apps.finance.models import AccountFundingTransfer, AdvertisingOrder, ExchangeRate, RefundRequest, Wallet
 from apps.finance.refunds import approve_refund, reject_refund, mark_refund_in_review
 from apps.notifications.services import notify_customer
 from apps.telegram_ads.client import TelegramAdsClient
@@ -97,6 +97,9 @@ def overview(request):
             ).count(),
             "open_refunds": RefundRequest.objects.filter(
                 status__in=[RefundRequest.Status.OPEN, RefundRequest.Status.REVIEW],
+            ).count(),
+            "uncertain_funding": AccountFundingTransfer.objects.filter(
+                status=AccountFundingTransfer.Status.UNCERTAIN,
             ).count(),
             "wallet_liabilities": Wallet.objects.aggregate(
                 available=Sum("available_irr"),

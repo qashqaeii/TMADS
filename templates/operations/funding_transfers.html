@@ -1,0 +1,61 @@
+{% extends "app_shell.html" %}
+{% load core_filters %}
+{% block page_title %}تطبیق انتقال اعتبار{% endblock %}
+{% block container_class %}container-wide{% endblock %}
+{% block content %}
+<div class="app-stack operations-page ui-ops ga-ops-premium ga-ops-workspace">
+{% include "includes/dash_header.html" with page_icon="repeat" eyebrow="مالی" title="انتقال‌های اعتبار حساب" subtitle="بررسی نتایج نامطمئن بدون اجرای مجدد انتقال" %}
+<div class="ops-context-strip">
+  <div><strong>{{ uncertain_count|format_count }} انتقال</strong><span>نیازمند تطبیق</span></div>
+  <a href="{% url 'operations:overview' %}">مرکز عملیات</a>
+</div>
+<section class="filter-exec-shell ga-ops-table-filter" aria-label="فیلتر انتقال">
+  <form method="get" class="filter-exec ops-filter-bar">
+    <div class="filter-exec__grid filter-exec__grid--inline">
+      <div class="filter-exec__field">
+        <label class="filter-exec__label" for="fund-status">وضعیت</label>
+        <select id="fund-status" class="filter-exec__control" name="status">
+          <option value="uncertain" {% if filter_status == 'uncertain' %}selected{% endif %}>نیازمند تطبیق</option>
+          <option value="executing" {% if filter_status == 'executing' %}selected{% endif %}>در حال اجرا</option>
+          <option value="completed" {% if filter_status == 'completed' %}selected{% endif %}>تأیید‌شده</option>
+          <option value="failed" {% if filter_status == 'failed' %}selected{% endif %}>ناموفق</option>
+          <option value="all" {% if filter_status == 'all' %}selected{% endif %}>همه</option>
+        </select>
+      </div>
+      <div class="ops-filter-actions"><button class="btn btn-primary" type="submit">اعمال فیلتر</button></div>
+    </div>
+  </form>
+</section>
+{% if transfers %}
+<div class="table-wrap" tabindex="0" role="region" aria-label="فهرست انتقال اعتبار">
+  <table class="data-table">
+    <thead><tr><th scope="col">مشتری</th><th scope="col">مبلغ</th><th scope="col">وضعیت</th><th scope="col">شناسه تراکنش</th><th scope="col">منبع</th><th scope="col">اقدام</th></tr></thead>
+    <tbody>
+    {% for t in transfers %}
+      <tr>
+        <td>{{ t.connection.customer }}</td>
+        <td dir="ltr"><bdi>{{ t.amount }} {{ t.currency }}</bdi></td>
+        <td><span class="status {% if t.status == 'completed' %}status-active{% elif t.status == 'uncertain' %}status-warn{% elif t.status == 'failed' %}status-danger{% else %}status-info{% endif %}">{{ t.get_status_display }}</span></td>
+        <td class="tabnums"><bdi>{{ t.transaction_id|default:"—" }}</bdi></td>
+        <td>{% if t.order_id %}سفارش{% elif t.operation_id %}عملیات بودجه{% else %}—{% endif %}</td>
+        <td>
+          {% if t.status == 'uncertain' and t.transaction_id %}
+          <form method="post" class="ui-inline-form">{% csrf_token %}
+            <input type="hidden" name="transfer_id" value="{{ t.pk }}">
+            <input type="hidden" name="action" value="reconcile">
+            <button type="submit" class="btn btn-secondary btn-sm" data-confirm-title="تطبیق انتقال" data-confirm-message="وضعیت از تلگرام فقط خوانده می‌شود و انتقال دوباره اجرا نمی‌شود." data-confirm-label="تطبیق" data-confirm-tone="primary">تطبیق با تلگرام</button>
+          </form>
+          {% elif t.status == 'uncertain' %}
+          <span class="muted">شناسه تراکنش ندارد</span>
+          {% else %}—{% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="ui-empty"><h2>انتقالی یافت نشد</h2><p>با فیلتر انتخابی موردی برای نمایش وجود ندارد.</p></div>
+{% endif %}
+</div>
+{% endblock %}

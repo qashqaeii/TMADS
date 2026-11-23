@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import views, account_reports, release_views, sms_views
+from . import views, account_reports, release_views, sms_views, funding_views
 from apps.telegram_ads.related_views import ops_related_accounts
 from apps.telegram_ads.platform_token_views import platform_api_token
 from apps.campaigns.remote_views import remote_operations
@@ -21,4 +21,5 @@ urlpatterns = [
     path("release-readiness/", release_views.release_readiness, name="release_readiness"),
     path("audit/", views.audit_logs, name="audit"),
     path("refunds/", views.refunds_ops, name="refunds"),
+    path("funding-transfers/", funding_views.funding_transfers_ops, name="funding_transfers"),
 ]
