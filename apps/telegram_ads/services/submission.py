@@ -40,7 +40,7 @@ def _claim_customer_owned_submission(campaign_id):
     from apps.policies.services.preflight import assert_submission_ready
 
     with transaction.atomic():
-        campaign = Campaign.objects.select_for_update().select_related(
+        campaign = Campaign.objects.select_for_update(of=("self",)).select_related(
             "telegram_connection", "telegram_connection__related_account",
         ).get(pk=campaign_id)
         if campaign.status != Campaign.Status.READY_FOR_SUBMISSION:
@@ -89,7 +89,7 @@ def _claim_submission(campaign_id):
     from apps.policies.services.preflight import assert_submission_ready
 
     with transaction.atomic():
-        campaign = Campaign.objects.select_for_update().select_related(
+        campaign = Campaign.objects.select_for_update(of=("self",)).select_related(
             "telegram_connection", "telegram_connection__related_account",
         ).get(pk=campaign_id)
         order = require_submission_order(campaign, lock=True)
@@ -242,7 +242,7 @@ def submit_campaign_to_telegram(campaign: Campaign) -> TelegramAdvertisement:
             _fund_platform_managed_account(campaign, order)
         execute_create_ad(campaign, mode=ExecutionMode.LIVE)
         with transaction.atomic():
-            current = Campaign.objects.select_for_update().select_related("telegram_connection").get(pk=campaign.pk)
+            current = Campaign.objects.select_for_update(of=("self",)).select_related("telegram_connection").get(pk=campaign.pk)
             ad = TelegramAdvertisement.objects.get(campaign=current)
             if not ad.remote_ad_id:
                 raise TelegramAdsError("شناسه تبلیغ برای تطبیق موجود نیست.")

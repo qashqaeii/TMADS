@@ -307,7 +307,7 @@
   color: inherit !important;
 }
 .ui-final.is-app .ui-campaign-list .campaign-kpi-ribbon__cell--lead .campaign-kpi-ribbon__glyph {
-  background: #e8f1fc !important;
+  background: transparent !important;
   color: #146ca8 !important;
 }
 @media (max-width: 900px) {

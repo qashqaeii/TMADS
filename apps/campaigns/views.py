@@ -366,7 +366,7 @@ def campaign_wizard(request, campaign_id=None):
         and campaign.telegram_connection.connection_type == "customer_owned"
     )
     if request.method == "POST":
-        campaign = Campaign.objects.select_for_update().select_related("telegram_connection").get(pk=campaign.pk)
+        campaign = Campaign.objects.select_for_update(of=("self",)).select_related("telegram_connection").get(pk=campaign.pk)
         is_customer_owned = bool(
             campaign.telegram_connection_id
             and campaign.telegram_connection.connection_type == "customer_owned"
