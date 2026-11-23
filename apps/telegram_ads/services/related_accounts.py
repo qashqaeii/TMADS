@@ -9,6 +9,7 @@ from apps.core.models import AuditLog
 from apps.telegram_ads.models import RelatedAccountRequest
 from apps.telegram_ads.client import TelegramAdsClient
 from apps.telegram_ads.exceptions import TelegramAdsError
+from apps.telegram_ads.services.account_connections import ensure_platform_managed_connection
 from apps.policies.services.preflight import CampaignPolicyPreflight
 
 class RelatedAccountForm(forms.Form):
@@ -84,14 +85,28 @@ def execute_account(row_id,actor):
             row.details={}  # minimize retained company contact information
             row.save(update_fields=["remote_account_id","status","details","updated_at"])
             audit(row,actor,"provisioned")
+        try:
+            ensure_platform_managed_connection(row, actor=actor)
+        except Exception as connection_exc:
+            RelatedAccountRequest.objects.filter(pk=row_id).update(
+                note="حساب تلگرام ایجاد شده؛ تأیید اتصال داخل TMADS نیازمند به‌روزرسانی است."
+            )
+            raise TelegramAdsError("حساب در تلگرام ایجاد شد؛ تأیید اتصال نیازمند بررسی مجدد است.") from connection_exc
         return row
     except Exception as exc:
         with transaction.atomic():
             row=RelatedAccountRequest.objects.select_for_update().get(pk=row_id)
-            row.status=RelatedAccountRequest.Status.UNCERTAIN
-            row.note="نتیجه ایجاد حساب نیازمند تطبیق است؛ اجرای مجدد مجاز نیست."
-            row.save(update_fields=["status","note","updated_at"])
-            audit(row,actor,"uncertain")
+            if row.status == RelatedAccountRequest.Status.PROVISIONED:
+                row.note = row.note or "حساب ایجاد شده؛ اتصال نیازمند تطبیق است."
+                row.save(update_fields=["note","updated_at"])
+                audit(row,actor,"connection_uncertain")
+            else:
+                row.status=RelatedAccountRequest.Status.UNCERTAIN
+                row.note="نتیجه ایجاد حساب نیازمند تطبیق است؛ اجرای مجدد مجاز نیست."
+                row.save(update_fields=["status","note","updated_at"])
+                audit(row,actor,"uncertain")
+        if isinstance(exc, TelegramAdsError):
+            raise
         raise TelegramAdsError("ایجاد حساب نیازمند تطبیق است؛ درخواست را دوباره اجرا نکنید.") from exc
 
 @transaction.atomic

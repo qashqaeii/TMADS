@@ -52,6 +52,13 @@ class Campaign(TenantOwnedModel):
         CHANNELS = "channels", "داخل کانال‌ها"
 
     customer = models.ForeignKey(CustomerProfile, on_delete=models.CASCADE, related_name="campaigns")
+    telegram_connection = models.ForeignKey(
+        "telegram_ads.TelegramAdsConnection",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="campaigns",
+    )
     project = models.ForeignKey(
         AdvertisingProject,
         on_delete=models.SET_NULL,
@@ -74,6 +81,9 @@ class Campaign(TenantOwnedModel):
 
     budget_irr = models.BigIntegerField(default=0)
     daily_cap_irr = models.BigIntegerField(default=0)
+    account_budget_amount = models.DecimalField(max_digits=24, decimal_places=9, default=0)
+    account_daily_budget_limit = models.DecimalField(max_digits=24, decimal_places=9, default=0)
+    budget_currency = models.CharField(max_length=8, blank=True)
     cpm_bid = models.DecimalField(max_digits=12, decimal_places=4, null=True, blank=True)
     schedule_start = models.DateTimeField(null=True, blank=True)
     schedule_end = models.DateTimeField(null=True, blank=True)
@@ -105,6 +115,7 @@ class CampaignTargeting(TenantOwnedModel):
 class TelegramAdvertisement(TenantOwnedModel):
     campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE, related_name="remote_ads")
     remote_ad_id = models.CharField(max_length=64, blank=True, db_index=True)
+    remote_account_id = models.CharField(max_length=256, blank=True, db_index=True)
     remote_status = models.CharField(max_length=64, blank=True)
     remote_status_raw = models.JSONField(default=dict, blank=True)
     placement = models.CharField(max_length=64, blank=True)
@@ -112,10 +123,17 @@ class TelegramAdvertisement(TenantOwnedModel):
 
     class Meta:
         constraints = [
+            # Legacy ads without account scope keep global uniqueness of remote_ad_id.
             models.UniqueConstraint(
                 fields=["remote_ad_id"],
-                condition=~models.Q(remote_ad_id=""),
-                name="unique_remote_ad_id_when_set",
+                condition=models.Q(remote_account_id="") & ~models.Q(remote_ad_id=""),
+                name="unique_legacy_remote_ad_id_when_set",
+            ),
+            # Account-scoped uniqueness: the same remote ad id may exist on different accounts.
+            models.UniqueConstraint(
+                fields=["remote_account_id", "remote_ad_id"],
+                condition=~models.Q(remote_ad_id="") & ~models.Q(remote_account_id=""),
+                name="unique_remote_ad_per_account",
             ),
         ]
 

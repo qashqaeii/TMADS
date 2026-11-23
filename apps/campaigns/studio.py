@@ -297,15 +297,35 @@ def apply_studio_step(campaign: Campaign, step: int, data, files=None) -> None:
         errors = validate_budget_inputs(campaign, data, strict=False)
         if errors:
             raise ValueError("؛ ".join(errors))
-        if "budget_toman" in data:
-            from apps.finance.services.money import toman_to_irr
+        direct = bool(
+            campaign.telegram_connection_id
+            and campaign.telegram_connection.connection_type == "customer_owned"
+        )
+        if direct:
+            if "account_budget_amount" in data:
+                campaign.account_budget_amount = parse_studio_decimal_amount(
+                    data.get("account_budget_amount")
+                ) or Decimal("0")
+            if "account_daily_budget_limit" in data:
+                campaign.account_daily_budget_limit = parse_studio_decimal_amount(
+                    data.get("account_daily_budget_limit")
+                ) or Decimal("0")
+            campaign.budget_currency = campaign.telegram_connection.currency
+            campaign.budget_irr = 0
+            campaign.daily_cap_irr = 0
+        else:
+            if "budget_toman" in data:
+                from apps.finance.services.money import toman_to_irr
 
-            campaign.budget_irr = toman_to_irr(parse_studio_int_amount(data.get("budget_toman")))
-        if "daily_cap_toman" in data:
-            from apps.finance.services.money import toman_to_irr
+                campaign.budget_irr = toman_to_irr(parse_studio_int_amount(data.get("budget_toman")))
+            if "daily_cap_toman" in data:
+                from apps.finance.services.money import toman_to_irr
 
-            raw_daily = parse_studio_int_amount(data.get("daily_cap_toman"))
-            campaign.daily_cap_irr = toman_to_irr(raw_daily) if raw_daily else 0
+                raw_daily = parse_studio_int_amount(data.get("daily_cap_toman"))
+                campaign.daily_cap_irr = toman_to_irr(raw_daily) if raw_daily else 0
+            campaign.account_budget_amount = 0
+            campaign.account_daily_budget_limit = 0
+            campaign.budget_currency = ""
         if "cpm_bid" in data:
             campaign.cpm_bid = parse_studio_decimal_amount(data.get("cpm_bid"))
         title = (data.get("campaign_name") or data.get("ad_title") or "").strip()
@@ -378,42 +398,80 @@ def parse_studio_decimal_amount(raw: Any) -> Decimal | None:
 
 def validate_budget_inputs(campaign, data, *, strict):
     errors = []
-    def amount(key, previous):
-        raw = data.get(key)
-        if raw is None:
-            return previous
-        try:
-            from apps.finance.services.money import toman_to_irr
+    direct = bool(
+        campaign.telegram_connection_id
+        and campaign.telegram_connection.connection_type == "customer_owned"
+    )
+    if direct:
+        currency = campaign.telegram_connection.currency
+        precision = {"TON": 2, "EUR": 2, "XTR": 0}.get(currency)
+        if precision is None:
+            return ["ارز حساب اختصاصی برای بودجه‌گذاری پشتیبانی نمی‌شود."]
+        quantum = Decimal(1).scaleb(-precision)
 
-            tomans = parse_studio_int_amount(raw)
-            return toman_to_irr(tomans) if tomans else 0
-        except (TypeError, ValueError):
-            errors.append("بودجه و سقف روزانه باید عدد صحیح نامنفی باشند.")
-            return previous
-    budget = amount("budget_toman", campaign.budget_irr)
-    daily = amount("daily_cap_toman", campaign.daily_cap_irr)
-    if strict:
-        from apps.core.dates import to_persian_digits
-        from apps.finance.services.money import (
-            irr_to_toman_int,
-            minimum_advertising_budget_irr,
-        )
+        def direct_amount(key, previous):
+            raw = data.get(key)
+            if raw is None:
+                return Decimal(str(previous or 0))
+            try:
+                value = parse_studio_decimal_amount(raw)
+                if value is None:
+                    value = Decimal("0")
+                if not value.is_finite() or value < 0 or value > Decimal("999999999999"):
+                    raise ValueError
+                if value != value.quantize(quantum):
+                    raise ValueError
+                return value
+            except (InvalidOperation, TypeError, ValueError):
+                errors.append(f"مبالغ حساب {currency} باید با دقت مجاز همان ارز وارد شوند.")
+                return Decimal(str(previous or 0))
 
-        min_irr = minimum_advertising_budget_irr()
-        if min_irr and budget < min_irr:
-            min_toman = irr_to_toman_int(min_irr)
-            min_fa = to_persian_digits(f"{min_toman:,}".replace(",", "٬"))
-            errors.append(f"حداقل بودجه معادل ۱ گرام است (حدود {min_fa} تومان با نرخ روز).")
-    if strict and daily > budget:
-        errors.append("سقف روزانه نباید بیشتر از بودجه کل باشد.")
+        budget = direct_amount("account_budget_amount", campaign.account_budget_amount)
+        daily = direct_amount("account_daily_budget_limit", campaign.account_daily_budget_limit)
+        if strict and budget <= 0:
+            errors.append("بودجه کمپین باید بیشتر از صفر باشد.")
+        if strict and daily > budget:
+            errors.append("سقف روزانه نباید بیشتر از بودجه کل باشد.")
+        cpm_precision = precision
+    else:
+        def amount(key, previous):
+            raw = data.get(key)
+            if raw is None:
+                return previous
+            try:
+                from apps.finance.services.money import toman_to_irr
+
+                tomans = parse_studio_int_amount(raw)
+                return toman_to_irr(tomans) if tomans else 0
+            except (TypeError, ValueError):
+                errors.append("بودجه و سقف روزانه باید عدد صحیح نامنفی باشند.")
+                return previous
+        budget = amount("budget_toman", campaign.budget_irr)
+        daily = amount("daily_cap_toman", campaign.daily_cap_irr)
+        if strict:
+            from apps.core.dates import to_persian_digits
+            from apps.finance.services.money import (
+                irr_to_toman_int,
+                minimum_advertising_budget_irr,
+            )
+
+            min_irr = minimum_advertising_budget_irr()
+            if min_irr and budget < min_irr:
+                min_toman = irr_to_toman_int(min_irr)
+                min_fa = to_persian_digits(f"{min_toman:,}".replace(",", "٬"))
+                errors.append(f"حداقل بودجه معادل ۱ گرام است (حدود {min_fa} تومان با نرخ روز).")
+        if strict and daily > budget:
+            errors.append("سقف روزانه نباید بیشتر از بودجه کل باشد.")
+        cpm_precision = 2
     raw_cpm = data.get("cpm_bid")
     if raw_cpm not in (None, ""):
         try:
             cpm = parse_studio_decimal_amount(raw_cpm)
-            if cpm is None or not 0 < cpm <= Decimal("99999999.99") or cpm != cpm.quantize(Decimal("0.01")):
+            quantum = Decimal(1).scaleb(-cpm_precision)
+            if cpm is None or not 0 < cpm <= Decimal("99999999.99") or cpm != cpm.quantize(quantum):
                 raise ValueError
         except (InvalidOperation, TypeError, ValueError):
-            errors.append("هزینه هر هزار نمایش باید عدد مثبت با حداکثر دو رقم اعشار باشد.")
+            errors.append("هزینه هر هزار نمایش باید مثبت و با دقت مجاز ارز حساب باشد.")
     dates = []
     for key, previous in (("schedule_start", campaign.schedule_start), ("schedule_end", campaign.schedule_end)):
         raw = data.get(key)

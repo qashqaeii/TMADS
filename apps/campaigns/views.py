@@ -302,6 +302,7 @@ def campaign_duplicate(request, campaign_id):
     original = get_customer_campaign(request.user.customer_profile, campaign_id)
     clone = Campaign.objects.create(
         customer=original.customer,
+        telegram_connection=original.telegram_connection,
         project=original.project,
         name=f"{(original.name or 'کمپین')[:194]} (کپی)",
         status=Campaign.Status.DRAFT,
@@ -317,6 +318,9 @@ def campaign_duplicate(request, campaign_id):
                      if key in {"impression_frequency", "show_userpic", "additional_info"}},
         budget_irr=original.budget_irr,
         daily_cap_irr=original.daily_cap_irr,
+        account_budget_amount=original.account_budget_amount,
+        account_daily_budget_limit=original.account_daily_budget_limit,
+        budget_currency=original.budget_currency,
         cpm_bid=original.cpm_bid,
     )
     if hasattr(original, "targeting") and original.targeting:
@@ -346,16 +350,27 @@ def campaign_wizard(request, campaign_id=None):
     customer = request.user.customer_profile
 
     if campaign_id is None:
+        from apps.telegram_ads.services.account_connections import default_connection
+        # Optional binding: legacy/central path remains valid when no connection exists.
         campaign = Campaign.objects.create(
             customer=customer,
+            telegram_connection=default_connection(customer),
             name="کمپین جدید",
             wizard_version=2,
         )
         return redirect("campaigns:wizard", campaign_id=campaign.id)
 
     campaign = get_customer_campaign(customer, campaign_id)
+    is_customer_owned = bool(
+        campaign.telegram_connection_id
+        and campaign.telegram_connection.connection_type == "customer_owned"
+    )
     if request.method == "POST":
-        campaign = Campaign.objects.select_for_update().get(pk=campaign.pk)
+        campaign = Campaign.objects.select_for_update().select_related("telegram_connection").get(pk=campaign.pk)
+        is_customer_owned = bool(
+            campaign.telegram_connection_id
+            and campaign.telegram_connection.connection_type == "customer_owned"
+        )
     if not _campaign_editable(campaign):
         messages.info(request, "این کمپین ثبت شده و قابل ویرایش در استودیو نیست. برای ساخت نسخه جدید از کپی کمپین استفاده کنید.")
         return redirect("campaigns:detail", campaign_id=campaign.id)
@@ -376,11 +391,14 @@ def campaign_wizard(request, campaign_id=None):
             messages.error(request, "نسخه یا مرحله پیش‌نویس تغییر کرده است؛ صفحه جدید را بررسی کنید.")
             return redirect("campaigns:wizard", campaign_id=campaign.id)
         if action == "refresh_quote" and step == max_step:
-            try:
-                _create_quote(campaign)
-                messages.success(request, "پیش‌فاکتور جدید آماده است. مبلغ را بررسی و سپس پرداخت کنید.")
-            except PricingError as exc:
-                messages.error(request, str(exc))
+            if is_customer_owned:
+                messages.error(request, "حساب اختصاصی مشتری به پیش‌فاکتور یا کیف پول TMADS نیاز ندارد.")
+            else:
+                try:
+                    _create_quote(campaign)
+                    messages.success(request, "پیش‌فاکتور جدید آماده است. مبلغ را بررسی و سپس پرداخت کنید.")
+                except PricingError as exc:
+                    messages.error(request, str(exc))
             return redirect("campaigns:wizard", campaign_id=campaign.id)
         strict_next = action in {"next", "pay"}
         try:
@@ -453,12 +471,36 @@ def campaign_wizard(request, campaign_id=None):
                         if request.POST.get("terms_accepted") != "1":
                             messages.error(request, "پذیرش قوانین برای پرداخت الزامی است.")
                             return redirect("campaigns:wizard", campaign_id=campaign.id)
-                        if not _handle_payment_submission(request, campaign):
-                            return redirect("campaigns:wizard", campaign_id=campaign.id)
                         acceptance = (
                             "مشتری تأیید می‌کند حق تبلیغ مقصد را دارد، محتوا دقیق است، "
                             "بررسی نهایی با تلگرام است و تأیید گرام‌ادز تضمین نمایش نیست."
                         )
+                        if is_customer_owned:
+                            from apps.campaigns.models import CampaignStatusHistory
+
+                            campaign.refresh_from_db()
+                            CampaignPolicyPreflight.record_acceptance(
+                                campaign, request=request, acceptance_text=acceptance,
+                            )
+                            CampaignPolicyPreflight(campaign).run(
+                                strict=True, context="customer_owned_pre_submit", check_operator=False,
+                            )
+                            previous = campaign.status
+                            campaign.status = Campaign.Status.READY_FOR_SUBMISSION
+                            campaign.save(update_fields=["status", "updated_at"])
+                            CampaignStatusHistory.objects.create(
+                                campaign=campaign, from_status=previous,
+                                to_status=campaign.status,
+                                note="آماده ثبت مستقیم از حساب تبلیغاتی مشتری؛ بدون پرداخت TMADS",
+                            )
+                            # Live submit remains gated by TELEGRAM_ADS_* flags and is not forced here.
+                            messages.success(
+                                request,
+                                "کمپین برای ثبت مستقیم از حساب تلگرام شما آماده شد؛ ارسال زنده فقط با مجوز جداگانه انجام می‌شود.",
+                            )
+                            return redirect("campaigns:detail", campaign_id=campaign.id)
+                        if not _handle_payment_submission(request, campaign):
+                            return redirect("campaigns:wizard", campaign_id=campaign.id)
                         campaign.refresh_from_db()
                         CampaignPolicyPreflight.record_acceptance(
                             campaign,
@@ -475,7 +517,7 @@ def campaign_wizard(request, campaign_id=None):
                 campaign.wizard_step = step + 1
                 bump_studio_furthest_step(campaign, step + 1)
                 campaign.save(update_fields=["wizard_step", "wizard_data", "updated_at"])
-                if step == 4:
+                if step == 4 and not is_customer_owned:
                     try:
                         _create_quote(campaign)
                     except PricingError as exc:

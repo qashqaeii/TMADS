@@ -118,13 +118,15 @@ class CampaignPolicyPreflight:
         return campaign.policy_evaluations.select_related("policy_version").first()
 
 
-def assert_submission_ready(campaign: Campaign) -> PolicyRunResult:
-    if not CampaignPolicyPreflight.operator_submission_allowed():
+def assert_submission_ready(campaign: Campaign, *, check_operator: bool = True) -> PolicyRunResult:
+    if check_operator and not CampaignPolicyPreflight.operator_submission_allowed():
         result = evaluate_campaign(campaign, strict=True, check_operator=True)
         if not result.submission_ready:
             blocked = [f.message_fa for f in result.findings if f.severity == FindingSeverity.BLOCKED]
             raise ValueError(blocked[0] if blocked else "ارسال تبلیغ مجاز نیست.")
-    preflight = CampaignPolicyPreflight(campaign).run(strict=True, context="telegram_submit", check_operator=True)
+    preflight = CampaignPolicyPreflight(campaign).run(
+        strict=True, context="telegram_submit", check_operator=check_operator,
+    )
     if not preflight.submission_ready or preflight.blocked:
         msgs = [f.message_fa for f in preflight.findings if f.severity == FindingSeverity.BLOCKED]
         raise ValueError("; ".join(msgs) if msgs else "پیش‌پرواز سیاست رد شد.")

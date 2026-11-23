@@ -9,10 +9,10 @@ from django.db import transaction
 
 from apps.campaigns.metrics import _decimal, _int
 from apps.campaigns.models import Campaign, CampaignStatisticsSnapshot, CampaignTargeting, TelegramAdvertisement
-from apps.telegram_ads.client import TelegramAdsClient
 from apps.telegram_ads.constants import API_TO_TMADS_PLACEMENT, STATS_INTERVAL_DAY
 from apps.telegram_ads.exceptions import TelegramAdsError
 from apps.telegram_ads.models import APIRequestLog
+from apps.telegram_ads.services.account_connections import campaign_client
 from apps.telegram_ads.status_map import map_remote_status_to_campaign
 from apps.finance.models import AdvertisingOrder
 
@@ -28,37 +28,26 @@ def log_api_request(operation: str, success: bool, meta: dict | None = None) -> 
 
 
 def sync_remote_advertisements_readonly() -> int:
-    """Update linked ads from getAdsList (lifetime fields on Ad object)."""
-    client = TelegramAdsClient()
-    try:
-        items = client.list_advertisements()
-        log_api_request("list_advertisements", True, {"count": len(items)})
-    except TelegramAdsError:
-        log_api_request("list_advertisements", False)
-        raise
+    """Sync each linked ad through its own tenant-bound account connection.
 
-    by_remote = {}
-    for item in items:
-        rid = str(item.get("ad_id") or item.get("id") or "")
-        if rid:
-            by_remote[rid] = item
+    Never fan the main account's global ad list out across customer campaigns.
+    """
     updated = 0
-    for ad in TelegramAdvertisement.objects.exclude(remote_ad_id=""):
-        item = by_remote.get(ad.remote_ad_id)
-        if not item:
-            continue
-        _apply_remote_ad_payload(ad, item)
-        ad.save(
-            update_fields=[
-                "remote_status",
-                "remote_status_raw",
-                "placement",
-                "promotion_url",
-                "updated_at",
-            ]
-        )
-        _sync_campaign_from_remote(ad)
-        updated += 1
+    failures = 0
+    ads = TelegramAdvertisement.objects.exclude(remote_ad_id="").select_related(
+        "campaign", "campaign__telegram_connection",
+    )
+    for ad in ads.iterator():
+        try:
+            sync_advertisement_detail(ad)
+            updated += 1
+        except TelegramAdsError:
+            failures += 1
+            logger.warning(
+                "scoped Telegram Ads sync failed for campaign=%s ad=%s",
+                ad.campaign_id, ad.remote_ad_id,
+            )
+    log_api_request("scoped_ads_sync", failures == 0, {"updated": updated, "failed": failures})
     return updated
 
 
@@ -66,7 +55,7 @@ def sync_advertisement_detail(ad: TelegramAdvertisement) -> None:
     """Fetch single Ad via getAdsById with return_target."""
     if not ad.remote_ad_id:
         return
-    client = TelegramAdsClient()
+    client = campaign_client(ad.campaign)
     try:
         data = client.get_ad(ad.remote_ad_id, return_target=True)
         log_api_request("get_ad", True, {"ad_id": ad.remote_ad_id})
@@ -74,10 +63,13 @@ def sync_advertisement_detail(ad: TelegramAdvertisement) -> None:
         log_api_request("get_ad", False, {"ad_id": ad.remote_ad_id})
         raise
     _apply_remote_ad_payload(ad, data)
+    if not ad.remote_account_id and ad.campaign.telegram_connection_id:
+        ad.remote_account_id = ad.campaign.telegram_connection.remote_account_id
     ad.save(
         update_fields=[
             "remote_status",
             "remote_status_raw",
+            "remote_account_id",
             "placement",
             "promotion_url",
             "updated_at",
@@ -224,7 +216,7 @@ def sync_ad_statistics_for(ad: TelegramAdvertisement, *, days: int | None = None
     campaign = ad.campaign
     if days is None:
         days = stats_sync_days(ad, campaign) if campaign else 30
-    client = TelegramAdsClient()
+    client = campaign_client(campaign) if campaign else campaign_client(ad.campaign)
     now = timezone.now()
     from_time = now - timedelta(days=days)
     try:
