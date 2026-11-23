@@ -21,7 +21,7 @@ def test_duplicate_requests_and_disabled_write(customer_user,settings):
     with pytest.raises(ValueError):
         request_operation(campaign.pk,actor=customer_user,action="pause")
     manager=User.objects.create_user(username="ops-remote",role=User.Role.ADMIN)
-    with patch("apps.telegram_ads.services.manage_ad.TelegramAdsClient") as api:
+    with patch("apps.telegram_ads.services.manage_ad.campaign_client") as api:
         with pytest.raises(ValueError):
             execute_operation(op.pk,actor=manager)
         api.assert_not_called()
@@ -35,7 +35,7 @@ def test_pause_uncertainty_blocks_retry(customer_user,settings):
     campaign,ad=setup_ad(customer_user)
     op=request_operation(campaign.pk,actor=customer_user,action="pause")
     manager=User.objects.create_user(username="ops-remote",role=User.Role.ADMIN)
-    with patch("apps.telegram_ads.services.manage_ad.CampaignPolicyPreflight.operator_submission_allowed",return_value=True), patch("apps.telegram_ads.services.manage_ad.TelegramAdsClient") as api:
+    with patch("apps.telegram_ads.services.manage_ad.CampaignPolicyPreflight.operator_submission_allowed",return_value=True), patch("apps.telegram_ads.services.manage_ad.campaign_client") as api:
         api.return_value.get_ad.return_value={"ad_id":101,"status":"active","currency":"TON"}
         api.return_value.edit_advertisement.side_effect=TimeoutError
         with pytest.raises(TelegramAdsError):
@@ -67,7 +67,7 @@ def test_withdraw_pending_request_never_calls_api(customer_user):
     from apps.telegram_ads.services.manage_ad import withdraw_operation
     campaign,ad=setup_ad(customer_user)
     op=request_operation(campaign.pk,actor=customer_user,action="pause")
-    with patch("apps.telegram_ads.services.manage_ad.TelegramAdsClient") as api:
+    with patch("apps.telegram_ads.services.manage_ad.campaign_client") as api:
         withdraw_operation(campaign.pk,op.pk,actor=customer_user)
         assert request_operation(campaign.pk,actor=customer_user,action="resume").status=="pending"
         api.assert_not_called()
@@ -91,7 +91,7 @@ def test_uncertain_operation_reconciles_only_when_remote_matches(customer_user):
     )
     staff = User.objects.create_user(username="ops-check-remote", password="sample",
         role=User.Role.ADMIN)
-    with patch("apps.telegram_ads.services.manage_ad.TelegramAdsClient") as api:
+    with patch("apps.telegram_ads.services.manage_ad.campaign_client") as api:
         api.return_value.get_ad.return_value = {"ad_id": int(ad.remote_ad_id), "currency": "TON", "cpm": "1.20", "status": "active"}
         with pytest.raises(ValueError):
             reconcile_operation_readonly(op.pk, actor=staff)

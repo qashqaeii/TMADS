@@ -48,8 +48,9 @@ def test_paid_payload_uses_locked_amount(customer_user):
 def test_uncertain_create_cannot_be_retried(customer_user, settings):
     settings.TELEGRAM_ADS_WRITE_ENABLED = settings.TELEGRAM_ADS_PAID_SUBMISSION_ENABLED = True
     campaign, order = paid_campaign(customer_user)
-    with patch("apps.policies.services.preflight.assert_submission_ready"), patch("apps.telegram_ads.services.submission.TelegramAdsClient") as account, patch("apps.telegram_ads.services.submission.execute_create_ad", side_effect=TimeoutError) as execute:
+    with patch("apps.policies.services.preflight.assert_submission_ready"), patch("apps.telegram_ads.services.submission.campaign_client") as account, patch("apps.telegram_ads.services.submission.TelegramAdsClient") as central, patch("apps.telegram_ads.services.submission.execute_create_ad", side_effect=TimeoutError) as execute:
         account.return_value.get_account.return_value = {"currency": "TON", "remaining_budget": 500}
+        central.return_value.get_account.return_value = {"currency": "TON", "remaining_budget": 500, "account_id": "main-1"}
         with pytest.raises(TelegramAdsError):
             submit_campaign_to_telegram(campaign)
         with pytest.raises(ValueError):

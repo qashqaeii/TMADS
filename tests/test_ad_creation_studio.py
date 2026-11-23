@@ -158,7 +158,7 @@ def test_execute_create_ad_rejects_unpaid_live(customer_user, settings):
         budget_irr=1_000_000, ad_settings={"terms_accepted": True},
     )
     CampaignTargeting.objects.create(campaign=campaign, config={"search_queries": ["test"]})
-    with patch("apps.policies.services.preflight.assert_submission_ready"), patch("apps.telegram_ads.services.ad_write.TelegramAdsClient") as client:
+    with patch("apps.policies.services.preflight.assert_submission_ready"), patch("apps.telegram_ads.services.ad_write.campaign_client") as client:
         with pytest.raises(ValueError):
             execute_create_ad(campaign, mode=ExecutionMode.LIVE)
         client.assert_not_called()

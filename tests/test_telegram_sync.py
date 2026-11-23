@@ -22,8 +22,8 @@ def test_sync_ad_statistics_stores_period_rows(monkeypatch):
             return {"items": fake_items}
 
     monkeypatch.setattr(
-        "apps.telegram_ads.services.sync.TelegramAdsClient",
-        lambda: FakeClient(),
+        "apps.telegram_ads.services.sync.campaign_client",
+        lambda campaign: FakeClient(),
     )
 
     n = sync_ad_statistics_for(ad, days=7)
