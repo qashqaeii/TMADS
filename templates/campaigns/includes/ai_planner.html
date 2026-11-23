@@ -1,38 +1,44 @@
-<section class="tm-ai tm-ai--planner" data-tm-ai="planner" data-ai-url="{% url 'campaigns:ai_plan' campaign.id %}" hidden aria-label="برنامه‌ریز هوشمند کمپین">
+<section class="tm-ai tm-ai--planner" data-tm-ai="planner" data-ai-url="{% url 'campaigns:ai_plan' campaign.id %}" hidden aria-label="استراتژیست هوشمند کمپین">
   <details>
     <summary class="tm-ai-head">
-      <span class="tm-ai-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="sparkles" size="md" %}</span>
-      <span class="tm-ai-heading"><strong>برنامه‌ریز هوشمند کمپین</strong><small>از شرح محصول تا پیشنهاد مسیر مناسب تبلیغ</small></span>
+      <span class="tm-ai-icon" aria-hidden="true">{% include "includes/ai_icon.html" with size="md" %}</span>
+      <span class="tm-ai-heading">
+        <strong>استراتژیست هوشمند کمپین</strong>
+        <small>از شرح محصول تا بهترین نقطهٔ شروع در تلگرام ادز</small>
+      </span>
       <span class="tm-ai-chevron" aria-hidden="true">{% include "includes/lucide_icon.html" with name="chevron-down" size="sm" %}</span>
     </summary>
     <div class="tm-ai-body">
       <div class="tm-ai-fields">
         <div class="tm-ai-field tm-ai-field--wide">
-          <label for="tm-ai-plan-brief">چه محصول یا خدمتی را می‌خواهید تبلیغ کنید؟</label>
-          <textarea id="tm-ai-plan-brief" data-ai-brief maxlength="800" rows="3" placeholder="محصول، مزیت اصلی و چیزی که مخاطب باید بداند را کوتاه توضیح دهید."></textarea>
+          <label for="tm-ai-plan-brief">محصول یا خدمت را چگونه توصیف می‌کنید؟</label>
+          <textarea id="tm-ai-plan-brief" data-ai-brief maxlength="800" rows="3" placeholder="مزیت اصلی، برای چه کسی، و چرا الان باید دیده شود را کوتاه بنویسید."></textarea>
         </div>
         <div class="tm-ai-field">
-          <label for="tm-ai-plan-audience">مخاطب موردنظر <small>(اختیاری)</small></label>
-          <input id="tm-ai-plan-audience" data-ai-audience maxlength="400" placeholder="مثلاً صاحبان کسب‌وکارهای آنلاین">
+          <label for="tm-ai-plan-audience">مخاطب ایده‌آل <small>(اختیاری)</small></label>
+          <input id="tm-ai-plan-audience" data-ai-audience maxlength="400" placeholder="مثلاً مدیران فروش آنلاین یا علاقه‌مندان آموزش زبان">
         </div>
         <div class="tm-ai-field">
-          <label for="tm-ai-plan-goal">هدف اصلی تبلیغ</label>
+          <label for="tm-ai-plan-goal">نتیجهٔ اصلی که می‌خواهید</label>
           <select id="tm-ai-plan-goal" data-ai-goal>
-            <option value="">پیشنهاد بر اساس توضیحات</option>
-            <option value="awareness">افزایش آگاهی از محصول</option>
-            <option value="traffic">افزایش بازدید</option>
-            <option value="leads">دریافت سرنخ و مشتری بالقوه</option>
+            <option value="">پیشنهاد خودکار بر اساس توضیح</option>
+            <option value="awareness">شناخته‌شدن برند / محصول</option>
+            <option value="traffic">افزایش بازدید مقصد</option>
+            <option value="leads">جذب سرنخ و گفت‌وگو</option>
             <option value="conversions">افزایش اقدام و تبدیل</option>
-            <option value="community">جذب عضو و مخاطب</option>
+            <option value="community">رشد عضو و جامعه</option>
             <option value="sales">افزایش فروش</option>
           </select>
         </div>
       </div>
-      <p class="tm-ai-hint">پیشنهادها بر اساس توضیحات شما ساخته می‌شوند. لینک مقصد، شناسه مخاطبان و اطلاعات مالی به مدل ارسال نمی‌شود.</p>
-      <button type="button" class="btn btn-ghost tm-ai-button" data-ai-generate><span data-ai-label>طراحی استراتژی کمپین</span>{% include "includes/lucide_icon.html" with name="sparkles" size="sm" %}</button>
+      <p class="tm-ai-hint">پیشنهاد بر اساس توضیح شما ساخته می‌شود. لینک مقصد، شناسه مخاطب و اطلاعات مالی به مدل ارسال نمی‌شود.</p>
+      <button type="button" class="btn btn-ghost tm-ai-button" data-ai-generate>
+        <span data-ai-label>طراحی استراتژی شروع</span>
+        {% include "includes/ai_icon.html" with size="sm" %}
+      </button>
       <p class="tm-ai-status" data-ai-status role="status"></p>
       <div class="tm-ai-results" data-ai-results hidden></div>
-      <p class="tm-ai-hint">مدل هوش مصنوعی: جمنای فلش لایت ۲.۵ از طریق آروان‌کلاد. اعمال پیشنهاد فقط نام و نوع هدف‌گیری پیش‌نویس را تنظیم می‌کند؛ مقصد و مخاطبان دقیق با تأیید شما تکمیل می‌شوند.</p>
+      <p class="tm-ai-hint">اعمال پیشنهاد فقط نام داخلی و نوع هدف‌گیری پیش‌نویس را تنظیم می‌کند؛ مقصد و جزئیات مخاطب را خودتان کامل و بررسی کنید.</p>
     </div>
   </details>
 </section>

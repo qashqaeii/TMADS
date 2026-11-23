@@ -7,10 +7,20 @@ from apps.policies.services.rules_registry import rule_meta
 from apps.policies.services.types import PolicyFindingDTO
 
 # Advisory hints only — never sole basis for automatic rejection.
+# Short tokens like «بت» must not match inside words (ربات، ثابت، شیشه‌ای، …).
+# Include ZWNJ/ZWJ so compounds like شیشه‌ای are not treated as bare «شیشه».
+_FA_BOUND = r"(?<![\w\u0600-\u06FF\u200c\u200d]){0}(?![\w\u0600-\u06FF\u200c\u200d])"
 _CATEGORY_HINTS: list[tuple[str, re.Pattern[str], str]] = [
-    ("5.6", re.compile(r"(کازینو|شرط\s*بندی|پوکر|بت|اسلات|قمار)", re.I), "ممکن است در دستهٔ قمار قرار گیرد."),
+    (
+        "5.6",
+        re.compile(
+            rf"(کازینو|شرط\s*بندی|پوکر|{_FA_BOUND.format('بت')}|اسلات|قمار)",
+            re.I,
+        ),
+        "ممکن است در دستهٔ قمار قرار گیرد.",
+    ),
     ("5.7", re.compile(r"(سود\s*مضمون|پیش\s*بینی\s*قطعی|وام\s*فوری|هر\s*روز\s*درآمد)", re.I), "ممکن است در دستهٔ خدمات مالی پرریسک قرار گیرد."),
-    ("5.9", re.compile(r"(سیگار|ویپ|الکل|مشروب|حشیش|شیشه)", re.I), "ممکن است در دستهٔ الکل/دخانیات/مواد قرار گیرد."),
+    ("5.9", re.compile(r"(سیگار|ویپ|الکل|مشروب|حشیش|" + _FA_BOUND.format("شیشه") + ")", re.I), "ممکن است در دستهٔ الکل/دخانیات/مواد قرار گیرد."),
     ("5.10", re.compile(r"(اسلحه|کلت|تفنگ|گلوله|مواد\s*منفجره)", re.I), "ممکن است در دستهٔ سلاح قرار گیرد."),
     ("5.11", re.compile(r"(هک|کرک|فیشینگ|فالوور\s*ارزان|لایک\s*رایگان)", re.I), "ممکن است در دستهٔ اسپم/بدافزار قرار گیرد."),
 ]

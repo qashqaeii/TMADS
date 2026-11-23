@@ -5,7 +5,15 @@ from apps.policies.constants import FindingSeverity, OperatorAuthorizationState
 from apps.policies.models import OperatorAdvertisingAuthorization
 from apps.policies.services.engine import evaluate_campaign
 from apps.policies.services.preflight import CampaignPolicyPreflight, assert_submission_ready
+from apps.policies.services.content_rules import scan_prohibited_hints
 from apps.policies.services.text_rules import check_ad_text, check_text_links
+
+
+def test_prohibited_hint_does_not_match_inside_persian_words():
+    assert scan_prohibited_hints("ربات فیلترشکن با آی‌پی ثابت") == []
+    assert scan_prohibited_hints("پنجره شیشه‌ای خانه") == []
+    assert any(f.rule_id == "TG-PRH-005" for f in scan_prohibited_hints("سایت بت آنلاین"))
+    assert any(f.rule_id == "TG-PRH-005" for f in scan_prohibited_hints("مصرف شیشه ممنوع"))
 
 
 @pytest.mark.django_db

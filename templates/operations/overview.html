@@ -1,15 +1,15 @@
 {% extends "app_shell.html" %}
-{% load core_filters %}
+{% load core_filters ton_display %}
 {% block page_title %}مرکز عملیات{% endblock %}
 {% block container_class %}container-wide{% endblock %}
 {% block content %}
 <div class="app-stack operations-page ui-ops ga-ops-premium ga-ops-center">
   <section class="ops-lead" aria-label="نمای عملیات پلتفرم">
     <div class="ops-lead__content">
-      <span class="ops-lead__eyebrow">{% include "includes/gramads_workspace_icon.html" with name="shield-check" %} فرماندهی پلتفرم</span>
+      <span class="ops-lead__eyebrow">{% include "includes/gramads_workspace_icon.html" with name="shield-check" %} مدیریت پلتفرم</span>
       <h1>مرکز عملیات</h1>
-      <p>درخواست‌های منتظر تصمیم، تعهدات مالی و سلامت سرویس‌ها را از یک نقطه مدیریت کنید.</p>
-      <div class="ops-lead__meta"><span>امروز: {{ today|jalali_date }}</span><span>اطلاعات این صفحه فقط از سامانه خوانده می‌شوند.</span></div>
+      <p>صف تصمیم‌ها، تعهدات مالی و سلامت سرویس‌ها — در یک نگاه.</p>
+      <div class="ops-lead__meta"><span>امروز: {{ today|jalali_date }}</span><span>فقط خواندن از سامانه</span></div>
     </div>
     <div class="ops-lead__actions" aria-label="اقدام‌های سریع">
       <a class="btn btn-primary" href="{% url 'operations:campaigns' %}?status=pending_review">بررسی کمپین‌ها {% include "includes/gramads_workspace_icon.html" with name="chevron-left" %}</a>
@@ -46,6 +46,65 @@
       </div>
     </article>
   </div>
+
+  <section class="ops-ads-treasury" aria-label="موجودی تلگرام ادز">
+    <div class="ops-ads-treasury__head">
+      <div class="ops-ads-treasury__title">
+        <span class="ga-symbol" aria-hidden="true">{% include "includes/gramads_workspace_icon.html" with name="wallet" %}</span>
+        <div>
+          <h2>موجودی تلگرام ادز</h2>
+          <p>{% if ads_treasury.ok %}{% if ads_treasury.title %}{{ ads_treasury.title }}{% else %}حساب مرکزی{% endif %}{% if ads_treasury.currency %} · {{ ads_treasury.currency|currency_label_fa }}{% endif %}{% else %}حساب مرکزی تبلیغات{% endif %}</p>
+        </div>
+      </div>
+      <div class="ops-ads-treasury__links">
+        <a href="{% url 'operations:api_status' %}">وضعیت اتصال</a>
+        <a href="{% url 'operations:exchange_rates' %}">نرخ گرام</a>
+      </div>
+    </div>
+    {% if ads_treasury.ok %}
+    <div class="ops-ads-treasury__grid">
+      <div class="ops-ads-treasury__primary">
+        <span class="ops-ads-treasury__label">باقی‌مانده قابل استفاده</span>
+        <strong class="ops-ads-treasury__ton">
+          {% if ads_treasury.currency == 'TON' %}
+            {% ton_amount ads_treasury.remaining hint=False %}
+            <span class="ops-ads-treasury__unit">تون</span>
+          {% else %}
+            <bdi class="tabnums">{{ ads_treasury.remaining|default_if_none:"—" }}</bdi>
+            <span class="ops-ads-treasury__unit">{{ ads_treasury.currency|currency_label_fa }}</span>
+          {% endif %}
+        </strong>
+        {% if ads_treasury.remaining_toman is not None %}
+        <strong class="ops-ads-treasury__toman tabnums">≈ {{ ads_treasury.remaining_toman|format_irr }} تومان</strong>
+        {% if ads_treasury.rate_hint %}<small class="ops-ads-treasury__hint">{{ ads_treasury.rate_hint }}{% if ads_treasury.irr_per_ton %} · هر تون ≈ {{ ads_treasury.irr_per_ton|irr_to_toman|format_count }} تومان{% endif %}</small>{% endif %}
+        {% elif ads_treasury.currency == 'TON' %}
+        <small class="ops-ads-treasury__hint">معادل تومانی به‌خاطر نبود نرخ معتبر نمایش داده نشد.</small>
+        {% endif %}
+      </div>
+      <div class="ops-ads-treasury__metrics">
+        <div class="ops-ads-treasury__metric">
+          <span>مصرف‌شده</span>
+          <strong>
+            {% if ads_treasury.currency == 'TON' %}{% ton_amount ads_treasury.spent hint=False %} تون{% else %}<bdi>{{ ads_treasury.spent|default_if_none:"—" }}</bdi>{% endif %}
+          </strong>
+          {% if ads_treasury.spent_toman is not None %}<small class="tabnums">≈ {{ ads_treasury.spent_toman|format_irr }} تومان</small>{% endif %}
+        </div>
+        <div class="ops-ads-treasury__metric">
+          <span>بودجه تبلیغات</span>
+          <strong>
+            {% if ads_treasury.currency == 'TON' %}{% ton_amount ads_treasury.ads_budget hint=False %} تون{% else %}<bdi>{{ ads_treasury.ads_budget|default_if_none:"—" }}</bdi>{% endif %}
+          </strong>
+        </div>
+      </div>
+    </div>
+    {% else %}
+    <div class="ops-ads-treasury__empty" role="status">
+      <strong>موجودی در دسترس نیست</strong>
+      <p>{{ ads_treasury.error|default:"برای نمایش موجودی، اتصال تلگرام ادز را بررسی کنید." }}</p>
+    </div>
+    {% endif %}
+  </section>
+
   <div class="ops-section-heading"><div><h2>اولویت‌های امروز</h2><p>پرونده‌هایی که بیشترین نیاز به اقدام دارند</p></div><span class="ops-section-heading__count">{{ pending_campaigns|add:open_refunds|add:remote_pending|format_count }} مورد در صف</span></div>
   <div class="ga-split ga-ops-priorities">
     <section class="ga-panel"><header class="ga-panel-head"><div class="ga-panel-title"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="activity" %}</span><div><h2>صف رسیدگی</h2><p>اقدام‌های اصلی اپراتور</p></div></div></header><div class="ga-panel-body ga-ops-queue">

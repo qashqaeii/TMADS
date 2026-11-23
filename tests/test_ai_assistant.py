@@ -11,8 +11,8 @@ from apps.campaigns.models import Campaign, TelegramAdvertisement
 
 
 def test_arvan_endpoint_accepts_panel_base_and_complete_url():
-    with override_settings(ARVAN_AI_BASE_URL="https://ai.divarfiling.ir/v1/"):
-        assert provider.endpoint() == "https://ai.divarfiling.ir/v1/chat/completions"
+    with override_settings(ARVAN_AI_BASE_URL="https://api.arvancloudai.ir/v1/"):
+        assert provider.endpoint() == "https://api.arvancloudai.ir/v1/chat/completions"
     with override_settings(ARVAN_AI_BASE_URL="https://gateway.arvancloudai.ir/v1/chat/completions"):
         assert provider.endpoint() == "https://gateway.arvancloudai.ir/v1/chat/completions"
 
@@ -142,6 +142,48 @@ def test_arvan_provider_maps_auth_error_without_exposing_secret(monkeypatch):
         with pytest.raises(AiError, match="provider_auth") as exc:
             provider.complete("system", {"brief": "test"})
     assert "secret-key" not in str(exc.value)
+
+
+@pytest.mark.django_db
+def test_creative_variants_accept_angled_objects_and_legacy_strings(monkeypatch, customer_profile):
+    from apps.ai import features
+
+    campaign = Campaign.objects.create(
+        customer=customer_profile,
+        name="کمپین متن",
+        target_type=Campaign.TargetType.CHANNELS,
+        wizard_version=2,
+    )
+    captured = {}
+
+    def fake_run(customer, feature, system, context, validate, **kwargs):
+        captured.update({"feature": feature, "context": context, "system": system})
+        return validate({
+            "variants": [
+                {"text": "یادگیری زبان را با تمرین روزانه کوتاه شروع کنید.", "angle": "benefit"},
+                "نسخه شفاف و مستقیم برای مخاطب هدف.",
+                {"text": "همین امروز مسیر یادگیری خودتان را بسازید.", "angle": "action"},
+                {"text": "این متن باید رد شود چون https://bad.example دارد", "angle": "trust"},
+            ]
+        }), False
+
+    monkeypatch.setattr(features, "run", fake_run)
+    result, cached = features.creative_variants(
+        customer_profile,
+        campaign,
+        "دوره فشرده زبان برای مبتدی‌ها",
+        "",
+    )
+
+    assert cached is False
+    assert captured["feature"] == "creative"
+    assert "senior Persian copy chief" in captured["system"]
+    assert result["variants"][0]["angle"] == "مزیت‌محور"
+    assert result["variants"][1]["text"] == "نسخه شفاف و مستقیم برای مخاطب هدف."
+    assert "angle" not in result["variants"][1]
+    assert result["variants"][2]["angle"] == "دعوت به اقدام"
+    assert all("http" not in item["text"] for item in result["variants"])
+    assert len(result["variants"]) == 3
 
 
 @pytest.mark.django_db

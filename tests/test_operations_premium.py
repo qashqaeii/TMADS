@@ -29,11 +29,23 @@ OPS_VIEWS = (
 @pytest.mark.django_db
 @pytest.mark.parametrize("name", OPS_VIEWS)
 def test_management_pages_render_premium_shell(client, platform_admin, monkeypatch, name):
-    if name == "api_status":
+    if name in {"api_status", "overview"}:
         class LocalTelegram:
             def get_account(self):
-                return {"title": "حساب آزمایشی", "account_id": "test", "currency": "TON"}
+                return {
+                    "title": "حساب آزمایشی",
+                    "account_id": "test",
+                    "currency": "TON",
+                    "remaining_budget": "12.5",
+                    "spent_budget": "1.25",
+                    "ads_budget": "13.75",
+                }
         monkeypatch.setattr("apps.operations.views.TelegramAdsClient", LocalTelegram)
+        if name == "overview":
+            monkeypatch.setattr(
+                "apps.finance.services.ton_equiv.resolve_ton_display_rate",
+                lambda **kwargs: (2_500_000, "برآورد با نرخ فعلی بازار"),
+            )
     client.force_login(platform_admin)
     response = client.get(reverse("operations:" + name))
     assert response.status_code == 200, name
@@ -42,6 +54,10 @@ def test_management_pages_render_premium_shell(client, platform_admin, monkeypat
     assert static("css/gramads-ops-premium.css") in html
     assert '<html lang="fa" dir="rtl">' in html
     assert html.count('id="ui-confirmation"') == 1
+    if name == "overview":
+        assert "ops-ads-treasury" in html
+        assert "موجودی تلگرام ادز" in html
+        assert "تومان" in html
 
 
 @pytest.mark.django_db

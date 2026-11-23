@@ -1,13 +1,24 @@
-<section class="tm-ai tm-ai--creative" data-tm-ai="creative" data-ai-url="{% url 'campaigns:ai_creative' campaign.id %}" hidden aria-label="دستیار متن تبلیغ">
+<section class="tm-ai tm-ai--creative" data-tm-ai="creative" data-ai-url="{% url 'campaigns:ai_creative' campaign.id %}" hidden aria-label="کپی‌رایتر هوشمند تبلیغ">
   <details>
-    <summary class="tm-ai-head"><span class="tm-ai-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="sparkles" size="md" %}</span><span class="tm-ai-heading"><strong>دستیار متن تبلیغ</strong><small>چند پیشنهاد کوتاه و قابل ویرایش</small></span><span aria-hidden="true" class="tm-ai-chevron">{% include "includes/lucide_icon.html" with name="chevron-down" size="sm" %}</span></summary>
+    <summary class="tm-ai-head">
+      <span class="tm-ai-icon" aria-hidden="true">{% include "includes/ai_icon.html" with size="md" %}</span>
+      <span class="tm-ai-heading">
+        <strong>کپی‌رایتر هوشمند تبلیغ</strong>
+        <small>سه زاویهٔ متن کوتاه، دقیق و قابل انتشار</small>
+      </span>
+      <span aria-hidden="true" class="tm-ai-chevron">{% include "includes/lucide_icon.html" with name="chevron-down" size="sm" %}</span>
+    </summary>
     <div class="tm-ai-body">
-      <label for="tm-ai-brief">چه چیزی را تبلیغ می‌کنید؟ <small>(اختیاری اگر متن نوشته‌اید)</small></label>
-      <textarea id="tm-ai-brief" data-ai-brief rows="3" maxlength="600" placeholder="مثلاً دوره آموزش زبان برای مبتدیان؛ تمرین کوتاه روزانه"></textarea>
-      <p class="tm-ai-hint">اطلاعات خصوصی و شماره تماس وارد نکنید. متن و توضیح برای تولید پیشنهاد به سرویس آروان ارسال می‌شود.</p>
-      <button type="button" class="btn btn-ghost tm-ai-button" data-ai-generate><span data-ai-label>پیشنهاد متن</span>{% include "includes/lucide_icon.html" with name="sparkles" size="sm" %}</button>
-      <p class="tm-ai-status" data-ai-status role="status"></p><div class="tm-ai-results" data-ai-results hidden></div>
-      <p class="tm-ai-hint">انتخاب هر پیشنهاد فقط متن پیش‌نویس را تغییر می‌دهد. بررسی قوانین همچنان ضروری است.</p>
+      <label for="tm-ai-brief">چه چیزی را تبلیغ می‌کنید؟ <small>(اگر متن نوشته‌اید اختیاری است)</small></label>
+      <textarea id="tm-ai-brief" data-ai-brief rows="3" maxlength="600" placeholder="مثلاً دوره فشرده زبان برای مبتدی‌ها؛ تمرین روزانه ۱۰ دقیقه‌ای"></textarea>
+      <p class="tm-ai-hint">شماره تماس، لینک و اطلاعات خصوصی وارد نکنید. توضیح شما فقط برای ساخت پیشنهاد متن استفاده می‌شود.</p>
+      <button type="button" class="btn btn-ghost tm-ai-button" data-ai-generate>
+        <span data-ai-label>ساخت ۳ پیشنهاد متن</span>
+        {% include "includes/ai_icon.html" with size="sm" %}
+      </button>
+      <p class="tm-ai-status" data-ai-status role="status"></p>
+      <div class="tm-ai-results" data-ai-results hidden></div>
+      <p class="tm-ai-hint">انتخاب هر پیشنهاد فقط متن پیش‌نویس را عوض می‌کند؛ قبل از ادامه حتماً بازبینی و قوانین را چک کنید.</p>
     </div>
   </details>
 </section>

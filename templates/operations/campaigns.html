@@ -4,8 +4,8 @@
 {% block page_title %}بررسی کمپین{% endblock %}
 {% block content %}
 <div class="app-stack operations-page ui-ops ga-ops-premium ga-ops-workspace ga-ops-campaign-list">
-{% include "includes/dash_header.html" with page_icon="megaphone" eyebrow="عملیات" title="بررسی کمپین" subtitle="اولویت‌بندی سفارش‌ها، جستجوی سریع و تصمیم‌گیری امن" %}
-<div class="ops-context-strip"><div><strong>{{ total_results|format_count }} کمپین</strong><span>در محدوده فیلتر انتخابی</span></div><a href="{% url 'operations:overview' %}">بازگشت به مرکز عملیات</a></div>
+{% include "includes/dash_header.html" with page_icon="megaphone" eyebrow="عملیات" title="بررسی کمپین" subtitle="صف سفارش‌ها برای جستجو، فیلتر و تصمیم امن" %}
+<div class="ops-context-strip"><div><strong>{{ total_results|format_count }} کمپین</strong><span>در محدوده فیلتر فعلی</span></div><a href="{% url 'operations:overview' %}">مرکز عملیات</a></div>
 
 <article class="ga-panel ga-data-panel ga-ops-table"><header class="ga-panel-head"><div class="ga-panel-title"><span class="ga-symbol">{% include "includes/gramads_workspace_icon.html" with name="megaphone" %}</span><div><h2>صف کمپین‌ها</h2><p>بررسی سفارش‌ها بر اساس وضعیت فعلی</p></div></div></header><section class="filter-exec-shell ga-ops-table-filter" aria-label="فیلتر کمپین‌ها">
   <form method="get" class="filter-exec ops-filter-bar">

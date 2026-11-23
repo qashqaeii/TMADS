@@ -1,7 +1,21 @@
 <section class="tm-ai tm-ai--analysis" data-tm-ai="analysis" data-ai-url="{% url 'campaigns:ai_analysis' campaign.id %}" hidden aria-label="تحلیل هوشمند عملکرد">
-  <div class="tm-ai-head"><span class="tm-ai-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="chart-no-axes-combined" size="md" %}</span><span class="tm-ai-heading"><strong>تحلیل هوشمند عملکرد</strong><small>تفسیر آمار واقعی و پیشنهاد اقدام بعدی</small></span></div>
-  <div class="tm-ai-body"><p class="tm-ai-hint">تحلیل بر اساس آمار کلی از ابتدای تبلیغ تا آخرین همگام‌سازی است؛ نتیجه پیشنهادی است، نه تضمین بازده.</p>
-    <form method="post" class="tm-ai-inline-form">{% csrf_token %}<button type="button" class="btn btn-ghost tm-ai-button" data-ai-generate><span data-ai-label>تحلیل کمپین</span>{% include "includes/lucide_icon.html" with name="sparkles" size="sm" %}</button></form>
-    <p class="tm-ai-status" data-ai-status role="status"></p><div class="tm-ai-results" data-ai-results hidden></div>
+  <div class="tm-ai-head">
+    <span class="tm-ai-icon" aria-hidden="true">{% include "includes/ai_icon.html" with size="md" %}</span>
+    <span class="tm-ai-heading">
+      <strong>تحلیل هوشمند عملکرد</strong>
+      <small>خوانش حرفه‌ای آمار واقعی و اقدام بعدی</small>
+    </span>
+  </div>
+  <div class="tm-ai-body">
+    <p class="tm-ai-hint">تحلیل فقط روی آمار معتبر lifetime است؛ نتیجه راهنماست، نه تضمین بازده.</p>
+    <form method="post" class="tm-ai-inline-form">
+      {% csrf_token %}
+      <button type="button" class="btn btn-ghost tm-ai-button" data-ai-generate>
+        <span data-ai-label>تحلیل تخصصی کمپین</span>
+        {% include "includes/ai_icon.html" with size="sm" %}
+      </button>
+    </form>
+    <p class="tm-ai-status" data-ai-status role="status"></p>
+    <div class="tm-ai-results" data-ai-results hidden></div>
   </div>
 </section>

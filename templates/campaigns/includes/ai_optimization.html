@@ -1,18 +1,25 @@
-<section class="tm-ai tm-ai--optimization" data-tm-ai="optimization" data-ai-url="{% url 'campaigns:ai_optimization' campaign.id %}" hidden aria-label="بهینه‌سازی هوشمند کمپین">
+<section class="tm-ai tm-ai--optimization" data-tm-ai="optimization" data-ai-url="{% url 'campaigns:ai_optimization' campaign.id %}" hidden aria-label="مشاور بهینه‌سازی کمپین">
   <details>
     <summary class="tm-ai-head">
-      <span class="tm-ai-icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="sliders-horizontal" size="md" %}</span>
-      <span class="tm-ai-heading"><strong>مشاور بهینه‌سازی کمپین</strong><small>اولویت‌بندی اقدام‌ها بر اساس آمار و تنظیمات واقعی</small></span>
+      <span class="tm-ai-icon" aria-hidden="true">{% include "includes/ai_icon.html" with size="md" %}</span>
+      <span class="tm-ai-heading">
+        <strong>مشاور بهینه‌سازی کمپین</strong>
+        <small>اولویت‌بندی اقدام‌های با بیشترین اثر</small>
+      </span>
       <span class="tm-ai-chevron" aria-hidden="true">{% include "includes/lucide_icon.html" with name="chevron-down" size="sm" %}</span>
     </summary>
     <div class="tm-ai-body">
-      <p class="tm-ai-hint">پیشنهادها از آمار معتبر و به‌روز و متن تبلیغِ پاک‌سازی‌شده از لینک و اطلاعات تماس استفاده می‌کنند. هیچ بودجه، متن یا تنظیمی بدون تأیید شما تغییر نمی‌کند.</p>
-      <form method="post" class="tm-ai-inline-form">{% csrf_token %}
-        <button type="button" class="btn btn-ghost tm-ai-button" data-ai-generate><span data-ai-label>بررسی فرصت‌های بهینه‌سازی</span>{% include "includes/lucide_icon.html" with name="sparkles" size="sm" %}</button>
+      <p class="tm-ai-hint">پیشنهادها از آمار تازه و تنظیمات واقعی کمپین می‌آیند. هیچ بودجه، متن یا تنظیمی بدون تأیید شما تغییر نمی‌کند.</p>
+      <form method="post" class="tm-ai-inline-form">
+        {% csrf_token %}
+        <button type="button" class="btn btn-ghost tm-ai-button" data-ai-generate>
+          <span data-ai-label>استخراج فرصت‌های بهینه‌سازی</span>
+          {% include "includes/ai_icon.html" with size="sm" %}
+        </button>
       </form>
       <p class="tm-ai-status" data-ai-status role="status"></p>
       <div class="tm-ai-results" data-ai-results hidden></div>
-      <p class="tm-ai-hint">مدل هوش مصنوعی: جمنای فلش لایت ۲.۵ از طریق آروان‌کلاد.</p>
+      <p class="tm-ai-hint">هر توصیه یک آزمایش کنترل‌شده پیشنهاد می‌کند تا سیگنال از نویز جدا شود.</p>
     </div>
   </details>
 </section>

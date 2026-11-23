@@ -88,9 +88,9 @@ def test_campaign_studio_renders_premium_guided_steps(client, customer_user, ste
         assert "قیمت گرام" in html
         assert "افزایش نرخ" not in html
         assert "نوبیتکس" not in html
-        assert "عنوان تبلیغ" in html
+        assert "عنوان تبلیغ" not in html
         assert "کد داخلی تبلیغ" not in html
-        assert 'name="campaign_name"' in html
+        assert 'name="campaign_name"' not in html
 
 
 def test_campaign_preview_keeps_currency_labels_persian():

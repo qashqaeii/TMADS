@@ -128,25 +128,7 @@
           {% else %}خلاصه تبلیغ، مبلغ و قوانین رو ببین؛ اگر اوکی بود ادامه بده.{% endif %}
         </p>
       </div>
-      {% if step == 2 %}
-      <fieldset class="studio-mode-toggle" aria-label="سطح تنظیمات">
-        <legend class="sr-only">سطح تنظیمات</legend>
-        <label class="choice-card studio-mode-option {% if studio_mode == 'simple' %}is-selected{% endif %}">
-          <input type="radio" name="studio_mode" value="simple" {% if studio_mode == 'simple' %}checked{% endif %}>
-          <span class="studio-mode-option__icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="zap" size="md" %}</span>
-          <span class="studio-mode-option__copy"><strong>ساده و سریع</strong><small>فقط چیزهایی که لازم داری</small></span>
-          <span class="studio-mode-option__check" aria-hidden="true">{% include "includes/lucide_icon.html" with name="check-circle-2" size="sm" %}</span>
-        </label>
-        <label class="choice-card studio-mode-option {% if studio_mode == 'professional' %}is-selected{% endif %}">
-          <input type="radio" name="studio_mode" value="professional" {% if studio_mode == 'professional' %}checked{% endif %}>
-          <span class="studio-mode-option__icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="sliders-horizontal" size="md" %}</span>
-          <span class="studio-mode-option__copy"><strong>با جزئیات بیشتر</strong><small>اگر می‌خوای مخاطب و نمایش دقیق‌تر باشه</small></span>
-          <span class="studio-mode-option__check" aria-hidden="true">{% include "includes/lucide_icon.html" with name="check-circle-2" size="sm" %}</span>
-        </label>
-      </fieldset>
-      {% else %}
       <input type="hidden" name="studio_mode" value="{{ studio_mode }}">
-      {% endif %}
 
       {% if step == 1 %}
       {% if ai_available %}{% include "campaigns/includes/ai_planner.html" %}{% endif %}
@@ -181,12 +163,6 @@
       {% include "campaigns/includes/policy_panel.html" %}
 
       {% elif step == 2 %}
-      <div class="studio-context-note">
-        <span class="studio-context-note__icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="info" size="sm" %}</span>
-        <div><strong>{% if campaign.target_type == 'search' %}چی سرچ می‌کنن؟{% elif campaign.target_type == 'bots' %}کدام ربات‌ها؟{% elif campaign.target_type == 'users' %}مخاطبت کیه؟{% else %}کدام کانال‌ها؟{% endif %}</strong>
-          <p>{% if campaign.target_type == 'search' %}کلمه‌هایی رو بنویس که مردم تو تلگرام سرچ می‌کنن (حداکثر ۱۰ تا).{% elif campaign.target_type == 'bots' %}یوزرنیم ربات رو وارد کن تا ببینیم می‌شه روش تبلیغ زد یا نه.{% elif campaign.target_type == 'users' %}کشور و موضوعات مرتبط رو انتخاب کن؛ جزئیات بیشتر اگر خواستی هست.{% else %}زبان، موضوع یا کانال مشخص را انتخاب کن؛ حذف موضوع/کانال هم اختیاری است.{% endif %}</p>
-        </div>
-      </div>
       {% if target_placement_choices|length > 1 %}
       <div class="field">
         <label>تبلیغ کجا دیده بشه؟</label>
@@ -214,19 +190,19 @@
       </div>
       {% elif campaign.target_type == 'bots' %}
       <div class="field bot-target-studio" data-bot-selector>
-        <label for="studio-bots">کدام ربات‌ها؟</label>
-        <p id="studio-bots-hint" class="muted studio-hint studio-hint--sm">یوزرنیم ربات رو بزن؛ خودمون چک می‌کنیم می‌شه روش تبلیغ زد یا نه.</p>
+        <label class="sr-only" for="studio-bots">ربات‌ها</label>
         <div class="catalog-row">
-          <input id="studio-bots" aria-describedby="studio-bots-hint" type="text" data-bot-input dir="ltr" placeholder="@mybot یا https://t.me/mybot" autocomplete="off" spellcheck="false">
+          <input id="studio-bots" type="text" data-bot-input dir="ltr" placeholder="@mybot یا https://t.me/mybot" autocomplete="off" spellcheck="false">
           <button type="button" class="btn btn-ghost btn-sm" data-bot-add disabled>افزودن</button>
         </div>
         <div class="bot-target-preview" data-bot-preview hidden aria-live="polite"></div>
         <ul class="bot-target-list" data-bot-chip-list role="list"></ul>
+        <button type="button" class="btn-link similar-channels-trigger" data-similar-bots-open hidden>افزودن ربات‌های مشابه ←</button>
         <section class="similar-bots" data-similar-bots-panel hidden>
           <div class="similar-bots__head">
             <div class="similar-bots__titles">
               <strong class="similar-bots__heading">ربات‌های مشابه</strong>
-              <p class="similar-bots__hint muted" data-similar-bots-status>پس از تأیید ربات، پیشنهادهای مرتبط اینجا می‌آید.</p>
+              <p class="similar-bots__hint muted" data-similar-bots-status>برای دیدن پیشنهادها، روی «افزودن ربات‌های مشابه» بزنید.</p>
             </div>
             <button type="button" class="btn btn-ghost btn-sm similar-bots__add" data-similar-bots-add disabled>
               افزودن انتخاب‌شده‌ها
@@ -388,10 +364,6 @@
       {% include "campaigns/includes/policy_panel.html" %}
 
       {% elif step == 3 %}
-      <div class="studio-context-note studio-context-note--creative">
-        <span class="studio-context-note__icon" aria-hidden="true">{% include "includes/lucide_icon.html" with name="lightbulb" size="sm" %}</span>
-        <div><strong>کوتاه، واضح، جذاب</strong><p>متن تبلیغ حداکثر ۱۶۰ حرف می‌تونه باشه. اگر از پیشنهاد آماده استفاده کردی، قبل از ثبت یه بار بخونش.</p></div>
-      </div>
       {% if campaign.target_type != 'search' %}
       {% if ai_available %}{% include "campaigns/includes/ai_creative.html" %}{% endif %}
       <div class="template-pills">{% for t in creative_templates %}<button type="button" class="btn btn-ghost btn-sm" data-creative-template-text="{{ t.text }}" data-creative-template-cta="{{ t.cta_label }}">{{ t.title }}</button>{% endfor %}</div>
@@ -467,14 +439,6 @@
 
         <div class="studio-finance__columns">
           <div class="studio-finance__col">
-            <div class="field studio-finance__row">
-              <div class="studio-finance__label-row">
-                <label for="studio-control-21">عنوان تبلیغ</label>
-                {% include "campaigns/includes/studio_field_tip.html" with label="عنوان تبلیغ" tip="فقط در رابط مدیریت تبلیغ دیده می‌شود؛ مخاطب آن را نمی‌بیند. برای نظم دادن به تبلیغ‌ها در پنل خودتان است." %}
-              </div>
-              <input id="studio-control-21" class="studio-finance__text" name="campaign_name" maxlength="128" value="{{ campaign.name|default:'' }}" placeholder="مثلاً کمپین نوروز" autocomplete="off">
-            </div>
-
             <div class="studio-finance__money">
               <div class="field studio-finance__row">
                 <div class="studio-finance__label-row">

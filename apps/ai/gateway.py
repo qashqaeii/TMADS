@@ -11,7 +11,7 @@ from django.utils import timezone
 from .models import AiDay, AiRun
 from .provider import AiError, available, complete
 
-VERSION = "2"
+VERSION = "3"
 PENDING_TTL = timedelta(minutes=2)
 
 

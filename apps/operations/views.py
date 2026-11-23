@@ -21,6 +21,66 @@ from apps.operations.review import review_campaign, review_payment_order
 from apps.telegram_ads.services.submission_guard import require_submission_order
 
 
+def _telegram_ads_treasury():
+    """Read-only central Telegram Ads balance with optional Toman estimate."""
+    from apps.finance.services.money import irr_to_toman_int
+    from apps.finance.services.ton_equiv import resolve_ton_display_rate, ton_amount_to_irr
+
+    snapshot = {
+        "ok": False,
+        "error": "",
+        "title": "",
+        "account_id": "",
+        "currency": "",
+        "remaining": None,
+        "spent": None,
+        "ads_budget": None,
+        "remaining_toman": None,
+        "spent_toman": None,
+        "irr_per_ton": None,
+        "rate_hint": "",
+    }
+    try:
+        account = TelegramAdsClient().get_account() or {}
+    except TelegramAdsError:
+        snapshot["error"] = "خواندن موجودی حساب تلگرام ادز ممکن نشد."
+        return snapshot
+    except Exception:
+        snapshot["error"] = "ارتباط با سرویس تلگرام ادز برقرار نشد."
+        return snapshot
+
+    currency = str(account.get("currency") or "").upper()
+    remaining = account.get("remaining_budget")
+    spent = account.get("spent_budget")
+    ads_budget = account.get("ads_budget")
+    irr_per_ton, rate_hint = resolve_ton_display_rate()
+    remaining_toman = spent_toman = None
+    if currency == "TON" and irr_per_ton:
+        rem_irr = ton_amount_to_irr(remaining, irr_per_ton)
+        spent_irr = ton_amount_to_irr(spent, irr_per_ton)
+        if rem_irr is not None:
+            remaining_toman = irr_to_toman_int(rem_irr)
+        if spent_irr is not None:
+            spent_toman = irr_to_toman_int(spent_irr)
+
+    snapshot.update(
+        {
+            "ok": True,
+            "title": str(account.get("title") or "").strip(),
+            "account_id": str(account.get("account_id") or "").strip(),
+            "currency": currency,
+            "remaining": remaining,
+            "spent": spent,
+            "ads_budget": ads_budget,
+            "remaining_toman": remaining_toman,
+            "spent_toman": spent_toman,
+            "irr_per_ton": irr_per_ton if currency == "TON" else None,
+            "rate_hint": rate_hint if currency == "TON" and irr_per_ton else "",
+        }
+    )
+    return snapshot
+
+
 @login_required
 @staff_ops_required
 def overview(request):
@@ -42,6 +102,7 @@ def overview(request):
                 available=Sum("available_irr"),
                 reserved=Sum("reserved_irr"),
             ),
+            "ads_treasury": _telegram_ads_treasury(),
         },
     )
 

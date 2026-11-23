@@ -1,0 +1,11 @@
+{% load static %}
+{# Magic wand mark for AI assistant surfaces. #}
+<img
+  class="ga-ai-icon ga-ai-icon--{{ size|default:'md' }}{% if class %} {{ class }}{% endif %}"
+  src="{% static 'img/icons/ai-wand.svg' %}"
+  alt=""
+  width="{% if size == 'lg' %}28{% elif size == 'sm' %}16{% elif size == 'xs' %}14{% else %}22{% endif %}"
+  height="{% if size == 'lg' %}28{% elif size == 'sm' %}16{% elif size == 'xs' %}14{% else %}22{% endif %}"
+  decoding="async"
+  aria-hidden="true"
+>
