@@ -32,7 +32,7 @@ def test_website_upload_is_off_by_default_and_creates_no_api_calls(customer_user
         destination="https://example.com", name="Site",
         ad_settings={"destination_rights_confirmed":True})
     AdCreative.objects.create(campaign=campaign, website_photo=photo())
-    with patch("apps.telegram_ads.services.website_photo.TelegramAdsClient") as api:
+    with patch("apps.telegram_ads.services.website_photo.campaign_client") as api:
         with pytest.raises(ValueError):
             upload_saved_website_photo(campaign, actor=customer_user)
         api.assert_not_called()
@@ -49,7 +49,7 @@ def test_uncertain_website_photo_upload_never_repeats(customer_user, settings, t
         ad_settings={"destination_rights_confirmed": True})
     AdCreative.objects.create(campaign=campaign, website_photo=photo())
     with patch("apps.telegram_ads.services.website_photo.website_photo_enabled", return_value=True), patch(
-        "apps.telegram_ads.services.website_photo.TelegramAdsClient"
+        "apps.telegram_ads.services.website_photo.campaign_client"
     ) as client:
         client.return_value.upload_website_photo.side_effect = TimeoutError("isolated timeout")
         with pytest.raises(TelegramAdsError):

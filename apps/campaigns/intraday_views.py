@@ -9,8 +9,8 @@ from django.views.decorators.http import require_GET
 from django.views.decorators.cache import never_cache
 from apps.accounts.permissions import customer_required
 from apps.campaigns.ownership import get_customer_campaign
-from apps.telegram_ads.client import TelegramAdsClient
 from apps.telegram_ads.exceptions import TelegramAdsError
+from apps.telegram_ads.services.account_connections import campaign_client
 
 def normalize_rows(items,start,end):
     if not isinstance(items,list) or len(items)>288:
@@ -59,7 +59,7 @@ def campaign_intraday(request,campaign_id):
             end=int(timezone.now().timestamp())//300*300
             start=end-hours*3600
             try:
-                stats=TelegramAdsClient().get_ad_statistics(ads[0].remote_ad_id,from_time=start,to_time=end,interval=300)
+                stats=campaign_client(campaign).get_ad_statistics(ads[0].remote_ad_id,from_time=start,to_time=end,interval=300)
                 rows=normalize_rows(stats.get("items"),start,end)
                 data={"rows":rows,"loaded":True,"fetched_at":timezone.now(),"slots":hours*12,"count":len(rows)}
                 cache.set(key,data,timeout=60)

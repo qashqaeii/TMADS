@@ -1,8 +1,9 @@
 """Read-only, individually authorized child-account ad inventory."""
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import never_cache
-from django.views.decorators.http import require_GET
-from django.shortcuts import get_object_or_404, render
+from django.contrib import messages
+from django.views.decorators.http import require_GET, require_http_methods
+from django.shortcuts import get_object_or_404, redirect, render
 
 from apps.accounts.permissions import customer_required
 from apps.telegram_ads.services.customer_assets import owned_account, verified_client
@@ -14,10 +15,10 @@ from apps.telegram_ads.services.account_connections import connection_client, de
 @login_required
 @customer_required
 @never_cache
-@require_GET
+@require_http_methods(["GET", "POST"])
 def related_account_ads(request):
     profile = request.user.customer_profile
-    selected_id = request.GET.get("connection_id")
+    selected_id = request.GET.get("connection_id") or request.POST.get("connection_id")
     connection = (
         get_object_or_404(
             TelegramAdsConnection,
@@ -37,6 +38,22 @@ def related_account_ads(request):
     }
     if not row and not connection:
         return render(request, "accounts/related_ads.html", context)
+
+    if request.method == "POST" and request.POST.get("action") == "import" and connection:
+        from apps.telegram_ads.services.import_campaigns import import_remote_campaigns_for_customer
+
+        try:
+            created, updated, skipped = import_remote_campaigns_for_customer(
+                profile, connection=connection, fetch_statistics=False,
+            )
+            messages.success(
+                request,
+                f"واردسازی انجام شد: {created} جدید، {updated} به‌روز، {skipped} رد شده.",
+            )
+        except Exception:
+            messages.error(request, "واردسازی تبلیغات از حساب انتخاب‌شده ممکن نشد.")
+        return redirect(f"{request.path}?connection_id={connection.pk}&load=1")
+
     if request.GET.get("load") != "1":
         return render(request, "accounts/related_ads.html", context)
     cursor = request.GET.get("offset") or None

@@ -9,7 +9,7 @@ from django.db import transaction
 from apps.campaigns.models import Campaign
 from apps.campaigns.media_validation import validate_telegram_creative_media
 from apps.policies.services.preflight import CampaignPolicyPreflight
-from apps.telegram_ads.client import TelegramAdsClient
+from apps.telegram_ads.services.account_connections import campaign_client
 from apps.telegram_ads.models import APIRequestLog
 
 
@@ -98,7 +98,7 @@ def upload_saved_media(campaign, *, actor):
 
     try:
         with creative.media.open("rb") as stream:
-            result = TelegramAdsClient().upload_creative_media(
+            result = campaign_client(campaign).upload_creative_media(
                 stream,
                 filename="creative" + Path(creative.media.name).suffix.lower(),
                 is_video=sig["field"] == "video_id",

@@ -236,10 +236,26 @@ def validate_submission_ready(campaign) -> StudioValidationResult:
         result.errors.append("مخاطبان اختصاصی نیازمند مسیردهی حساب مستقل تأییدشده هستند.")
     if not campaign.destination:
         result.errors.append("مقصد تبلیغ الزامی است.")
-    if campaign.budget_irr <= 0:
-        result.errors.append("بودجه معتبر الزامی است.")
-    if campaign.daily_cap_irr < 0 or campaign.daily_cap_irr > campaign.budget_irr:
-        result.errors.append("سقف روزانه نامعتبر است.")
+    connection = getattr(campaign, "telegram_connection", None)
+    if connection and connection.connection_type == "customer_owned":
+        try:
+            amount = Decimal(str(campaign.account_budget_amount))
+            daily = Decimal(str(campaign.account_daily_budget_limit))
+            if not amount.is_finite() or amount <= 0:
+                result.errors.append("بودجه حساب معتبر الزامی است.")
+            if not daily.is_finite() or daily < 0 or daily > amount:
+                result.errors.append("سقف روزانه حساب نامعتبر است.")
+            if (campaign.budget_currency or "").upper() != (connection.currency or "").upper():
+                result.errors.append("ارز بودجه با ارز حساب متصل مطابقت ندارد.")
+        except (InvalidOperation, ValueError, TypeError):
+            result.errors.append("بودجه حساب معتبر الزامی است.")
+        if campaign.budget_irr or campaign.daily_cap_irr:
+            result.errors.append("بودجه ریالی نباید برای حساب اختصاصی مشتری ثبت شود.")
+    else:
+        if campaign.budget_irr <= 0:
+            result.errors.append("بودجه معتبر الزامی است.")
+        if campaign.daily_cap_irr < 0 or campaign.daily_cap_irr > campaign.budget_irr:
+            result.errors.append("سقف روزانه نامعتبر است.")
     if campaign.cpm_bid is not None:
         try:
             cpm = Decimal(str(campaign.cpm_bid))

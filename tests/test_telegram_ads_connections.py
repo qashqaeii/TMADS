@@ -399,6 +399,7 @@ def test_customer_owned_budget_requests_use_currency_precision():
 
 @pytest.mark.django_db
 def test_on_hold_payload_flag_preserved_for_customer_owned(customer_user):
+    from apps.campaigns.models import AdCreative, CampaignTargeting
     from apps.telegram_ads.services.ad_payload import build_create_ad_payload
 
     connection = TelegramAdsConnection.objects.create(
@@ -424,11 +425,12 @@ def test_on_hold_payload_flag_preserved_for_customer_owned(customer_user):
         account_daily_budget_limit=Decimal("1"),
         budget_currency="EUR",
         cpm_bid=Decimal("1.00"),
-        ad_settings={"remote_initial_status": "on_hold", "is_paused": True},
+        wizard_version=2,
+        ad_settings={"remote_initial_status": "on_hold", "is_paused": True, "terms_accepted": True},
     )
-    # Payload builder may still require more fields; only assert pause flag when build succeeds.
-    try:
-        payload = build_create_ad_payload(campaign, include_initial_budget=True)
-    except Exception:
-        pytest.skip("payload prerequisites incomplete in unit fixture")
+    CampaignTargeting.objects.create(
+        campaign=campaign, config={"channel_mode": "language", "language_codes": ["fa"]},
+    )
+    AdCreative.objects.create(campaign=campaign, ad_text="متن تست", title="Paused launch")
+    payload = build_create_ad_payload(campaign, include_initial_budget=True)
     assert payload.get("is_paused") is True

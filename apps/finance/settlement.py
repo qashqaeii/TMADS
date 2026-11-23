@@ -9,8 +9,8 @@ from apps.core.models import AuditLog
 from apps.finance.models import AdvertisingOrder, Wallet, WalletLedgerEntry
 from apps.finance.services import ensure_wallet, outstanding_order_reservation, release_reservation_for_order
 from apps.notifications.services import notify_customer
-from apps.telegram_ads.client import TelegramAdsClient
 from apps.telegram_ads.models import APIRequestLog
+from apps.telegram_ads.services.account_connections import campaign_client
 from apps.telegram_ads.status_map import map_remote_status_to_campaign
 
 
@@ -105,11 +105,19 @@ def settle_confirmed_allocation(campaign_id, *, actor):
     except (KeyError, ValueError, TypeError, InvalidOperation):
         raise ValueError("شرایط مالی پیش‌فاکتور نیازمند تطبیق دستی است.") from None
 
-    client = TelegramAdsClient()
+    client = campaign_client(campaign)
     remote = client.get_ad(ad.remote_ad_id)
-    if (str(remote.get("ad_id")) != ad.remote_ad_id or remote.get("currency") != "TON"
-            or remote.get("promote_url") != campaign.destination):
-        raise ValueError("هویت یا ارز تبلیغ با سند ایجاد آن یکسان نیست.")
+    if str(remote.get("ad_id")) != ad.remote_ad_id or remote.get("promote_url") != campaign.destination:
+        raise ValueError("هویت تبلیغ با سند ایجاد آن یکسان نیست.")
+    if remote.get("currency") != "TON":
+        raise ValueError("ارز تبلیغ با سند ایجاد آن یکسان نیست.")
+    connection = getattr(campaign, "telegram_connection", None)
+    if connection:
+        expected_account = connection.remote_account_id
+        if ad.remote_account_id and ad.remote_account_id != expected_account:
+            raise ValueError("شناسه حساب تبلیغ با حساب انتخاب‌شده کمپین مطابقت ندارد.")
+        if not ad.remote_account_id:
+            raise ValueError("شناسه حساب تبلیغ ثبت نشده است.")
     evidence = _verify_transfer(client.get_ad_transactions(ad.remote_ad_id, limit=100),
                                 amount=order.ton_allocation, claimed_at=claim.created_at)
 

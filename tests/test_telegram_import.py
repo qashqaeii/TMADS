@@ -51,6 +51,41 @@ def test_import_creates_hyper_tunnel_campaign(monkeypatch):
 
 
 @pytest.mark.django_db
+def test_import_uses_connection_scoped_client(monkeypatch, customer_user):
+    from apps.telegram_ads.models import TelegramAdsConnection
+
+    connection = TelegramAdsConnection.objects.create(
+        customer=customer_user.customer_profile,
+        connection_type=TelegramAdsConnection.Type.CUSTOMER_OWNED,
+        status=TelegramAdsConnection.Status.CONNECTED,
+        remote_account_id="import-own",
+        currency="TON",
+        remaining_budget=1,
+        encrypted_access_token="enc",
+        token_fingerprint="a" * 64,
+        is_default=True,
+    )
+    calls = {"list": 0}
+
+    def fake_list(self):
+        calls["list"] += 1
+        return [{"ad_id": 11, "title": "scoped", "promote_url": "https://t.me/x", "status": "active", "currency": "TON"}]
+
+    monkeypatch.setattr(
+        "apps.telegram_ads.services.import_campaigns.connection_client",
+        lambda conn: type("C", (), {"list_advertisements": fake_list})(),
+    )
+    created, _, _ = import_remote_campaigns_for_customer(
+        customer_user.customer_profile, connection=connection, fetch_statistics=False,
+    )
+    assert created == 1
+    camp = Campaign.objects.get(customer=customer_user.customer_profile)
+    assert camp.telegram_connection_id == connection.pk
+    ad = TelegramAdvertisement.objects.get(remote_ad_id="11")
+    assert ad.remote_account_id == "import-own"
+
+
+@pytest.mark.django_db
 def test_prune_preserves_draft_content():
     user = User.objects.create_user(username="prune-safe", password="x")
     campaign = Campaign.objects.create(customer=user.customer_profile, name="کمپین جدید", destination="https://t.me/example")

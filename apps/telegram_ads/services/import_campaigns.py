@@ -16,7 +16,11 @@ from apps.campaigns.models import (
     CampaignTargeting,
     TelegramAdvertisement,
 )
+from django.core.exceptions import PermissionDenied
+
 from apps.telegram_ads.client import TelegramAdsClient
+from apps.telegram_ads.models import TelegramAdsConnection
+from apps.telegram_ads.services.account_connections import connection_client, default_connection
 from apps.telegram_ads.services.sync import has_financial_lock, log_api_request, sync_ad_statistics_for
 from apps.campaigns.deletion import delete_draft_campaign
 from apps.campaigns.metrics import _decimal
@@ -62,6 +66,30 @@ def _infer_objective(item: dict) -> str:
     return Campaign.Objective.BOT
 
 
+def _list_import_items(client, connection: TelegramAdsConnection | None) -> list[dict]:
+    if connection and connection.connection_type == TelegramAdsConnection.Type.PLATFORM_MANAGED:
+        items, offset, seen = [], None, set()
+        for _ in range(1000):
+            page = client.get_account_ads_page(
+                account_id=connection.remote_account_id, offset=offset, limit=100,
+            )
+            ads = page.get("ads") or []
+            if not isinstance(ads, list):
+                raise ValueError("ساختار فهرست تبلیغات معتبر نیست.")
+            for row in ads:
+                ad_id = row.get("ad_id")
+                if type(ad_id) is int and ad_id > 0 and ad_id not in seen:
+                    seen.add(ad_id)
+                    items.append(row)
+            offset = page.get("next_offset")
+            if not offset:
+                return items
+            if not ads:
+                raise ValueError("صفحه‌بندی تبلیغات کامل نشد.")
+        raise ValueError("سقف امن صفحه‌بندی تبلیغات رسید.")
+    return client.list_advertisements()
+
+
 def resolve_import_customer(*, username: str | None = None) -> CustomerProfile:
     User = get_user_model()
     if username:
@@ -79,6 +107,7 @@ def resolve_import_customer(*, username: str | None = None) -> CustomerProfile:
 def import_remote_campaigns_for_customer(
     customer: CustomerProfile,
     *,
+    connection: TelegramAdsConnection | None = None,
     project_name: str = "Hyper Tunnel",
     default_destination: str = HYPER_TUNNEL_BOT_URL,
     fetch_statistics: bool = True,
@@ -88,9 +117,19 @@ def import_remote_campaigns_for_customer(
 
     Returns (created, updated, skipped).
     """
-    client = TelegramAdsClient()
-    items = client.list_advertisements()
-    log_api_request("import_list_advertisements", True, {"count": len(items)})
+    if connection is not None and connection.customer_id != customer.id:
+        raise PermissionDenied
+    if connection is None:
+        connection = default_connection(customer)
+    if connection:
+        client = connection_client(connection)
+    else:
+        client = TelegramAdsClient()
+    items = _list_import_items(client, connection)
+    log_api_request(
+        "import_list_advertisements", True,
+        {"count": len(items), "connection_id": str(connection.pk) if connection else ""},
+    )
 
     project, _ = AdvertisingProject.objects.get_or_create(
         customer=customer,
@@ -129,21 +168,28 @@ def import_remote_campaigns_for_customer(
                 campaign = Campaign.objects.create(
                     customer=customer,
                     project=project,
+                    telegram_connection=connection,
                     name=title,
                     status=status,
                     objective=objective,
                     destination=destination,
                     placement=placement,
                     wizard_step=5,
-                    wizard_data={"imported": True},
+                    wizard_data={"imported": True, "connection_id": str(connection.pk) if connection else ""},
                 )
-                remote = TelegramAdvertisement.objects.create(campaign=campaign, remote_ad_id=rid)
+                remote = TelegramAdvertisement.objects.create(
+                    campaign=campaign,
+                    remote_ad_id=rid,
+                    remote_account_id=connection.remote_account_id if connection else "",
+                )
                 created += 1
 
             campaign.name = title
             campaign.status = status
             campaign.objective = objective
             campaign.destination = destination
+            if connection and not campaign.telegram_connection_id:
+                campaign.telegram_connection = connection
             if placement:
                 campaign.placement = placement
             cpm_ton = _decimal(cpm) if item.get("currency") == "TON" else None
@@ -158,6 +204,8 @@ def import_remote_campaigns_for_customer(
             remote.remote_status_raw = item
             remote.placement = placement or remote.placement
             remote.promotion_url = destination
+            if connection and connection.remote_account_id:
+                remote.remote_account_id = connection.remote_account_id
             remote.save()
 
             creative = campaign.creatives.first()

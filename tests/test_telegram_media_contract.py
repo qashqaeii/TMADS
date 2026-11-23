@@ -38,7 +38,7 @@ def test_uncertain_media_upload_blocks_second_write(customer_user, settings, tmp
     )
     AdCreative.objects.create(campaign=campaign, media=SimpleUploadedFile("test.png", buf.getvalue()))
     with patch("apps.telegram_ads.services.media.media_upload_enabled", return_value=True), patch(
-        "apps.telegram_ads.services.media.TelegramAdsClient"
+        "apps.telegram_ads.services.media.campaign_client"
     ) as api:
         api.return_value.upload_creative_media.side_effect = TimeoutError("simulated")
         with pytest.raises(ValueError):

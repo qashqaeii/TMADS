@@ -15,7 +15,7 @@ from apps.campaigns.media_validation import validate_website_photo
 from apps.telegram_ads.models import APIRequestLog
 from apps.telegram_ads.services.media import media_upload_enabled
 from apps.telegram_ads.targeting.website import is_external
-from apps.telegram_ads.client import TelegramAdsClient
+from apps.telegram_ads.services.account_connections import campaign_client
 from apps.telegram_ads.exceptions import TelegramAdsError
 
 
@@ -96,7 +96,7 @@ def upload_saved_website_photo(campaign, *, actor):
     # another upload by the same campaign without explicit reconciliation.
     try:
         with creative.website_photo.open("rb") as file:
-            response = TelegramAdsClient().upload_website_photo(
+            response = campaign_client(campaign).upload_website_photo(
                 file, filename="site" + Path(creative.website_photo.name).suffix.lower(),
             )
         photo_id = response.get("photo_id") if isinstance(response, dict) else None
