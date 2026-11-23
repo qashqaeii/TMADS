@@ -144,84 +144,14 @@ def _claim_submission(campaign_id):
 
 
 def _fund_platform_managed_account(campaign, order):
-    """Move the paid TON allocation to the customer's related account once."""
-    connection = campaign.telegram_connection
-    if not connection or connection.connection_type != "platform_managed":
-        return None
-    related = connection.related_account
-    if not related or related.remote_account_id != connection.remote_account_id:
-        raise ValueError("حساب مرتبط برای انتقال اعتبار معتبر نیست.")
+    from apps.finance.account_funding import fund_platform_managed_transfer
 
-    key = f"tmads-fund-{order.pk}"
-    transfer, _ = AccountFundingTransfer.objects.get_or_create(
+    return fund_platform_managed_transfer(
+        campaign,
+        amount=order.ton_allocation,
+        idempotency_key=f"tmads-fund-{order.pk}",
         order=order,
-        defaults={
-            "connection": connection,
-            "direction": AccountFundingTransfer.Direction.MAIN_TO_RELATED,
-            "status": AccountFundingTransfer.Status.EXECUTING,
-            "amount": order.ton_allocation,
-            "currency": "TON",
-            "idempotency_key": key,
-        },
     )
-    if (
-        transfer.connection_id != connection.pk
-        or transfer.amount != order.ton_allocation
-        or transfer.currency != "TON"
-        or transfer.idempotency_key != key
-    ):
-        raise ValueError("سند انتقال اعتبار با سفارش و حساب مقصد مطابقت ندارد.")
-    if transfer.status == AccountFundingTransfer.Status.COMPLETED:
-        return transfer
-    if transfer.status == AccountFundingTransfer.Status.FAILED:
-        raise ValueError("انتقال اعتبار قبلی ناموفق بوده است؛ بررسی مالی لازم است.")
-
-    try:
-        result = TelegramAdsClient().transfer_to_related_account(
-            account_id=related.remote_account_id,
-            amount=float(order.ton_allocation),
-            idempotency_key=key,
-        )
-        transaction_id = str(result.get("transaction_id") or "").strip()
-        amount = Decimal(str(result.get("amount")))
-        main_account = result.get("main_account") or {}
-        child_account = result.get("related_account") or {}
-        valid = (
-            result.get("status") == "completed"
-            and transaction_id
-            and result.get("currency") == "TON"
-            and amount == order.ton_allocation
-            and str(main_account.get("account_id") or "") == related.main_account_id
-            and str(child_account.get("account_id") or "") == related.remote_account_id
-        )
-        if not valid:
-            raise ValueError("پاسخ انتقال اعتبار کامل یا منطبق نیست.")
-        child_snapshot = campaign_account_snapshot(campaign)
-        if child_snapshot["currency"] != "TON" or child_snapshot["remaining_budget"] < order.ton_allocation:
-            raise ValueError("موجودی حساب مرتبط پس از انتقال قابل تأیید نیست.")
-        transfer.status = AccountFundingTransfer.Status.COMPLETED
-        transfer.transaction_id = transaction_id
-        transfer.response_payload = {
-            "status": result.get("status"),
-            "transaction_id": transaction_id,
-            "currency": result.get("currency"),
-            "amount": str(amount),
-            "main_account_id": related.main_account_id,
-            "related_account_id": related.remote_account_id,
-        }
-        transfer.confirmed_at = timezone.now()
-        transfer.save(update_fields=[
-            "status", "transaction_id", "response_payload", "confirmed_at", "updated_at",
-        ])
-        return transfer
-    except Exception as exc:
-        AccountFundingTransfer.objects.filter(pk=transfer.pk).update(
-            status=AccountFundingTransfer.Status.UNCERTAIN,
-            error_code=type(exc).__name__,
-        )
-        raise TelegramAdsError(
-            "نتیجه انتقال اعتبار به حساب اختصاصی مشتری نیازمند تطبیق است؛ ساخت تبلیغ تا تأیید انتقال متوقف شد."
-        ) from exc
 
 
 def submit_campaign_to_telegram(campaign: Campaign) -> TelegramAdvertisement:

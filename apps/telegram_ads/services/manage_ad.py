@@ -99,10 +99,8 @@ def reject_operation(operation_id, *, actor, reason):
 def _guard(campaign, op):
     direct = bool(campaign.telegram_connection_id and campaign.telegram_connection.connection_type == "customer_owned")
     if op.action == Action.INCREASE_BUDGET and not direct:
-        raise ValueError(
-            "افزایش بودجه حساب مدیریت‌شده نیازمند رزرو کیف پول و انتقال اعتبار است؛ "
-            "این مسیر از پنل عملیات هنوز فعال نشده است."
-        )
+        if not campaign.telegram_connection_id or campaign.telegram_connection.connection_type != "platform_managed":
+            raise ValueError("افزایش بودجه مدیریت‌شده فقط برای حساب تأیید‌شده پلتفرم مجاز است.")
     if not settings.TELEGRAM_ADS_WRITE_ENABLED or not settings.TELEGRAM_ADS_PAID_SUBMISSION_ENABLED:
         raise ValueError("عملیات زنده تبلیغات غیرفعال است.")
     if not direct and not CampaignPolicyPreflight.operator_submission_allowed():
@@ -241,6 +239,15 @@ def execute_operation(operation_id, *, actor):
     stub = RemoteAdOperation.objects.select_related("advertisement__campaign__telegram_connection").get(
         pk=operation_id,
     )
+    managed_quote = None
+    if stub.action == Action.INCREASE_BUDGET:
+        direct = bool(
+            stub.advertisement.campaign.telegram_connection_id
+            and stub.advertisement.campaign.telegram_connection.connection_type == "customer_owned"
+        )
+        if not direct:
+            from apps.finance.managed_budget_increase import parse_managed_increase_quote
+            managed_quote = parse_managed_increase_quote(stub.request_payload or {})
     with transaction.atomic():
         campaign = Campaign.objects.select_for_update().get(pk=stub.advertisement.campaign_id)
         op = RemoteAdOperation.objects.select_for_update().get(pk=operation_id)
@@ -261,6 +268,20 @@ def execute_operation(operation_id, *, actor):
         op.request_payload = request_payload
         op.save(update_fields=["request_payload", "updated_at"])
     try:
+        if managed_quote is not None:
+            from apps.finance.account_funding import fund_platform_managed_transfer
+            from apps.finance.managed_budget_increase import (
+                reserve_managed_budget_increase,
+                settle_managed_budget_increase,
+            )
+
+            reserve_managed_budget_increase(campaign.customer, op.pk, managed_quote.total)
+            fund_platform_managed_transfer(
+                campaign,
+                amount=managed_quote.ton,
+                idempotency_key=f"tmads-budget-fund-{op.pk}",
+                operation=op,
+            )
         if op.action in (Action.INCREASE_BUDGET, Action.DECREASE_BUDGET):
             _budget_api_call(client, op, ad)
         elif op.action == Action.REVIEW:
@@ -272,17 +293,25 @@ def execute_operation(operation_id, *, actor):
         if not valid:
             raise ValueError("نتیجه عملیات هنوز تأیید نشده است.")
         with transaction.atomic():
-            locked_campaign=Campaign.objects.select_for_update().get(pk=campaign.pk)
-            op=RemoteAdOperation.objects.select_for_update().get(pk=op.pk)
-            ad=TelegramAdvertisement.objects.select_for_update().get(pk=ad.pk)
-            _apply_remote_ad_payload(ad,confirmed)
-            ad.save(update_fields=["remote_status","remote_status_raw","placement","promotion_url","updated_at"])
+            locked_campaign = Campaign.objects.select_for_update().get(pk=campaign.pk)
+            op = RemoteAdOperation.objects.select_for_update().get(pk=op.pk)
+            ad = TelegramAdvertisement.objects.select_for_update().get(pk=ad.pk)
+            if managed_quote is not None:
+                from apps.finance.managed_budget_increase import settle_managed_budget_increase
+                settle_managed_budget_increase(campaign.customer, op.pk, managed_quote)
+            _apply_remote_ad_payload(ad, confirmed)
+            ad.save(update_fields=["remote_status", "remote_status_raw", "placement", "promotion_url", "updated_at"])
             _sync_campaign_from_remote(ad)
-            op.status=Status.COMPLETED
-            op.result_payload={"ad_id":ad.remote_ad_id,"status":confirmed.get("status"),"confirmed":True}
-            op.save(update_fields=["status","result_payload","updated_at"])
-            _audit(op,actor,"completed")
-            notify_customer(locked_campaign.customer,"عملیات تبلیغ تأیید شد",op.get_action_display(),related_campaign_id=locked_campaign.pk)
+            op.status = Status.COMPLETED
+            op.result_payload = {"ad_id": ad.remote_ad_id, "status": confirmed.get("status"), "confirmed": True}
+            op.save(update_fields=["status", "result_payload", "updated_at"])
+            _audit(op, actor, "completed")
+            notify_customer(
+                locked_campaign.customer,
+                "عملیات تبلیغ تأیید شد",
+                op.get_action_display(),
+                related_campaign_id=locked_campaign.pk,
+            )
         return op
     except Exception as exc:
         with transaction.atomic():

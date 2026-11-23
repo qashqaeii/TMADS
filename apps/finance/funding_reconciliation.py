@@ -15,9 +15,10 @@ def _manager(actor) -> None:
         raise PermissionDenied
 
 
-def _parse_completed(status_payload: dict, *, transfer: AccountFundingTransfer) -> dict:
-    if status_payload.get("status") != "completed":
-        raise ValueError("تراکنش هنوز کامل نشده یا ناموفق است.")
+def _parse_status(status_payload: dict, *, transfer: AccountFundingTransfer) -> dict:
+    status = str(status_payload.get("status") or "").strip().lower()
+    if status not in {"completed", "failed"}:
+        raise ValueError("تراکنش هنوز کامل نشده یا وضعیت آن قابل تأیید نیست.")
     transaction_id = str(status_payload.get("transaction_id") or transfer.transaction_id or "").strip()
     if not transaction_id:
         raise ValueError("شناسه تراکنش در پاسخ تلگرام موجود نیست.")
@@ -25,36 +26,46 @@ def _parse_completed(status_payload: dict, *, transfer: AccountFundingTransfer) 
         amount = Decimal(str(status_payload.get("amount")))
     except (InvalidOperation, TypeError, ValueError):
         raise ValueError("مبلغ تراکنش قابل تأیید نیست.") from None
-    if amount != transfer.amount or status_payload.get("currency") != transfer.currency:
+    if status == "completed" and (amount != transfer.amount or status_payload.get("currency") != transfer.currency):
         raise ValueError("مبلغ یا ارز تراکنش با سند انتقال مطابقت ندارد.")
     return {
-        "status": "completed",
+        "status": status,
         "transaction_id": transaction_id,
-        "amount": str(amount),
+        "amount": str(amount) if status == "completed" else str(transfer.amount),
         "currency": transfer.currency,
         "reconciled_at": timezone.now().isoformat(),
     }
 
 
-@transaction.atomic
-def reconcile_uncertain_funding_transfer(transfer_id, *, actor) -> AccountFundingTransfer:
-    _manager(actor)
-    transfer = AccountFundingTransfer.objects.select_for_update().select_related("connection").get(
-        pk=transfer_id,
-    )
-    if transfer.status != AccountFundingTransfer.Status.UNCERTAIN:
-        raise ValueError("فقط انتقال‌های نیازمند تطبیق قابل بررسی هستند.")
+def fetch_transfer_status_payload(transfer: AccountFundingTransfer) -> dict:
     if not transfer.transaction_id:
         raise ValueError("شناسه تراکنش روی سند ثبت نشده است؛ تطبیق دستی لازم است.")
+    return TelegramAdsClient().get_account_transaction_status(transfer.transaction_id)
 
-    client = TelegramAdsClient()
-    status_payload = client.get_account_transaction_status(transfer.transaction_id)
-    evidence = _parse_completed(status_payload, transfer=transfer)
 
-    transfer.status = AccountFundingTransfer.Status.COMPLETED
+@transaction.atomic
+def apply_reconciled_transfer(transfer_id, *, actor, evidence: dict) -> AccountFundingTransfer:
+    _manager(actor)
+    transfer = AccountFundingTransfer.objects.select_for_update().select_related(
+        "connection", "operation__advertisement__campaign",
+    ).get(pk=transfer_id)
+    if transfer.status != AccountFundingTransfer.Status.UNCERTAIN:
+        raise ValueError("فقط انتقال‌های نیازمند تطبیق قابل بررسی هستند.")
+
+    if evidence["status"] == "completed":
+        transfer.status = AccountFundingTransfer.Status.COMPLETED
+        transfer.transaction_id = evidence["transaction_id"]
+        transfer.confirmed_at = timezone.now()
+    else:
+        transfer.status = AccountFundingTransfer.Status.FAILED
+        if transfer.operation_id and transfer.operation.action == "increase_budget":
+            from apps.finance.managed_budget_increase import release_managed_budget_reservation
+
+            campaign = transfer.operation.advertisement.campaign
+            release_managed_budget_reservation(campaign.customer, transfer.operation_id)
+
     transfer.response_payload = {**(transfer.response_payload or {}), "reconciliation": evidence}
-    transfer.confirmed_at = timezone.now()
-    transfer.save(update_fields=["status", "response_payload", "confirmed_at", "updated_at"])
+    transfer.save(update_fields=["status", "transaction_id", "response_payload", "confirmed_at", "updated_at"])
     AuditLog.objects.create(
         actor=actor,
         action="account_funding_transfer.reconciled",
@@ -63,3 +74,12 @@ def reconcile_uncertain_funding_transfer(transfer_id, *, actor) -> AccountFundin
         new_state=evidence,
     )
     return transfer
+
+
+def reconcile_uncertain_funding_transfer(transfer_id, *, actor) -> AccountFundingTransfer:
+    _manager(actor)
+    transfer = AccountFundingTransfer.objects.select_related("connection").get(pk=transfer_id)
+    if transfer.status != AccountFundingTransfer.Status.UNCERTAIN:
+        raise ValueError("فقط انتقال‌های نیازمند تطبیق قابل بررسی هستند.")
+    evidence = _parse_status(fetch_transfer_status_payload(transfer), transfer=transfer)
+    return apply_reconciled_transfer(transfer_id, actor=actor, evidence=evidence)

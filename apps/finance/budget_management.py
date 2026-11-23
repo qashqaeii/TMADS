@@ -52,8 +52,9 @@ def preview_budget(campaign, *, actor, action, value):
         if min_irr and toman_to_irr(toman) < min_irr:
             min_fa = to_persian_digits(f"{irr_to_toman_int(min_irr):,}".replace(",", "٬"))
             raise ValueError(f"حداقل بودجه پیشنهادی معادل ۱ گرام است (حدود {min_fa} تومان).")
-        quote=build_campaign_quote(toman*10)
-        data={"quote":quote,"requested_toman":toman,"amount_ton":quote["ton_allocation"]}
+        quote = build_campaign_quote(toman * 10)
+        quote = {**quote, "buffer_disposition": "return_after_confirmed_allocation"}
+        data = {"quote": quote, "requested_toman": toman, "amount_ton": quote["ton_allocation"]}
     elif action=="decrease_budget":
         amount=_amount(value)
         remaining=_amount(ad.remote_status_raw.get("remaining_budget"))

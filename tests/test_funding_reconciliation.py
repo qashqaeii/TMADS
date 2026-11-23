@@ -58,5 +58,9 @@ def test_reconcile_uncertain_funding_transfer(customer_user):
             "amount": "1.5",
             "currency": "TON",
         }
-        result = reconcile_uncertain_funding_transfer(transfer.pk, actor=manager)
+        with patch(
+            "apps.finance.funding_reconciliation.fetch_transfer_status_payload",
+            return_value=client.return_value.get_account_transaction_status.return_value,
+        ):
+            result = reconcile_uncertain_funding_transfer(transfer.pk, actor=manager)
     assert result.status == AccountFundingTransfer.Status.COMPLETED
