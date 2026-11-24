@@ -10,7 +10,8 @@ from django.urls import reverse
 from apps.telegram_bot.config import get_bot_config
 from apps.telegram_bot.handler import process_update_payload
 from apps.telegram_bot.models import TelegramUpdateLog, TelegramUserLink
-from apps.telegram_bot.security import digest_token, generate_link_token
+from apps.telegram_bot.formatters import escape_html
+from apps.telegram_bot.security import callback_is_processed, record_callback_processed
 from apps.telegram_bot.services.link import consume_link_token, create_link_token
 from apps.telegram_bot.tasks import process_telegram_update
 
@@ -48,9 +49,16 @@ def mock_bot():
     bot.send_message.side_effect = send_message
     bot.edit_message_text.side_effect = edit_message_text
     bot.answer_callback_query.return_value = True
-    with patch("apps.telegram_bot.handler.get_bot", return_value=bot):
-        with patch("apps.telegram_bot.bot.get_bot", return_value=bot):
-            yield bot, sent
+    patches = [
+        "apps.telegram_bot.handler.get_bot",
+        "apps.telegram_bot.bot.get_bot",
+        "apps.telegram_bot.chat_guard.get_bot",
+        "apps.telegram_bot.services.delivery.get_bot",
+    ]
+    with patch(patches[0], return_value=bot), patch(patches[1], return_value=bot), patch(
+        patches[2], return_value=bot
+    ), patch(patches[3], return_value=bot):
+        yield bot, sent
 
 
 @pytest.mark.django_db
@@ -153,10 +161,136 @@ def test_cross_tenant_campaign_context(customer_user, db, bot_settings, mock_bot
             "callback_query": {
                 "id": "cb2",
                 "from": {"id": 500},
-                "message": {"message_id": 20, "chat": {"id": 500}},
+                "message": {"message_id": 20, "chat": {"id": 500, "type": "private"}},
                 "data": "go:c:cmp:v:0",
             },
         }
     )
     _, sent = mock_bot
     assert "یافت نشد" in sent.get("text", "")
+
+
+@pytest.mark.django_db
+def test_group_chat_does_not_show_dashboard(customer_profile, bot_settings, mock_bot):
+    consume_link_token(create_link_token(customer_profile), telegram_user_id=88, chat_id=-100)
+    _, sent = mock_bot
+    process_update_payload(
+        {
+            "update_id": 3,
+            "message": {
+                "message_id": 1,
+                "chat": {"id": -100, "type": "group"},
+                "from": {"id": 88, "username": "u"},
+                "text": "/start",
+            },
+        }
+    )
+    assert sent.get("text")
+    assert "داشبورد" not in sent.get("text", "")
+    assert "خصوصی" in sent.get("text", "")
+
+
+@pytest.mark.django_db
+def test_guest_link_button_uses_go_prefix(bot_settings, mock_bot):
+    _, sent = mock_bot
+    process_update_payload(
+        {
+            "update_id": 4,
+            "callback_query": {
+                "id": "cb-link",
+                "from": {"id": 1},
+                "message": {"message_id": 5, "chat": {"id": 1, "type": "private"}},
+                "data": "go:c:guest:link",
+            },
+        }
+    )
+    assert "اتصال حساب" in sent.get("text", "")
+
+
+@pytest.mark.django_db
+def test_callback_retry_after_failure_without_premature_dedup(customer_profile, bot_settings, mock_bot):
+    consume_link_token(create_link_token(customer_profile), telegram_user_id=91, chat_id=91)
+    assert not callback_is_processed("cb-retry")
+    with patch("apps.telegram_bot.handler.build_screen", side_effect=RuntimeError("boom")):
+        with pytest.raises(RuntimeError):
+            process_update_payload(
+                {
+                    "update_id": 5,
+                    "callback_query": {
+                        "id": "cb-retry",
+                        "from": {"id": 91},
+                        "message": {"message_id": 7, "chat": {"id": 91, "type": "private"}},
+                        "data": "go:c:wallet",
+                    },
+                }
+            )
+    assert not callback_is_processed("cb-retry")
+    process_update_payload(
+        {
+            "update_id": 6,
+            "callback_query": {
+                "id": "cb-retry",
+                "from": {"id": 91},
+                "message": {"message_id": 7, "chat": {"id": 91, "type": "private"}},
+                "data": "go:c:wallet",
+            },
+        }
+    )
+    assert callback_is_processed("cb-retry")
+
+
+@pytest.mark.django_db
+def test_html_escape_notification_body(customer_profile, bot_settings):
+    from apps.notifications.models import Notification
+    from apps.telegram_bot.services.delivery import enqueue_notification_for_customer
+
+    consume_link_token(create_link_token(customer_profile), telegram_user_id=55, chat_id=55)
+    note = Notification.objects.create(
+        customer=customer_profile,
+        title="<script>alert(1)</script>",
+        body="مبلغ <b>خطر</b> & تست",
+    )
+    enqueue_notification_for_customer(note)
+    from apps.telegram_bot.models import TelegramOutbox
+
+    row = TelegramOutbox.objects.get()
+    assert "<script>" not in row.body
+    assert escape_html("<b>") in row.body or "&lt;b&gt;" in row.body
+
+
+@pytest.mark.django_db
+def test_webhook_requeues_failed_update(bot_settings, client: Client):
+    payload = {
+        "update_id": 12345,
+        "message": {"message_id": 1, "chat": {"id": 2, "type": "private"}, "from": {"id": 2}, "text": "/start"},
+    }
+    url = reverse("telegram_bot:webhook")
+    headers = {"HTTP_X_TELEGRAM_BOT_API_SECRET_TOKEN": "test-webhook-secret"}
+    client.post(url, data=json.dumps(payload), content_type="application/json", **headers)
+    log = TelegramUpdateLog.objects.get(update_id=12345)
+    log.status = TelegramUpdateLog.Status.FAILED
+    log.save(update_fields=["status", "updated_at"])
+    with patch("apps.telegram_bot.webhook.process_telegram_update.delay") as delay:
+        client.post(url, data=json.dumps(payload), content_type="application/json", **headers)
+        delay.assert_called_once_with(str(log.pk))
+
+
+@pytest.mark.django_db
+def test_outbox_retries_failed_row(customer_profile, bot_settings, mock_bot):
+    mock_bot  # ensure get_bot is patched
+    from apps.telegram_bot.models import TelegramOutbox
+    from apps.telegram_bot.services.delivery import send_outbox_row
+
+    link = consume_link_token(create_link_token(customer_profile), telegram_user_id=66, chat_id=66)
+    row = TelegramOutbox.objects.create(
+        link=link,
+        telegram_user_id=66,
+        chat_id=66,
+        body="تست",
+        dedupe_key="test:1",
+        status=TelegramOutbox.Status.FAILED,
+        attempt_count=1,
+    )
+    assert send_outbox_row(row) is True
+    row.refresh_from_db()
+    assert row.status == TelegramOutbox.Status.SENT

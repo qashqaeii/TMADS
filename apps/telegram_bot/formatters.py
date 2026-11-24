@@ -1,9 +1,16 @@
 from __future__ import annotations
 
+import html
+
 from django.urls import reverse
 
 from apps.core.dates import jalali_datetime_string, to_persian_digits
 from apps.finance.services.money import irr_to_toman_int
+
+
+def escape_html(value) -> str:
+    """Escape user/database text for Telegram HTML parse mode."""
+    return html.escape(str(value or ""), quote=False)
 
 
 def format_toman(irr: int) -> str:

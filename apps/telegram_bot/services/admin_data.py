@@ -9,6 +9,15 @@ from apps.finance.models import AccountFundingTransfer, AdvertisingOrder, Refund
 from apps.support.models import SupportTicket
 
 
+def recent_open_tickets(limit: int = 5):
+    return list(
+        SupportTicket.objects.filter(
+            status__in=[SupportTicket.Status.OPEN, SupportTicket.Status.IN_PROGRESS],
+        ).select_related("customer")
+        .order_by("-updated_at")[:limit]
+    )
+
+
 def ops_overview() -> dict:
     return {
         "today": timezone.localdate(),

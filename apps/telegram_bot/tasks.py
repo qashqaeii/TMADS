@@ -7,8 +7,7 @@ from django.utils import timezone
 
 from .handler import process_update_payload
 from .models import TelegramOutbox, TelegramUpdateLog
-from .security import callback_already_processed
-from .services.delivery import send_outbox_row
+from .services.delivery import send_outbox_row, recover_stuck_outbox_rows
 
 logger = logging.getLogger(__name__)
 
@@ -21,13 +20,6 @@ def process_telegram_update(self, update_log_id: str) -> None:
     row.status = TelegramUpdateLog.Status.PROCESSING
     row.save(update_fields=["status", "updated_at"])
     payload = row.payload or {}
-    callback = (payload.get("callback_query") or {})
-    cb_id = callback.get("id")
-    if cb_id and callback_already_processed(str(cb_id)):
-        row.status = TelegramUpdateLog.Status.DUPLICATE
-        row.processed_at = timezone.now()
-        row.save(update_fields=["status", "processed_at", "updated_at"])
-        return
     try:
         process_update_payload(payload)
         row.status = TelegramUpdateLog.Status.DONE
@@ -43,8 +35,17 @@ def process_telegram_update(self, update_log_id: str) -> None:
 
 @shared_task
 def flush_telegram_outbox(batch_size: int = 40) -> int:
+    recover_stuck_outbox_rows()
     sent = 0
-    qs = TelegramOutbox.objects.filter(status=TelegramOutbox.Status.QUEUED).order_by("created_at")[:batch_size]
+    from django.db.models import Q
+
+    qs = (
+        TelegramOutbox.objects.filter(
+            Q(status=TelegramOutbox.Status.QUEUED)
+            | Q(status=TelegramOutbox.Status.FAILED, attempt_count__lt=8)
+        )
+        .order_by("created_at")[:batch_size]
+    )
     for row in qs:
         if send_outbox_row(row):
             sent += 1

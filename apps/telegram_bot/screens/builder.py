@@ -10,7 +10,7 @@ from apps.campaigns.models import Campaign
 from apps.core.dates import jalali_datetime_string
 from apps.finance.models import WalletLedgerEntry
 
-from ..formatters import format_int, format_pct, format_toman, named_site_url
+from ..formatters import escape_html, format_int, format_pct, format_toman, named_site_url
 from ..keyboards import attach_nav, inline_grid
 from ..navigation import ADMIN_HOME, GUEST_HOME, HOME
 from ..permissions import active_customer_link, active_staff_link, user_may_use_admin_panel
@@ -120,11 +120,11 @@ def _guest_link_help() -> Screen:
 def _guest_home(link, staff, note: str = "") -> Screen:
     product = settings.PRODUCT_NAME
     lines = [
-        f"👋 به ربات رسمی <b>{product}</b> خوش آمدید.",
+        f"👋 به ربات رسمی <b>{escape_html(product)}</b> خوش آمدید.",
         "حساب تلگرام خود را به پنل گرام‌ادز وصل کنید و کمپین‌ها را از همین‌جا مدیریت کنید.",
     ]
     if note:
-        lines.append(note)
+        lines.append(escape_html(note))
     if link:
         lines.append("✅ اتصال فعال است — از «خانه» وارد داشبورد شوید.")
     buttons = []
@@ -135,7 +135,7 @@ def _guest_home(link, staff, note: str = "") -> Screen:
     kb = inline_grid([(t, d if d.startswith("http") or d.startswith("c:") or d.startswith("nav:") else f"url:{d}") for t, d in buttons], columns=1)
     # fix url buttons
     kb = types.InlineKeyboardMarkup()
-    kb.add(types.InlineKeyboardButton("🔗 راهنمای اتصال", callback_data="c:guest:link"))
+    kb.add(types.InlineKeyboardButton("🔗 راهنمای اتصال", callback_data="go:c:guest:link"))
     kb.add(types.InlineKeyboardButton("🌐 ورود به سایت", url=named_site_url("accounts:login")))
     if staff and user_may_use_admin_panel(staff.user):
         kb.add(types.InlineKeyboardButton("🛠 پنل مدیریت", callback_data="nav:admin"))
@@ -188,10 +188,9 @@ def _campaigns_menu(customer: CustomerProfile) -> Screen:
             ("⏳ در انتظار", "go:c:cmp:l:pending:p:0"),
             ("⏸ متوقف", "go:c:cmp:l:paused:p:0"),
             ("⛔️ ردشده", "go:c:cmp:l:rejected:p:0"),
-            ("➕ ایجاد کمپین", "url:new_campaign"),
         ]
     )
-    kb.keyboard[-1][0].url = named_site_url("campaigns:wizard_new")
+    kb.add(types.InlineKeyboardButton("➕ ایجاد کمپین", url=named_site_url("campaigns:wizard_new")))
     attach_nav(kb)
     return Screen("\n".join(lines), kb)
 
@@ -234,8 +233,8 @@ def _campaign_detail(customer: CustomerProfile, session, idx: int) -> Screen:
     if not campaign:
         return Screen("کمپین یافت نشد.", inline_grid([("بازگشت", "nav:back")]))
     lines = [
-        f"📌 <b>{campaign.name or 'کمپین'}</b>",
-        f"وضعیت: {_status_label(campaign)}",
+        f"📌 <b>{escape_html(campaign.name or 'کمپین')}</b>",
+        f"وضعیت: {escape_html(_status_label(campaign))}",
         f"بودجه: {format_toman(campaign.budget_irr)} تومان",
         f"آخرین به‌روزرسانی: {jalali_datetime_string(campaign.updated_at)}",
     ]
@@ -307,7 +306,7 @@ def _notifications_menu(customer: CustomerProfile) -> Screen:
     lines = ["🔔 <b>اعلان‌ها</b>", f"خوانده‌نشده: {format_int(snap['unread'])}", ""]
     for n in snap["items"][:6]:
         mark = "•" if not n.is_read else "◦"
-        lines.append(f"{mark} {n.title[:48]}")
+        lines.append(f"{mark} {escape_html(n.title[:48])}")
     kb = types.InlineKeyboardMarkup()
     kb.add(types.InlineKeyboardButton("مشاهده در سایت", url=named_site_url("dashboard:notifications")))
     attach_nav(kb)
@@ -322,7 +321,7 @@ def _support_menu(customer: CustomerProfile) -> Screen:
         "",
     ]
     for t in snap["recent"][:4]:
-        lines.append(f"• {t.subject[:40]} — {t.get_status_display()}")
+        lines.append(f"• {escape_html(t.subject[:40])} — {escape_html(t.get_status_display())}")
     kb = types.InlineKeyboardMarkup()
     kb.add(types.InlineKeyboardButton("تیکت جدید", url=named_site_url("support:create")))
     kb.add(types.InlineKeyboardButton("تیکت‌های من", url=named_site_url("support:list")))
@@ -346,19 +345,14 @@ def _ai_menu(customer: CustomerProfile) -> Screen:
 def _settings_menu(customer: CustomerProfile, link, session) -> Screen:
     lines = [
         "⚙️ <b>حساب و تنظیمات</b>",
-        f"نام: {customer}",
+        f"نام: {escape_html(customer)}",
         f"تلگرام: {'متصل ✅' if link else 'متصل نیست'}",
     ]
-    kb = inline_grid(
-        [
-            ("👤 پروفایل سایت", "url:profile"),
-            ("📱 دستگاه‌های متصل", "go:c:set:devices"),
-            ("🔕 تنظیم اعلان‌ها", "go:c:set:notify"),
-            ("⛓ قطع اتصال تلگرام", "go:c:set:disc"),
-        ],
-        columns=1,
-    )
-    kb.keyboard[0][0].url = named_site_url("accounts:profile")
+    kb = types.InlineKeyboardMarkup()
+    kb.add(types.InlineKeyboardButton("👤 پروفایل سایت", url=named_site_url("accounts:profile")))
+    kb.add(types.InlineKeyboardButton("📱 دستگاه‌های متصل", callback_data="go:c:set:devices"))
+    kb.add(types.InlineKeyboardButton("🔕 تنظیم اعلان‌ها", callback_data="go:c:set:notify"))
+    kb.add(types.InlineKeyboardButton("⛓ قطع اتصال تلگرام", callback_data="go:c:set:disc"))
     attach_nav(kb)
     return Screen("\n".join(lines), kb)
 
@@ -406,7 +400,7 @@ def _devices_list(customer: CustomerProfile) -> Screen:
     lines = ["📱 <b>دستگاه‌های متصل</b>", ""]
     for row in links:
         uname = f"@{row.telegram_username}" if row.telegram_username else f"ID {row.telegram_user_id}"
-        lines.append(f"• {uname} — {jalali_datetime_string(row.linked_at)}")
+        lines.append(f"• {escape_html(uname)} — {jalali_datetime_string(row.linked_at)}")
     kb = types.InlineKeyboardMarkup()
     kb.add(types.InlineKeyboardButton("اتصال دستگاه جدید", url=named_site_url("accounts:profile")))
     attach_nav(kb)
@@ -436,11 +430,11 @@ def _admin_home(staff) -> Screen:
             ("🎫 تیکت‌ها", "go:a:tickets"),
             ("📈 آمار", "go:a:stats"),
             ("🖥 وضعیت سرویس", "go:a:svc"),
-            ("🌐 پنل عملیات", "url:ops"),
         ],
         columns=2,
     )
-    kb.keyboard[-1][0].url = named_site_url("operations:overview") if _ops_url_exists() else named_site_url("dashboard:home")
+    if _ops_url_exists():
+        kb.add(types.InlineKeyboardButton("🌐 پنل عملیات", url=named_site_url("operations:overview")))
     attach_nav(kb, back=False)
     kb.row(types.InlineKeyboardButton("🏠 پنل مشتری", callback_data="nav:home"))
     return Screen("\n".join(lines), kb)
@@ -488,6 +482,8 @@ def _admin_users() -> Screen:
     ov = admin_data.ops_overview()
     lines = ["👥 <b>کاربران و مشتریان</b>", f"تعداد مشتریان: {format_int(ov['customer_count'])}", ""]
     kb = types.InlineKeyboardMarkup()
+    if _ops_url_exists():
+        kb.add(types.InlineKeyboardButton("پنل عملیات", url=named_site_url("operations:overview")))
     attach_nav(kb)
     return Screen("\n".join(lines), kb)
 
@@ -501,7 +497,9 @@ def _admin_finance() -> Screen:
         "عملیات مالی حساس فقط از پنل عملیات با تأیید مجوز انجام شود.",
     ]
     kb = types.InlineKeyboardMarkup()
+    kb.add(types.InlineKeyboardButton("بازپرداخت‌ها", url=named_site_url("operations:refunds")))
     kb.add(types.InlineKeyboardButton("تطبیق انتقال", url=named_site_url("operations:funding_transfers")))
+    kb.add(types.InlineKeyboardButton("نرخ ارز", url=named_site_url("operations:exchange_rates")))
     attach_nav(kb)
     return Screen("\n".join(lines), kb)
 
@@ -517,24 +515,46 @@ def _admin_funding() -> Screen:
 
 def _admin_review_queue() -> Screen:
     ov = admin_data.ops_overview()
-    lines = ["✅ <b>صف بررسی تبلیغات</b>", f"عملیات معلق: {format_int(ov['remote_pending'])}", ""]
+    lines = [
+        "✅ <b>صف بررسی تبلیغات</b>",
+        f"عملیات معلق: {format_int(ov['remote_pending'])}",
+        "",
+        "تأیید و ارسال حساس فقط از پنل عملیات وب انجام شود.",
+    ]
     kb = types.InlineKeyboardMarkup()
+    kb.add(types.InlineKeyboardButton("عملیات ریموت", url=named_site_url("operations:remote_operations")))
+    kb.add(types.InlineKeyboardButton("بررسی کمپین‌ها", url=named_site_url("operations:campaigns")))
     attach_nav(kb)
     return Screen("\n".join(lines), kb)
 
 
 def _admin_tickets() -> Screen:
     ov = admin_data.ops_overview()
+    tickets = admin_data.recent_open_tickets()
     lines = ["🎫 <b>تیکت‌های پشتیبانی</b>", f"باز: {format_int(ov['open_tickets'])}", ""]
+    if tickets:
+        lines.append("<b>آخرین تیکت‌های باز:</b>")
+        for t in tickets:
+            who = escape_html(str(t.customer)[:24])
+            lines.append(f"• {escape_html(t.subject[:36])} — {who}")
+    else:
+        lines.append("تیکت بازی در صف نیست.")
     kb = types.InlineKeyboardMarkup()
+    kb.add(types.InlineKeyboardButton("پنل عملیات", url=named_site_url("operations:overview")))
     attach_nav(kb)
     return Screen("\n".join(lines), kb)
 
 
 def _admin_stats() -> Screen:
     ov = admin_data.ops_overview()
-    lines = ["📈 <b>آمار</b>", f"سفارش‌ها: {format_int(ov['order_count'])}", ""]
+    lines = [
+        "📈 <b>آمار</b>",
+        f"سفارش‌ها: {format_int(ov['order_count'])}",
+        f"مشتریان: {format_int(ov['customer_count'])}",
+        f"کمپین در صف: {format_int(ov['pending_campaigns'])}",
+    ]
     kb = types.InlineKeyboardMarkup()
+    kb.add(types.InlineKeyboardButton("گزارش حساب تلگرام", url=named_site_url("operations:telegram_account")))
     attach_nav(kb)
     return Screen("\n".join(lines), kb)
 
@@ -546,7 +566,7 @@ def _admin_services() -> Screen:
         "در تلگرام فقط خلاصه و هشدار نمایش داده می‌شود.",
     ]
     kb = types.InlineKeyboardMarkup()
-    if _ops_url_exists():
-        kb.add(types.InlineKeyboardButton("کنترل از وب", url=named_site_url("operations:overview")))
+    kb.add(types.InlineKeyboardButton("کنترل از وب", url=named_site_url("operations:overview")))
+    kb.add(types.InlineKeyboardButton("گزارش API", url=named_site_url("operations:remote_operations")))
     attach_nav(kb)
     return Screen("\n".join(lines), kb)

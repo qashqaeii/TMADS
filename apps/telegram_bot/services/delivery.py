@@ -10,7 +10,7 @@ from django.utils import timezone
 from apps.notifications.models import Notification
 
 from ..bot import get_bot
-from ..formatters import named_site_url
+from ..formatters import escape_html, named_site_url
 from ..models import TelegramNotificationPreference, TelegramOutbox, TelegramUserLink
 logger = logging.getLogger(__name__)
 
@@ -40,9 +40,9 @@ def enqueue_notification_for_customer(notification: Notification) -> int:
     for link in links:
         if not _should_notify(link, notification):
             continue
-        body = f"🔔 <b>{notification.title}</b>"
+        body = f"🔔 <b>{escape_html(notification.title)}</b>"
         if notification.body:
-            body += f"\n{notification.body}"
+            body += f"\n{escape_html(notification.body)}"
         markup = {}
         detail_url = None
         if notification.related_campaign_id:
@@ -67,11 +67,32 @@ def enqueue_notification_for_customer(notification: Notification) -> int:
     return created
 
 
+MAX_OUTBOX_ATTEMPTS = 8
+STUCK_SENDING_MINUTES = 5
+
+
+def recover_stuck_outbox_rows() -> int:
+    from datetime import timedelta
+
+    cutoff = timezone.now() - timedelta(minutes=STUCK_SENDING_MINUTES)
+    qs = TelegramOutbox.objects.filter(
+        status=TelegramOutbox.Status.SENDING,
+        updated_at__lt=cutoff,
+        attempt_count__lt=MAX_OUTBOX_ATTEMPTS,
+    )
+    return qs.update(status=TelegramOutbox.Status.QUEUED, last_error="stuck_sending_recovered")
+
+
 def send_outbox_row(row: TelegramOutbox) -> bool:
     bot = get_bot()
     if not bot:
         row.status = TelegramOutbox.Status.SKIPPED
         row.last_error = "bot_not_configured"
+        row.save(update_fields=["status", "last_error", "updated_at"])
+        return False
+    if row.attempt_count >= MAX_OUTBOX_ATTEMPTS and row.status == TelegramOutbox.Status.FAILED:
+        row.status = TelegramOutbox.Status.SKIPPED
+        row.last_error = "max_attempts"
         row.save(update_fields=["status", "last_error", "updated_at"])
         return False
     row.status = TelegramOutbox.Status.SENDING
@@ -81,7 +102,7 @@ def send_outbox_row(row: TelegramOutbox) -> bool:
         kwargs = {}
         if row.reply_markup:
             kwargs["reply_markup"] = json.dumps(row.reply_markup)
-        bot.send_message(row.chat_id, row.body, **kwargs)
+        bot.send_message(row.chat_id, row.body, parse_mode="HTML", **kwargs)
         row.status = TelegramOutbox.Status.SENT
         row.sent_at = timezone.now()
         row.last_error = ""

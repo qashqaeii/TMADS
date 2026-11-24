@@ -50,10 +50,17 @@ def rate_limit_allow(telegram_user_id: int, *, limit: int | None = None) -> bool
         return True
 
 
-def callback_already_processed(callback_query_id: str) -> bool:
+def callback_is_processed(callback_query_id: str) -> bool:
     from .models import TelegramCallbackReceipt
 
     if not callback_query_id:
         return False
-    _, created = TelegramCallbackReceipt.objects.get_or_create(callback_query_id=callback_query_id)
-    return not created
+    return TelegramCallbackReceipt.objects.filter(callback_query_id=callback_query_id).exists()
+
+
+def record_callback_processed(callback_query_id: str) -> None:
+    from .models import TelegramCallbackReceipt
+
+    if not callback_query_id:
+        return
+    TelegramCallbackReceipt.objects.get_or_create(callback_query_id=callback_query_id)

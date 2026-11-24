@@ -49,8 +49,14 @@ def telegram_webhook(request):
         },
     )
     if not created:
-        log.status = TelegramUpdateLog.Status.DUPLICATE
-        log.save(update_fields=["status", "updated_at"])
+        if log.status in {
+            TelegramUpdateLog.Status.FAILED,
+            TelegramUpdateLog.Status.QUEUED,
+        }:
+            process_telegram_update.delay(str(log.pk))
+        elif log.status == TelegramUpdateLog.Status.DONE:
+            log.status = TelegramUpdateLog.Status.DUPLICATE
+            log.save(update_fields=["status", "updated_at"])
         return HttpResponse(status=200)
 
     process_telegram_update.delay(str(log.pk))
