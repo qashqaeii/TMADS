@@ -83,6 +83,30 @@
       </footer>
     </form>
 
+    {% if telegram_bot_enabled %}
+    <section class="ga-profile-card ga-profile-card--telegram">
+      <header class="ga-profile-card__head">
+        <div>
+          <h2>ربات تلگرام گرام‌ادز</h2>
+          <p>حساب تلگرام خود را با کد یک‌بارمصرف وصل کنید. رمز عبور یا توکن API را در چت ربات وارد نکنید.</p>
+        </div>
+      </header>
+      <div class="ga-profile-card__body">
+        <p class="ga-profile-meta">دستگاه‌های متصل: {{ telegram_bot_devices }}</p>
+        {% if telegram_bot_link_token %}
+        <div class="ga-profile-callout" dir="ltr">
+          <p><strong>کد اتصال ({{ telegram_bot_link_ttl }} دقیقه):</strong></p>
+          <p>/start link_{{ telegram_bot_link_token }}</p>
+        </div>
+        {% endif %}
+        <form method="post" action="{% url 'telegram_bot:create_link_token' %}">
+          {% csrf_token %}
+          <button class="btn btn-secondary" type="submit">دریافت کد اتصال جدید</button>
+        </form>
+      </div>
+    </section>
+    {% endif %}
+
     <section class="ga-profile-card ga-profile-card--security">
       <header class="ga-profile-card__head">
         <div>

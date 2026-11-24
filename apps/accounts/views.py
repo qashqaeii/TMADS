@@ -86,6 +86,11 @@ def profile_view(request):
             profile.save(update_fields=["display_name", "company_name", "updated_at"])
             messages.success(request, "پروفایل به‌روزرسانی شد.")
             return redirect("accounts:profile")
+    from apps.telegram_bot.config import bot_runtime_enabled
+    from apps.telegram_bot.services.link import customer_active_links
+
+    tg_token = request.session.pop("telegram_bot_link_token", "")
+    tg_token_ttl = request.session.pop("telegram_bot_link_expires_min", 0)
     return render(
         request,
         "accounts/profile.html",
@@ -93,5 +98,9 @@ def profile_view(request):
             "profile": profile,
             "password_form": password_form,
             "avatar_choices": CustomerProfile.Avatar.choices,
+            "telegram_bot_enabled": bot_runtime_enabled(),
+            "telegram_bot_link_token": tg_token,
+            "telegram_bot_link_ttl": tg_token_ttl,
+            "telegram_bot_devices": customer_active_links(profile).count(),
         },
     )

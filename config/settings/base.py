@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "apps.operations",
     "apps.policies",
     "apps.ai",
+    "apps.telegram_bot",
 ]
 
 MIDDLEWARE = [
@@ -137,8 +138,12 @@ CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = TIME_ZONE
 
+GRAMADS_BOT_TOKEN = env("GRAMADS_BOT_TOKEN", default="")
+GRAMADS_BOT_WEBHOOK_SECRET = env("GRAMADS_BOT_WEBHOOK_SECRET", default="")
+
 CELERY_BEAT_SCHEDULE = {
     "dispatch-transactional-sms": {"task": "apps.notifications.tasks.dispatch_sms", "schedule": 60.0},
+    "flush-telegram-outbox": {"task": "apps.telegram_bot.tasks.flush_telegram_outbox", "schedule": 30.0},
     "sync-active-ad-stats-hourly": {
         "task": "apps.telegram_ads.tasks.task_sync_active_ad_stats",
         "schedule": 3600.0,

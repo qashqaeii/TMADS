@@ -51,6 +51,8 @@ jobs:
       NOBITEX_API_BASE_URL: http://127.0.0.1:1
       NOBITEX_HTTP_TIMEOUT_SECONDS: "1"
       NOBITEX_HTTP_RETRIES: "0"
+      GRAMADS_BOT_TOKEN: "000000000:CI-GRAMADS-BOT-TOKEN"
+      GRAMADS_BOT_WEBHOOK_SECRET: "ci-webhook-secret"
     steps:
       - uses: actions/checkout@v4
         with:
