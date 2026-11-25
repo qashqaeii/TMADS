@@ -5,6 +5,7 @@ import logging
 
 from django.conf import settings
 from django.db import transaction
+from django.db.models import F
 from django.utils import timezone
 
 from apps.notifications.models import Notification
@@ -84,39 +85,43 @@ def recover_stuck_outbox_rows() -> int:
 
 
 def send_outbox_row(row: TelegramOutbox) -> bool:
+    """Claim before sending; parallel Beat/worker runs may not send the same row."""
     bot = get_bot()
     if not bot:
-        row.status = TelegramOutbox.Status.SKIPPED
-        row.last_error = "bot_not_configured"
-        row.save(update_fields=["status", "last_error", "updated_at"])
         return False
-    if row.attempt_count >= MAX_OUTBOX_ATTEMPTS and row.status == TelegramOutbox.Status.FAILED:
-        row.status = TelegramOutbox.Status.SKIPPED
-        row.last_error = "max_attempts"
-        row.save(update_fields=["status", "last_error", "updated_at"])
+    claimed = TelegramOutbox.objects.filter(
+        pk=row.pk,
+        status__in=[TelegramOutbox.Status.QUEUED, TelegramOutbox.Status.FAILED],
+        attempt_count__lt=MAX_OUTBOX_ATTEMPTS,
+    ).update(
+        status=TelegramOutbox.Status.SENDING,
+        attempt_count=F("attempt_count") + 1,
+        updated_at=timezone.now(),
+    )
+    if not claimed:
         return False
-    row.status = TelegramOutbox.Status.SENDING
-    row.attempt_count += 1
-    row.save(update_fields=["status", "attempt_count", "updated_at"])
+    row.refresh_from_db()
+    # A timeout after a successful external send can remain ambiguous; this is
+    # best-effort at-least-once delivery, not an exactly-once Telegram guarantee.
     try:
         kwargs = {}
         if row.reply_markup:
             kwargs["reply_markup"] = json.dumps(row.reply_markup)
         bot.send_message(row.chat_id, row.body, parse_mode="HTML", **kwargs)
+        TelegramOutbox.objects.filter(pk=row.pk, status=TelegramOutbox.Status.SENDING).update(
+            status=TelegramOutbox.Status.SENT, sent_at=timezone.now(),
+            last_error="", updated_at=timezone.now(),
+        )
         row.status = TelegramOutbox.Status.SENT
-        row.sent_at = timezone.now()
-        row.last_error = ""
-        row.save(update_fields=["status", "sent_at", "last_error", "updated_at"])
         return True
     except Exception as exc:
         err = str(exc)[:500]
-        row.status = TelegramOutbox.Status.FAILED
-        row.last_error = err
-        row.save(update_fields=["status", "last_error", "updated_at"])
+        TelegramOutbox.objects.filter(pk=row.pk, status=TelegramOutbox.Status.SENDING).update(
+            status=TelegramOutbox.Status.FAILED, last_error=err, updated_at=timezone.now(),
+        )
         if "blocked" in err.lower() or "deactivate" in err.lower():
             if row.link_id:
                 from .link import revoke_link
-
                 revoke_link(row.link, reason="ربات توسط کاربر مسدود شد")
         logger.warning("telegram outbox failed: %s", err)
         return False

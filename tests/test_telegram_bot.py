@@ -294,3 +294,83 @@ def test_outbox_retries_failed_row(customer_profile, bot_settings, mock_bot):
     assert send_outbox_row(row) is True
     row.refresh_from_db()
     assert row.status == TelegramOutbox.Status.SENT
+
+@pytest.mark.django_db
+def test_render_transport_error_remains_retryable(customer_profile, bot_settings, mock_bot):
+    consume_link_token(create_link_token(customer_profile), telegram_user_id=8101, chat_id=8101)
+    bot, _ = mock_bot
+    bot.edit_message_text.side_effect = RuntimeError("network unavailable")
+    payload = {"callback_query": {
+        "id": "retry-render-8101", "from": {"id": 8101},
+        "message": {"message_id": 20, "chat": {"id": 8101, "type": "private"}},
+        "data": "go:c:wallet",
+    }}
+    with pytest.raises(RuntimeError, match="network unavailable"):
+        process_update_payload(payload)
+    assert not callback_is_processed("retry-render-8101")
+    bot.edit_message_text.side_effect = None
+    process_update_payload(payload)
+    assert callback_is_processed("retry-render-8101")
+
+
+@pytest.mark.django_db
+def test_stale_menu_recreated(customer_profile, bot_settings, mock_bot):
+    consume_link_token(create_link_token(customer_profile), telegram_user_id=8102, chat_id=8102)
+    bot, _ = mock_bot
+    bot.edit_message_text.side_effect = RuntimeError("message to edit not found")
+    process_update_payload({"callback_query": {
+        "id": "stale-menu-8102", "from": {"id": 8102},
+        "message": {"message_id": 20, "chat": {"id": 8102, "type": "private"}},
+        "data": "go:c:wallet",
+    }})
+    assert bot.send_message.called
+    assert callback_is_processed("stale-menu-8102")
+
+
+@pytest.mark.django_db
+def test_outbox_claim_prevents_duplicate_send(customer_profile, bot_settings, mock_bot):
+    from apps.telegram_bot.models import TelegramOutbox
+    from apps.telegram_bot.services.delivery import send_outbox_row
+    link = consume_link_token(create_link_token(customer_profile), telegram_user_id=8103, chat_id=8103)
+    row = TelegramOutbox.objects.create(
+        link=link, telegram_user_id=8103, chat_id=8103,
+        body="یک اعلان", dedupe_key="delivery-8103",
+    )
+    bot, _ = mock_bot
+    assert send_outbox_row(row) is True
+    assert send_outbox_row(row) is False
+    assert bot.send_message.call_count == 1
+
+
+@pytest.mark.django_db
+def test_disconnect_disables_staff_link(customer_profile, bot_settings):
+    from apps.accounts.models import User
+    from apps.telegram_bot.models import TelegramStaffLink
+    from apps.telegram_bot.services.link import revoke_link
+    user = customer_profile.user
+    user.role = User.Role.ADMIN
+    user.save(update_fields=["role"])
+    link = consume_link_token(create_link_token(customer_profile), telegram_user_id=8104, chat_id=8104)
+    assert TelegramStaffLink.objects.filter(telegram_user_id=8104, is_active=True).exists()
+    revoke_link(link, reason="explicit disconnect")
+    assert not TelegramStaffLink.objects.filter(telegram_user_id=8104, is_active=True).exists()
+
+
+@pytest.mark.django_db
+def test_processing_update_cannot_execute_twice(bot_settings):
+    log = TelegramUpdateLog.objects.create(
+        update_id=8810, payload={"message": {}},
+        status=TelegramUpdateLog.Status.PROCESSING,
+    )
+    with patch("apps.telegram_bot.tasks.process_update_payload") as process:
+        process_telegram_update(str(log.pk))
+        process.assert_not_called()
+
+
+@pytest.mark.django_db
+def test_webhook_rejects_invalid_update_types(bot_settings, client):
+    url = reverse("telegram_bot:webhook")
+    headers = {"HTTP_X_TELEGRAM_BOT_API_SECRET_TOKEN": "test-webhook-secret"}
+    for payload in ('["invalid"]', '{"update_id": true}', '{"update_id": "5"}', '{"update_id": 8, "message": "bad"}'):
+        response = client.post(url, data=payload, content_type="application/json", **headers)
+        assert response.status_code == 400

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from django.db import transaction
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
@@ -13,4 +14,4 @@ from .tasks import deliver_notification
 def notification_to_telegram(sender, instance: Notification, created: bool, **kwargs):
     if not created or not bot_runtime_enabled():
         return
-    deliver_notification.delay(str(instance.pk))
+    transaction.on_commit(lambda pk=str(instance.pk): deliver_notification.delay(pk))

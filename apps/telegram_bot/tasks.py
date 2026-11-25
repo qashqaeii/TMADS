@@ -14,18 +14,23 @@ logger = logging.getLogger(__name__)
 
 @shared_task(bind=True, max_retries=5, default_retry_delay=3)
 def process_telegram_update(self, update_log_id: str) -> None:
-    row = TelegramUpdateLog.objects.filter(pk=update_log_id).first()
-    if not row or row.status in {TelegramUpdateLog.Status.DONE, TelegramUpdateLog.Status.DUPLICATE}:
+    # Claim each update atomically, including retries from duplicate webhooks.
+    claimed = TelegramUpdateLog.objects.filter(
+        pk=update_log_id,
+        status__in=[TelegramUpdateLog.Status.QUEUED, TelegramUpdateLog.Status.FAILED],
+    ).update(status=TelegramUpdateLog.Status.PROCESSING, updated_at=timezone.now())
+    if not claimed:
         return
-    row.status = TelegramUpdateLog.Status.PROCESSING
-    row.save(update_fields=["status", "updated_at"])
+    row = TelegramUpdateLog.objects.get(pk=update_log_id)
     payload = row.payload or {}
     try:
         process_update_payload(payload)
         row.status = TelegramUpdateLog.Status.DONE
         row.processed_at = timezone.now()
         row.error_message = ""
-        row.save(update_fields=["status", "processed_at", "error_message", "updated_at"])
+        # Avoid retaining one-time /start credentials after processing.
+        row.payload = {}
+        row.save(update_fields=["status", "processed_at", "error_message", "payload", "updated_at"])
     except Exception as exc:
         row.status = TelegramUpdateLog.Status.FAILED
         row.error_message = str(exc)[:2000]

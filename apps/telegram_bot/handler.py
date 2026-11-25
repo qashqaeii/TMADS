@@ -37,34 +37,39 @@ def _answer_callback(call: dict, text: str = ""):
 
 
 def _render(chat_id: int, telegram_user_id: int, screen_id: str, session, *, edit_message_id: int | None):
+    """Keep callbacks retryable on transport errors; recreate stale menu messages."""
     screen = build_screen(screen_id, telegram_user_id=telegram_user_id, session=session)
     bot = get_bot()
     if not bot:
-        return
-    try:
-        if edit_message_id:
+        raise RuntimeError("Telegram bot transport is unavailable.")
+    message_id = None
+    if edit_message_id:
+        try:
             bot.edit_message_text(
-                screen.text,
-                chat_id,
-                edit_message_id,
-                reply_markup=screen.keyboard,
-                disable_web_page_preview=True,
+                screen.text, chat_id, edit_message_id,
+                reply_markup=screen.keyboard, disable_web_page_preview=True,
                 parse_mode="HTML",
             )
-            session.menu_message_id = edit_message_id
-        else:
-            msg = bot.send_message(
-                chat_id,
-                screen.text,
-                reply_markup=screen.keyboard,
-                disable_web_page_preview=True,
-                parse_mode="HTML",
-            )
-            session.menu_message_id = msg.message_id
-        session.save(update_fields=["menu_message_id", "updated_at"])
-    except Exception as exc:
-        if "message is not modified" not in str(exc).lower():
-            logger.warning("telegram render failed: %s", exc)
+            message_id = edit_message_id
+        except Exception as exc:
+            detail = str(exc).lower()
+            if "message is not modified" in detail:
+                message_id = edit_message_id
+            elif any(s in detail for s in (
+                "message to edit not found", "message can't be edited",
+                "message cannot be edited", "message_id_invalid",
+            )):
+                message_id = None
+            else:
+                raise
+    if message_id is None:
+        msg = bot.send_message(
+            chat_id, screen.text, reply_markup=screen.keyboard,
+            disable_web_page_preview=True, parse_mode="HTML",
+        )
+        message_id = msg.message_id
+    session.menu_message_id = message_id
+    session.save(update_fields=["menu_message_id", "updated_at"])
 
 
 def _touch_link(telegram_user_id: int):

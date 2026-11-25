@@ -89,6 +89,12 @@ def revoke_link(link: TelegramUserLink, *, reason: str = "") -> None:
     link.revoked_at = timezone.now()
     link.revoked_reason = reason[:200]
     link.save(update_fields=["is_active", "revoked_at", "revoked_reason", "updated_at"])
+    # Explicit disconnect revokes the same user's staff access too.
+    TelegramStaffLink.objects.filter(
+        user_id=link.customer.user_id,
+        telegram_user_id=link.telegram_user_id,
+        is_active=True,
+    ).update(is_active=False)
 
 
 def customer_active_links(customer: CustomerProfile):
