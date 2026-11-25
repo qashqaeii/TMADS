@@ -452,3 +452,38 @@ def test_menu_includes_close_navigation(customer_profile, bot_settings):
     for screen_id in ("home", "c:cmp", "c:wallet", "c:set:notify"):
         screen = build_screen(screen_id, telegram_user_id=8995, session=session)
         assert any(b.callback_data == "nav:close" for row in screen.keyboard.keyboard for b in row)
+
+
+@pytest.mark.django_db
+def test_revoked_customer_does_not_receive_queued_notifications(customer_profile, bot_settings, mock_bot):
+    from apps.telegram_bot.models import TelegramOutbox
+    from apps.telegram_bot.services.delivery import send_outbox_row
+    from apps.telegram_bot.services.link import revoke_link
+    link = consume_link_token(create_link_token(customer_profile), telegram_user_id=9111, chat_id=9111)
+    row = TelegramOutbox.objects.create(
+        link=link, telegram_user_id=9111, chat_id=9111,
+        body="پیام خصوصی", dedupe_key="revoked-9111",
+    )
+    revoke_link(link)
+    bot, _ = mock_bot
+    assert send_outbox_row(row) is False
+    row.refresh_from_db()
+    assert row.status == TelegramOutbox.Status.SKIPPED
+    bot.send_message.assert_not_called()
+
+
+@pytest.mark.django_db
+def test_security_notification_preference_is_respected(customer_profile, bot_settings):
+    from apps.notifications.models import Notification
+    from apps.telegram_bot.services.delivery import _should_notify
+    link = consume_link_token(create_link_token(customer_profile), telegram_user_id=9112, chat_id=9112)
+    prefs = link.notification_prefs
+    prefs.security_alerts = False
+    prefs.save(update_fields=["security_alerts"])
+    notification = Notification.objects.create(
+        customer=customer_profile,
+        event_key="security:login",
+        title="ورود جدید به حساب",
+        body="دستگاه جدید",
+    )
+    assert _should_notify(link, notification) is False

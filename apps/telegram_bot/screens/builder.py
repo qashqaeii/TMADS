@@ -238,7 +238,7 @@ def _campaign_detail(customer: CustomerProfile, campaign_key: str) -> Screen:
     try:
         campaign_id = UUID(campaign_key)
     except (TypeError, ValueError, AttributeError):
-        return Screen("این دکمه منقضی شده است. لطفاً فهرست کمپین‌ها را باز کنید.", inline_grid([("📢 فهرست کمپین‌ها", "go:c:cmp")]))
+        return Screen("کمپین یافت نشد؛ این دکمه قدیمی یا منقضی شده است. فهرست کمپین‌ها را دوباره باز کنید.", inline_grid([("📢 فهرست کمپین‌ها", "go:c:cmp")]))
     campaign = Campaign.objects.filter(customer=customer, pk=campaign_id).first()
     if not campaign:
         return Screen("کمپین یافت نشد.", inline_grid([("📢 فهرست کمپین‌ها", "go:c:cmp")]))
@@ -319,7 +319,11 @@ def _reports_menu(customer: CustomerProfile) -> Screen:
 
 def _notifications_menu(customer: CustomerProfile) -> Screen:
     snap = customer_data.notifications_snapshot(customer)
-    lines = ["🔔 <b>اعلان‌ها</b>", f"خوانده‌نشده: {format_int(snap['unread'])}", ""]
+    lines = [
+        "🔔 <b>اعلان‌ها</b>",
+        "تازه‌ترین پیام‌های مربوط به حساب و کمپین‌های شما.",
+        f"خوانده‌نشده: {format_int(snap['unread'])}", "",
+    ]
     for n in snap["items"][:6]:
         mark = "•" if not n.is_read else "◦"
         lines.append(f"{mark} {escape_html(n.title[:48])}")
@@ -333,6 +337,7 @@ def _support_menu(customer: CustomerProfile) -> Screen:
     snap = customer_data.support_snapshot(customer)
     lines = [
         "🎫 <b>پشتیبانی</b>",
+        "پیگیری درخواست‌ها و ارتباط با تیم پشتیبانی.",
         f"تیکت‌های باز: {format_int(snap['open_count'])}",
         "",
     ]
@@ -362,6 +367,7 @@ def _ai_menu(customer: CustomerProfile) -> Screen:
 def _settings_menu(customer: CustomerProfile, link, session) -> Screen:
     lines = [
         "⚙️ <b>حساب و تنظیمات</b>",
+        "مدیریت اتصال‌ها، اعلان‌ها و اطلاعات حساب.",
         f"نام: {escape_html(customer)}",
         f"تلگرام: {'متصل ✅' if link else 'متصل نیست'}",
     ]
@@ -494,7 +500,7 @@ def _admin_dashboard(*, show_finance: bool = False) -> Screen:
 
 def _admin_campaigns() -> Screen:
     ov = admin_data.ops_overview()
-    lines = ["📢 <b>مدیریت کمپین‌ها</b>", f"در انتظار بررسی: {format_int(ov['pending_campaigns'])}", ""]
+    lines = ["📢 <b>مدیریت کمپین‌ها</b>", "مشاهده صف کمپین‌ها و بررسی از پنل امن وب.", f"در انتظار بررسی: {format_int(ov['pending_campaigns'])}", ""]
     kb = types.InlineKeyboardMarkup()
     kb.add(types.InlineKeyboardButton("صف بررسی کمپین", url=named_site_url("operations:campaigns")))
     attach_nav(kb)
@@ -503,7 +509,7 @@ def _admin_campaigns() -> Screen:
 
 def _admin_users() -> Screen:
     ov = admin_data.ops_overview()
-    lines = ["👥 <b>کاربران و مشتریان</b>", f"تعداد مشتریان: {format_int(ov['customer_count'])}", ""]
+    lines = ["👥 <b>کاربران و مشتریان</b>", "خلاصه کاربران و دسترسی امن به پنل عملیات.", f"تعداد مشتریان: {format_int(ov['customer_count'])}", ""]
     kb = types.InlineKeyboardMarkup()
     if _ops_url_exists():
         kb.add(types.InlineKeyboardButton("پنل عملیات", url=named_site_url("operations:overview")))
@@ -529,7 +535,7 @@ def _admin_finance() -> Screen:
 
 def _admin_funding() -> Screen:
     ov = admin_data.ops_overview()
-    lines = ["🔄 <b>انتقال‌های نیازمند تطبیق</b>", f"نامطمئن: {format_int(ov['uncertain_funding'])}", ""]
+    lines = ["🔄 <b>انتقال‌های نیازمند تطبیق</b>", "بررسی سند انتقال و نتیجه نامطمئن در پنل امن.", f"نامطمئن: {format_int(ov['uncertain_funding'])}", ""]
     kb = types.InlineKeyboardMarkup()
     kb.add(types.InlineKeyboardButton("صف تطبیق", url=named_site_url("operations:funding_transfers")))
     attach_nav(kb)
@@ -554,7 +560,7 @@ def _admin_review_queue() -> Screen:
 def _admin_tickets() -> Screen:
     ov = admin_data.ops_overview()
     tickets = admin_data.recent_open_tickets()
-    lines = ["🎫 <b>تیکت‌های پشتیبانی</b>", f"باز: {format_int(ov['open_tickets'])}", ""]
+    lines = ["🎫 <b>تیکت‌های پشتیبانی</b>", "تازه‌ترین درخواست‌های باز برای پیگیری تیم پشتیبانی.", f"باز: {format_int(ov['open_tickets'])}", ""]
     if tickets:
         lines.append("<b>آخرین تیکت‌های باز:</b>")
         for t in tickets:

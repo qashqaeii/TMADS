@@ -22,6 +22,9 @@ def _should_notify(link: TelegramUserLink, notification: Notification) -> bool:
     except TelegramNotificationPreference.DoesNotExist:
         return True
     title = (notification.title or "").lower()
+    event = (notification.event_key or "").lower()
+    if any(word in (title + " " + event) for word in ("امنیت", "security", "ورود", "login", "auth")):
+        return prefs.security_alerts
     if "کیف پول" in title or "پرداخت" in title or "شارژ" in title:
         return prefs.payment_events
     if "بودجه" in title or "budget" in title:
@@ -86,6 +89,20 @@ def recover_stuck_outbox_rows() -> int:
 
 def send_outbox_row(row: TelegramOutbox) -> bool:
     """Claim before sending; parallel Beat/worker runs may not send the same row."""
+    # A queued private notification must not be delivered after account disconnect.
+    if row.link_id and not TelegramUserLink.objects.filter(
+        pk=row.link_id, telegram_user_id=row.telegram_user_id,
+        chat_id=row.chat_id, is_active=True,
+    ).exists():
+        TelegramOutbox.objects.filter(
+            pk=row.pk,
+            status__in=[TelegramOutbox.Status.QUEUED, TelegramOutbox.Status.FAILED],
+        ).update(
+            status=TelegramOutbox.Status.SKIPPED,
+            last_error="recipient_link_revoked",
+            updated_at=timezone.now(),
+        )
+        return False
     bot = get_bot()
     if not bot:
         return False

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from django.conf import settings
 from telebot import types
 
 
@@ -39,7 +40,7 @@ def url_grid(pairs: list[tuple[str, str]], *, columns: int = 2) -> types.InlineK
     kb = types.InlineKeyboardMarkup()
     row = []
     for label, url in pairs:
-        if not url.startswith("https://"):
+        if not (url.startswith("https://") or (settings.DEBUG and url.startswith("http://"))):
             raise ValueError("Telegram URL buttons require a configured HTTPS site URL")
         row.append(types.InlineKeyboardButton(text=label, url=url))
         if len(row) == columns:
