@@ -135,3 +135,10 @@ Status sync locks the campaign before applying remote fields and never overwrite
 
 ## Analytics display consistency
 Unverified daily amounts remain null rather than fabricated zero in charts and period totals; filtered campaign charts follow the same filter as list KPIs. Sparkline uses corrected daily parsing. Performance ratings limit conversion comparisons to a shared known action type. Duplication shortcut submits POST with CSRF. Regression coverage added, CI still unavailable (latest run 44507127586 failed before runner/steps). Historical rows with no raw source remain subject to audit; current code does not guess a foreign-currency conversion.
+
+## 2026-11-25 — settlement stale-evidence guard
+
+- Baseline 5985d70: CI run 45411807086 completed successfully; historical runner blocker above is no longer current.
+- c830cbd4f9a65c74b6ed606bc1da124a5a8ac2b9: lock and recheck campaign ownership/destination/account binding, order association and fee/cost, quote terms, and remote ad account before consuming reservation. Completed-order retry requires allocation ledger evidence.
+- Five mocked stale-context regression cases added. New tests and E2E not executed locally; await CI for this SHA. No production operations performed.
+- Next: inspect new CI, add actual PostgreSQL concurrent settlement coverage, review receipt/claim and legacy central-account identity binding, then continue payment/refund regression audit.
