@@ -142,3 +142,10 @@ Unverified daily amounts remain null rather than fabricated zero in charts and p
 - c830cbd4f9a65c74b6ed606bc1da124a5a8ac2b9: lock and recheck campaign ownership/destination/account binding, order association and fee/cost, quote terms, and remote ad account before consuming reservation. Completed-order retry requires allocation ledger evidence.
 - Five mocked stale-context regression cases added. New tests and E2E not executed locally; await CI for this SHA. No production operations performed.
 - Next: inspect new CI, add actual PostgreSQL concurrent settlement coverage, review receipt/claim and legacy central-account identity binding, then continue payment/refund regression audit.
+
+## 2026-11-25 — concurrent settlement regression
+
+- CI for 11a12931d09ae64ebd788f9bd073308d913fd76e succeeded (run 45520633266), covering the preceding stale-evidence changes; intermediate run 45520619385 was cancelled.
+- 43b07cf4456461e5880ee71ae4c3c081f58a920b adds a PostgreSQL transactional regression with two independent database connections, a barrier at mocked evidence retrieval, bounded lock timeout, and assertions for exactly-once allocation, fee, buffer return and audit. No real Telegram requests.
+- New concurrency test not executed locally; await CI and confirm it runs rather than skips. E2E not independently rerun in this batch.
+- Next: verify concurrency CI, audit receipt/claim and legacy central-account identity binding, then payment/refund regression audit.
