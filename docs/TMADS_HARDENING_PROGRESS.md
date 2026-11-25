@@ -149,3 +149,9 @@ Unverified daily amounts remain null rather than fabricated zero in charts and p
 - 43b07cf4456461e5880ee71ae4c3c081f58a920b adds a PostgreSQL transactional regression with two independent database connections, a barrier at mocked evidence retrieval, bounded lock timeout, and assertions for exactly-once allocation, fee, buffer return and audit. No real Telegram requests.
 - New concurrency test not executed locally; await CI and confirm it runs rather than skips. E2E not independently rerun in this batch.
 - Next: verify concurrency CI, audit receipt/claim and legacy central-account identity binding, then payment/refund regression audit.
+
+## 2026-11-25 — allocation receipt revalidation
+
+- Baseline 0218277f11d221cb789b5a82e37834487e05f7be: quality run 45563310717 succeeded; PostgreSQL job 139031977534 logs report 613 passed, no skips, in 110.41s. Django checks, migrations, static and JS checks passed. This includes the concurrent allocation regression.
+- d7a74a627a436c0f58a11e8cd1ad4297d3caf516: recheck the exact claim and successful create receipt under lock after evidence retrieval; reject a second remote ad appearing before settlement. Added three mocked stale-evidence regressions. New tests await CI; no local execution or browser QA.
+- Next: inspect CI, audit central-account identity binding and payment/refund races. No production writes or gate changes.
