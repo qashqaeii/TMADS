@@ -101,7 +101,7 @@ def test_settlement_rejects_mismatched_remote_account(customer_user):
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize("changed", ["destination", "fee", "quote", "account", "campaign"])
+@pytest.mark.parametrize("changed", ["destination", "fee", "quote", "account", "campaign", "receipt", "claim", "extra_ad"])
 def test_settlement_rejects_changed_context_after_evidence(customer_user, changed):
     campaign, order = paid_campaign(customer_user)
     campaign.status = Campaign.Status.AWAITING_TELEGRAM
@@ -130,6 +130,12 @@ def test_settlement_rejects_changed_context_after_evidence(customer_user, change
             quote.save(update_fields=["payload"])
         elif changed == "account":
             TelegramAdvertisement.objects.filter(pk=ad.pk).update(remote_account_id="changed")
+        elif changed == "receipt":
+            APIRequestLog.objects.filter(operation="create_ad_receipt", meta__campaign_id=str(campaign.pk)).update(success=False)
+        elif changed == "claim":
+            CampaignStatusHistory.objects.filter(pk=claim.pk).delete()
+        elif changed == "extra_ad":
+            TelegramAdvertisement.objects.create(campaign=campaign, remote_ad_id="456", promotion_url=campaign.destination)
         else:
             from uuid import uuid4
             AdvertisingOrder.objects.filter(pk=order.pk).update(campaign_id=uuid4())

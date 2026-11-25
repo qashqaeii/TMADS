@@ -71,6 +71,9 @@ class _SettlementPrepared:
     connection_id: object
     account_identity: tuple
     ad_account_id: str
+    receipt_id: object
+    claim_id: object
+    claim_created_at: object
     quote_id: object
     quote_ton_value: object
     cost: int
@@ -153,6 +156,9 @@ def _load_settlement_context(campaign_id) -> tuple[Campaign, AdvertisingOrder, o
         connection_id=campaign.telegram_connection_id,
         account_identity=_account_identity(connection),
         ad_account_id=ad.remote_account_id,
+        receipt_id=receipt.pk,
+        claim_id=claim.pk,
+        claim_created_at=claim.created_at,
         quote_id=quote.pk,
         quote_ton_value=payload['ton_allocation'],
         cost=cost,
@@ -224,7 +230,24 @@ def _commit_settlement(prepared: _SettlementPrepared, *, actor) -> AdvertisingOr
             or quote.payload.get("ton_allocation") != prepared.quote_ton_value):
         raise ValueError("پیش‌فاکتور از زمان تأیید تغییر کرده است.")
 
-    ad = campaign.remote_ads.select_for_update().get(pk=prepared.ad_pk)
+    # Evidence is only valid for the exact claim and receipt observed before the API read.
+    claim = campaign.status_history.select_for_update().filter(
+        to_status=Campaign.Status.SUBMITTING,
+    ).first()
+    receipt = APIRequestLog.objects.select_for_update().filter(
+        pk=prepared.receipt_id, operation="create_ad_receipt", success=True,
+        meta__campaign_id=str(campaign.pk), meta__order_id=str(order.pk),
+        meta__remote_ad_id=prepared.remote_ad_id,
+        meta__idempotency_key=f"tmads-create-{campaign.pk}",
+    ).first()
+    if (not claim or claim.pk != prepared.claim_id
+            or claim.created_at != prepared.claim_created_at
+            or not receipt or receipt.created_at < claim.created_at):
+        raise ValueError("سند ایجاد تبلیغ از زمان تأیید تغییر کرده است.")
+    ads = list(campaign.remote_ads.select_for_update().exclude(remote_ad_id="")[:2])
+    if len(ads) != 1 or ads[0].pk != prepared.ad_pk:
+        raise ValueError("شناسه معتبر و یکتای تبلیغ ثبت نشده است.")
+    ad = ads[0]
     if ad.remote_ad_id != prepared.remote_ad_id or ad.remote_account_id != prepared.ad_account_id:
         raise ValueError("شناسه تبلیغ برای تسویه منطبق نیست.")
 
@@ -273,7 +296,7 @@ def settle_confirmed_allocation(campaign_id, *, actor):
     if prepared is None:
         return order
     claim = campaign.status_history.filter(to_status=Campaign.Status.SUBMITTING).first()
-    if not claim:
+    if not claim or claim.pk != prepared.claim_id or claim.created_at != prepared.claim_created_at:
         raise ValueError("سند ایجاد تبلیغ ثبت نشده است؛ بررسی دستی لازم است.")
     prepared = _fetch_settlement_evidence(campaign, order, ad, claim, prepared)
     return _commit_settlement(prepared, actor=actor)
