@@ -147,3 +147,70 @@ def test_settlement_rejects_changed_context_after_evidence(customer_user, change
     assert order.status == AdvertisingOrder.Status.SUBMITTING
     assert outstanding_order_reservation(wallet, order.pk) == order.total_irr
     assert not wallet.ledger_entries.filter(entry_type=WalletLedgerEntry.EntryType.CREDIT_ALLOCATION).exists()
+
+
+@pytest.mark.django_db(transaction=True)
+def test_concurrent_allocation_settlement_postgresql(customer_user):
+    """Both workers obtain evidence before either can consume the reservation."""
+    from concurrent.futures import ThreadPoolExecutor
+    from threading import Barrier
+    from django.db import connection, connections, close_old_connections
+
+    if connection.vendor != "postgresql":
+        pytest.skip("Requires PostgreSQL row-level locking")
+    campaign, order = paid_campaign(customer_user)
+    campaign.status = Campaign.Status.AWAITING_TELEGRAM
+    campaign.save(update_fields=["status"])
+    order.status = AdvertisingOrder.Status.SUBMITTING
+    order.save(update_fields=["status"])
+    claim = CampaignStatusHistory.objects.create(
+        campaign=campaign, to_status=Campaign.Status.SUBMITTING,
+    )
+    ad = TelegramAdvertisement.objects.create(
+        campaign=campaign, remote_ad_id="123", promotion_url=campaign.destination,
+    )
+    APIRequestLog.objects.create(operation="create_ad_receipt", success=True, meta={
+        "campaign_id": str(campaign.pk), "order_id": str(order.pk),
+        "remote_ad_id": ad.remote_ad_id, "idempotency_key": f"tmads-create-{campaign.pk}",
+    })
+    barrier = Barrier(2, timeout=15)
+    buffer = order.quote.payload["risk_buffer_irr"]
+    client = MagicMock()
+    client.get_ad.return_value = {
+        "ad_id": 123, "currency": "TON", "promote_url": campaign.destination, "status": "active",
+    }
+
+    def evidence(*args, **kwargs):
+        barrier.wait()
+        return {"total_count": 1, "transactions": [{
+            "peer": {"type": "account"}, "currency": "TON",
+            "date": int(claim.created_at.timestamp()), "amount": str(order.ton_allocation),
+        }]}
+
+    client.get_ad_transactions.side_effect = evidence
+
+    def worker():
+        close_old_connections()
+        try:
+            with connections["default"].cursor() as cursor:
+                cursor.execute("SET lock_timeout = '10s'")
+            return settle_confirmed_allocation(campaign.pk, actor=customer_user).pk
+        finally:
+            connections.close_all()
+
+    with patch("apps.finance.settlement.campaign_client", return_value=client):
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            futures = [pool.submit(worker) for _ in range(2)]
+            assert [future.result(timeout=30) for future in futures] == [order.pk, order.pk]
+    assert client.get_ad_transactions.call_count == 2
+    order.refresh_from_db()
+    wallet = ensure_wallet(campaign.customer)
+    assert order.status == AdvertisingOrder.Status.COMPLETED
+    assert wallet.available_irr == buffer
+    assert wallet.reserved_irr == 0
+    assert outstanding_order_reservation(wallet, order.pk) == 0
+    entries = wallet.ledger_entries.filter(related_order_id=order.pk)
+    assert entries.filter(entry_type=WalletLedgerEntry.EntryType.CREDIT_ALLOCATION).count() == 1
+    assert entries.filter(entry_type=WalletLedgerEntry.EntryType.SERVICE_FEE).count() == int(order.service_fee_irr > 0)
+    from apps.core.models import AuditLog
+    assert AuditLog.objects.filter(action="order.allocation_settled", entity_id=order.pk).count() == 1
