@@ -10,11 +10,13 @@ from apps.campaigns.models import Campaign
 from apps.core.dates import jalali_datetime_string
 from apps.finance.models import WalletLedgerEntry
 
+from ..config import get_bot_config
 from ..formatters import escape_html, format_int, format_pct, format_toman, named_site_url
-from ..keyboards import attach_nav, inline_grid
+from ..keyboards import attach_nav, inline_grid, url_grid
 from ..navigation import ADMIN_HOME, GUEST_HOME, HOME
-from ..permissions import active_customer_link, active_staff_link, user_may_use_admin_panel
+from ..permissions import active_customer_link, active_staff_link, user_may_use_admin_panel, user_may_use_sensitive_admin
 from ..services import admin_data, customer_data
+from ..models import TelegramNotificationPreference
 
 
 @dataclass
@@ -28,10 +30,21 @@ def _status_label(campaign: Campaign) -> str:
 
 
 def build_screen(screen_id: str, *, telegram_user_id: int, session) -> Screen:
+    cfg = get_bot_config()
     link = active_customer_link(telegram_user_id)
-    staff = active_staff_link(telegram_user_id)
-    customer = link.customer if link else None
+    staff = active_staff_link(telegram_user_id) if cfg.admin_panel_enabled else None
+    customer = link.customer if link and cfg.customer_panel_enabled else None
 
+    if screen_id == ADMIN_HOME and not cfg.admin_panel_enabled:
+        return Screen("⏳ پنل مدیریت موقتاً غیرفعال است.", inline_grid([("🏠 خانه", "nav:home")]))
+    if screen_id.startswith("a:") and not cfg.admin_panel_enabled:
+        return Screen("⏳ پنل مدیریت موقتاً غیرفعال است.", inline_grid([("🏠 خانه", "nav:home")]))
+    if screen_id == HOME and link and not cfg.customer_panel_enabled:
+        return _guest_home(None, staff, note="پنل مشتری موقتاً در دسترس نیست.")
+    if screen_id.startswith("c:") and screen_id != "c:guest:link" and not cfg.customer_panel_enabled:
+        return _guest_home(None, staff, note="پنل مشتری موقتاً در دسترس نیست.")
+    if screen_id == "c:ai" and not cfg.ai_menu_enabled:
+        return Screen("🧠 دستیار هوشمند فعلاً غیرفعال است.", inline_grid([("◀️ بازگشت", "nav:back")]))
     if screen_id in (GUEST_HOME, "c:guest:link"):
         if screen_id == "c:guest:link":
             return _guest_link_help()
@@ -46,6 +59,8 @@ def build_screen(screen_id: str, *, telegram_user_id: int, session) -> Screen:
         return _guest_home(link, staff, note="برای دسترسی، ابتدا حساب گرام‌ادز را متصل کنید.")
     if screen_id.startswith("a:") and not (staff and user_may_use_admin_panel(staff.user)):
         return Screen("⛔️ دسترسی مدیریتی برای این حساب تلگرام فعال نیست.", inline_grid([("🏠 خانه", "nav:home")]))
+    if screen_id in ("a:fin", "a:fund") and not user_may_use_sensitive_admin(staff.user):
+        return Screen("⛔️ مشاهده اطلاعات مالی مدیریتی فقط برای مدیر پلتفرم مجاز است.", inline_grid([("◀️ بازگشت", "nav:back")]))
 
     if screen_id == "c:dash":
         return _customer_dashboard(customer, staff)
@@ -54,11 +69,14 @@ def build_screen(screen_id: str, *, telegram_user_id: int, session) -> Screen:
     if screen_id.startswith("c:cmp:l:"):
         parts = screen_id.split(":")
         filt = parts[3] if len(parts) > 3 else "all"
-        page = int(parts[5]) if len(parts) > 5 and parts[4] == "p" else 0
-        return _campaigns_list(customer, session, filt, page)
+        try:
+            page = int(parts[5]) if len(parts) > 5 and parts[4] == "p" else 0
+        except (TypeError, ValueError):
+            page = 0
+        return _campaigns_list(customer, session, filt, min(max(page, 0), 999))
     if screen_id.startswith("c:cmp:v:"):
-        idx = int(screen_id.split(":")[-1])
-        return _campaign_detail(customer, session, idx)
+        campaign_key = screen_id.removeprefix("c:cmp:v:")
+        return _campaign_detail(customer, campaign_key)
     if screen_id == "c:wallet":
         return _wallet_menu(customer)
     if screen_id == "c:conn":
@@ -81,7 +99,7 @@ def build_screen(screen_id: str, *, telegram_user_id: int, session) -> Screen:
         return _notify_prefs(link)
 
     if screen_id == "a:dash":
-        return _admin_dashboard()
+        return _admin_dashboard(show_finance=user_may_use_sensitive_admin(staff.user))
     if screen_id == "a:cmp":
         return _admin_campaigns()
     if screen_id == "a:users":
@@ -127,13 +145,6 @@ def _guest_home(link, staff, note: str = "") -> Screen:
         lines.append(escape_html(note))
     if link:
         lines.append("✅ اتصال فعال است — از «خانه» وارد داشبورد شوید.")
-    buttons = []
-    if staff and user_may_use_admin_panel(staff.user):
-        buttons.append(("🛠 پنل مدیریت", "nav:admin"))
-    buttons.append(("🔗 راهنمای اتصال", "c:guest:link"))
-    buttons.append(("🌐 ورود به سایت", named_site_url("accounts:login")))
-    kb = inline_grid([(t, d if d.startswith("http") or d.startswith("c:") or d.startswith("nav:") else f"url:{d}") for t, d in buttons], columns=1)
-    # fix url buttons
     kb = types.InlineKeyboardMarkup()
     kb.add(types.InlineKeyboardButton("🔗 راهنمای اتصال", callback_data="go:c:guest:link"))
     kb.add(types.InlineKeyboardButton("🌐 ورود به سایت", url=named_site_url("accounts:login")))
@@ -161,14 +172,15 @@ def _customer_dashboard(customer: CustomerProfile, staff) -> Screen:
         ("📈 گزارش‌ها", "go:c:reports"),
         ("🏦 حساب تبلیغاتی", "go:c:conn"),
         ("🔔 اعلان‌ها", "go:c:notif"),
-        ("🧠 دستیار هوشمند", "go:c:ai"),
         ("🎫 پشتیبانی", "go:c:support"),
         ("⚙️ تنظیمات", "go:c:settings"),
     ]
+    if get_bot_config().ai_menu_enabled:
+        pairs.insert(5, ("🧠 دستیار هوشمند", "go:c:ai"))
     if staff and user_may_use_admin_panel(staff.user):
         pairs.append(("🛠 پنل مدیریت", "nav:admin"))
     kb = inline_grid(pairs)
-    attach_nav(kb, back=False)
+    attach_nav(kb, back=False, home=False)
     return Screen("\n".join(lines), kb)
 
 
@@ -203,12 +215,10 @@ def _campaigns_list(customer: CustomerProfile, session, filt: str, page: int) ->
         f"صفحه {format_int(page + 1)} از {format_int(max(1, (total + page_size - 1) // page_size))}",
         "",
     ]
-    session.context = {**(session.context or {}), "cmp_items": [str(c.pk) for c in items]}
-    session.save(update_fields=["context", "updated_at"])
     pairs = []
     for i, c in enumerate(items):
         title = c.name or "کمپین بدون نام"
-        pairs.append((f"{_status_label(c)[:12]} · {title[:22]}", f"go:c:cmp:v:{i}"))
+        pairs.append((f"{_status_label(c)[:12]} · {title[:22]}", f"go:c:cmp:v:{c.pk}"))
     kb = inline_grid(pairs, columns=1)
     nav = []
     if page > 0:
@@ -223,24 +233,27 @@ def _campaigns_list(customer: CustomerProfile, session, filt: str, page: int) ->
     return Screen("\n".join(lines), kb)
 
 
-def _campaign_detail(customer: CustomerProfile, session, idx: int) -> Screen:
-    ids = (session.context or {}).get("cmp_items") or []
-    if idx < 0 or idx >= len(ids):
-        return Screen("کمپین یافت نشد.", inline_grid([("بازگشت", "nav:back")]))
+def _campaign_detail(customer: CustomerProfile, campaign_key: str) -> Screen:
     from uuid import UUID
-
-    campaign = Campaign.objects.filter(customer=customer, pk=UUID(ids[idx])).first()
+    try:
+        campaign_id = UUID(campaign_key)
+    except (TypeError, ValueError, AttributeError):
+        return Screen("این دکمه منقضی شده است. لطفاً فهرست کمپین‌ها را باز کنید.", inline_grid([("📢 فهرست کمپین‌ها", "go:c:cmp")]))
+    campaign = Campaign.objects.filter(customer=customer, pk=campaign_id).first()
     if not campaign:
-        return Screen("کمپین یافت نشد.", inline_grid([("بازگشت", "nav:back")]))
+        return Screen("کمپین یافت نشد.", inline_grid([("📢 فهرست کمپین‌ها", "go:c:cmp")]))
     lines = [
         f"📌 <b>{escape_html(campaign.name or 'کمپین')}</b>",
+        "وضعیت و اطلاعات این کمپین را مشاهده کنید.",
+        "",
         f"وضعیت: {escape_html(_status_label(campaign))}",
         f"بودجه: {format_toman(campaign.budget_irr)} تومان",
         f"آخرین به‌روزرسانی: {jalali_datetime_string(campaign.updated_at)}",
     ]
-    kb = types.InlineKeyboardMarkup()
-    kb.add(types.InlineKeyboardButton("جزئیات در سایت", url=named_site_url("campaigns:detail", campaign.pk)))
-    kb.add(types.InlineKeyboardButton("آمار روزانه", url=named_site_url("campaigns:intraday", campaign.pk)))
+    kb = url_grid([
+        ("📋 جزئیات در سایت", named_site_url("campaigns:detail", campaign.pk)),
+        ("📈 آمار روزانه", named_site_url("campaigns:intraday", campaign.pk)),
+    ])
     attach_nav(kb)
     return Screen("\n".join(lines), kb)
 
@@ -261,11 +274,12 @@ def _wallet_menu(customer: CustomerProfile) -> Screen:
         for e in snap["recent"][:3]:
             sign = "+" if e.entry_type == WalletLedgerEntry.EntryType.DEPOSIT else "−"
             lines.append(f"{sign}{format_toman(e.amount_irr)} — {e.get_entry_type_display()}")
-    kb = types.InlineKeyboardMarkup()
-    kb.add(types.InlineKeyboardButton("💳 کیف پول", url=named_site_url("finance:wallet")))
-    kb.add(types.InlineKeyboardButton("➕ افزایش موجودی", url=named_site_url("finance:topup")))
-    kb.add(types.InlineKeyboardButton("📜 تراکنش‌ها", url=named_site_url("finance:transactions")))
-    kb.add(types.InlineKeyboardButton("🧾 فاکتورها", url=named_site_url("finance:invoices")))
+    kb = url_grid([
+        ("💳 کیف پول", named_site_url("finance:wallet")),
+        ("➕ افزایش موجودی", named_site_url("finance:topup")),
+        ("📜 تراکنش‌ها", named_site_url("finance:transactions")),
+        ("🧾 فاکتورها", named_site_url("finance:invoices")),
+    ])
     attach_nav(kb)
     return Screen("\n".join(lines), kb)
 
@@ -277,9 +291,10 @@ def _connections_menu(customer: CustomerProfile) -> Screen:
         lines.append("هنوز حسابی متصل نشده — اتصال امن فقط از پنل سایت انجام می‌شود.")
     for c in snap["connections"][:4]:
         lines.append(f"• {c.get_connection_type_display()} — {c.get_status_display()}")
-    kb = types.InlineKeyboardMarkup()
-    kb.add(types.InlineKeyboardButton("مدیریت اتصال‌ها", url=named_site_url("accounts:telegram_connection")))
-    kb.add(types.InlineKeyboardButton("حساب تبلیغ‌دهنده", url=named_site_url("accounts:related_account")))
+    kb = url_grid([
+        ("🔗 مدیریت اتصال‌ها", named_site_url("accounts:telegram_connection")),
+        ("🏦 حساب تبلیغ‌دهنده", named_site_url("accounts:related_account")),
+    ])
     attach_nav(kb)
     return Screen("\n".join(lines), kb)
 
@@ -294,9 +309,10 @@ def _reports_menu(customer: CustomerProfile) -> Screen:
         f"بازدید: {format_int(snap['impressions'])}  ·  کلیک: {format_int(snap['clicks'])}",
         f"CTR: {format_pct(float(snap['ctr'] or 0))}",
     ]
-    kb = types.InlineKeyboardMarkup()
-    kb.add(types.InlineKeyboardButton("داشبورد وب", url=named_site_url("dashboard:home")))
-    kb.add(types.InlineKeyboardButton("فهرست کمپین‌ها", url=named_site_url("campaigns:list")))
+    kb = url_grid([
+        ("📊 داشبورد وب", named_site_url("dashboard:home")),
+        ("📢 فهرست کمپین‌ها", named_site_url("campaigns:list")),
+    ])
     attach_nav(kb)
     return Screen("\n".join(lines), kb)
 
@@ -322,9 +338,10 @@ def _support_menu(customer: CustomerProfile) -> Screen:
     ]
     for t in snap["recent"][:4]:
         lines.append(f"• {escape_html(t.subject[:40])} — {escape_html(t.get_status_display())}")
-    kb = types.InlineKeyboardMarkup()
-    kb.add(types.InlineKeyboardButton("تیکت جدید", url=named_site_url("support:create")))
-    kb.add(types.InlineKeyboardButton("تیکت‌های من", url=named_site_url("support:list")))
+    kb = url_grid([
+        ("➕ تیکت جدید", named_site_url("support:create")),
+        ("🎫 تیکت‌های من", named_site_url("support:list")),
+    ])
     attach_nav(kb)
     return Screen("\n".join(lines), kb)
 
@@ -372,23 +389,27 @@ def _disconnect_confirm(link) -> Screen:
 
 def _notify_prefs(link) -> Screen:
     lines = [
-        "🔕 <b>تنظیم اعلان‌های ربات</b>",
-        "انواع رویدادهایی که از طریق تلگرام دریافت می‌کنید.",
+        "🔔 <b>تنظیم اعلان‌های تلگرام</b>",
+        "دسته‌های دلخواه را با لمس دکمه‌ها روشن یا خاموش کنید.",
     ]
-    if link:
-        try:
-            p = link.notification_prefs
-            lines += [
-                "",
-                f"{'✅' if p.campaign_status else '◻️'} وضعیت کمپین",
-                f"{'✅' if p.payment_events else '◻️'} پرداخت و کیف پول",
-                f"{'✅' if p.budget_alerts else '◻️'} هشدار بودجه",
-                f"{'✅' if p.support_replies else '◻️'} پاسخ پشتیبانی",
-            ]
-        except Exception:
-            lines.append("تنظیمات پیش‌فرض فعال است.")
-    kb = types.InlineKeyboardMarkup()
-    kb.add(types.InlineKeyboardButton("تنظیم در سایت", url=named_site_url("accounts:profile")))
+    if not link:
+        kb = inline_grid([("🔗 اتصال حساب", "go:c:guest:link")])
+        attach_nav(kb)
+        return Screen("\n".join(lines + ["\nابتدا حساب خود را متصل کنید."]), kb)
+    prefs, _ = TelegramNotificationPreference.objects.get_or_create(link=link)
+    choices = [
+        ("campaign_status", "📢 کمپین‌ها"),
+        ("payment_events", "💳 پرداخت‌ها"),
+        ("budget_alerts", "💰 هشدار بودجه"),
+        ("support_replies", "🎫 پاسخ پشتیبانی"),
+        ("security_alerts", "🔐 امنیت حساب"),
+    ]
+    enabled = sum(bool(getattr(prefs, field)) for field, _ in choices)
+    lines.append(f"فعال: {format_int(enabled)} از {format_int(len(choices))} دسته")
+    kb = inline_grid([
+        (f"{'✅' if getattr(prefs, field) else '◻️'} {label}", f"act:pref:{field}:{'0' if getattr(prefs, field) else '1'}")
+        for field, label in choices
+    ])
     attach_nav(kb)
     return Screen("\n".join(lines), kb)
 
@@ -397,12 +418,14 @@ def _devices_list(customer: CustomerProfile) -> Screen:
     from ..services.link import customer_active_links
 
     links = customer_active_links(customer)
-    lines = ["📱 <b>دستگاه‌های متصل</b>", ""]
-    for row in links:
+    total = links.count()
+    lines = ["📱 <b>دستگاه‌های متصل</b>", f"اتصال‌های فعال: {format_int(total)}", ""]
+    for row in links[:8]:
         uname = f"@{row.telegram_username}" if row.telegram_username else f"ID {row.telegram_user_id}"
         lines.append(f"• {escape_html(uname)} — {jalali_datetime_string(row.linked_at)}")
-    kb = types.InlineKeyboardMarkup()
-    kb.add(types.InlineKeyboardButton("اتصال دستگاه جدید", url=named_site_url("accounts:profile")))
+    if total > 8:
+        lines.append("برای مشاهده سایر اتصال‌ها به پروفایل سایت بروید.")
+    kb = url_grid([("🔗 مدیریت اتصال‌ها", named_site_url("accounts:profile"))], columns=1)
     attach_nav(kb)
     return Screen("\n".join(lines), kb)
 
@@ -419,24 +442,24 @@ def _admin_home(staff) -> Screen:
         f"📢 کمپین در صف: {format_int(ov['pending_campaigns'])}",
         f"🎫 تیکت باز: {format_int(ov['open_tickets'])}",
     ]
-    kb = inline_grid(
-        [
-            ("📊 داشبورد", "go:a:dash"),
-            ("📢 کمپین‌ها", "go:a:cmp"),
-            ("👥 مشتریان", "go:a:users"),
+    pairs = [
+        ("📊 داشبورد", "go:a:dash"),
+        ("📢 کمپین‌ها", "go:a:cmp"),
+        ("👥 مشتریان", "go:a:users"),
+        ("✅ صف بررسی", "go:a:ads"),
+        ("🎫 تیکت‌ها", "go:a:tickets"),
+        ("📈 آمار", "go:a:stats"),
+        ("🖥 وضعیت سرویس", "go:a:svc"),
+    ]
+    if user_may_use_sensitive_admin(staff.user):
+        pairs[3:3] = [
             ("💳 مالی", "go:a:fin"),
             ("🔄 انتقال نامطمئن", "go:a:fund"),
-            ("✅ صف بررسی", "go:a:ads"),
-            ("🎫 تیکت‌ها", "go:a:tickets"),
-            ("📈 آمار", "go:a:stats"),
-            ("🖥 وضعیت سرویس", "go:a:svc"),
-        ],
-        columns=2,
-    )
+        ]
+    kb = inline_grid(pairs, columns=2)
     if _ops_url_exists():
         kb.add(types.InlineKeyboardButton("🌐 پنل عملیات", url=named_site_url("operations:overview")))
     attach_nav(kb, back=False)
-    kb.row(types.InlineKeyboardButton("🏠 پنل مشتری", callback_data="nav:home"))
     return Screen("\n".join(lines), kb)
 
 
@@ -448,20 +471,20 @@ def _ops_url_exists():
         return False
 
 
-def _admin_dashboard() -> Screen:
+def _admin_dashboard(*, show_finance: bool = False) -> Screen:
     ov = admin_data.ops_overview()
-    wl = ov["wallet_liabilities"]
-    avail = int(wl.get("available") or 0)
-    res = int(wl.get("reserved") or 0)
     lines = [
         "📊 <b>داشبورد مدیریتی</b>",
         f"سفارش‌ها: {format_int(ov['order_count'])}",
         f"بازپرداخت باز: {format_int(ov['open_refunds'])}",
         f"انتقال نامطمئن: {format_int(ov['uncertain_funding'])}",
         f"عملیات تبلیغ معلق: {format_int(ov['remote_pending'])}",
-        "",
-        f"بدهی کیف پول — آزاد: {format_toman(avail)} · رزرو: {format_toman(res)} تومان",
     ]
+    if show_finance:
+        wl = ov["wallet_liabilities"]
+        avail = int(wl.get("available") or 0)
+        res = int(wl.get("reserved") or 0)
+        lines += ["", f"بدهی کیف پول — آزاد: {format_toman(avail)} · رزرو: {format_toman(res)} تومان"]
     kb = types.InlineKeyboardMarkup()
     if _ops_url_exists():
         kb.add(types.InlineKeyboardButton("پنل عملیات", url=named_site_url("operations:overview")))

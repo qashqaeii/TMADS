@@ -22,6 +22,7 @@ from .permissions import active_customer_link, active_staff_link
 from .screens import build_screen
 from .security import callback_is_processed, rate_limit_allow, record_callback_processed
 from .services.link import consume_link_token, revoke_link
+from .models import TelegramNotificationPreference
 
 logger = logging.getLogger(__name__)
 
@@ -213,6 +214,22 @@ def _process_callback(call: dict, update_id: int | None) -> None:
         push_screen(session, screen)
         _answer_callback(call)
         _render(int(chat_id), int(telegram_user_id), screen, session, edit_message_id=edit_id)
+        _commit_callback(call)
+        return
+    if data.startswith("act:pref:"):
+        parts = data.split(":")
+        allowed = {"campaign_status", "payment_events", "budget_alerts", "support_replies", "security_alerts"}
+        link = active_customer_link(int(telegram_user_id))
+        if not link or len(parts) != 4 or parts[2] not in allowed or parts[3] not in {"0", "1"}:
+            _answer_callback(call, "این عملیات معتبر نیست.")
+            return
+        prefs, _ = TelegramNotificationPreference.objects.get_or_create(link=link)
+        field, enabled = parts[2], parts[3] == "1"
+        if getattr(prefs, field) != enabled:
+            setattr(prefs, field, enabled)
+            prefs.save(update_fields=[field, "updated_at"])
+        _answer_callback(call, "تنظیم اعلان ذخیره شد.")
+        _render(int(chat_id), int(telegram_user_id), "c:set:notify", session, edit_message_id=edit_id)
         _commit_callback(call)
         return
     if data == "act:disc:yes":

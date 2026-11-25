@@ -374,3 +374,81 @@ def test_webhook_rejects_invalid_update_types(bot_settings, client):
     for payload in ('["invalid"]', '{"update_id": true}', '{"update_id": "5"}', '{"update_id": 8, "message": "bad"}'):
         response = client.post(url, data=payload, content_type="application/json", **headers)
         assert response.status_code == 400
+
+
+@pytest.mark.django_db
+def test_campaign_buttons_use_stable_ids(customer_profile, bot_settings):
+    from apps.campaigns.models import Campaign
+    from apps.telegram_bot.models import TelegramMenuSession
+    from apps.telegram_bot.screens import build_screen
+    first = Campaign.objects.create(customer=customer_profile, name="اول", budget_irr=100000)
+    session = TelegramMenuSession.objects.create(telegram_user_id=8991, chat_id=8991)
+    consume_link_token(create_link_token(customer_profile), telegram_user_id=8991, chat_id=8991)
+    screen = build_screen("c:cmp:l:all:p:0", telegram_user_id=8991, session=session)
+    data = [button.callback_data for row in screen.keyboard.keyboard for button in row]
+    assert f"go:c:cmp:v:{first.pk}" in data
+    assert all(len((value or "").encode()) <= 64 for value in data)
+    details = build_screen(f"c:cmp:v:{first.pk}", telegram_user_id=8991, session=session)
+    assert "اول" in details.text
+
+
+@pytest.mark.django_db
+def test_notification_preferences_set_idempotently(customer_profile, bot_settings, mock_bot):
+    from apps.telegram_bot.models import TelegramNotificationPreference
+    link = consume_link_token(create_link_token(customer_profile), telegram_user_id=8992, chat_id=8992)
+    payload = {"callback_query": {
+        "id": "pref-8992", "from": {"id": 8992},
+        "message": {"message_id": 21, "chat": {"id": 8992, "type": "private"}},
+        "data": "act:pref:payment_events:0",
+    }}
+    process_update_payload(payload)
+    link.notification_prefs.refresh_from_db()
+    assert link.notification_prefs.payment_events is False
+    # Repeated desired-value command cannot flip the setting back.
+    payload["callback_query"]["id"] = "pref-8992-next"
+    process_update_payload(payload)
+    link.notification_prefs.refresh_from_db()
+    assert link.notification_prefs.payment_events is False
+
+
+@pytest.mark.django_db
+def test_bot_feature_flags_hide_disabled_menu(customer_profile, bot_settings):
+    from apps.telegram_bot.models import TelegramMenuSession
+    from apps.telegram_bot.screens import build_screen
+    cfg = get_bot_config()
+    cfg.ai_menu_enabled = False
+    cfg.save(update_fields=["ai_menu_enabled", "updated_at"])
+    consume_link_token(create_link_token(customer_profile), telegram_user_id=8993, chat_id=8993)
+    session = TelegramMenuSession.objects.create(telegram_user_id=8993, chat_id=8993)
+    home = build_screen("home", telegram_user_id=8993, session=session)
+    labels = [b.text for row in home.keyboard.keyboard for b in row]
+    assert all("هوشمند" not in text for text in labels)
+    disabled = build_screen("c:ai", telegram_user_id=8993, session=session)
+    assert "غیرفعال" in disabled.text
+
+
+@pytest.mark.django_db
+def test_support_role_cannot_view_sensitive_bot_finance(customer_profile, bot_settings):
+    from apps.accounts.models import User
+    from apps.telegram_bot.models import TelegramMenuSession
+    from apps.telegram_bot.screens import build_screen
+    user = customer_profile.user
+    user.role = User.Role.SUPPORT
+    user.save(update_fields=["role"])
+    consume_link_token(create_link_token(customer_profile), telegram_user_id=8994, chat_id=8994)
+    session = TelegramMenuSession.objects.create(telegram_user_id=8994, chat_id=8994)
+    screen = build_screen("a:fin", telegram_user_id=8994, session=session)
+    assert "فقط برای مدیر" in screen.text
+    home = build_screen("admin_home", telegram_user_id=8994, session=session)
+    assert all("انتقال نامطمئن" not in b.text for row in home.keyboard.keyboard for b in row)
+
+
+@pytest.mark.django_db
+def test_menu_includes_close_navigation(customer_profile, bot_settings):
+    from apps.telegram_bot.models import TelegramMenuSession
+    from apps.telegram_bot.screens import build_screen
+    consume_link_token(create_link_token(customer_profile), telegram_user_id=8995, chat_id=8995)
+    session = TelegramMenuSession.objects.create(telegram_user_id=8995, chat_id=8995)
+    for screen_id in ("home", "c:cmp", "c:wallet", "c:set:notify"):
+        screen = build_screen(screen_id, telegram_user_id=8995, session=session)
+        assert any(b.callback_data == "nav:close" for row in screen.keyboard.keyboard for b in row)

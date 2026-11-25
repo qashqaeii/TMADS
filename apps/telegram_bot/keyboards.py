@@ -30,6 +30,21 @@ def nav_row(*, back: bool = True, home: bool = True, close: bool = False) -> lis
     return buttons
 
 
-def attach_nav(kb: types.InlineKeyboardMarkup, *, back: bool = True, home: bool = True, close: bool = False):
+def attach_nav(kb: types.InlineKeyboardMarkup, *, back: bool = True, home: bool = True, close: bool = True):
     kb.row(*nav_row(back=back, home=home, close=close))
+    return kb
+
+def url_grid(pairs: list[tuple[str, str]], *, columns: int = 2) -> types.InlineKeyboardMarkup:
+    """Consistent two-column layout for safe HTTPS web actions."""
+    kb = types.InlineKeyboardMarkup()
+    row = []
+    for label, url in pairs:
+        if not url.startswith("https://"):
+            raise ValueError("Telegram URL buttons require a configured HTTPS site URL")
+        row.append(types.InlineKeyboardButton(text=label, url=url))
+        if len(row) == columns:
+            kb.row(*row)
+            row = []
+    if row:
+        kb.row(*row)
     return kb
