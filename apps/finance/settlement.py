@@ -7,10 +7,10 @@ from django.utils import timezone
 
 from apps.campaigns.models import Campaign, CampaignStatusHistory
 from apps.core.models import AuditLog
-from apps.finance.models import AdvertisingOrder, Wallet, WalletLedgerEntry
+from apps.finance.models import AdvertisingOrder, PriceQuote, Wallet, WalletLedgerEntry
 from apps.finance.services import ensure_wallet, outstanding_order_reservation, release_reservation_for_order
 from apps.notifications.services import notify_customer
-from apps.telegram_ads.models import APIRequestLog
+from apps.telegram_ads.models import APIRequestLog, TelegramAdsConnection
 from apps.telegram_ads.services.account_connections import campaign_client
 from apps.telegram_ads.status_map import map_remote_status_to_campaign
 
@@ -66,6 +66,13 @@ class _SettlementPrepared:
     order_id: int
     ad_pk: int
     remote_ad_id: str
+    customer_id: object
+    destination: str
+    connection_id: object
+    account_identity: tuple
+    ad_account_id: str
+    quote_id: object
+    quote_ton_value: object
     cost: int
     fee: int
     buffer: int
@@ -73,6 +80,14 @@ class _SettlementPrepared:
     ton_allocation: Decimal
     remote: dict
     evidence: dict
+
+
+def _account_identity(connection):
+    if connection is None:
+        return ()
+    return (connection.customer_id, connection.remote_account_id,
+            connection.connection_type, connection.status, connection.currency,
+            connection.related_account_id, connection.token_fingerprint)
 
 
 def _load_settlement_context(campaign_id) -> tuple[Campaign, AdvertisingOrder, object, _SettlementPrepared]:
@@ -133,6 +148,13 @@ def _load_settlement_context(campaign_id) -> tuple[Campaign, AdvertisingOrder, o
         order_id=order.pk,
         ad_pk=ad.pk,
         remote_ad_id=ad.remote_ad_id,
+        customer_id=campaign.customer_id,
+        destination=campaign.destination,
+        connection_id=campaign.telegram_connection_id,
+        account_identity=_account_identity(connection),
+        ad_account_id=ad.remote_account_id,
+        quote_id=quote.pk,
+        quote_ton_value=payload['ton_allocation'],
         cost=cost,
         fee=fee,
         buffer=buffer,
@@ -162,20 +184,48 @@ def _fetch_settlement_evidence(campaign, order, ad, claim, prepared: _Settlement
 def _commit_settlement(prepared: _SettlementPrepared, *, actor) -> AdvertisingOrder:
     campaign = Campaign.objects.select_for_update().get(pk=prepared.campaign_id)
     orders = list(
-        AdvertisingOrder.objects.select_for_update().filter(pk=prepared.order_id, customer=campaign.customer)[:2]
+        AdvertisingOrder.objects.select_for_update().filter(pk=prepared.order_id, customer=campaign.customer, campaign_id=campaign.pk)[:2]
     )
     if len(orders) != 1:
         raise ValueError("سفارش یکتا یافت نشد.")
     order = orders[0]
     if order.status == AdvertisingOrder.Status.COMPLETED:
-        return order
+        if WalletLedgerEntry.objects.filter(
+            wallet__customer=campaign.customer, related_order_id=order.pk,
+            idempotency_key=f"settle-{order.pk}-allocation",
+            entry_type=WalletLedgerEntry.EntryType.CREDIT_ALLOCATION,
+        ).exists():
+            return order
+        raise ValueError("سفارش تکمیل‌شده فاقد سند تسویه است.")
     if order.status != AdvertisingOrder.Status.SUBMITTING:
         raise ValueError("سفارش در وضعیت قابل تسویه نیست.")
-    if order.total_irr != prepared.order_total_irr or order.ton_allocation != prepared.ton_allocation:
+    if (order.total_irr != prepared.order_total_irr
+            or order.ton_allocation != prepared.ton_allocation
+            or order.advertising_budget_irr != prepared.cost
+            or order.service_fee_irr != prepared.fee):
         raise ValueError("شرایط مالی سفارش از زمان تأیید تغییر کرده است.")
 
+    if (campaign.customer_id != prepared.customer_id
+            or campaign.destination != prepared.destination
+            or campaign.telegram_connection_id != prepared.connection_id):
+        raise ValueError("هویت کمپین از زمان تأیید تغییر کرده است.")
+    if prepared.connection_id:
+        connection = TelegramAdsConnection.objects.select_for_update().get(pk=prepared.connection_id)
+        if _account_identity(connection) != prepared.account_identity:
+            raise ValueError("هویت حساب از زمان تأیید تغییر کرده است.")
+    quote = PriceQuote.objects.select_for_update().filter(order=order).first()
+    if (not quote or quote.pk != prepared.quote_id
+            or quote.locked_total_irr != prepared.order_total_irr
+            or quote.payload.get("quote_status") != "locked"
+            or quote.payload.get("buffer_disposition") != "return_after_confirmed_allocation"
+            or quote.payload.get("advertising_budget_irr") != prepared.cost
+            or quote.payload.get("service_fee_irr") != prepared.fee
+            or quote.payload.get("risk_buffer_irr") != prepared.buffer
+            or quote.payload.get("ton_allocation") != prepared.quote_ton_value):
+        raise ValueError("پیش‌فاکتور از زمان تأیید تغییر کرده است.")
+
     ad = campaign.remote_ads.select_for_update().get(pk=prepared.ad_pk)
-    if ad.remote_ad_id != prepared.remote_ad_id:
+    if ad.remote_ad_id != prepared.remote_ad_id or ad.remote_account_id != prepared.ad_account_id:
         raise ValueError("شناسه تبلیغ برای تسویه منطبق نیست.")
 
     wallet = Wallet.objects.select_for_update().get(pk=ensure_wallet(campaign.customer).pk)
